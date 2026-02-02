@@ -43,12 +43,12 @@ By the end of this module, you will be able to:
 
 ## Exercises
 
-1. **Exercise 01**: [Title] - Basic concepts
-2. **Exercise 02**: [Title] - Intermediate application
-3. **Exercise 03**: [Title] - Advanced usage
-4. **Exercise 04**: [Title] - Integration patterns
-5. **Exercise 05**: [Title] - Performance optimization
-6. **Exercise 06**: [Title] - Production best practices
+1. **Exercise 01**: Medallion Data Lake Design - Design Bronze/Silver/Gold architecture with S3, lifecycle policies, and IAM
+2. **Exercise 02**: File Format Conversion - Convert between CSV, JSON, Parquet, Avro with performance benchmarking
+3. **Exercise 03**: Partitioning Strategies - Implement Hive-style partitioning (date, geography, hybrid) to optimize queries
+4. **Exercise 04**: Compression Optimization - Compare Snappy, Gzip, LZ4, Zstd compression algorithms for Parquet
+5. **Exercise 05**: Schema Evolution - Add columns, handle backward/forward compatibility in Parquet files
+6. **Exercise 06**: Glue Catalog Integration - Register datasets, create crawlers, query with Athena
 
 ## Resources
 
