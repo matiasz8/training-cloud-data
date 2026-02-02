@@ -35,11 +35,13 @@ By the end of this module, you will be able to:
 ## Getting Started
 
 1. Ensure prerequisites are completed
-2. Read `theory/concepts.md` for foundational understanding
-3. Review `theory/architecture.md` for AWS architecture patterns
-4. Set up infrastructure: `bash scripts/setup.sh`
-5. Complete exercises in order (01 through 06)
-6. Validate your learning: `bash scripts/validate.sh`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Generate sample data: `cd data/sample && bash generate_users.sh && cd ../..`
+4. Read `theory/concepts.md` for foundational understanding
+5. Review `theory/architecture.md` for AWS architecture patterns
+6. Set up infrastructure: `bash scripts/setup.sh`
+7. Complete exercises in order (01 through 06)
+8. Validate your learning: `bash scripts/validate.sh`
 
 ## Exercises
 

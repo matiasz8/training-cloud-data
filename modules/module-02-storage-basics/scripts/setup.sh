@@ -16,6 +16,12 @@ python3 --version || { echo "Python 3 required"; exit 1; }
 echo -e "${BLUE}Installing Python dependencies...${NC}"
 pip install -r requirements.txt
 
+# Generate sample data
+echo -e "${BLUE}Generating sample data files...${NC}"
+cd data/sample
+bash generate_users.sh
+cd ../..
+
 # Start infrastructure
 echo -e "${BLUE}Starting LocalStack infrastructure...${NC}"
 cd infrastructure
