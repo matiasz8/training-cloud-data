@@ -1,18 +1,18 @@
-# Module 02: Storage Basics & Data Formats
+# Módulo 02: Fundamentos de Almacenamiento y Formatos de Datos
 
-⏱️ **Estimated Time:** 10-12 hours
+⏱️ **Tiempo Estimado:** 10-12 horas
 
-## Prerequisites
+## Prerequisitos
 
-- Module 01: Cloud Fundamentals (completed)
+- Módulo 01: Fundamentos de Cloud (completado)
 
 ## Module Overview
 
 Domina los fundamentos de almacenamiento de datos y formatos de archivo esenciales para data engineering. Profundiza en S3 como data lake, aprende a elegir formatos óptimos (JSON, CSV, Parquet, Avro), y comprende particionamiento y compresión para performance.
 
-## Learning Objectives
+## Objetivos de Aprendizaje
 
-By the end of this module, you will be able to:
+Al finalizar este módulo, serás capaz de:
 
 - [x] Diseñar data lakes con arquitectura medallion (Bronze/Silver/Gold)
 - [x] Seleccionar formatos óptimos según caso de uso (analytical vs transactional)
@@ -23,68 +23,68 @@ By the end of this module, you will be able to:
 - [x] Implementar schema evolution en Parquet
 - [x] Optimizar metadata con Glue Catalog
 
-## Structure
+## Estructura
 
-- **theory/**: Core concepts and architecture documentation
-- **exercises/**: Hands-on practice exercises (6 exercises)
-- **infrastructure/**: LocalStack/Docker setup for this module
-- **data/**: Sample datasets and schemas
-- **validation/**: Automated tests to validate your learning
-- **scripts/**: Helper scripts
+- **theory/**: Conceptos centrales y documentación de arquitectura
+- **exercises/**: Ejercicios prácticos (6 ejercicios)
+- **infrastructure/**: Configuración LocalStack/Docker para este módulo
+- **data/**: Datasets de muestra y esquemas
+- **validation/**: Tests automatizados para validar tu aprendizaje
+- **scripts/**: Scripts de ayuda
 
-## Getting Started
+## Comenzando
 
-1. Ensure prerequisites are completed
-2. Install dependencies: `pip install -r requirements.txt`
-3. Generate sample data: `cd data/sample && bash generate_users.sh && cd ../..`
-4. Read `theory/concepts.md` for foundational understanding
-5. Review `theory/architecture.md` for AWS architecture patterns
-6. Set up infrastructure: `bash scripts/setup.sh`
-7. Complete exercises in order (01 through 06)
-8. Validate your learning: `bash scripts/validate.sh`
+1. Asegurarse de que los prerequisitos estén completados
+2. Instalar dependencias: `pip install -r requirements.txt`
+3. Generar datos de muestra: `cd data/sample && bash generate_users.sh && cd ../..`
+4. Leer `theory/concepts.md` para comprensión fundamental
+5. Revisar `theory/architecture.md` para patrones de arquitectura AWS
+6. Configurar infraestructura: `bash scripts/setup.sh`
+7. Completar ejercicios en orden (01 hasta 06)
+8. Validar tu aprendizaje: `bash scripts/validate.sh`
 
-## Exercises
+## Ejercicios
 
-1. **Exercise 01**: Medallion Data Lake Design - Design Bronze/Silver/Gold architecture with S3, lifecycle policies, and IAM
-2. **Exercise 02**: File Format Conversion - Convert between CSV, JSON, Parquet, Avro with performance benchmarking
-3. **Exercise 03**: Partitioning Strategies - Implement Hive-style partitioning (date, geography, hybrid) to optimize queries
-4. **Exercise 04**: Compression Optimization - Compare Snappy, Gzip, LZ4, Zstd compression algorithms for Parquet
-5. **Exercise 05**: Schema Evolution - Add columns, handle backward/forward compatibility in Parquet files
-6. **Exercise 06**: Glue Catalog Integration - Register datasets, create crawlers, query with Athena
+1. **Ejercicio 01**: Diseño de Data Lake Medallion - Diseñar arquitectura Bronze/Silver/Gold con S3, políticas de lifecycle, e IAM
+2. **Ejercicio 02**: Conversión de Formatos de Archivo - Convertir entre CSV, JSON, Parquet, Avro con benchmarking de rendimiento
+3. **Ejercicio 03**: Estrategias de Particionamiento - Implementar particionamiento estilo Hive (fecha, geografía, híbrido) para optimizar queries
+4. **Ejercicio 04**: Optimización de Compresión - Comparar algoritmos de compresión Snappy, Gzip, LZ4, Zstd para Parquet
+5. **Ejercicio 05**: Evolución de Esquema - Agregar columnas, manejar compatibilidad backward/forward en archivos Parquet
+6. **Ejercicio 06**: Integración con Glue Catalog - Registrar datasets, crear crawlers, consultar con Athena
 
-## Resources
+## Recursos
 
-See `theory/resources.md` for:
-- Official AWS documentation
-- Video tutorials and workshops
-- Community resources
-- Certification mapping
+Ver `theory/resources.md` para:
+- Documentación oficial de AWS
+- Tutoriales en video y workshops
+- Recursos de la comunidad
+- Mapeo de certificaciones
 
-## Validation
+## Validación
 
-Run all validations:
+Ejecutar todas las validaciones:
 ```bash
 bash scripts/validate.sh
 ```
 
-Or use the global validation:
+O usar la validación global:
 ```bash
 make validate MODULE=module-{module_id}-{module["name"]}
 ```
 
-## Progress Checklist
+## Lista de Verificación de Progreso
 
-- [ ] Read all theory documentation
-- [ ] Completed Exercise 01
-- [ ] Completed Exercise 02
-- [ ] Completed Exercise 03
-- [ ] Completed Exercise 04
-- [ ] Completed Exercise 05
-- [ ] Completed Exercise 06
-- [ ] All validations passing
-- [ ] Ready for next module
+- [ ] Leer toda la documentación de teoría
+- [ ] Completado Ejercicio 01
+- [ ] Completado Ejercicio 02
+- [ ] Completado Ejercicio 03
+- [ ] Completado Ejercicio 04
+- [ ] Completado Ejercicio 05
+- [ ] Completado Ejercicio 06
+- [ ] Todas las validaciones pasando
+- [ ] Listo para siguiente módulo
 
-## Next Steps
+## Siguientes Pasos
 
-After completing this module, you'll be ready for:
-[List of modules that depend on this one]
+Después de completar este módulo, estarás listo para:
+[Lista de módulos que dependen de este]

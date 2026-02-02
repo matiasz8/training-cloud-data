@@ -62,6 +62,7 @@ Los archivos en `schemas/` contienen las definiciones DDL (Data Definition Langu
 Los archivos CSV en `seeds/` contienen datos de muestra para testing y desarrollo:
 
 ### users.csv
+
 - **Registros**: 10 usuarios de muestra
 - **Uso**: Testing de consultas básicas, joins
 - **Formato**: CSV con headers
@@ -103,15 +104,19 @@ df_products.to_sql('products', engine, if_exists='append', index=False)
 Los scripts en `migrations/` documentan cambios incrementales al esquema:
 
 ### 001_add_user_preferences.sql
+
 **Propósito**: Agregar columna JSONB para preferencias de usuario  
 **Cambios**:
+
 - Agrega columna `preferences` (JSONB)
 - Crea índice GIN para búsquedas eficientes
 **Uso**: Almacenar configuraciones personalizadas (tema, notificaciones, etc.)
 
 ### 002_add_product_ratings.sql
+
 **Propósito**: Agregar sistema de calificaciones de productos  
 **Cambios**:
+
 - Agrega columna `average_rating` (DECIMAL 3,2)
 - Agrega columna `review_count` (INTEGER)
 - Constraints de rango (0-5.00)
@@ -119,8 +124,10 @@ Los scripts en `migrations/` documentan cambios incrementales al esquema:
 **Uso**: Mostrar productos mejor calificados, filtros de búsqueda
 
 ### 003_add_order_tracking.sql
+
 **Propósito**: Agregar seguimiento de envíos  
 **Cambios**:
+
 - Agrega `tracking_number` (VARCHAR 100)
 - Agrega `estimated_delivery` (DATE)
 - Agrega `shipped_date` (TIMESTAMP)
@@ -251,12 +258,14 @@ ORDER BY idx_scan DESC;
 ## 🎯 Best Practices
 
 ### 1. Convenciones de Nomenclatura
+
 - **Tablas**: plural, snake_case (users, order_items)
 - **Columnas**: singular, snake_case (user_id, created_at)
 - **Índices**: idx_{table}_{columns} (idx_users_email)
 - **Constraints**: {table}_{column}_{type} (users_email_format)
 
 ### 2. Tipos de Datos
+
 - **IDs**: SERIAL para auto-increment
 - **Dinero**: DECIMAL(10,2) nunca FLOAT
 - **Timestamps**: TIMESTAMP con timezone
@@ -264,6 +273,7 @@ ORDER BY idx_scan DESC;
 - **JSON**: JSONB no JSON (mejor rendimiento)
 
 ### 3. Índices
+
 - Indexar todas las foreign keys
 - Indexar columnas frecuentemente usadas en WHERE
 - Índices compuestos para queries comunes
@@ -271,6 +281,7 @@ ORDER BY idx_scan DESC;
 - Revisar pg_stat_user_indexes regularmente
 
 ### 4. Constraints
+
 - Siempre definir PRIMARY KEY
 - Usar FOREIGN KEY con ON DELETE apropiado
 - CHECK constraints para validación de datos
@@ -278,6 +289,7 @@ ORDER BY idx_scan DESC;
 - NOT NULL cuando corresponda
 
 ### 5. Migrations
+
 - Nunca modificar archivos de migración aplicados
 - Crear nueva migración para cambios
 - Incluir Up y Down en comentarios
@@ -287,12 +299,14 @@ ORDER BY idx_scan DESC;
 ## 🔍 Troubleshooting
 
 ### Error: Tabla ya existe
+
 ```sql
 -- Usar IF NOT EXISTS en schemas
 CREATE TABLE IF NOT EXISTS users (...);
 ```
 
 ### Error: Foreign key violation
+
 ```sql
 -- Verificar orden de carga (padres antes de hijos)
 -- 1. users, products (sin FKs)
@@ -302,6 +316,7 @@ CREATE TABLE IF NOT EXISTS users (...);
 ```
 
 ### Error: CSV import fallido
+
 ```bash
 # Verificar formato del CSV
 head -n 2 data/seeds/users.csv
