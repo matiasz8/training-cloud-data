@@ -1,84 +1,159 @@
-# Module 10: Workflow Orchestration
+# Módulo 10: Orquestación de Workflows con Apache Airflow
 
-⏱️ **Estimated Time:** TBD hours
+Domina la orquestación de workflows y automatización de pipelines de datos usando Apache Airflow, la plataforma estándar de la industria para crear, programar y monitorear pipelines de datos.
 
-## Prerequisites
+## 📋 Descripción General
 
-- ✅ Module 06 must be completed (100%)
+Este módulo proporciona entrenamiento integral en Apache Airflow 2.8, cubriendo desde conceptos básicos hasta patrones de despliegue en producción. Aprenderás a diseñar, implementar, probar y desplegar pipelines de datos robustos que pueden orquestar workflows complejos a través de múltiples sistemas.
 
+**¿Por qué orquestación de workflows?** Los pipelines de datos modernos involucran múltiples pasos, dependencias e integraciones. Airflow proporciona:
+- **Gestión de dependencias**: Define el orden y relaciones de las tareas
+- **Programación**: Ejecución automatizada en intervalos especificados
+- **Monitoreo**: Rastrea la salud y rendimiento del pipeline
+- **Reintentos**: Recuperación automática de fallos
+- **Escalabilidad**: Ejecución distribuida con workers
+- **Extensibilidad**: Operadores y sensores personalizados
 
-## Module Overview
+## 🎯 Objetivos de Aprendizaje
 
-[Brief description of what you'll learn in this module]
+Al completar este módulo, podrás:
 
-## Learning Objectives
+1. **Entender la Arquitectura de Airflow**
+   - Componentes centrales (webserver, scheduler, executor, workers, metadata DB)
+   - Flujo de ejecución y ciclo de vida de tareas
+   - Mecanismos de parsing de DAG y programación
 
-By the end of this module, you will be able to:
+2. **Crear DAGs Listos para Producción**
+   - Patrones de diseño de DAG (clásico, context manager, TaskFlow API)
+   - Dependencias de tareas y reglas de activación
+   - Generación dinámica de tareas
+   - Templating con Jinja
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+3. **Dominar Operadores y Sensores**
+   - Operadores Python, Bash y Docker
+   - Operadores de base de datos (Postgres, MySQL)
+   - Operadores de nube (S3, GCS, BigQuery)
+   - Desarrollo de operadores personalizados
+   - Sensores de archivos, API y base de datos
 
-## Structure
+4. **Construir Pipelines ETL Reales**
+   - Ingesta de API a base de datos
+   - Carga de CSV a data warehouse
+   - Exportación de base de datos a data lake
+   - Integración de datos multi-fuente
+   - ETL incremental con change data capture
 
-- **theory/**: Core concepts and architecture documentation
-- **exercises/**: Hands-on practice exercises (6 exercises)
-- **infrastructure/**: LocalStack/Docker setup for this module
-- **data/**: Sample datasets and schemas
-- **validation/**: Automated tests to validate your learning
-- **scripts/**: Helper scripts
+5. **Implementar Monitoreo y Alertas**
+   - Seguimiento de SLA y violaciones
+   - Callbacks personalizados (éxito, fallo, reintento)
+   - Notificaciones de Slack y email
+   - Monitoreo de rendimiento
+   - Health checks
 
-## Getting Started
+6. **Desplegar a Producción**
+   - Configuración multi-servicio con Docker Compose
+   - Patrones de alta disponibilidad
+   - Escalado con CeleryExecutor
+   - Gestión de secretos
+   - CI/CD para DAGs
+   - Estrategias de testing
 
-1. Ensure prerequisites are completed
-2. Read `theory/concepts.md` for foundational understanding
-3. Review `theory/architecture.md` for AWS architecture patterns
-4. Set up infrastructure: `bash scripts/setup.sh`
-5. Complete exercises in order (01 through 06)
-6. Validate your learning: `bash scripts/validate.sh`
+## 📚 Prerequisitos
 
-## Exercises
+### Requeridos
+- **Módulo 06**: Fundamentos de ETL (completado)
+- **Docker**: 20.10+ con Docker Compose
+- **Python**: 3.8 o superior (3.11 recomendado)
+- **Sistema**: 8GB RAM, 20GB espacio en disco
 
-1. **Exercise 01**: [Title] - Basic concepts
-2. **Exercise 02**: [Title] - Intermediate application
-3. **Exercise 03**: [Title] - Advanced usage
-4. **Exercise 04**: [Title] - Integration patterns
-5. **Exercise 05**: [Title] - Performance optimization
-6. **Exercise 06**: [Title] - Production best practices
+### Recomendados
+- Cliente PostgreSQL (para ejercicios de base de datos)
+- AWS CLI (para ejercicios de S3 con LocalStack)
+- Comprensión básica de SQL
+- Familiaridad con REST APIs
 
-## Resources
+## 🛠️ Stack Tecnológico
 
-See `theory/resources.md` for:
-- Official AWS documentation
-- Video tutorials and workshops
-- Community resources
-- Certification mapping
+| Componente | Versión | Propósito |
+|-----------|---------|---------|
+| Apache Airflow | 2.8.1 | Plataforma de orquestación de workflows |
+| PostgreSQL | 13 | Base de datos de metadatos |
+| Redis | latest | Message broker de Celery |
+| CeleryExecutor | - | Ejecución distribuida de tareas |
+| Python | 3.11 | Desarrollo de DAGs |
+| Docker Compose | - | Orquestación multi-servicio |
+| pytest | 7.4.3 | Framework de testing |
+| Great Expectations | 0.18.8 | Validación de calidad de datos |
+| boto3 | latest | AWS SDK (operaciones S3) |
 
-## Validation
+## 🚀 Inicio Rápido
 
-Run all validations:
+### 1. Configurar Ambiente
+
 ```bash
-bash scripts/validate.sh
+cd module-10-workflow-orchestration
+
+# Ejecutar setup automatizado (instala e inicia todos los servicios)
+./scripts/setup.sh
 ```
 
-Or use the global validation:
+### 2. Acceder a la UI de Airflow
+
+- **Airflow Webserver**: http://localhost:8080 (airflow/airflow)
+- **Flower (Monitoreo de Celery)**: http://localhost:5555
+
+### 3. Completar Ejercicios
+
+Navega a través de los ejercicios en orden (01-06)
+
+### 4. Validar tu Trabajo
+
 ```bash
-make validate MODULE=module-{module_id}-{module["name"]}
+./scripts/validate.sh
 ```
 
-## Progress Checklist
+## 📖 Resumen de Ejercicios
 
-- [ ] Read all theory documentation
-- [ ] Completed Exercise 01
-- [ ] Completed Exercise 02
-- [ ] Completed Exercise 03
-- [ ] Completed Exercise 04
-- [ ] Completed Exercise 05
-- [ ] Completed Exercise 06
-- [ ] All validations passing
-- [ ] Ready for next module
+1. **Primer DAG** (6 tareas) - Creación básica de DAG, programación
+2. **Operadores y Sensores** (6 tareas) - Múltiples operadores, sensores
+3. **Dependencias de Tareas** (6 tareas) - Ramificación, reglas de activación
+4. **Pipelines de Datos** (6 tareas) - Workflows ETL reales
+5. **Monitoreo y Alertas** (5 tareas) - Seguimiento de SLA, alertas
+6. **Despliegue en Producción** (6 tareas) - Docker, testing, CI/CD
 
-## Next Steps
+**Tiempo Total**: 20-25 horas
 
-After completing this module, you'll be ready for:
-[List of modules that depend on this one]
+## 🧪 Pruebas
+
+```bash
+cd validation
+pytest . -v
+
+# Ejecutar categorías específicas
+pytest -m dag_validation
+pytest -m integration
+```
+
+## 📚 Recursos Adicionales
+
+- [Documentación de Apache Airflow](https://airflow.apache.org/docs/)
+- [Guía de Mejores Prácticas](https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html)
+- [Referencia de API](https://airflow.apache.org/docs/apache-airflow/stable/python-api-ref.html)
+
+## ✅ Checklist de Validación
+
+- [ ] Explicar arquitectura de Airflow
+- [ ] Crear DAGs usando TaskFlow API
+- [ ] Implementar todas las reglas de activación
+- [ ] Usar 5+ tipos de operadores
+- [ ] Construir pipeline ETL (API → DB → S3)
+- [ ] Configurar monitoreo y alertas
+- [ ] Probar DAGs con pytest
+- [ ] Desplegar con Docker Compose
+- [ ] Todas las 40+ pruebas pasando
+
+---
+
+**Estado**: ✅ Módulo 100% Completo  
+**Tiempo Estimado**: 25-34 horas  
+**Próximo Módulo**: [Módulo 11: Infraestructura como Código](../module-11-infrastructure-as-code/README.md)

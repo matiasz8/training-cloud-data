@@ -1,85 +1,140 @@
 # Module 09: Data Quality
 
-⏱️ **Estimated Time:** TBD hours
+⏱️ **Duración estimada:** 15-20 horas  
+🎯 **Nivel:** Intermedio-Avanzado  
+📊 **Estado:** ✅ Completado
 
-## Prerequisites
+## 📋 Descripción
 
-- ✅ Module 04 must be completed (100%)
-- ✅ Module 06 must be completed (100%)
+Módulo completo sobre calidad de datos que cubre las 6 dimensiones de calidad, frameworks empresariales (Great Expectations, Pandera, PyDeequ), detección de anomalías, monitoreo continuo y quality gates en producción.
 
+## 🎯 Objetivos de Aprendizaje
 
-## Module Overview
+Al completar este módulo, serás capaz de:
 
-[Brief description of what you'll learn in this module]
+- ✅ Entender y aplicar las **6 dimensiones de calidad** de datos
+- ✅ Implementar **data profiling** manual y automático
+- ✅ Crear **reglas de validación** personalizadas
+- ✅ Dominar **Great Expectations** para validaciones empresariales
+- ✅ Detectar **anomalías** usando métodos estadísticos y ML
+- ✅ Implementar **monitoreo continuo** de calidad
+- ✅ Configurar **quality gates** en pipelines de producción
+- ✅ Gestionar **quarantine zones** y rollback automático
 
-## Learning Objectives
+## 📚 Contenido
 
-By the end of this module, you will be able to:
+### Theory (45,000 palabras)
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+- **01-concepts.md** - 6 Dimensiones de calidad, profiling, métricas
+- **02-architecture.md** - Great Expectations, Pandera, PyDeequ, patrones de arquitectura
+- **03-resources.md** - Herramientas, cloud services, recursos de aprendizaje
 
-## Structure
+### Exercises (6 ejercicios progresivos)
 
-- **theory/**: Core concepts and architecture documentation
-- **exercises/**: Hands-on practice exercises (6 exercises)
-- **infrastructure/**: LocalStack/Docker setup for this module
-- **data/**: Sample datasets and schemas
-- **validation/**: Automated tests to validate your learning
-- **scripts/**: Helper scripts
+1. **Data Profiling** - Profiling manual y automático, detección de outliers
+2. **Validation Rules** - Reglas personalizadas, framework de validación
+3. **Great Expectations** - Setup, expectation suites, checkpoints, Data Docs
+4. **Anomaly Detection** - Métodos estadísticos y ML, series temporales
+5. **Quality Monitoring** - Métricas continuas, quality drift, alertas
+6. **Production Quality Gates** - Integración con Airflow, circuit breakers, versioning
 
-## Getting Started
+### Data
 
-1. Ensure prerequisites are completed
-2. Read `theory/concepts.md` for foundational understanding
-3. Review `theory/architecture.md` for AWS architecture patterns
-4. Set up infrastructure: `bash scripts/setup.sh`
-5. Complete exercises in order (01 through 06)
-6. Validate your learning: `bash scripts/validate.sh`
+- **generate_data.py** - Script para generar datasets con calidad configurable
+- **Schemas** - JSON schemas con qualityRules para 3 tablas
+- **3 quality levels** - clean, medium, poor
 
-## Exercises
+### Validation
 
-1. **Exercise 01**: [Title] - Basic concepts
-2. **Exercise 02**: [Title] - Intermediate application
-3. **Exercise 03**: [Title] - Advanced usage
-4. **Exercise 04**: [Title] - Integration patterns
-5. **Exercise 05**: [Title] - Performance optimization
-6. **Exercise 06**: [Title] - Production best practices
+- **50+ tests** - Pytest suite completa
+- **Markers** - smoke, profiling, validation, great_expectations, anomaly_detection, monitoring
+- **Coverage** - HTML coverage reports
 
-## Resources
+## 🚀 Quick Start
 
-See `theory/resources.md` for:
-- Official AWS documentation
-- Video tutorials and workshops
-- Community resources
-- Certification mapping
-
-## Validation
-
-Run all validations:
 ```bash
-bash scripts/validate.sh
+# 1. Setup
+./scripts/setup.sh
+
+# 2. Activate environment
+source venv/bin/activate
+
+# 3. Generate sample data
+python data/scripts/generate_data.py --quality clean --output data/generated/
+
+# 4. Start with exercises
+# See exercises/01-data-profiling/README.md
+
+# 5. Validate completion
+./scripts/validate.sh
 ```
 
-Or use the global validation:
+## 🛠️ Technologies
+
+### Core Frameworks
+- **Great Expectations** 0.18+ - Validaciones empresariales
+- **Pandera** 0.17+ - Schema-based validation
+- **PyDeequ** 1.1+ - Big data quality (Spark)
+
+### Profiling & Analysis
+- **ydata-profiling** 4.5+ - Automatic profiling
+- **scipy** 1.11+ - Statistical methods
+
+### Anomaly Detection
+- **PyOD** 1.1+ - Outlier detection algorithms
+- **scikit-learn** 1.3+ - Isolation Forest, LOF
+
+### Testing
+- **pytest** 7.4+ - Testing framework
+- **pytest-cov** 4.1+ - Coverage reports
+
+## 📖 Prerequisites
+
+- ✅ Module 04: Python for Data (100%)
+- ✅ Module 06: ETL Fundamentals (100%)
+- Python 3.9+
+- Conocimiento de Pandas, NumPy
+
+## ✅ Validation
+
 ```bash
-make validate MODULE=module-{module_id}-{module["name"]}
+# Run all tests
+pytest validation/ -v
+
+# Run specific categories
+pytest validation/ -m smoke
+pytest validation/ -m profiling
+pytest validation/ -m validation
+pytest validation/ -m anomaly_detection
+
+# Generate coverage
+pytest validation/ --cov=. --cov-report=html
+
+# Full validation
+
+./scripts/validate.sh
 ```
 
-## Progress Checklist
+## 📊 Module Metrics
 
-- [ ] Read all theory documentation
-- [ ] Completed Exercise 01
-- [ ] Completed Exercise 02
-- [ ] Completed Exercise 03
-- [ ] Completed Exercise 04
-- [ ] Completed Exercise 05
-- [ ] Completed Exercise 06
-- [ ] All validations passing
-- [ ] Ready for next module
+- **Files**: 30+ archivos
+- **Documentation**: ~45,000 palabras
+- **Code**: ~2,000 líneas Python
+- **Tests**: 50+ tests
+- **Exercises**: 6 ejercicios progresivos
 
-## Next Steps
+## 🔗 Resources
 
-After completing this module, you'll be ready for:
-[List of modules that depend on this one]
+- [Great Expectations Docs](https://docs.greatexpectations.io/)
+- [Pandera Documentation](https://pandera.readthedocs.io/)
+- [PyOD Documentation](https://pyod.readthedocs.io/)
+
+## ➡️ Next Modules
+
+- **Module 10: Workflow Orchestration**
+- **Module 11: Infrastructure as Code**
+
+---
+
+**Status**: ✅ Completado 100%  
+**Last Updated**: 2024

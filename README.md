@@ -8,6 +8,113 @@
 
 ---
 
+## 🌟 Hub de Inicio
+
+Este bloque nuevo te orienta rápido en **cómo está armado el training**, **qué estudiar primero** y **dónde encontrar cada documento**.  
+Todo el contenido original y detallado se mantiene más abajo sin cambios.
+
+### 🎯 ¿Qué vas a aprender?
+
+Vas a dominar un stack completo de **Cloud Data Engineering** con foco práctico:
+
+- Data lakes/lakehouse y modelado de datos
+- ETL/ELT batch + streaming
+- Orquestación y automatización de pipelines
+- Data quality, gobernanza y seguridad
+- Infraestructura cloud-native (IaC, contenedores, serverless)
+- Operación realista en entorno local sin costo con LocalStack + Docker
+
+### 🗺️ Roadmap de Aprendizaje
+
+```text
+FASE 1: Foundation (Módulos 01-04)
+├─ Cloud fundamentals, storage, SQL, Python para datos
+└─ Checkpoint mental: bases sólidas de cloud + data
+
+FASE 2: Core Data Engineering (Módulos 05-10 + Checkpoint 01)
+├─ Lakehouse, ETL, batch, streaming, data quality, orchestration
+└─ Checkpoint 01: Serverless Data Lake
+
+FASE 3: Cloud-Native Platform (Módulos 11-14 + Checkpoint 02)
+├─ IaC, serverless processing, containers, governance
+└─ Checkpoint 02: Real-time Analytics Platform
+
+FASE 4: Advanced Tracks (Módulos 15-18 + Checkpoint 03)
+├─ Track A: Real-time analytics
+├─ Track B: Security & compliance
+├─ Track C: Cost optimization
+└─ Checkpoint 03: Enterprise Data Lakehouse
+
+FASE 5: Bonus (Módulos 22-23)
+└─ Databricks y Snowflake (opcionales)
+```
+
+### 📚 Estructura del Programa
+
+```text
+training-cloud-data/
+├── modules/                     → módulos y checkpoints
+├── docs/                        → guías técnicas y troubleshooting
+├── scripts/                     → setup, validación, utilidades
+├── shared/                      → recursos compartidos
+├── LEARNING-PATH.md             → ruta completa con dependencias
+├── IMPLEMENTATION-STATUS.md     → estado de implementación
+├── INFORME-PROGRESO-*.md        → reportes de avance
+├── Makefile                     → comandos de operación diaria
+└── docker-compose.yml           → stack local de servicios
+```
+
+### 🧩 Resumen de cada módulo
+
+| Módulo | Enfoque |
+|---|---|
+| 01 | Cloud Fundamentals (AWS basics, IAM) |
+| 02 | Storage Basics (S3, data formats) |
+| 03 | SQL Foundations |
+| 04 | Python for Data |
+| 05 | Data Lakehouse Architecture |
+| 06 | ETL Fundamentals |
+| Checkpoint 01 | Serverless Data Lake |
+| 07 | Batch Processing |
+| 08 | Streaming Basics |
+| 09 | Data Quality |
+| 10 | Workflow Orchestration |
+| 11 | Infrastructure as Code |
+| 12 | Serverless Processing |
+| Checkpoint 02 | Real-time Analytics Platform |
+| 13 | Container Orchestration |
+| 14 | Data Catalog & Governance |
+| 15 | Real-time Analytics (Track A) |
+| 16 | Data Security & Compliance (Track B) |
+| 17 | Cost Optimization (Track C) |
+| 18 | Advanced Architectures |
+| Checkpoint 03 | Enterprise Data Lakehouse |
+| Bonus 01 | Databricks Lakehouse |
+| Bonus 02 | Snowflake Data Cloud |
+
+### 🚀 Inicio Rápido
+
+1. **Setup del entorno**
+    - `bash scripts/setup-environment.sh`
+2. **Levantar servicios locales**
+    - `make up`
+3. **Ver progreso y plan**
+    - `make progress`
+    - `cat LEARNING-PATH.md`
+4. **Empezar módulo 01**
+    - `cd modules/module-01-cloud-fundamentals`
+    - `cat README.md`
+
+### 📖 Documentación Completa
+
+- [LEARNING-PATH.md](LEARNING-PATH.md) → ruta de estudio y dependencias
+- [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md) → estado del sistema
+- [INFORME-PROGRESO-ACTUALIZADO.md](INFORME-PROGRESO-ACTUALIZADO.md) → progreso general
+- [INFORME-PROGRESO-MODULOS.md](INFORME-PROGRESO-MODULOS.md) → detalle por módulos
+- [docs/setup-guide.md](docs/setup-guide.md) → instalación paso a paso
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -150,7 +257,7 @@ make progress
 
 ### Module Structure
 
-```
+```text
 module-XX-topic-name/
 ├── README.md                    # Learning objectives, prerequisites
 ├── theory/
@@ -239,7 +346,7 @@ make progress
 
 **Example Output:**
 
-```
+```text
 📊 CLOUD DATA ENGINEERING - LEARNING PROGRESS
 ═══════════════════════════════════════════════════════════
 
@@ -427,6 +534,7 @@ MIT License - Free to use for learning and teaching.
 ## 🙏 Acknowledgments
 
 Inspired by:
+
 - [roadmap.sh/data-engineer](https://roadmap.sh/data-engineer)
 - AWS Data Analytics workshops
 - Databricks Learning Academy
