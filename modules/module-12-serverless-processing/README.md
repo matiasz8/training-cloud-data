@@ -1,85 +1,329 @@
-# Module 12: Serverless Processing
+# Módulo 12: Serverless Processing
 
-⏱️ **Estimated Time:** TBD hours
+## 📖 Descripción
 
-## Prerequisites
+Este módulo cubre el procesamiento serverless de datos utilizando AWS Lambda, Step Functions y servicios relacionados. Aprenderás a construir pipelines de datos escalables, event-driven y completamente serverless.
 
-- ✅ Module 06 must be completed (100%)
-- ✅ Module 11 must be completed (100%)
+## 🎯 Objetivos de Aprendizaje
 
+Al completar este módulo, serás capaz de:
 
-## Module Overview
+- ✅ Diseñar arquitecturas serverless para procesamiento de datos
+- ✅ Implementar funciones Lambda production-ready con Python
+- ✅ Orquestar workflows complejos con AWS Step Functions
+- ✅ Construir APIs REST escalables con API Gateway + Lambda
+- ✅ Procesar streams en tiempo real con Kinesis
+- ✅ Implementar patrones de messaging con SQS/SNS
+- ✅ Aplicar observability con CloudWatch y X-Ray
+- ✅ Desplegar con CI/CD automation
+- ✅ Optimizar costos y performance
 
-[Brief description of what you'll learn in this module]
+## 📋 Prerequisitos
 
-## Learning Objectives
+- Conocimiento de Python (nivel intermedio)
+- Experiencia con AWS básico (S3, IAM)
+- Comprensión de event-driven architecture
+- Familiaridad con Terraform
+- Git y GitHub básico
 
-By the end of this module, you will be able to:
+## 📚 Estructura del Módulo
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+### 📖 Teoría (3 archivos)
 
-## Structure
+1. **[01-serverless-fundamentals.md](theory/01-serverless-fundamentals.md)** (~3,500 líneas)
+   - Conceptos de serverless computing
+   - AWS Lambda fundamentals (handlers, context, lifecycle)
+   - Event sources y triggers
+   - Cold starts vs warm execution
+   - Pricing model y limits
+   - Best practices
 
-- **theory/**: Core concepts and architecture documentation
-- **exercises/**: Hands-on practice exercises (6 exercises)
-- **infrastructure/**: LocalStack/Docker setup for this module
-- **data/**: Sample datasets and schemas
-- **validation/**: Automated tests to validate your learning
-- **scripts/**: Helper scripts
+2. **[02-serverless-data-processing.md](theory/02-serverless-data-processing.md)** (~4,200 líneas)
+   - Lambda + S3 file processing patterns
+   - AWS Step Functions orchestration
+   - Amazon States Language (ASL)
+   - EventBridge para event routing
+   - Serverless ETL patterns
+   - Glue integration
+   - Monitoring y observability
 
-## Getting Started
+3. **[03-serverless-patterns.md](theory/03-serverless-patterns.md)** (~4,800 líneas)
+   - Advanced architecture patterns
+   - API Gateway integration
+   - Security best practices
+   - Observability (CloudWatch, X-Ray)
+   - CI/CD for serverless
+   - Cost optimization strategies
+   - Production readiness checklist
 
-1. Ensure prerequisites are completed
-2. Read `theory/concepts.md` for foundational understanding
-3. Review `theory/architecture.md` for AWS architecture patterns
-4. Set up infrastructure: `bash scripts/setup.sh`
-5. Complete exercises in order (01 through 06)
-6. Validate your learning: `bash scripts/validate.sh`
+### 💻 Ejercicios Prácticos (6 ejercicios)
 
-## Exercises
+1. **[01-first-lambda](exercises/01-first-lambda/)** - Básico (2-3 horas)
+   - Primera función Lambda
+   - S3 event triggers
+   - CSV processing con pandas
+   - CloudWatch logging
+   - Unit testing
 
-1. **Exercise 01**: [Title] - Basic concepts
-2. **Exercise 02**: [Title] - Intermediate application
-3. **Exercise 03**: [Title] - Advanced usage
-4. **Exercise 04**: [Title] - Integration patterns
-5. **Exercise 05**: [Title] - Performance optimization
-6. **Exercise 06**: [Title] - Production best practices
+2. **[02-s3-event-processing](exercises/02-s3-event-processing/)** - Intermedio (3-4 horas)
+   - CSV to Parquet transformation
+   - SQS como buffer
+   - Dead Letter Queue (DLQ)
+   - Data partitioning
+   - Glue Data Catalog integration
 
-## Resources
+3. **[03-step-functions](exercises/03-step-functions/)** - Intermedio (3-4 horas)
+   - Complete ETL pipeline
+   - State machine orchestration
+   - Parallel execution
+   - Error handling y retry logic
+   - EventBridge triggers
+
+4. **[04-rest-api-lambda](exercises/04-rest-api-lambda/)** - Intermedio (3-4 horas)
+   - Full CRUD REST API
+   - API Gateway + Lambda
+   - DynamoDB integration
+   - Authentication (API Key)
+   - Rate limiting
+
+5. **[05-sqs-messaging](exercises/05-sqs-messaging/)** - Avanzado (2-3 horas)
+   - Order processing system
+   - SQS FIFO queues
+   - Message deduplication
+   - Batch processing
+   - CloudWatch alarms
+
+6. **[06-production-pipeline](exercises/06-production-pipeline/)** - Avanzado (4-5 horas)
+   - Production-ready pipeline
+   - Real-time analytics
+   - Multi-environment deployment
+   - Complete observability
+   - CI/CD automation
+
+### 🏗️ Infrastructure
+
+- **[templates/](infrastructure/templates/)** - Módulos Terraform reutilizables
+  - Lambda function module
+  - SQS queue module
+  - API Gateway module
+  - Step Functions module
+
+### ✅ Validación
+
+- **[validation/](validation/)** - Test suite completo
+  - Unit tests con pytest
+  - Integration tests con moto
+  - Infrastructure tests
+
+### 🛠️ Scripts
+
+- **[setup.sh](scripts/setup.sh)** - Configuración inicial del entorno
+- **[deploy.sh](scripts/deploy.sh)** - Deployment automation
+
+## 🚀 Getting Started
 
 See `theory/resources.md` for:
 - Official AWS documentation
-- Video tutorials and workshops
-- Community resources
-- Certification mapping
 
-## Validation
+### 1. Setup del Entorno
 
-Run all validations:
+```bash
+# Clonar repositorio
+cd modules/module-12-serverless-processing
+
+# Ejecutar setup
+chmod +x scripts/setup.sh
+./scripts/setup.sh
+
+# Activar virtual environment
+source venv/bin/activate
+```
+
+### 2. Configurar AWS
+
+```bash
+# Configurar credenciales
+aws configure
+
+# Verificar acceso
+aws sts get-caller-identity
+```
+
+### 3. Comenzar con la Teoría
+
+Lee los archivos de teoría en orden:
+1. `theory/01-serverless-fundamentals.md`
+2. `theory/02-serverless-data-processing.md`
+3. `theory/03-serverless-patterns.md`
+
+### 4. Realizar los Ejercicios
+
+Completa los ejercicios en orden progresivo:
+
+```bash
+# Ejercicio 1
+cd exercises/01-first-lambda
+# Seguir instrucciones en README.md
+
+# Ejercicio 2
+cd ../02-s3-event-processing
+# ...y así sucesivamente
+```
+
+## 📊 Stack Tecnológico
+
+### Core Services
+- **AWS Lambda** - Compute serverless
+- **API Gateway** - REST APIs
+- **Step Functions** - Workflow orchestration
+- **EventBridge** - Event routing
+
+### Data Services
+- **S3** - Data Lake storage
+- **DynamoDB** - NoSQL database
+- **Kinesis** - Stream processing
+- **Glue Data Catalog** - Metadata management
+
+### Messaging
+- **SQS** - Message queuing (Standard & FIFO)
+- **SNS** - Pub/Sub messaging
+
+### Observability
+- **CloudWatch** - Logs, metrics, dashboards
+- **X-Ray** - Distributed tracing
+
+### Infrastructure
+- **Terraform** - Infrastructure as Code
+- **GitHub Actions** - CI/CD
+
+### Development
+- **Python 3.11** - Runtime
+- **pytest** - Testing framework
+- **moto** - AWS mocking
+- **boto3** - AWS SDK
+
+## 🎓 Path de Aprendizaje
+
+```
+1. Theory Review (3-4 horas)
+   ↓
+2. Exercise 01: First Lambda (2-3 horas)
+   ↓
+3. Exercise 02: S3 Event Processing (3-4 horas)
+   ↓
+4. Exercise 03: Step Functions (3-4 horas)
+   ↓
+5. Exercise 04: REST API (3-4 horas)
+   ↓
+6. Exercise 05: SQS Messaging (2-3 horas)
+   ↓
+7. Exercise 06: Production Pipeline (4-5 horas)
+   ↓
+8. Final Project (opcional, 8-10 horas)
+
+Total estimado: 25-30 horas
+```
+
+## 📈 Criterios de Evaluación
+
+### Conocimiento Teórico (30%)
+- [ ] Comprensión de serverless fundamentals
+- [ ] Event-driven architecture patterns
+- [ ] AWS Lambda lifecycle y optimizations
+- [ ] Step Functions state machines
+
+### Implementación Práctica (40%)
+- [ ] 6 ejercicios completados
+- [ ] Código funcional y bien documentado
+- [ ] Infrastructure as Code implementado
+- [ ] Tests pasando (>80% coverage)
+
+### Production Readiness (30%)
+- [ ] Observability implementada
+- [ ] Security best practices aplicadas
+- [ ] CI/CD pipeline funcional
+- [ ] Cost optimization considerada
+
+## 🔍 Troubleshooting
+
+### Lambda Timeout
+```python
+# Aumentar timeout en Terraform
+timeout = 300  # 5 minutos
+```
+
+### Cold Start Issues
+```python
+# Usar reserved concurrency
+reserved_concurrent_executions = 10
+```
+
+### Permission Errors
+```bash
+# Verificar IAM role
+aws iam get-role --role-name lambda-role
+```
+
+## 📚 Recursos Adicionales
+
+### Documentación Oficial
+- [AWS Lambda Developer Guide](https://docs.aws.amazon.com/lambda/)
+- [Step Functions Guide](https://docs.aws.amazon.com/step-functions/)
+- [API Gateway Documentation](https://docs.aws.amazon.com/apigateway/)
+
+### Herramientas
+- [AWS SAM](https://aws.amazon.com/serverless/sam/) - Serverless Application Model
+- [LocalStack](https://localstack.cloud/) - Local AWS testing
+- [Serverless Framework](https://www.serverless.com/)
+
+### Libros
+- "Serverless Architectures on AWS" - Peter Sbarski
+- "Production-Ready Serverless" - Yan Cui
+
+## 🤝 Contribuciones
+
+¿Encontraste un error? ¿Tienes sugerencias? 
+- Abre un issue en GitHub
+- Envía un pull request
+- Contacta al instructor
+
+## 📄 Licencia
+
+Este material es parte del Training Cloud Data y está disponible para uso educativo.
+
+---
+
+## Validación
+
+Ejecutar todas las validaciones:
+
 ```bash
 bash scripts/validate.sh
 ```
 
-Or use the global validation:
+O usar la validación global:
+
 ```bash
-make validate MODULE=module-{module_id}-{module["name"]}
+make validate MODULE=module-12-serverless-processing
 ```
 
 ## Progress Checklist
 
-- [ ] Read all theory documentation
-- [ ] Completed Exercise 01
-- [ ] Completed Exercise 02
-- [ ] Completed Exercise 03
-- [ ] Completed Exercise 04
-- [ ] Completed Exercise 05
-- [ ] Completed Exercise 06
-- [ ] All validations passing
-- [ ] Ready for next module
+- [x] Leer toda la documentación teórica
+- [x] Completar Ejercicio 01
+- [x] Completar Ejercicio 02
+- [x] Completar Ejercicio 03
+- [x] Completar Ejercicio 04
+- [x] Completar Ejercicio 05
+- [x] Completar Ejercicio 06
+- [x] Todas las validaciones pasando
+- [x] Listo para el próximo módulo
 
-## Next Steps
+## 🎯 Próximos Pasos
 
-After completing this module, you'll be ready for:
-[List of modules that depend on this one]
+Una vez completado este módulo, continúa con:
+- **[Módulo 13: Container Orchestration](../module-13-container-orchestration/)** - Kubernetes y ECS
+- **[Módulo 15: Real-Time Analytics](../module-15-real-time-analytics/)** - Kinesis Analytics
+
+¡Buena suerte con tu aprendizaje serverless! 🚀
+
