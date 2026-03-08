@@ -1,50 +1,64 @@
 # Module 13: Container Orchestration
 
-⏱️ **Estimated Time:** TBD hours
+⏱️ **Estimated Time:** 25-30 hours
 
 ## Prerequisites
 
-- ✅ Module 11 must be completed (100%)
-
+- ✅ Module 12 completed (Serverless Processing)
+- Docker fundamentals knowledge
+- AWS account with appropriate permissions
+- kubectl, terraform, helm installed
 
 ## Module Overview
 
-[Brief description of what you'll learn in this module]
+Master container orchestration with Docker, Amazon ECS, and Kubernetes. Build production-ready data platforms using containers, from simple Docker applications to complex Kubernetes deployments with Spark, Airflow, and Kafka.
 
-## Learning Objectives
+## Learning Objectives  
 
 By the end of this module, you will be able to:
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+- ✅ Create optimized Docker images with multi-stage builds
+- ✅ Deploy serverless containers on AWS ECS/Fargate
+- ✅ Orchestrate complex ETL pipelines with Step Functions + ECS
+- ✅ Manage Kubernetes clusters on Amazon EKS
+- ✅ Run Apache Spark jobs at scale on Kubernetes
+- ✅ Build production data platforms with Airflow, Kafka, and monitoring
 
 ## Structure
 
-- **theory/**: Core concepts and architecture documentation
-- **exercises/**: Hands-on practice exercises (6 exercises)
-- **infrastructure/**: LocalStack/Docker setup for this module
-- **data/**: Sample datasets and schemas
-- **validation/**: Automated tests to validate your learning
-- **scripts/**: Helper scripts
+- **theory/**: 3 comprehensive theory files (Docker, ECS, Kubernetes)
+- **exercises/**: 6 progressive hands-on exercises (25+ hours)
+- **infrastructure/**: Reusable Terraform modules (ECS, EKS, add-ons)
+- **validation/**: pytest test suite for Docker, ECS, Kubernetes
+- **scripts/**: Automation scripts (setup, deploy, cleanup)
 
 ## Getting Started
 
-1. Ensure prerequisites are completed
-2. Read `theory/concepts.md` for foundational understanding
-3. Review `theory/architecture.md` for AWS architecture patterns
-4. Set up infrastructure: `bash scripts/setup.sh`
-5. Complete exercises in order (01 through 06)
-6. Validate your learning: `bash scripts/validate.sh`
+1. Run setup script: `./scripts/setup.sh`
+2. Configure AWS: `aws configure`
+3. Read theory files in order (01 → 02 → 03)
+4. Complete exercises sequentially
+5. Run tests: `pytest validation/ -v`
+6. Clean up: `./scripts/cleanup.sh`
 
 ## Exercises
 
-1. **Exercise 01**: [Title] - Basic concepts
-2. **Exercise 02**: [Title] - Intermediate application
-3. **Exercise 03**: [Title] - Advanced usage
-4. **Exercise 04**: [Title] - Integration patterns
-5. **Exercise 05**: [Title] - Performance optimization
-6. **Exercise 06**: [Title] - Production best practices
+1. **Exercise 01**: Docker Basics - First container with ETL app (2-3h)
+2. **Exercise 02**: ECS Fargate Deployment - Production infrastructure (3-4h)
+3. **Exercise 03**: ECS Data Pipeline - Step Functions orchestration (3-4h)
+4. **Exercise 04**: Kubernetes Basics - EKS cluster & workloads (3-4h)
+5. **Exercise 05**: EKS Spark Jobs - Large-scale processing (4-5h)
+6. **Exercise 06**: Production K8s - Airflow + Kafka + Monitoring (5-6h)
+
+## Technology Stack
+
+**Containers**: Docker, Docker Compose
+**AWS**: ECS, Fargate, ECR, ALB, EventBridge
+**Kubernetes**: EKS, kubectl, Helm, Operators
+**Data**: Spark, Airflow, Kafka, PostgreSQL
+**IaC**: Terraform, eksctl
+**Monitoring**: Prometheus, Grafana, CloudWatch
+**GitOps**: ArgoCD
 
 ## Resources
 
