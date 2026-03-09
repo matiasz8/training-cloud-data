@@ -1,53 +1,93 @@
-# Module 16: Data Security Compliance
+# Module 16: Data Security & Compliance
 
-⏱️ **Estimated Time:** TBD hours
+## Overview
 
-## Prerequisites
+Master data security, encryption, access control, compliance frameworks, and governance in AWS. Learn to implement defense-in-depth strategies, data protection mechanisms, audit trails, and meet regulatory requirements (GDPR, HIPAA, SOC 2, PCI-DSS).
 
-- ✅ Module 01 must be completed (100%)
-- ✅ Module 14 must be completed (100%)
-
-**Note:** This module is part of parallel track B and can be completed alongside other parallel modules.
-
-
-## Module Overview
-
-[Brief description of what you'll learn in this module]
+**Duration**: 16-18 hours  
+**Difficulty**: ⭐⭐⭐⭐ Expert  
+**Prerequisites**: Modules 02 (Storage), 05 (Data Lakehouse), 14 (Data Catalog)
 
 ## Learning Objectives
 
-By the end of this module, you will be able to:
+By completing this module, you will be able to:
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+1. **Implement IAM Best Practices**
+   - Design least-privilege access policies
+   - Configure IAM roles, policies, and permission boundaries
+   - Implement identity federation (SAML, OIDC)
+   - Use AWS Organizations for multi-account security
 
-## Structure
+2. **Encrypt Data at Rest and in Transit**
+   - Configure KMS keys with rotation policies
+   - Implement envelope encryption patterns
+   - Enable encryption for S3, RDS, DynamoDB, Redshift
+   - Configure SSL/TLS for data in transit
 
-- **theory/**: Core concepts and architecture documentation
-- **exercises/**: Hands-on practice exercises (6 exercises)
-- **infrastructure/**: LocalStack/Docker setup for this module
-- **data/**: Sample datasets and schemas
-- **validation/**: Automated tests to validate your learning
-- **scripts/**: Helper scripts
+3. **Implement Data Masking & Anonymization**
+   - PII detection and redaction
+   - Dynamic data masking in queries
+   - Tokenization and pseudonymization
+   - K-anonymity and differential privacy
 
-## Getting Started
+4. **Establish Audit & Compliance**
+   - Configure CloudTrail for audit logging
+   - Use AWS Config for compliance rules
+   - Implement automated compliance checks
+   - Generate compliance reports
 
-1. Ensure prerequisites are completed
-2. Read `theory/concepts.md` for foundational understanding
-3. Review `theory/architecture.md` for AWS architecture patterns
-4. Set up infrastructure: `bash scripts/setup.sh`
-5. Complete exercises in order (01 through 06)
-6. Validate your learning: `bash scripts/validate.sh`
+5. **Implement Data Governance**
+   - Configure Lake Formation fine-grained access
+   - Implement data lineage tracking
+   - Establish data classification policies
+   - Configure Glue Data Catalog security
+
+6. **Monitor Security Threats**
+   - Use GuardDuty for threat detection
+   - Configure Security Hub for centralized monitoring
+   - Implement SIEM with CloudWatch + Elasticsearch
+   - Create incident response playbooks
 
 ## Exercises
 
-1. **Exercise 01**: [Title] - Basic concepts
-2. **Exercise 02**: [Title] - Intermediate application
-3. **Exercise 03**: [Title] - Advanced usage
-4. **Exercise 04**: [Title] - Integration patterns
-5. **Exercise 05**: [Title] - Performance optimization
-6. **Exercise 06**: [Title] - Production best practices
+### Exercise 01: IAM & Access Control (3 hours) - ⭐⭐⭐ Advanced
+Implement least-privilege IAM policies for different personas, cross-account access, and permission boundaries.
+
+### Exercise 02: Data Encryption (3 hours) - ⭐⭐⭐ Advanced
+Configure KMS, encrypt data at rest/transit across S3, RDS, Redshift.
+
+### Exercise 03: Data Masking & Anonymization (3 hours) - ⭐⭐⭐⭐ Expert
+Detect PII with Macie/Comprehend, implement masking and tokenization.
+
+### Exercise 04: Audit & Compliance (2.5 hours) - ⭐⭐⭐ Advanced
+Configure CloudTrail, AWS Config rules, compliance reports.
+
+### Exercise 05: Data Governance (3 hours) - ⭐⭐⭐⭐ Expert
+Implement Lake Formation permissions, data lineage, tag-based access.
+
+### Exercise 06: Security Monitoring (2.5 hours) - ⭐⭐⭐⭐ Expert
+Deploy GuardDuty, Security Hub, build SIEM, incident response automation.
+
+## Setup
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Start infrastructure
+make setup
+
+# Validate
+make validate
+```
+
+## Compliance Frameworks
+
+- ✅ GDPR (General Data Protection Regulation)
+- ✅ HIPAA (Health Insurance Portability and Accountability Act)
+- ✅ PCI-DSS (Payment Card Industry Data Security Standard)
+- ✅ SOC 2 (Service Organization Control 2)
+- ✅ CIS AWS Foundations Benchmark
 
 ## Resources
 
