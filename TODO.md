@@ -63,25 +63,24 @@
   - Create: `docs/ENGLISH-MIGRATION-GUIDE.md`
   - Effort: ~1-2h
 
-- [ ] **5.2 - Full Content Replacement (9 Modules)**
-  - Process for each of 9 mixed modules:
-    1. Read Spanish content
-    2. Translate sections to English
-    3. Update `README.md` + sub-docs
-    4. Run `validate_english_content.py` per module
-  - Modules to migrate:
-    - module-01-cloud-fundamentals
-    - module-02-storage-basics
-    - module-03-compute-options
-    - module-04-networking-basics
-    - module-05-data-ingestion
-    - module-06-data-transformation
-    - module-07-serverless-data-processing
-    - module-08-stream-processing
-    - module-09-data-warehousing
-  - Progress update:
-    - Started module-01-cloud-fundamentals
-    - `modules/module-01-cloud-fundamentals/README.md` migrated to English
+- [x] **5.2 - Full Content Replacement (9 Modules) - STARTED**
+   - ✅ module-01-cloud-fundamentals: COMPLETE (commit 25e3b56)
+       - README.md: Full English translation
+       - theory/concepts.md: Translated (dictionary + deep-translator)
+       - theory/architecture.md: Translated
+       - theory/resources.md: Full English translation
+       - All 6 exercises: README, hints files translated
+       - Status/infrastructure/validation files: Translated
+   - ⬜ Remaining modules (02-09): Not yet started
+       - module-02-storage-basics
+       - module-03-compute-options
+       - module-04-networking-basics
+       - module-05-data-ingestion
+       - module-06-data-transformation
+       - module-07-serverless-data-processing
+       - module-08-stream-processing
+       - module-09-data-warehousing
+   - Next: Continue with modules 02-03 in next execution phase
   - Effort: ~6-8h (distributed)
 
 - [ ] **5.3 - Re-validate After Migration**
@@ -194,7 +193,7 @@
 | Phase | Title | Priority | Time | Status | Next Action |
 |-------|-------|----------|------|--------|------------|
 | 4 | Pre-commit & CI | 🔴 HIGH | 4-6h | 🟨 IN PROGRESS (2/3) | Run end-to-end PR flow test (4.3) |
-| 5 | English Migration | 🟡 MED | 8-10h | 🟨 IN PROGRESS (1/3) | Start full replacement on module-01 |
+| 5 | English Migration | 🟡 MED | 8-10h | 🟨 IN PROGRESS (1/9 complete) | Replicate module-01 pattern to modules 02-03 |
 | 6 | Skills Playbook | 🟡 MED | 6-8h | ⬜ TODO | Draft `SKILLS-PLAYBOOK.md` |
 | 7 | Learner Tracking | 🟢 LOW | 8-12h | ⬜ OPTIONAL | Extend progress.py (nice-to-have) |
 
