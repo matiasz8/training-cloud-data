@@ -57,14 +57,14 @@ def analyze_bucket(bucket_name):
     age_buckets = {
         'hot': 0, 'warm': 0, 'cold': 0, 'archive': 0
     }
-    
+
     paginator = s3.get_paginator('list_objects_v2')
     for page in paginator.paginate(Bucket=bucket_name):
         for obj in page.get('Contents', []):
             last_modified = obj['LastModified']
             age_days = (datetime.now(timezone.utc) - last_modified).days
             size = obj['Size']
-            
+
             if age_days <= 30:
                 age_buckets['hot'] += size
             elif age_days <= 90:
@@ -73,11 +73,11 @@ def analyze_bucket(bucket_name):
                 age_buckets['cold'] += size
             else:
                 age_buckets['archive'] += size
-    
+
     # Convert to GB
     for key in age_buckets:
         age_buckets[key] = age_buckets[key] / (1024**3)
-    
+
     return age_buckets
 ```
 
@@ -91,10 +91,10 @@ def calculate_costs(age_buckets):
         'GLACIER': 0.004,
         'DEEP_ARCHIVE': 0.00099
     }
-    
+
     # Current: all STANDARD
     current_cost = sum(age_buckets.values()) * pricing['STANDARD']
-    
+
     # Optimized: tiered
     optimized_cost = (
         age_buckets['hot'] * pricing['STANDARD'] +
@@ -102,10 +102,10 @@ def calculate_costs(age_buckets):
         age_buckets['cold'] * pricing['GLACIER'] +
         age_buckets['archive'] * pricing['DEEP_ARCHIVE']
     )
-    
+
     savings = current_cost - optimized_cost
     savings_percent = (savings / current_cost) * 100 if current_cost > 0 else 0
-    
+
     return {
         'current': current_cost,
         'optimized': optimized_cost,
@@ -148,7 +148,7 @@ def generate_lifecycle_policy(bucket_name):
             }
         ]
     }
-    
+
     # Apply policy
     s3.put_bucket_lifecycle_configuration(
         Bucket=bucket_name,
@@ -163,40 +163,40 @@ def analyze_lambda(function_name):
     # Get function config
     function = lambda_client.get_function(FunctionName=function_name)
     current_memory = function['Configuration']['MemorySize']
-    
+
     # Query CloudWatch Logs Insights
     query = """
     fields @memorySize / 1000000 as memoryUsedMB, @duration
-    | stats 
+    | stats
         avg(@duration) as avg_duration,
         max(@duration) as max_duration,
         avg(memoryUsedMB) as avg_memory,
         max(memoryUsedMB) as max_memory,
         count() as invocations
     """
-    
+
     log_group = f'/aws/lambda/{function_name}'
-    
+
     response = logs.start_query(
         logGroupName=log_group,
         startTime=int((datetime.now() - timedelta(days=7)).timestamp()),
         endTime=int(datetime.now().timestamp()),
         queryString=query
     )
-    
+
     # Wait and get results
     query_id = response['queryId']
     result = logs.get_query_results(queryId=query_id)
-    
+
     # Parse results
     stats = {}
     for field in result['results'][0]:
         stats[field['field']] = float(field['value'])
-    
+
     # Recommend memory (avg + 20% buffer, rounded to 64MB)
     recommended_memory = int((stats['avg_memory'] * 1.2) / 64) * 64
     recommended_memory = max(128, min(10240, recommended_memory))
-    
+
     return {
         'current_memory': current_memory,
         'recommended_memory': recommended_memory,

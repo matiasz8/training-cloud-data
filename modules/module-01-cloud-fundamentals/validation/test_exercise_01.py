@@ -5,8 +5,6 @@ Validation tests for Exercise 01: S3 Basics
 
 import boto3
 import pytest
-import subprocess
-from pathlib import Path
 
 # LocalStack configuration
 ENDPOINT_URL = 'http://localhost:4566'
@@ -80,19 +78,19 @@ def test_copy_operation():
     # Create a test object
     test_key = 'test-copy-source.txt'
     s3.put_object(Bucket=BUCKET_NAME, Key=test_key, Body=b'test content')
-    
+
     # Try to copy it
     copy_source = {'Bucket': BUCKET_NAME, 'Key': test_key}
     dest_key = 'test-copy-dest.txt'
     s3.copy_object(CopySource=copy_source, Bucket=BUCKET_NAME, Key=dest_key)
-    
+
     # Verify destination exists
     try:
         s3.head_object(Bucket=BUCKET_NAME, Key=dest_key)
         assert True
     except:
         pytest.fail("Copy operation failed")
-    
+
     # Cleanup
     s3.delete_object(Bucket=BUCKET_NAME, Key=test_key)
     s3.delete_object(Bucket=BUCKET_NAME, Key=dest_key)

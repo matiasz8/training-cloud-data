@@ -24,25 +24,25 @@ if docker-compose ps | grep -q localstack-module-01; then
 else
     echo -e "${BLUE}[1/4]${NC} Starting LocalStack..."
     docker-compose up -d
-    
+
     echo -e "${BLUE}[2/4]${NC} Waiting for LocalStack to be ready..."
     sleep 30
-    
+
     # Wait for health check
     MAX_RETRIES=30
     RETRY_COUNT=0
-    
+
     while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         if curl -s http://localhost:4566/_localstack/health > /dev/null 2>&1; then
             echo -e "${GREEN}✓${NC} LocalStack is ready"
             break
         fi
-        
+
         RETRY_COUNT=$((RETRY_COUNT + 1))
         echo -n "."
         sleep 1
     done
-    
+
     if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
         echo -e "\n${RED}✗${NC} LocalStack failed to start"
         exit 1

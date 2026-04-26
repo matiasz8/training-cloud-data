@@ -19,17 +19,17 @@ NUM_PRODUCTS = 500
 def generate_transactions():
     """Generate sample e-commerce transactions"""
     print("Generating transactions...")
-    
+
     start_date = datetime(2024, 1, 1)
     transactions = []
-    
+
     for i in range(NUM_TRANSACTIONS):
         transaction_date = start_date + timedelta(
             days=random.randint(0, 365),
             hours=random.randint(0, 23),
             minutes=random.randint(0, 59)
         )
-        
+
         transactions.append({
             'transaction_id': f'TXN{i+1:06d}',
             'user_id': f'USER{random.randint(1, NUM_USERS):04d}',
@@ -43,19 +43,19 @@ def generate_transactions():
             'country': random.choice(['US', 'UK', 'CA', 'AU', 'DE', 'FR', 'ES', 'IT']),
             'device': random.choice(['mobile', 'desktop', 'tablet'])
         })
-        
+
         # Calculate total
         transactions[-1]['total_amount'] = round(
             transactions[-1]['quantity'] * transactions[-1]['unit_price'], 2
         )
-    
+
     # Write CSV
     csv_file = OUTPUT_DIR / 'transactions-sample.csv'
     with open(csv_file, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=transactions[0].keys())
         writer.writeheader()
         writer.writerows(transactions)
-    
+
     print(f"✓ Created {csv_file} ({len(transactions)} rows)")
     return transactions
 
@@ -63,13 +63,13 @@ def generate_transactions():
 def generate_logs():
     """Generate sample application logs"""
     print("Generating logs...")
-    
-    event_types = ['page_view', 'add_to_cart', 'checkout', 'purchase', 
+
+    event_types = ['page_view', 'add_to_cart', 'checkout', 'purchase',
                    'search', 'login', 'logout', 'error']
-    
+
     start_date = datetime(2024, 1, 1)
     logs = []
-    
+
     for i in range(50000):
         log_date = start_date + timedelta(
             days=random.randint(0, 30),
@@ -77,7 +77,7 @@ def generate_logs():
             minutes=random.randint(0, 59),
             seconds=random.randint(0, 59)
         )
-        
+
         logs.append({
             'timestamp': log_date.isoformat(),
             'level': random.choice(['INFO', 'INFO', 'INFO', 'WARN', 'ERROR']),
@@ -91,19 +91,19 @@ def generate_logs():
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
             ]),
             'page_url': random.choice([
-                '/home', '/products', '/cart', '/checkout', 
+                '/home', '/products', '/cart', '/checkout',
                 '/account', '/search', '/product/123'
             ]),
             'response_time_ms': random.randint(50, 2000),
             'status_code': random.choice([200, 200, 200, 200, 301, 404, 500])
         })
-    
+
     # Write JSON Lines
     json_file = OUTPUT_DIR / 'logs-sample.jsonl'
     with open(json_file, 'w') as f:
         for log in logs:
             f.write(json.dumps(log) + '\n')
-    
+
     print(f"✓ Created {json_file} ({len(logs)} events)")
     return logs
 
@@ -111,21 +111,21 @@ def generate_logs():
 def generate_users():
     """Generate sample user data"""
     print("Generating users...")
-    
-    first_names = ['John', 'Jane', 'Bob', 'Alice', 'Charlie', 'Diana', 
+
+    first_names = ['John', 'Jane', 'Bob', 'Alice', 'Charlie', 'Diana',
                    'Eve', 'Frank', 'Grace', 'Henry']
-    last_names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 
+    last_names = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones',
                   'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez']
-    
+
     users = []
     start_date = datetime(2023, 1, 1)
-    
+
     for i in range(NUM_USERS):
         signup_date = start_date + timedelta(days=random.randint(0, 365))
-        
+
         first = random.choice(first_names)
         last = random.choice(last_names)
-        
+
         users.append({
             'user_id': f'USER{i+1:04d}',
             'email': f"{first.lower()}.{last.lower()}{random.randint(1,999)}@example.com",
@@ -137,14 +137,14 @@ def generate_users():
             'is_active': random.choice([True, True, True, False]),
             'lifetime_value': round(random.uniform(0, 5000), 2)
         })
-    
+
     # Write CSV
     csv_file = OUTPUT_DIR / 'users-sample.csv'
     with open(csv_file, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=users[0].keys())
         writer.writeheader()
         writer.writerows(users)
-    
+
     print(f"✓ Created {csv_file} ({len(users)} rows)")
     return users
 
@@ -152,12 +152,12 @@ def generate_users():
 def generate_products():
     """Generate sample product catalog"""
     print("Generating products...")
-    
-    categories = ['Electronics', 'Clothing', 'Home & Garden', 'Sports', 
+
+    categories = ['Electronics', 'Clothing', 'Home & Garden', 'Sports',
                   'Books', 'Toys', 'Food & Beverage']
-    
+
     products = []
-    
+
     for i in range(NUM_PRODUCTS):
         products.append({
             'product_id': f'PROD{i+1:04d}',
@@ -171,15 +171,15 @@ def generate_products():
             'is_featured': random.choice([True, False]),
             'created_at': (datetime(2023, 1, 1) + timedelta(days=random.randint(0, 365))).isoformat()
         })
-        
+
         # Calculate cost (60-80% of price)
         products[-1]['cost'] = round(products[-1]['price'] * random.uniform(0.6, 0.8), 2)
-    
+
     # Write JSON
     json_file = OUTPUT_DIR / 'products-sample.json'
     with open(json_file, 'w') as f:
         json.dump(products, f, indent=2)
-    
+
     print(f"✓ Created {json_file} ({len(products)} products)")
     return products
 
@@ -187,7 +187,7 @@ def generate_products():
 def generate_summary():
     """Generate summary statistics"""
     print("\nGenerating summary...")
-    
+
     summary = {
         'generated_at': datetime.now().isoformat(),
         'datasets': {
@@ -229,7 +229,7 @@ def generate_summary():
             ]
         }
     }
-    
+
     summary_file = OUTPUT_DIR / 'README.md'
     with open(summary_file, 'w') as f:
         f.write('# Sample Datasets\n\n')
@@ -242,17 +242,17 @@ def generate_summary():
             if 'rows' in info:
                 f.write(f"- **Rows:** {info['rows']:,}\n")
             f.write('\n')
-        
+
         f.write('## Usage\n\n')
         f.write('These datasets are used in:\n\n')
         for scenario in summary['usage']['scenarios']:
             f.write(f"- {scenario}\n")
-        
+
         f.write('\n## Regenerate\n\n')
         f.write('```bash\n')
         f.write('python3 generate_sample_data.py\n')
         f.write('```\n')
-    
+
     print(f"✓ Created {summary_file}")
 
 
@@ -261,13 +261,13 @@ def main():
     print("Sample Data Generator for Module 01")
     print("=" * 60)
     print()
-    
+
     generate_transactions()
     generate_logs()
     generate_users()
     generate_products()
     generate_summary()
-    
+
     print()
     print("=" * 60)
     print("✓ All sample datasets generated successfully!")

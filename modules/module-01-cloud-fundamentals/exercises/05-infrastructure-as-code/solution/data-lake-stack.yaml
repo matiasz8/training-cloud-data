@@ -10,14 +10,14 @@ Parameters:
       - staging
       - prod
     Description: Deployment environment
-  
+
   DataRetentionDays:
     Type: Number
     Default: 90
     MinValue: 30
     MaxValue: 365
     Description: Days to retain data in STANDARD storage before transitioning to STANDARD_IA
-  
+
   GlacierTransitionDays:
     Type: Number
     Default: 180
@@ -39,15 +39,15 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Sub 'quickmart-data-lake-${Environment}-${AWS::AccountId}'
-      
+
       VersioningConfiguration:
         Status: Enabled
-      
+
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-      
+
       LifecycleConfiguration:
         Rules:
           - Id: TransitionToIA
@@ -58,24 +58,24 @@ Resources:
                 StorageClass: STANDARD_IA
               - TransitionInDays: !Ref GlacierTransitionDays
                 StorageClass: GLACIER
-          
+
           - Id: DeleteOldVersions
             Status: Enabled
             Prefix: ''
             NoncurrentVersionExpirationInDays: 90
-          
+
           - Id: CleanupIncompleteUploads
             Status: Enabled
             Prefix: ''
             AbortIncompleteMultipartUpload:
               DaysAfterInitiation: 7
-      
+
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -103,7 +103,7 @@ Resources:
             Condition:
               StringNotEquals:
                 s3:x-amz-server-side-encryption: 'AES256'
-          
+
           - Sid: DenyInsecureTransport
             Effect: Deny
             Principal: '*'
@@ -114,7 +114,7 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: false
-          
+
           - Sid: AllowDataEngineerAccess
             Effect: Allow
             Principal:
@@ -133,7 +133,7 @@ Resources:
     Properties:
       RoleName: !Sub 'data-engineer-role-${Environment}'
       Description: !Sub 'IAM role for data engineers in ${Environment} environment'
-      
+
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -143,14 +143,14 @@ Resources:
                 - ec2.amazonaws.com
                 - lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      
+
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - !If
           - IsProduction
           - arn:aws:iam::aws:policy/ReadOnlyAccess
           - !Ref AWS::NoValue
-      
+
       Policies:
         - PolicyName: DataLakeAccess
           PolicyDocument:
@@ -164,7 +164,7 @@ Resources:
                   - s3:DeleteObject
                   - s3:GetObjectVersion
                 Resource: !Sub '${DataLakeBucket.Arn}/*'
-              
+
               - Sid: S3BucketList
                 Effect: Allow
                 Action:
@@ -172,14 +172,14 @@ Resources:
                   - s3:GetBucketLocation
                   - s3:GetBucketVersioning
                 Resource: !GetAtt DataLakeBucket.Arn
-              
+
               - Sid: CloudWatchMetrics
                 Effect: Allow
                 Action:
                   - cloudwatch:PutMetricData
                   - cloudwatch:GetMetricData
                 Resource: '*'
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -191,7 +191,7 @@ Resources:
     Properties:
       RoleName: !Sub 'data-analyst-role-${Environment}'
       Description: !Sub 'Read-only IAM role for data analysts in ${Environment}'
-      
+
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -200,7 +200,7 @@ Resources:
               Service:
                 - ec2.amazonaws.com
             Action: 'sts:AssumeRole'
-      
+
       Policies:
         - PolicyName: DataLakeReadOnly
           PolicyDocument:
@@ -213,7 +213,7 @@ Resources:
                 Resource:
                   - !GetAtt DataLakeBucket.Arn
                   - !Sub '${DataLakeBucket.Arn}/*'
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -231,29 +231,29 @@ Outputs:
     Value: !Ref DataLakeBucket
     Export:
       Name: !Sub '${AWS::StackName}-BucketName'
-  
+
   BucketArn:
     Description: Data Lake S3 bucket ARN
     Value: !GetAtt DataLakeBucket.Arn
     Export:
       Name: !Sub '${AWS::StackName}-BucketArn'
-  
+
   DataEngineerRoleArn:
     Description: IAM role ARN for data engineers
     Value: !GetAtt DataEngineerRole.Arn
     Export:
       Name: !Sub '${AWS::StackName}-DataEngineerRoleArn'
-  
+
   DataAnalystRoleArn:
     Description: IAM role ARN for data analysts
     Value: !GetAtt DataAnalystRole.Arn
     Export:
       Name: !Sub '${AWS::StackName}-DataAnalystRoleArn'
-  
+
   Environment:
     Description: Deployment environment
     Value: !Ref Environment
-  
+
   StackId:
     Description: CloudFormation stack ID
     Value: !Ref AWS::StackId

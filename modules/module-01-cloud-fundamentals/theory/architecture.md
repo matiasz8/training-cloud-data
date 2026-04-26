@@ -1,12 +1,12 @@
-# Arquitecturas de Referencia AWS para Data Engineering
+# AWS Reference Architectures for Data Engineering
 
-**Objetivo:** Comprender patrones arquitectónicos comunes y cómo diseñar sistemas cloud-native para datos.
+**Objective:** Understand common architectural patterns and how to design cloud-native systems for Data.
 
 ---
 
-## 1. Arquitectura de Data Lake en AWS
+## 1. Data Lake Architecture on AWS
 
-### Diagrama Conceptual
+### Conceptual Diagram
 
 ```mermaid
 graph TB
@@ -16,54 +16,54 @@ graph TB
         A3[External APIs]
         A4[Streaming Data]
     end
-    
+
     subgraph "Processing Layer"
         B1[AWS Glue ETL]
         B2[AWS Lambda]
         B3[Amazon EMR]
     end
-    
+
     subgraph "Storage Layer - S3 Data Lake"
         C1[Raw Zone<br/>Original format]
         C2[Processed Zone<br/>Cleaned & validated]
         C3[Curated Zone<br/>Business-ready]
         C4[Archive Zone<br/>Glacier storage]
     end
-    
+
     subgraph "Catalog & Governance"
         D1[AWS Glue Catalog]
         D2[Lake Formation]
     end
-    
+
     subgraph "Analytics & Consumption"
         E1[Amazon Athena]
         E2[Amazon QuickSight]
         E3[SageMaker]
         E4[Redshift Spectrum]
     end
-    
+
     A1 --> B2
     A2 --> B1
     A3 --> B2
     A4 --> B2
-    
+
     B1 --> C1
     B2 --> C1
     B3 --> C1
-    
+
     C1 --> B1
     C1 --> B3
     B1 --> C2
     B3 --> C2
-    
+
     C2 --> C3
-    
+
     C1 -.-> D1
     C2 -.-> D1
     C3 -.-> D1
-    
+
     C4 -.->|Lifecycle Policy| C1
-    
+
     D1 --> E1
     C3 --> E1
     C3 --> E2
@@ -71,7 +71,7 @@ graph TB
     C3 --> E4
 ```
 
-### Zonas del Data Lake
+### Data Lake Zones
 
 **Raw Zone (Bronze Layer)**
 ```
@@ -122,37 +122,37 @@ Restore time:
 
 ---
 
-## 2. Arquitectura de Streaming Real-Time
+## 2. Real-Time Streaming Architecture
 
-### Diagrama de Flujo
+### Flow Chart
 
 ```mermaid
 graph LR
     A[Data Producers<br/>Web/Mobile/IoT] --> B[Amazon Kinesis<br/>Data Streams]
-    
+
     B --> C1[Lambda Consumer 1<br/>Real-time alerts]
     B --> C2[Lambda Consumer 2<br/>Aggregations]
     B --> C3[Kinesis Firehose<br/>S3 delivery]
-    
+
     C1 --> D1[DynamoDB<br/>Current state]
     C1 --> D2[SNS<br/>Notifications]
-    
+
     C2 --> D1
-    
+
     C3 --> E[S3 Data Lake<br/>Parquet files]
-    
+
     E --> F1[Glue Crawler<br/>Auto-catalog]
     F1 --> F2[Glue Catalog]
-    
+
     F2 --> G1[Athena<br/>Ad-hoc queries]
     E --> G2[EMR<br/>Batch processing]
-    
+
     style B fill:#FF9900
     style E fill:#569A31
     style D1 fill:#527FFF
 ```
 
-### Componentes y Responsabilidades
+### Components and Responsibilities
 
 **Kinesis Data Streams**
 ```
@@ -167,17 +167,17 @@ Shards needed: 10MB / 1MB = 10 shards
 Costo: $0.015 per shard-hour = ~$11/mes per shard
 ```
 
-**Lambda como Consumer**
+**Lambda as Consumer**
 ```python
 # Lambda triggered por Kinesis
 def lambda_handler(event, context):
     for record in event['Records']:
         # Kinesis data en base64
         payload = base64.b64decode(record['kinesis']['data'])
-        
+
         # Procesar evento
         process_event(json.loads(payload))
-    
+
     # Batch processing: hasta 10,000 records por invocación
     return {'statusCode': 200, 'processed': len(event['Records'])}
 ```
@@ -198,7 +198,7 @@ Configuración típica:
 - Destino: s3://datalake/streaming/year=!{timestamp:yyyy}/...
 ```
 
-**DynamoDB para State**
+**DynamoDB for State**
 ```
 Uso: Almacenar estado actual para queries rápidas
 
@@ -213,30 +213,30 @@ Costo: On-Demand pricing (solo pagas por requests)
 
 ---
 
-## 3. Arquitectura Batch ETL con Orquestación
+## 3. Batch ETL Architecture with Orchestration
 
 ```mermaid
 graph TB
     A[CloudWatch Event<br/>Schedule: cron] --> B[Step Functions<br/>Orchestration]
-    
+
     B --> C1{Data Quality<br/>Validation}
-    
+
     C1 -->|Pass| C2[Glue Job 1<br/>Extract & Transform]
     C1 -->|Fail| C3[SNS Alert<br/>Notify team]
-    
+
     C2 --> D1[S3 Staging<br/>Intermediate data]
-    
+
     D1 --> E1[Glue Job 2<br/>Join & Aggregate]
-    
+
     E1 --> F1[S3 Curated<br/>Final output]
-    
+
     F1 --> G1[Glue Crawler<br/>Update catalog]
-    
+
     G1 --> H1{Job Status}
-    
+
     H1 -->|Success| H2[SNS Success<br/>+ CloudWatch Metric]
     H1 -->|Failure| H3[SNS Failure<br/>+ Trigger Rollback]
-    
+
     style B fill:#FF9900
     style E1 fill:#945DF2
     style F1 fill:#569A31
@@ -320,7 +320,7 @@ graph TB
 }
 ```
 
-### Scheduling con CloudWatch Events
+### Scheduling with CloudWatch Events
 
 ```python
 # Terraform para programar Step Functions
@@ -335,7 +335,7 @@ resource "aws_cloudwatch_event_target" "step_functions" {
   target_id = "TriggerStepFunction"
   arn       = aws_sfn_state_machine.etl_pipeline.arn
   role_arn  = aws_iam_role.eventbridge_sfn_role.arn
-  
+
   input = jsonencode({
     execution_date = "{{ timestamp }}"
     environment    = "production"
@@ -345,37 +345,37 @@ resource "aws_cloudwatch_event_target" "step_functions" {
 
 ---
 
-## 4. Arquitectura Lambda-Driven Serverless ETL
+## 4. Lambda-Driven Serverless ETL Architecture
 
 ```mermaid
 graph TB
     A[S3 Bucket<br/>Landing Zone] -->|S3 Event| B[Lambda 1<br/>File Detector]
-    
+
     B -->|Small file| C1[Lambda 2<br/>Direct Processing]
     B -->|Large file| C2[SQS Queue<br/>Buffer]
-    
+
     C1 --> D[S3 Bucket<br/>Processed Zone]
-    
+
     C2 --> E[Lambda 3<br/>Batch Processor]
     E --> D
-    
+
     D -->|S3 Event| F[Lambda 4<br/>Validator]
-    
+
     F -->|Valid| G1[DynamoDB<br/>Metadata]
     F -->|Invalid| G2[DLQ<br/>Dead Letter Queue]
-    
+
     G1 --> H[EventBridge<br/>Custom Event]
-    
+
     H --> I1[Lambda 5<br/>Notify Stakeholders]
     H --> I2[Lambda 6<br/>Trigger Downstream]
-    
+
     style A fill:#569A31
     style D fill:#569A31
     style C1 fill:#FF9900
     style E fill:#FF9900
 ```
 
-### Patrón: File Processing Pipeline
+### Pattern: File Processing Pipeline
 
 **Lambda 1: File Detector**
 ```python
@@ -387,16 +387,16 @@ sqs = boto3.client('sqs')
 
 def lambda_handler(event, context):
     """Detecta archivos nuevos y rutea según tamaño"""
-    
+
     for record in event['Records']:
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         size = record['s3']['object']['size']
-        
+
         # Small files: Procesar directamente
         if size < 10 * 1024 * 1024:  # < 10MB
             process_small_file(bucket, key)
-        
+
         # Large files: Queue para procesamiento batch
         else:
             sqs.send_message(
@@ -407,7 +407,7 @@ def lambda_handler(event, context):
                     'size': size
                 })
             )
-    
+
     return {'statusCode': 200}
 ```
 
@@ -418,14 +418,14 @@ from io import StringIO
 
 def process_small_file(bucket, key):
     """Procesa archivos pequeños en memoria"""
-    
+
     # Leer archivo
     obj = s3.get_object(Bucket=bucket, Key=key)
     df = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')))
-    
+
     # Transformar
     df_transformed = transform_data(df)
-    
+
     # Escribir a Parquet
     output_key = key.replace('.csv', '.parquet')
     df_transformed.to_parquet(
@@ -438,19 +438,19 @@ def process_small_file(bucket, key):
 ```python
 def lambda_handler(event, context):
     """Procesa archivos grandes por chunks"""
-    
+
     for record in event['Records']:
         message = json.loads(record['body'])
         bucket = message['bucket']
         key = message['key']
-        
+
         # Procesar por chunks para evitar memory issues
         process_in_chunks(bucket, key, chunk_size=100000)
 ```
 
-### Consideraciones de Diseño
+### Design Considerations
 
-**Límites de Lambda:**
+**Lambda limits:**
 ```
 Memory: 128MB - 10GB
 Timeout: Máximo 15 minutos
@@ -476,7 +476,7 @@ CloudWatch Alarm: DLQ message count > 0 → Alert team
 
 ---
 
-## 5. Arquitectura de Data Warehouse Moderno
+## 5. Modern Data Warehouse Architecture
 
 ```mermaid
 graph TB
@@ -485,48 +485,48 @@ graph TB
         A2[SaaS Applications<br/>Salesforce, etc.]
         A3[S3 Data Lake]
     end
-    
+
     subgraph "Ingestion Layer"
         B1[AWS DMS<br/>Database Migration]
         B2[Fivetran/Airbyte<br/>SaaS connectors]
         B3[Glue ETL<br/>S3 processing]
     end
-    
+
     subgraph "Staging Area"
         C1[S3 Staging Bucket]
     end
-    
+
     subgraph "Data Warehouse"
         D1[Amazon Redshift<br/>or Snowflake]
     end
-    
+
     subgraph "Transformation Layer"
         E1[dbt<br/>Transformations]
     end
-    
+
     subgraph "Consumption Layer"
         F1[Tableau/Looker<br/>BI Tools]
         F2[Python/R<br/>Data Science]
         F3[REST API<br/>Applications]
     end
-    
+
     A1 --> B1
     A2 --> B2
     A3 --> B3
-    
+
     B1 --> C1
     B2 --> C1
     B3 --> C1
-    
+
     C1 -->|COPY command| D1
-    
+
     D1 --> E1
     E1 --> D1
-    
+
     D1 --> F1
     D1 --> F2
     D1 --> F3
-    
+
     style D1 fill:#E2574C
     style E1 fill:#FF694B
 ```
@@ -609,7 +609,7 @@ FORMAT AS PARQUET;
 
 ---
 
-## 6. Arquitectura Multi-Account con AWS Organizations
+## 6. Multi-Account Architecture with AWS Organizations
 
 ```mermaid
 graph TB
@@ -617,19 +617,19 @@ graph TB
     A --> B2[Staging Account]
     A --> B3[Production Account]
     A --> B4[Shared Services Account]
-    
+
     B4 --> C1[Centralized Logging<br/>CloudWatch/S3]
     B4 --> C2[Shared Data Lake<br/>S3 buckets]
     B4 --> C3[Central Glue Catalog]
-    
+
     B1 -.->|Cross-account access| C2
     B2 -.->|Cross-account access| C2
     B3 -.->|Cross-account access| C2
-    
+
     B3 --> D1[VPC Prod]
     D1 --> D2[Private Subnets<br/>Redshift, RDS]
     D1 --> D3[Public Subnets<br/>NAT Gateway]
-    
+
     style A fill:#FF9900
     style B3 fill:#E74C3C
     style B1 fill:#3498DB
@@ -693,9 +693,9 @@ graph TB
 }
 ```
 
-### Ventajas Multi-Account
+### Multi-Account Advantages
 
-**Seguridad:**
+**Security:**
 ```
 - Blast radius limitado (breach en Dev no afecta Prod)
 - IAM policies más simples (menos condiciones complejas)
@@ -718,7 +718,7 @@ graph TB
 
 ---
 
-## 7. Networking para Data Engineering
+## 7. Networking for Data Engineering
 
 ```mermaid
 graph TB
@@ -727,44 +727,44 @@ graph TB
             A1[NAT Gateway]
             A2[Bastion Host]
         end
-        
+
         subgraph "Private Subnet 1: 10.0.10.0/24"
             B1[Redshift Cluster]
             B2[RDS Instance]
         end
-        
+
         subgraph "Private Subnet 2: 10.0.11.0/24"
             C1[EMR Cluster]
             C2[EC2 Workers]
         end
-        
+
         D1[Internet Gateway]
         D2[VPC Endpoint<br/>S3 Gateway]
         D3[VPC Endpoint<br/>Glue Interface]
     end
-    
+
     E1[S3 Buckets<br/>Outside VPC] -.->|Private connection| D2
     E2[AWS Glue<br/>Managed service] -.->|Private connection| D3
-    
+
     D1 --> A1
     A1 --> B1
     A1 --> C1
-    
+
     B1 -.-> D2
     C1 -.-> D2
-    
+
     style B1 fill:#E2574C
     style C1 fill:#945DF2
 ```
 
-### VPC Endpoints para Data Services
+### VPC Endpoints for Data Services
 
 **S3 Gateway Endpoint (FREE):**
 ```hcl
 resource "aws_vpc_endpoint" "s3" {
   vpc_id       = aws_vpc.main.id
   service_name = "com.amazonaws.us-east-1.s3"
-  
+
   route_table_ids = [
     aws_route_table.private_subnet_1.id,
     aws_route_table.private_subnet_2.id
@@ -785,7 +785,7 @@ resource "aws_vpc_endpoint" "glue" {
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [aws_subnet.private_1.id]
   security_group_ids  = [aws_security_group.glue_endpoint.id]
-  
+
   private_dns_enabled = true
 }
 
@@ -793,14 +793,14 @@ resource "aws_vpc_endpoint" "glue" {
 # Beneficio: Glue jobs en VPC pueden acceder a Glue API sin Internet
 ```
 
-### Security Groups para Data Services
+### Security Groups for Data Services
 
 **Redshift Security Group:**
 ```hcl
 resource "aws_security_group" "redshift" {
   name_prefix = "redshift-"
   vpc_id      = aws_vpc.main.id
-  
+
   # Permitir acceso desde EMR
   ingress {
     from_port       = 5439
@@ -808,7 +808,7 @@ resource "aws_security_group" "redshift" {
     protocol        = "tcp"
     security_groups = [aws_security_group.emr_master.id]
   }
-  
+
   # Permitir acceso desde bastion
   ingress {
     from_port       = 5439
@@ -816,7 +816,7 @@ resource "aws_security_group" "redshift" {
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
-  
+
   # Outbound a S3 endpoint
   egress {
     from_port   = 443
@@ -838,22 +838,22 @@ graph LR
         A2[RDS Multi-AZ<br/>Automated backups]
         A3[Redshift<br/>Automated snapshots]
     end
-    
+
     subgraph "DR Region: us-west-2"
         B1[S3 Replica<br/>Cross-Region Repl]
         B2[RDS Read Replica<br/>Can promote to primary]
         B3[Redshift Snapshot<br/>Copy to region]
     end
-    
+
     A1 -.->|Automatic replication| B1
     A2 -.->|Continuous replication| B2
     A3 -.->|Daily snapshot copy| B3
-    
+
     C1[Route 53<br/>Failover routing]
-    
+
     C1 -->|Primary| A2
     C1 -.->|Failover| B2
-    
+
     style A1 fill:#569A31
     style B1 fill:#569A31
     style C1 fill:#8C4FFF
@@ -861,10 +861,10 @@ graph LR
 
 ### Recovery Time Objective (RTO) vs Recovery Point Objective (RPO)
 
-**RTO:** Tiempo para recuperar servicio después de desastre  
-**RPO:** Cantidad de datos que puedes perder (tiempo desde último backup)
+**RTO:** Time to recover service after disaster
+**RPO:** Amount of Data you can lose (time since last backup)
 
-**Estrategias por Servicio:**
+**Strategies by Service:**
 
 **S3 (Data Lake):**
 ```
@@ -920,30 +920,30 @@ aws redshift enable-snapshot-copy \
 
 ## 9. Cost-Optimized Architecture
 
-### Arquitectura para Workloads Batch Intermitentes
+### Architecture for Intermittent Batch Workloads
 
 ```mermaid
 graph TB
     A[CloudWatch Event<br/>Cron trigger] --> B[Lambda<br/>Cluster Manager]
-    
+
     B -->|Create| C[EMR Cluster<br/>Spot Instances]
-    
+
     C --> D[Process Data<br/>from S3]
-    
+
     D --> E{Job Complete?}
-    
+
     E -->|Yes| F[Lambda<br/>Terminate Cluster]
     E -->|No| D
-    
+
     F --> G[SNS<br/>Success notification]
-    
+
     C -.->|On Spot Termination| H[Lambda<br/>Save State & Retry]
-    
+
     style C fill:#945DF2
     style B fill:#FF9900
 ```
 
-**Cluster Manager Lambda:**
+**Lambda Cluster Manager:**
 ```python
 import boto3
 
@@ -951,7 +951,7 @@ emr = boto3.client('emr')
 
 def lambda_handler(event, context):
     """Launch ephemeral EMR cluster with Spot instances"""
-    
+
     response = emr.run_job_flow(
         Name='nightly-etl-cluster',
         ReleaseLabel='emr-6.10.0',
@@ -1018,11 +1018,11 @@ def lambda_handler(event, context):
             {'Key': 'CostCenter', 'Value': 'DataEngineering'}
         ]
     )
-    
+
     return {'cluster_id': response['JobFlowId']}
 ```
 
-**Cálculo de Ahorro:**
+**Savings Calculation:**
 ```
 Escenario: Proceso nocturno que toma 2 horas/día
 
@@ -1052,48 +1052,48 @@ graph TB
         A3[EMR Clusters]
         A4[Step Functions]
     end
-    
+
     subgraph "Logging"
         B1[CloudWatch Logs]
     end
-    
+
     subgraph "Metrics"
         C1[CloudWatch Metrics]
         C2[Custom Metrics]
     end
-    
+
     subgraph "Tracing"
         D1[AWS X-Ray]
     end
-    
+
     subgraph "Alerting"
         E1[CloudWatch Alarms]
         E2[SNS Topics]
         E3[PagerDuty/Slack]
     end
-    
+
     A1 --> B1
     A2 --> B1
     A3 --> B1
     A4 --> B1
-    
+
     A1 --> C1
     A2 --> C2
     A3 --> C2
-    
+
     A1 --> D1
     A4 --> D1
-    
+
     C1 --> E1
     C2 --> E1
     E1 --> E2
     E2 --> E3
-    
+
     style B1 fill:#FF9900
     style E1 fill:#E74C3C
 ```
 
-### CloudWatch Custom Metrics para Pipelines
+### CloudWatch Custom Metrics for Pipelines
 
 ```python
 import boto3
@@ -1108,7 +1108,7 @@ def publish_pipeline_metrics(
     errors: int
 ):
     """Publicar métricas custom de pipeline a CloudWatch"""
-    
+
     cloudwatch.put_metric_data(
         Namespace='DataEngineering/Pipelines',
         MetricData=[
@@ -1161,7 +1161,7 @@ publish_pipeline_metrics(
 )
 ```
 
-### CloudWatch Alarms para SLAs
+### CloudWatch Alarms for SLAs
 
 ```python
 # Terraform: Alarma si tasa de errores >1%
@@ -1171,14 +1171,14 @@ resource "aws_cloudwatch_metric_alarm" "pipeline_error_rate" {
   evaluation_periods  = "2"
   threshold           = "1.0"
   alarm_description   = "Error rate exceeds 1%"
-  
+
   metric_query {
     id          = "error_rate"
     expression  = "(errors / total) * 100"
     label       = "Error Rate"
     return_data = true
   }
-  
+
   metric_query {
     id = "errors"
     metric {
@@ -1191,7 +1191,7 @@ resource "aws_cloudwatch_metric_alarm" "pipeline_error_rate" {
       }
     }
   }
-  
+
   metric_query {
     id = "total"
     metric {
@@ -1204,20 +1204,20 @@ resource "aws_cloudwatch_metric_alarm" "pipeline_error_rate" {
       }
     }
   }
-  
+
   alarm_actions = [aws_sns_topic.pipeline_alerts.arn]
 }
 ```
 
 ---
 
-## Próximos Pasos
+## Next Steps
 
-Ahora que entiendes los patrones arquitectónicos:
+Now that you understand the architectural patterns:
 
-1. **Revisa `resources.md`** para videos y documentación oficial
-2. **Completa los ejercicios** aplicando estos patrones
-3. **Dibuja tus propias arquitecturas** para casos de uso específicos
-4. **Considera trade-offs** entre complejidad, costo y performance
+1. **Check out `resources.md`** for videos and official documentation
+2. **Complete the Exercises** applying these patterns
+3. **Draw your own architectures** for specific Usage cases
+4. **Consider trade-offs** between complexity, cost and performance
 
-**Recuerda:** No hay "una arquitectura perfecta". Todo depende de requisitos específicos de tu caso de uso.
+**Remember:** There is no "perfect architecture." It all depends on the specific requirements of your Usage case.

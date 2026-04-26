@@ -187,7 +187,7 @@ aws s3api get-bucket-policy \
 # In Python
 import boto3
 
-s3 = boto3.client('s3', 
+s3 = boto3.client('s3',
     endpoint_url='http://localhost:4566',
     aws_access_key_id='test',
     aws_secret_access_key='test'
@@ -478,7 +478,7 @@ Resources:
   LambdaRole:
     Type: AWS::IAM::Role
     Properties: ...
-  
+
   # Then reference it
   LambdaFunction:
     Type: AWS::Lambda::Function

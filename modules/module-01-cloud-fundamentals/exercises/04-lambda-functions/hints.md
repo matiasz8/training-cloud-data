@@ -51,7 +51,7 @@ def lambda_handler(event, context):
     record = event['Records'][0]
     bucket = record['s3']['bucket']['name']
     key = record['s3']['object']['key']
-    
+
     print(f"Processing s3://{bucket}/{key}")
 ```
 
@@ -78,15 +78,15 @@ from datetime import datetime
 
 def validate_row(row):
     errors = []
-    
+
     # Check transaction_id
     if not row.get('transaction_id'):
         errors.append("transaction_id is required")
-    
+
     # Check user_id format
     if not re.match(r'^USER\d{4}$', row.get('user_id', '')):
         errors.append("user_id must match USER####")
-    
+
     # Check amount
     try:
         amount = float(row.get('amount', 0))
@@ -94,13 +94,13 @@ def validate_row(row):
             errors.append("amount must be between 0 and 10000")
     except ValueError:
         errors.append("amount must be a number")
-    
+
     # Check timestamp
     try:
         datetime.fromisoformat(row.get('timestamp', '').replace('Z', '+00:00'))
     except:
         errors.append("timestamp must be valid ISO 8601")
-    
+
     return (len(errors) == 0, ", ".join(errors))
 ```
 
@@ -110,12 +110,12 @@ def validate_row(row):
 def format_csv(records):
     if not records:
         return ""
-    
+
     output = StringIO()
     writer = csv.DictWriter(output, fieldnames=records[0].keys())
     writer.writeheader()
     writer.writerows(records)
-    
+
     return output.getvalue()
 ```
 
@@ -132,22 +132,22 @@ def lambda_handler(event, context):
         record = event['Records'][0]
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
-        
+
         print(f"Processing s3://{bucket}/{key}")
-        
+
         # Download file
         response = s3.get_object(Bucket=bucket, Key=key)
         content = response['Body'].read().decode('utf-8')
-        
+
         # Validate CSV
         result = validate_csv(content)
-        
+
         print(f"Validation complete: {len(result['valid'])} valid, {len(result['invalid'])} invalid")
-        
+
         # Upload results
         filename = key.split('/')[-1]
         upload_results(bucket, filename, result['valid'], result['invalid'])
-        
+
         return {
             'statusCode': 200,
             'body': json.dumps({
@@ -155,7 +155,7 @@ def lambda_handler(event, context):
                 'rejected': len(result['invalid'])
             })
         }
-        
+
     except Exception as e:
         print(f"ERROR: {str(e)}")
         return {
@@ -171,16 +171,16 @@ def validate_csv(content):
     reader = csv.DictReader(StringIO(content))
     valid = []
     invalid = []
-    
+
     for row in reader:
         is_valid, error_msg = validate_row(row)
-        
+
         if is_valid:
             valid.append(row)
         else:
             row['error'] = error_msg
             invalid.append(row)
-    
+
     return {'valid': valid, 'invalid': invalid}
 ```
 
@@ -197,14 +197,14 @@ def upload_results(bucket, filename, valid_records, invalid_records):
             Body=valid_csv.encode('utf-8')
         )
         print(f"Uploaded {len(valid_records)} valid records to validated/{filename}")
-    
+
     # Upload invalid records
     if invalid_records:
         # Add error column if not present
         if invalid_records and 'error' not in invalid_records[0]:
             for record in invalid_records:
                 record['error'] = 'validation_failed'
-        
+
         invalid_csv = format_csv(invalid_records)
         error_filename = filename.replace('.csv', '-errors.csv')
         s3.put_object(

@@ -1,250 +1,250 @@
-# Conceptos Fundamentales de Cloud Computing
+# Fundamental Concepts of Cloud Computing
 
-**Tiempo de estudio estimado:** 3-4 horas  
-**Nivel:** Fundamental  
+**Estimated study time:** 3-4 hours
+**Nivel:** Fundamental
 **Prerequisitos:** Ninguno
 
 ---
 
-## 1. Introducción al Cloud Computing
+## 1. Introduction al Cloud Computing
 
-### ¿Qué es Cloud Computing?
+### What is Cloud Computing?
 
-Cloud Computing (Computación en la Nube) es la entrega bajo demanda de recursos de TI a través de Internet con un modelo de pago por uso. En lugar de comprar, poseer y mantener data centers y servidores físicos, puedes acceder a servicios tecnológicos como capacidad de cómputo, almacenamiento y bases de datos según lo necesites desde un proveedor cloud como AWS, Azure o Google Cloud.
+Cloud Computing is the on-demand delivery of IT Resources over the Internet with a pay-per-usage model. Instead of purchasing, owning and maintaining physical data centers and servers, you can access technological services such as computing capacity, storage and databases as needed from a cloud provider such as AWS, Azure or Google Cloud.
 
-### Características Esenciales del Cloud Computing
+### Essential Features of Cloud Computing
 
-Según el NIST (National Institute of Standards and Technology), el cloud computing tiene cinco características esenciales:
+According to the NIST (National Institute of Standards and Technology), cloud computing has five essential features:
 
 1. **On-Demand Self-Service (Autoservicio bajo demanda)**
-   - Provisiona recursos automáticamente sin interacción humana con el proveedor
-   - Crea servidores, almacenamiento o bases de datos en minutos mediante consola o API
-   - Ejemplo: Lanzar una instancia EC2 en AWS toma menos de 2 minutos
+   - Provision Resources automatically without human interaction with the provider
+   - Create servers, storage or databases in minutes via console or API
+   - Example: Launching an EC2 instance on AWS takes less than 2 minutes
 
-2. **Broad Network Access (Amplio acceso a la red)**
-   - Acceso desde cualquier dispositivo con conexión a Internet
-   - APIs disponibles para automatización
-   - Consolas web, CLI, SDKs en múltiples lenguajes
+2. **Broad Network Access**
+   - Access from any device with an Internet connection
+   - APIs available for automation
+   - Web consoles, CLI, SDKs in multiple languages
 
-3. **Resource Pooling (Agrupación de recursos)**
-   - Recursos compartidos entre múltiples clientes (multi-tenant)
-   - Asignación dinámica según demanda
-   - El cliente generalmente no sabe la ubicación exacta de los recursos
+3. **Resource Pooling**
+   - Resources shared between multiple clients (multi-tenant)
+   - Dynamic allocation on demand
+   - The client usually does not know the exact location of the Resources
 
-4. **Rapid Elasticity (Elasticidad rápida)**
-   - Escalar recursos hacia arriba o abajo automáticamente
+4. **Rapid Elasticity**
+   - Scale Resources up or down automatically
    - Capacidad aparentemente ilimitada
-   - Ejemplo: Auto Scaling Groups en AWS que añaden/remueven servidores según carga
+   - Example: Auto Scaling Groups in AWS that add/remove servers based on load
 
 5. **Measured Service (Servicio medido)**
-   - Pago solo por lo que usas (pay-as-you-go)
-   - Monitoreo, control y reporting del uso de recursos
-   - Optimización de costos basada en métricas precisas
+   - I only pay for what you use (pay-as-you-go)
+   - Monitoring, control and reporting of Resources Usage
+   - Cost optimization based on accurate metrics
 
-### ¿Por qué Cloud para Data Engineering?
+### Why Cloud for Data Engineering?
 
-El cloud computing es especialmente relevante para Data Engineering por varias razones:
+Cloud computing is especially relevant for Data Engineering for several reasons:
 
-**1. Escalabilidad para Grandes Volúmenes de Datos**
-- Procesar terabytes o petabytes sin inversión inicial en hardware
-- Escalar procesamiento horizontalmente para jobs de Spark o pipelines ETL
-- Almacenamiento prácticamente ilimitado (S3 puede almacenar objetos infinitos)
+**1. Scalability for Large Volumes of Data**
+- Process terabytes or petabytes without initial investment in hardware
+- Scale processing horizontally for Spark jobs or ETL pipelines
+- Virtually unlimited storage (S3 can store infinite objects)
 
-**2. Costo Variable vs. Costo Fijo**
-- No pagas por capacidad ociosa
-- Procesa datos en batch solo cuando es necesario
-- Ejemplo: Un pipeline que corre 1 hora/día solo cuesta 1/24 del costo de un servidor 24/7
+**2. Costo variable vs. Costo Fijo**
+- You don't pay for idle capacity
+- Process data in batch only when necessary
+- Example: A pipeline that runs 1 hour/day only costs 1/24 of the cost of a 24/7 server
 
-**3. Velocidad y Agilidad**
-- Experimenta con nuevas tecnologías sin procurement
-- Provisiona clusters de Spark en minutos, no semanas
-- Itera rápidamente en arquitecturas de datos
+**3. Speed ​​and Agility**
+- Experiment with new technologies without procurement
+- Provision Spark clusters in minutes, not weeks
+- Quickly iterate on data architectures
 
 **4. Alcance Global**
-- Replica datos cerca de tus usuarios en múltiples regiones
-- Baja latencia para aplicaciones globales
-- Cumplimiento con regulaciones de residencia de datos
+- Replicate Data close to your users in multiple regions
+- Low latency for global applications
+- Compliance with Data residency regulations
 
-**5. Serverless y Managed Services**
+**5. Serverless and Managed Services**
 - Reduce overhead operacional (no gestionar parches, backups, HA)
-- Enfócate en lógica de negocio, no en infraestructura
-- Ejemplo: AWS Glue para ETL sin gestionar servidores Spark
+- Focus on business logic, not infrastructure
+- Example: AWS Glue for ETL without managing Spark servers
 
 ---
 
-## 2. Modelos de Servicio Cloud
+## 2. Cloud Service Models
 
-Existen tres modelos principales de servicio cloud, formando una pirámide de abstracción:
+There are three main cloud service models, forming an abstraction pyramid:
 
 ### Infrastructure as a Service (IaaS)
 
-**Definición:** Provisión de infraestructura fundamental de TI (cómputo, networking, almacenamiento) como servicio.
+**Definition:** Provision of critical IT infrastructure (computing, networking, storage) as a service.
 
-**Qué gestionas tú:**
+**What do you manage:**
 - Sistema operativo
 - Middleware
 - Runtime
-- Datos
+- Data
 - Aplicaciones
 
-**Qué gestiona el proveedor:**
-- Virtualización
-- Servidores físicos
-- Almacenamiento físico
-- Networking físico
+**What the provider manages:**
+- Virtualization
+- Physical servers
+- Physical storage
+- Physical networking
 
-**Ejemplos en AWS:**
-- **Amazon EC2:** Máquinas virtuales
-- **Amazon EBS:** Almacenamiento en bloque
+**Examples on AWS:**
+- **Amazon EC2:** Virtual machines
+- **Amazon EBS:** Block Storage
 - **Amazon VPC:** Redes virtuales privadas
 
-**Caso de uso en Data Engineering:**
+**Usage Case in Data Engineering:**
 ```
-Necesitas instalar una versión específica de Apache Kafka con configuraciones 
-custom que no están disponibles en servicios managed. Usas EC2 para desplegar 
+Necesitas instalar una versión específica de Apache Kafka con configuraciones
+custom que no están disponibles en servicios managed. Usas EC2 para desplegar
 tu cluster de Kafka con control total sobre la configuración.
 ```
 
 **Ventajas:**
-- Control total sobre la infraestructura
-- Flexibilidad máxima
+- Full control over infrastructure
+- Maximum flexibility
 - Puedes instalar cualquier software
 
 **Desventajas:**
 - Mayor responsabilidad operacional
 - Debes gestionar OS, seguridad, patches
-- Más complejidad
+- More complexity
 
 ### Platform as a Service (PaaS)
 
-**Definición:** Provisión de una plataforma de desarrollo y despliegue sin gestionar infraestructura subyacente.
+**Definition:** Provision of a development and deployment platform without managing underlying infrastructure.
 
-**Qué gestionas tú:**
-- Datos
+**What do you manage:**
+- Data
 - Aplicaciones
 
-**Qué gestiona el proveedor:**
+**What the provider manages:**
 - Runtime
 - Middleware
 - Sistema operativo
-- Virtualización
+- Virtualization
 - Servidores
 - Almacenamiento
 - Networking
 
-**Ejemplos en AWS:**
-- **AWS Elastic Beanstalk:** Despliegue de aplicaciones web
-- **AWS Lambda:** Funciones serverless
-- **Amazon RDS:** Bases de datos relacionales managed
-- **AWS Glue:** ETL managed con Spark
+**Examples on AWS:**
+- **AWS Elastic Beanstalk:** Web Application Deployment
+- **AWS Lambda:** Functions serverless
+- **Amazon RDS:** Managed Relational Databases
+- **AWS Glue:** ETL managed with Spark
 
-**Caso de uso en Data Engineering:**
+**Usage Case in Data Engineering:**
 ```
-Necesitas una base de datos PostgreSQL para tu data warehouse. En lugar de 
-instalar y configurar PostgreSQL en EC2 (IaaS), usas Amazon RDS que gestiona 
+Necesitas una base de datos PostgreSQL para tu data warehouse. En lugar de
+instalar y configurar PostgreSQL en EC2 (IaaS), usas Amazon RDS que gestiona
 automáticamente backups, patches, replicación y failover.
 ```
 
 **Ventajas:**
 - Menos overhead operacional
-- Enfoque en desarrollo, no en infraestructura
-- Built-in scalability y high availability
+- Focus on development, not infrastructure
+- Built-in scalability and high availability
 
 **Desventajas:**
-- Menos control sobre configuración
+- Less control over configuration
 - Vendor lock-in potencial
-- Costos pueden ser mayores que IaaS
+- Costs may be higher than IaaS
 
 ### Software as a Service (SaaS)
 
-**Definición:** Provisión de aplicaciones completas a través de Internet.
+**Definition:** Provision of complete applications over the Internet.
 
-**Qué gestionas tú:**
-- Solo usas la aplicación
+**What do you manage:**
+- You just use the app
 
-**Qué gestiona el proveedor:**
-- Todo el stack tecnológico
+**What the provider manages:**
+- The entire technological stack
 
-**Ejemplos:**
+**Examples:**
 - **Snowflake:** Data warehouse cloud-native
-- **Databricks:** Plataforma de datos unificada
-- **Fivetran:** Herramienta de ingesta de datos
+- **Databricks:** Unified Data Platform
+- **Fivetran:** Data ingestion tool
 - **Looker:** Business intelligence
 
-**Caso de uso en Data Engineering:**
+**Usage Case in Data Engineering:**
 ```
-Necesitas ingestar datos de 50 fuentes SaaS (Salesforce, Google Analytics, etc.) 
-a tu data warehouse. Usar Fivetran (SaaS) te da conectores pre-built y 
+Necesitas ingestar datos de 50 fuentes SaaS (Salesforce, Google Analytics, etc.)
+a tu data warehouse. Usar Fivetran (SaaS) te da conectores pre-built y
 mantenidos, sin escribir código.
 ```
 
 **Ventajas:**
-- Cero gestión de infraestructura
-- Actualizaciones automáticas
+- Zero infrastructure management
+- Automatic updates
 - Acceso inmediato
 
 **Desventajas:**
 - Menos flexibilidad
-- Dependencia total del vendor
-- Costos pueden escalar rápidamente
+- Total dependence on the vendor
+- Costs can escalate quickly
 
-### Matriz de Comparación
+### Comparison Matrix
 
 | Aspecto | IaaS | PaaS | SaaS |
 |---------|------|------|------|
 | **Control** | Alto | Medio | Bajo |
-| **Flexibilidad** | Máxima | Media | Limitada |
-| **Tiempo de setup** | Horas/Días | Minutos | Inmediato |
-| **Gestión operacional** | Alta | Media | Mínima |
-| **Curva de aprendizaje** | Empinada | Moderada | Suave |
+| **Flexibility** | Maximum | Medium | Limited |
+| **Setup time** | Hours/Days | Minutes | Immediate |
+| **Operational management** | High | Medium | Minimum |
+| **Learning Curve** | Steep | Moderate | Soft |
 | **Costo inicial** | Bajo | Medio | Alto |
-| **Escalabilidad** | Manual | Semi-automática | Automática |
+| **Scalability** | Manual | Semi-automatic | Automatic |
 
-### ¿Cuál elegir para Data Engineering?
+### Which one to choose for Data Engineering?
 
-En la práctica, usarás una **combinación de los tres**:
+In Practice, you'll use a **combination of all three**:
 
-- **IaaS:** Para herramientas self-hosted específicas (Airflow, Kafka con configs especiales)
-- **PaaS:** Para la mayoría de workloads (Lambda para transformaciones, RDS para metadatos, Glue para ETL)
-- **SaaS:** Para herramientas de productividad (Databricks, Snowflake, Fivetran)
+- **IaaS:** For specific self-hosted tools (Airflow, Kafka with special configs)
+- **PaaS:** For most workloads (Lambda for transformations, RDS for metadata, Glue for ETL)
+- **SaaS:** For productivity tools (Databricks, Snowflake, Fivetran)
 
-**Principio rector:** Usa el mayor nivel de abstracción que satisfaga tus requisitos. Solo baja de nivel cuando necesites control específico.
+**Guiding Principle:** Use the highest level of abstraction that satisfies your Requirements. Only downgrade when you need specific control.
 
 ---
 
 ## 3. AWS Global Infrastructure
 
-Entender la infraestructura global de AWS es crítico para diseñar arquitecturas resilientes y performantes.
+Understanding the global AWS infrastructure is critical to designing resilient and performing architectures.
 
 ### Regions (Regiones)
 
-Una **AWS Region** es una ubicación geográfica física en el mundo donde AWS tiene múltiples data centers.
+An **AWS Region** is a physical geographic location in the world where AWS has multiple data centers.
 
-**Características:**
-- AWS tiene **33+ regiones** actualmente (y creciendo)
-- Cada región es completamente independiente
-- Los datos en una región NO se replican automáticamente a otras regiones
-- Cada región tiene un código único: `us-east-1`, `eu-west-1`, `ap-southeast-2`, etc.
+**Features:**
+- AWS has **33+ regions** currently (and growing)
+- Each region is completely independent
+- Data in one region is NOT automatically replicated to other regions
+- Each region has a unique code:`us-east-1`, `eu-west-1`, `ap-southeast-2`, etc.
 
-**Factores para elegir una región:**
+**Factors for choosing a region:**
 
 1. **Compliance (Cumplimiento)**
-   - Regulaciones de residencia de datos (GDPR, leyes locales)
-   - Ejemplo: Datos de ciudadanos europeos deben estar en regiones EU
+   - Data residency regulations (GDPR, local laws)
+   - Example: Data of European citizens must be in EU regions
 
 2. **Latency (Latencia)**
    - Proximidad a usuarios finales
-   - Ejemplo: Usuarios en Brasil → usar `sa-east-1` (São Paulo)
+   - Example: Users in Brazil → use`sa-east-1` (São Paulo)
 
 3. **Available Services (Servicios disponibles)**
-   - No todos los servicios están en todas las regiones
-   - Servicios nuevos generalmente lanzan primero en `us-east-1`
+   - Not all services are in all regions
+   - New services generally launch first in`us-east-1`
 
 4. **Pricing (Precios)**
-   - Los precios varían entre regiones
-   - `us-east-1` suele ser la más barata, regiones Asia-Pacific más caras
+   - Prices vary between regions
+   - `us-east-1`usually the cheapest, Asia-Pacific regions more expensive
 
-**Ejemplo para Data Engineering:**
+**Example for Data Engineering:**
 ```
 Tienes usuarios en América del Norte y Europa. Decides:
 - Data Lake principal en us-east-1 (costo)
@@ -254,15 +254,15 @@ Tienes usuarios en América del Norte y Europa. Decides:
 
 ### Availability Zones (AZs)
 
-Una **Availability Zone** es uno o más data centers discretos con poder, networking y conectividad redundantes dentro de una región.
+An Availability Zone is one or more discrete data centers with redundant power, networking and connectivity within a region.
 
-**Características clave:**
-- Cada región tiene **mínimo 3 AZs** (algunas tienen 6+)
-- AZs están **físicamente separadas** (diferentes edificios)
-- Conectadas con **networking de baja latencia** (<2ms entre AZs)
+**Features clave:**
+- Each region has **minimum 3 AZs** (some have 6+)
+- AZs are **physically separated** (different buildings)
+- Connected with **low latency networking** (<2ms between AZs)
 - Nombradas: `us-east-1a`, `us-east-1b`, `us-east-1c`, etc.
 
-**Visualización:**
+**Visualization:**
 ```
 Region: us-east-1
 ├── AZ: us-east-1a (Data Center 1, 2)
@@ -273,11 +273,11 @@ Region: us-east-1
 └── AZ: us-east-1f (Data Center 9)
 ```
 
-**¿Por qué múltiples AZs?**
+**Why multiple AZs?**
 
-**Alta Disponibilidad:** Si un data center falla (incendio, corte eléctrico, desastre natural), tus aplicaciones siguen funcionando en otras AZs.
+**High Availability:** If a data center fails (fire, power outage, natural disaster), your applications continue working in other AZs.
 
-**Ejemplo de arquitectura multi-AZ para Data Engineering:**
+**Multi-AZ architecture example for Data Engineering:**
 ```
 Data Pipeline:
 - Kinesis Data Stream: Réplicas en 3 AZs (automático)
@@ -293,14 +293,14 @@ Si us-east-1a falla → Kinesis sigue escribiendo en 1b y 1c
 
 ### Edge Locations
 
-**Edge Locations** son puntos de presencia (PoP) distribuidos globalmente para entregar contenido con baja latencia.
+**Edge Locations** are globally distributed points of presence (PoP) to deliver Content with low latency.
 
-**Características:**
-- **450+ Edge Locations** en ~90 ciudades
-- Mucho más numerosas que las regiones (33) o AZs (~100)
-- Usadas principalmente por **CloudFront** (CDN) y **Route 53** (DNS)
+**Features:**
+- **450+ Edge Locations** in ~90 cities
+- Much more numerous than regions (33) or AZs (~100)
+- Mainly used by **CloudFront** (CDN) and **Route 53** (DNS)
 
-**Uso en Data Engineering:**
+**Usage in Data Engineering:**
 ```
 Escenario: Dashboard de BI consumido por 10,000 usuarios globales
 
@@ -314,7 +314,7 @@ Con CloudFront (Edge Locations):
 - 10x mejora en performance
 ```
 
-### Diagrama de Infraestructura Global
+### Global Infrastructure Diagram
 
 ```mermaid
 graph TB
@@ -324,54 +324,54 @@ graph TB
             AZ2[AZ-1b<br/>Data Centers 3,4]
             AZ3[AZ-1c<br/>Data Centers 5,6]
         end
-        
+
         subgraph "Region: eu-west-1"
             AZ4[AZ-1a<br/>Data Centers]
             AZ5[AZ-1b<br/>Data Centers]
             AZ6[AZ-1c<br/>Data Centers]
         end
-        
+
         subgraph "Region: ap-southeast-2"
             AZ7[AZ-2a<br/>Data Centers]
             AZ8[AZ-2b<br/>Data Centers]
             AZ9[AZ-2c<br/>Data Centers]
         end
     end
-    
+
     Edge1[Edge Location<br/>New York]
     Edge2[Edge Location<br/>London]
     Edge3[Edge Location<br/>Sydney]
-    
+
     AZ1 -.->|CloudFront<br/>Distribution| Edge1
     AZ4 -.->|CloudFront<br/>Distribution| Edge2
     AZ7 -.->|CloudFront<br/>Distribution| Edge3
 ```
 
-### Principios de Diseño para Data Engineering
+### Design Principles for Data Engineering
 
-1. **Design for Failure:** Asume que cualquier componente puede fallar
-2. **Multi-AZ por defecto:** Para workloads de producción
-3. **Multi-Region solo si es necesario:** Añade complejidad y costo
-4. **Considera latencia:** Coloca datos cerca de donde se procesan
+1. **Design for Failure:** Assume that any component can fail
+2. **Multi-AZ by default:** For production workloads
+3. **Multi-Region only if necessary:** Adds complexity and cost
+4. **Consider latency:** Place Data close to where it is processed
 
 ---
 
 ## 4. Identity and Access Management (IAM)
 
-IAM es el servicio fundamental de seguridad en AWS. **Todo en AWS requiere autenticación y autorización vía IAM.**
+IAM is the fundamental security service on AWS. **Everything in AWS requires authentication and authorization via IAM.**
 
-### Conceptos Fundamentales
+### Concepts Fundamentales
 
 #### Users (Usuarios)
 
-Un **IAM User** representa a una persona o aplicación que interactúa con AWS.
+An **IAM User** represents a person or application that interacts with AWS.
 
-**Características:**
+**Features:**
 - Tiene credenciales permanentes (password o access keys)
 - Puede tener permisos asignados directamente (no recomendado)
-- Mejor práctica: Asignar permisos vía Groups
+- Best Practice: Assign permissions via Groups
 
-**Ejemplo:**
+**Example:**
 ```
 IAM User: john.doe@company.com
 - Password: Para AWS Console
@@ -379,7 +379,7 @@ IAM User: john.doe@company.com
 - Secret Access Key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
-**Para Data Engineering:**
+**For Data Engineering:**
 ```
 Escenario: Tienes 5 data engineers en tu equipo
 
@@ -395,14 +395,14 @@ Escenario: Tienes 5 data engineers en tu equipo
 
 #### Groups (Grupos)
 
-Un **IAM Group** es una colección de IAM Users.
+An **IAM Group** is a collection of IAM Users.
 
 **Ventajas:**
-- Gestiona permisos a nivel de grupo, no usuario por usuario
-- Un user puede pertenecer a múltiples grupos
-- Simplifica administración a escala
+- Manage permissions at the group level, not user by user
+- A user can belong to multiple groups
+- Simplify administration at scale
 
-**Ejemplo de estructura:**
+**Structure Example:**
 ```
 Group: DataEngineers
 ├── Permissions: S3 Full Access, Glue Full Access, Athena Full Access
@@ -420,15 +420,15 @@ Group: DataAnalysts
 
 #### Roles (Roles)
 
-Un **IAM Role** es una identidad con permisos específicos que puede ser **asumida** temporalmente por entidades de confianza.
+An **IAM Role** is an identity with specific permissions that can be temporarily **assumed** by trusted entities.
 
-**Key difference con Users:**
+**Key difference with Users:**
 - **Users:** Credenciales permanentes
 - **Roles:** Credenciales temporales (15min - 12hrs)
 
-**Casos de uso principales:**
+**Main Usage Cases:**
 
-**1. EC2 Instances (más común)**
+**1. EC2 Instances (most common)**
 ```
 EC2 Instance → Asume IAM Role → Obtiene credenciales temporales → Accede a S3
 
@@ -461,11 +461,11 @@ Employee → Autentica con Okta/Azure AD → Asume Role en AWS → Acceso tempor
 Ventaja: Single Sign-On, no gestionar passwords en AWS
 ```
 
-#### Policies (Políticas)
+#### Policies
 
-Una **IAM Policy** es un documento JSON que define permisos.
+An **IAM Policy** is a JSON document that defines permissions.
 
-**Anatomía de una Policy:**
+**Anatomy of a Policy:**
 ```json
 {
   "Version": "2012-10-17",
@@ -488,14 +488,14 @@ Una **IAM Policy** es un documento JSON que define permisos.
 ```
 
 **Componentes:**
-- **Version:** Siempre "2012-10-17" (versión del lenguaje de políticas)
-- **Statement:** Array de declaraciones de permisos
+- **Version:** Always "2012-10-17" (policy language version)
+- **Statement:** Array of permission statements
   - **Effect:** `Allow` o `Deny`
-  - **Action:** Qué operaciones (ej: `s3:GetObject`, `glue:*`)
-  - **Resource:** En qué recursos (ARN)
+  - **Action:** What operations (ex:`s3:GetObject`, `glue:*`)
+  - **Resource:** In which Resources (ARN)
   - **Condition:** (Opcional) Condiciones adicionales
 
-**Tipos de políticas:**
+**Types of policies:**
 
 **1. Managed Policies (AWS-managed):**
 ```
@@ -503,7 +503,7 @@ Una **IAM Policy** es un documento JSON que define permisos.
 - AWSGlueServiceRole
 - AmazonAthenaFullAccess
 ```
-Ventaja: Mantenidas por AWS, buenas para empezar  
+Advantage: Maintained by AWS, good to start with
 Desventaja: Pueden ser muy permisivas
 
 **2. Customer-Managed Policies:**
@@ -518,7 +518,7 @@ Políticas embebidas directamente en un User/Group/Role
 Uso: Relaciones 1:1 estrictas
 ```
 
-**Ejemplo para Data Engineering - Policy restrictiva:**
+**Example for Data Engineering - Restrictive Policy:**
 ```json
 {
   "Version": "2012-10-17",
@@ -554,40 +554,40 @@ Uso: Relaciones 1:1 estrictas
 }
 ```
 
-### Best Practices de IAM
+### IAM Best Practices
 
 1. **Never use Root Account credentials**
    - Root = acceso total, sin restricciones
-   - Configura MFA en root
-   - Solo usa root para tareas específicas (cambiar plan de pago, cerrar cuenta)
+   - Configure MFA in root
+   - Only use root for specific tasks (change payment plan, close account)
 
 2. **Principle of Least Privilege**
-   - Da solo los permisos mínimos necesarios
-   - Empieza restrictivo, expande solo si es necesario
-   - Revisa permisos regularmente con IAM Access Analyzer
+   - Give only the minimum necessary permissions
+   - Starts restrictive, expand only if necessary
+   - Check permissions regularly with IAM Access Analyzer
 
 3. **Use IAM Roles for applications**
-   - Nunca hardcodees access keys en código
+   - Never hardcode access keys in code
    - EC2 instances → IAM Role
    - Lambda functions → Execution Role
    - ECS tasks → Task Role
 
 4. **Enable MFA for privileged users**
-   - Users que pueden crear/eliminar recursos
-   - Users con acceso a datos sensibles
+   - Users who can create/delete Resources
+   - Users with access to sensitive data
 
 5. **Rotate credentials regularly**
-   - Access keys: Cada 90 días
-   - AWS puede notificarte automáticamente
+   - Access keys: Every 90 days
+   - AWS can automatically notify you
 
 6. **Use CloudTrail for auditing**
-   - Registra todas las llamadas API
-   - Quién hizo qué, cuándo, desde dónde
-   - Crítico para compliance y debugging
+   - Log all API calls
+   - Who did what, when, from where
+   - Critical for compliance and debugging
 
-### IAM para Data Pipelines - Ejemplo Completo
+### IAM for Data Pipelines - Complete Example
 
-**Escenario:** Pipeline que lee de S3, procesa con Lambda, escribe a DynamoDB
+**Scenario:** Pipeline that reads from S3, processes with Lambda, writes to DynamoDB
 
 ```
 Step 1: Crear IAM Policy para Lambda
@@ -628,18 +628,18 @@ Step 4: Lambda ejecuta con credenciales temporales
 
 ---
 
-## 5. Core AWS Services para Data Engineering
+## 5. Core AWS Services for Data Engineering
 
 ### Amazon S3 (Simple Storage Service)
 
-**Qué es:** Almacenamiento de objetos escalable, durable y de bajo costo.
+**What it is:** Scalable, durable and low-cost object storage.
 
-**Conceptos clave:**
-- **Bucket:** Contenedor de objetos (nombres únicos globalmente)
-- **Object:** Archivo + metadata (hasta 5TB por objeto)
-- **Key:** Ruta del objeto (ej: `data/year=2024/month=01/file.parquet`)
+**Concepts clave:**
+- **Bucket:** Object container (globally unique names)
+- **Object:** File + metadata (up to 5TB per object)
+- **Key:** Path of the object (ex:`data/year=2024/month=01/file.parquet`)
 
-**Por qué es fundamental para Data Engineering:**
+**Why it is essential for Data Engineering:**
 ```
 S3 es el "sistema de archivos" de la nube para datos
 
@@ -667,22 +667,22 @@ Ejemplo de costos (us-east-1):
 ```
 
 **Features esenciales:**
-- **Versioning:** Mantén múltiples versiones de objetos
-- **Lifecycle Policies:** Transición automática entre storage classes
+- **Versioning:** Maintain multiple versions of objects
+- **Lifecycle Policies:** Automatic transition between storage classes
 - **Replication:** Cross-Region o Same-Region replication
 - **Event Notifications:** Trigger Lambda cuando suben archivos
 
 ### AWS Lambda
 
-**Qué es:** Servicio de cómputo serverless que ejecuta código en respuesta a eventos.
+**What it is:** Serverless computing service that executes code in response to events.
 
-**Características:**
-- Sin servidores que gestionar
-- Auto-scaling automático (0 a 1000s de ejecuciones concurrentes)
-- Pago por milisegundo de ejecución
-- Límite de 15 minutos por invocación
+**Features:**
+- No servers to manage
+- Automatic auto-scaling (0 to 1000s of concurrent executions)
+- Payment per millisecond of execution
+- 15 minute limit per invocation
 
-**Usos en Data Engineering:**
+**Uses in Data Engineering:**
 ```
 1. ETL ligero y transformaciones
    S3 (CSV) → Lambda → S3 (Parquet)
@@ -701,16 +701,16 @@ Ejemplo de costos (us-east-1):
 ```
 
 **Limitaciones importantes:**
-- 15 min timeout (para procesos largos usa Glue, EMR, Batch)
-- 10GB RAM máximo
+- 15 min timeout (for long processes use Glue, EMR, Batch)
+- 10GB RAM maximum
 - 512MB /tmp storage
-- No persistente (cada invocación es stateless)
+- Non-persistent (each invocation is stateless)
 
 ### Amazon EC2 (Elastic Compute Cloud)
 
-**Qué es:** Máquinas virtuales (instancias) en la nube con capacidad de cómputo redimensionable.
+**What it is:** Virtual machines (instances) in the cloud with resizable computing capacity.
 
-**Instance Types relevantes para Data:**
+**Instance Types relevant to Data:**
 ```
 Compute Optimized (C-family):
 - c6i.xlarge: Para procesamiento batch intensivo
@@ -725,7 +725,7 @@ Storage Optimized (I-family):
 - Ejemplo: Elasticsearch cluster para búsqueda de logs
 ```
 
-**Cuándo usar EC2 vs. Lambda:**
+**When to use EC2 vs. Lambda:**
 ```
 Usa EC2 si:
 - Proceso corre >15 minutos
@@ -742,7 +742,7 @@ Usa Lambda si:
 
 ### Amazon RDS (Relational Database Service)
 
-**Qué es:** Bases de datos relacionales managed (PostgreSQL, MySQL, SQL Server, Oracle).
+**What it is:** Managed relational databases (PostgreSQL, MySQL, SQL Server, Oracle).
 
 **Ventajas sobre EC2 + BD self-hosted:**
 ```
@@ -760,7 +760,7 @@ Tú solo:
 └── Gestionas usuarios y permisos
 ```
 
-**Usos en Data Engineering:**
+**Uses in Data Engineering:**
 ```
 1. Metadata Store
    - Airflow metadata database
@@ -775,7 +775,7 @@ Tú solo:
    - Alternativa a Redshift para casos simples
 ```
 
-**Ejemplo de architecture:**
+**Architecture example:**
 ```
 Production App → RDS Primary (Multi-AZ)
                       ↓
@@ -790,18 +790,18 @@ Production App → RDS Primary (Multi-AZ)
 
 ## 6. AWS Pricing Models
 
-Entender el modelo de costos es crítico para optimización y evitar sorpresas en la factura.
+Understanding the cost model is critical for optimization and avoiding invoice surprises.
 
 ### On-Demand Pricing
 
-**Modelo:** Pago por uso, sin compromisos.
+**Model:** Payment by Usage, without commitments.
 
-**Características:**
+**Features:**
 - Sin costos upfront
 - Sin contratos a largo plazo
-- Paga solo por lo que usas
+- Pay only for what you use
 
-**Cuándo usar:**
+**When to use:**
 ```
 ✅ Workloads impredecibles
 ✅ Desarrollo y testing
@@ -809,7 +809,7 @@ Entender el modelo de costos es crítico para optimización y evitar sorpresas e
 ✅ Aplicaciones con tráfico spiky
 ```
 
-**Ejemplo de costos:**
+**Cost example:**
 ```
 Lambda:
 - $0.20 por 1M de requests
@@ -825,16 +825,16 @@ RDS PostgreSQL (db.t3.medium):
 
 ### Reserved Instances (RIs)
 
-**Modelo:** Compromiso de 1 o 3 años a cambio de descuento de hasta 75%.
+**Model:** 1 or 3 year commitment in exchange for a discount of up to 75%.
 
-**Tipos:**
+**Types:**
 ```
 1. Standard RI: Máximo descuento, menos flexibilidad
 2. Convertible RI: Cambiar instance type, menor descuento
 3. Scheduled RI: Para workloads predecibles por horario
 ```
 
-**Ejemplo de ahorro:**
+**Savings example:**
 ```
 EC2 m5.xlarge On-Demand: $0.192/hora × 24 × 365 = $1,681/año
 
@@ -843,7 +843,7 @@ EC2 m5.xlarge 3-year RI: $0.046/hora × 24 × 365 = $403/año
 Ahorro: $1,278/año (76% descuento)
 ```
 
-**Cuándo usar:**
+**When to use:**
 ```
 ✅ Workloads de producción estables
 ✅ Databases que corren 24/7 (RDS, Redshift)
@@ -852,11 +852,11 @@ Ahorro: $1,278/año (76% descuento)
 
 ### Spot Instances
 
-**Modelo:** Compra capacidad no utilizada con descuento de hasta 90%.
+**Model:** Purchase unused capacity with a discount of up to 90%.
 
-**Catch:** AWS puede terminar tu instancia con 2 minutos de aviso.
+**Catch:** AWS can terminate your instance with 2 minutes notice.
 
-**Cuándo usar:**
+**When to use:**
 ```
 ✅ Batch processing tolerante a interrupciones
 ✅ Spark jobs que pueden reanudar desde checkpoint
@@ -868,7 +868,7 @@ Ahorro: $1,278/año (76% descuento)
 ❌ Real-time processing crítico
 ```
 
-**Ejemplo para Data Engineering:**
+**Example for Data Engineering:**
 ```
 EMR Cluster para procesamiento nocturno:
 - Core nodes: On-Demand (master + state)
@@ -883,13 +883,13 @@ Ahorro mensual (30 jobs): $645
 
 ### Savings Plans
 
-**Modelo:** Compromiso de gasto por hora durante 1 o 3 años.
+**Model:** Hourly spending commitment for 1 or 3 years.
 
 **Ventajas vs. RIs:**
-- Más flexibilidad (cualquier region, instance type, OS)
-- Aplica automáticamente a Lambda, Fargate, EC2
+- More flexibility (any region, instance type, OS)
+- Automatically applies to Lambda, Fargate, EC2
 
-**Ejemplo:**
+**Example:**
 ```
 Te comprometes a gastar $10/hora por 1 año = $87,600
 
@@ -902,7 +902,7 @@ AWS aplica descuento a:
 
 ### Free Tier
 
-**12 meses gratuitos** desde creación de cuenta AWS:
+**12 months free** from AWS account creation:
 ```
 EC2:
 - 750 horas/mes de t2.micro o t3.micro
@@ -937,7 +937,7 @@ DynamoDB: 25GB + 25 RCU/WCU
 CloudWatch: 10 custom metrics, 10 alarms
 ```
 
-### Cost Optimization Tips para Data Engineering
+### Cost Optimization Tips for Data Engineering
 
 **1. Use S3 Intelligent-Tiering**
 ```bash
@@ -962,7 +962,7 @@ Parquet Snappy: 10GB × $0.023 = $0.23/mes
 Ahorro: 90% en storage + menor costo en queries Athena
 ```
 
-**3. Partition Data en S3**
+**3. Partition Data in S3**
 ```
 Sin particiones:
 s3://bucket/data/
@@ -1007,13 +1007,13 @@ emr_client.run_job_flow(
 
 ## 7. AWS Well-Architected Framework
 
-Framework de best practices de AWS basado en 5 pilares. **Esencial para diseñar sistemas de producción.**
+AWS best practices framework based on 5 pillars. **Essential for designing production systems.**
 
 ### Pilar 1: Operational Excellence
 
-**Principio:** Ejecutar y monitorear sistemas para entregar valor de negocio.
+**Principle:** Execute and monitor systems to deliver business value.
 
-**Para Data Engineering:**
+**For Data Engineering:**
 ```
 1. Infrastructure as Code (IaC)
    - Todo en Terraform/CloudFormation
@@ -1033,9 +1033,9 @@ Framework de best practices de AWS basado en 5 pilares. **Esencial para diseñar
 
 ### Pilar 2: Security
 
-**Principio:** Proteger información, sistemas y assets.
+**Principle:** Protect information, systems and assets.
 
-**Para Data Engineering:**
+**For Data Engineering:**
 ```
 1. Encryption everywhere
    ├── At Rest: S3 con KMS, RDS encrypted
@@ -1061,9 +1061,9 @@ Framework de best practices de AWS basado en 5 pilares. **Esencial para diseñar
 
 ### Pilar 3: Reliability
 
-**Principio:** Sistemas que funcionan correctamente y se recuperan de fallas.
+**Principle:** Systems that function correctly and recover from failures.
 
-**Para Data Engineering:**
+**For Data Engineering:**
 ```
 1. Multi-AZ por defecto
    - RDS Multi-AZ para metadata stores
@@ -1088,9 +1088,9 @@ Framework de best practices de AWS basado en 5 pilares. **Esencial para diseñar
 
 ### Pilar 4: Performance Efficiency
 
-**Principio:** Usar recursos de manera eficiente para cumplir requisitos.
+**Principle:** Use Resources efficiently to meet Requirements.
 
-**Para Data Engineering:**
+**For Data Engineering:**
 ```
 1. Columnar Formats
    CSV → Parquet: 10x menos storage + 10x queries más rápidos
@@ -1114,7 +1114,7 @@ Framework de best practices de AWS basado en 5 pilares. **Esencial para diseñar
 
 **Principio:** Evitar gastos innecesarios.
 
-**Para Data Engineering:**
+**For Data Engineering:**
 ```
 1. Lifecycle Policies
    Raw data: Delete después de 90 días
@@ -1137,7 +1137,7 @@ Framework de best practices de AWS basado en 5 pilares. **Esencial para diseñar
 
 ---
 
-## 8. Key Takeaways para Data Engineers
+## 8. Key Takeaways for Data Engineers
 
 ### Mental Models Esenciales
 
@@ -1227,13 +1227,13 @@ Kinesis Data Stream → Lambda → S3 (partitioned)
 
 ## 9. Escenario Real: E-Commerce Data Pipeline
 
-**Contexto:** Tienda online con 100K transacciones/día necesita pipeline de analytics.
+**Context:** Online store with 100K transactions/day needs analytics pipeline.
 
-**Requisitos:**
-1. Ingestar transacciones en tiempo real
-2. Procesar datos y calcular métricas diarias
-3. Almacenar para análisis histórico
-4. Dashboard para stakeholders
+**Requirements:**
+1. Ingest transactions in real time
+2. Process data and calculate daily metrics
+3. Store for Historical Analysis
+4. Dashboard for stakeholders
 5. Bajo costo (<$500/mes)
 
 **Arquitectura AWS:**
@@ -1241,7 +1241,7 @@ Kinesis Data Stream → Lambda → S3 (partitioned)
 ```
 1. Data Ingestion (Real-time)
    Website/Mobile App → API Gateway → Lambda → Kinesis Data Stream
-   
+
    Costo: ~$50/mes
    - API Gateway: $3.50 per million requests
    - Lambda: Free tier cubre
@@ -1250,7 +1250,7 @@ Kinesis Data Stream → Lambda → S3 (partitioned)
 2. Stream Processing
    Kinesis → Lambda (consumer) → S3 (partitioned Parquet)
                               → DynamoDB (current state)
-   
+
    Costo: ~$80/mes
    - Lambda: Minimal (free tier)
    - S3: 30GB/mes × $0.023 = $0.70/mes
@@ -1258,14 +1258,14 @@ Kinesis Data Stream → Lambda → S3 (partitioned)
 
 3. Batch Processing (Daily)
    CloudWatch Event (daily) → Glue Crawler → Glue ETL Job → S3 (curated)
-   
+
    Costo: ~$15/mes
    - Glue Crawler: $0.44/hr × 0.5hr/día = $6.60/mes
    - Glue Job: 2 DPU × $0.44/hr × 1hr/día = $13.20/mes
 
 4. Analytics Layer
    Athena (query S3) ← QuickSight (dashboard)
-   
+
    Costo: ~$50/mes
    - Athena: $5/TB scanned, ~100GB/mes = $0.50/mes
    - QuickSight: $9/user/mes × 5 users = $45/mes
@@ -1285,18 +1285,18 @@ Escalabilidad:
 - Estimated: ~$600/mes
 ```
 
-**Ventajas de este diseño:**
-- ✅ Serverless: Sin servidores que gestionar
-- ✅ Auto-scaling: Maneja picos de tráfico
+**Advantages of this design:**
+- ✅ Serverless: No servers to manage
+- ✅ Auto-scaling: Handle traffic spikes
 - ✅ Cost-effective: Pay only for use
 - ✅ Resilient: Multi-AZ, S3 durability 99.999999999%
-- ✅ Analytics-ready: Athena queries en segundos
+- ✅ Analytics-ready: Athena queries in seconds
 
 ---
 
 ## 10. Self-Assessment Questions
 
-Responde estas preguntas para validar tu comprensión:
+Answer these questions to validate your understanding:
 
 **1. Architecture Design**
 ```
@@ -1378,23 +1378,23 @@ Usuarios EU se quejan de lentitud en queries.
 
 ---
 
-## Próximos Pasos
+## Next Steps
 
-**Has completado el módulo teórico.** Ahora es momento de aplicar estos conceptos:
+**You have completed the theoretical Module.** Now it is time to apply these Concepts:
 
-1. **Ejercicio 01:** Configura AWS CLI y crea tu primer bucket S3
-2. **Ejercicio 02:** Crea policies IAM restrictivas
-3. **Ejercicio 03:** Implementa S3 bucket policies
-4. **Ejercicio 04:** Despliega tu primera Lambda function
-5. **Ejercicio 05:** Infrastructure as Code con CloudFormation
-6. **Ejercicio 06:** Cost optimization con lifecycle policies
+1. **Exercise 01:** Configure AWS CLI and create your first S3 bucket
+2. **Exercise 02:** Crea policies IAM restrictivas
+3. **Exercise 03:** Implementa S3 bucket policies
+4. **Exercise 04:** Despliega tu primera Lambda function
+5. **Exercise 05:** Infrastructure as Code with CloudFormation
+6. **Exercise 06:** Cost optimization with lifecycle policies
 
 **Recuerda:**
-- Lee la teoría completamente antes de empezar ejercicios
-- Revisa recursos adicionales en `theory/resources.md`
+- Read the Theory completely before starting Exercises
+- Check out additional Resources at`theory/resources.md`
 - Usa hints progresivos si te atascas
-- Solo mira la solución cuando hayas intentado todo
+- Just look at the solution when you've tried everything
 
-**Tiempo estimado para ejercicios:** 5-8 horas
+**Estimated time for Exercises:** 5-8 hours
 
-¡Éxito en tu aprendizaje! 🚀
+Success in your Learning! 🚀

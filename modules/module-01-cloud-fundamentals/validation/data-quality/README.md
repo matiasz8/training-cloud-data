@@ -21,7 +21,7 @@ def test_transaction_schema():
 ```python
 def test_no_duplicates():
     """Verificar que no hay transacciones duplicadas"""
-    
+
 def test_referential_integrity():
     """Verificar relaciones entre datasets"""
 ```
@@ -30,7 +30,7 @@ def test_referential_integrity():
 ```python
 def test_csv_format():
     """Verificar formato correcto de CSV"""
-    
+
 def test_json_format():
     """Verificar JSON válido"""
 ```
@@ -46,14 +46,14 @@ from jsonschema import validate
 def test_transaction_data_quality():
     """Verificar calidad de datos de transacciones"""
     s3 = boto3.client('s3', endpoint_url='http://localhost:4566')
-    
+
     # Descargar datos
     response = s3.get_object(
         Bucket='quickmart-data-lake',
         Key='validated/transactions.csv'
     )
     data = response['Body'].read().decode('utf-8')
-    
+
     # Validar
     assert len(data) > 0
     assert 'transaction_id' in data

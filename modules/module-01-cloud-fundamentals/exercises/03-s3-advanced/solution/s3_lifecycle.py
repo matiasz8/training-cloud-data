@@ -4,7 +4,6 @@ S3 Lifecycle Configuration - Complete Solution
 """
 
 import boto3
-import json
 
 s3 = boto3.client(
     's3',
@@ -76,7 +75,7 @@ def create_lifecycle_policy(bucket_name: str) -> bool:
             }
         ]
     }
-    
+
     try:
         s3.put_bucket_lifecycle_configuration(
             Bucket=bucket_name,
@@ -96,7 +95,7 @@ def create_lifecycle_policy(bucket_name: str) -> bool:
 def verify_lifecycle(bucket_name: str) -> bool:
     try:
         response = s3.get_bucket_lifecycle_configuration(Bucket=bucket_name)
-        
+
         print_success("Lifecycle configuration retrieved:")
         for rule in response['Rules']:
             print(f"  Rule: {rule['Id']}")
@@ -106,7 +105,7 @@ def verify_lifecycle(bucket_name: str) -> bool:
                     print(f"    Transition: {transition['Days']} days → {transition['StorageClass']}")
             if 'Expiration' in rule:
                 print(f"    Expiration: {rule['Expiration']['Days']} days")
-        
+
         return True
     except s3.exceptions.NoSuchLifecycleConfiguration:
         print_error("No lifecycle configuration found")
@@ -120,9 +119,9 @@ def main():
     print(f"\n{BLUE}{'='*60}{RESET}")
     print(f"{BLUE}S3 Lifecycle Configuration - Complete Solution{RESET}")
     print(f"{BLUE}{'='*60}{RESET}")
-    
+
     bucket_name = 'my-data-lake-raw'
-    
+
     print_step("Step 1: Ensuring bucket exists")
     try:
         s3.head_bucket(Bucket=bucket_name)
@@ -130,22 +129,22 @@ def main():
     except:
         s3.create_bucket(Bucket=bucket_name)
         print_success(f"Created bucket: {bucket_name}")
-    
+
     print_step("Step 2: Enabling versioning")
     if not enable_versioning(bucket_name):
         return
-    
+
     print_step("Step 3: Applying lifecycle policy")
     if not create_lifecycle_policy(bucket_name):
         return
-    
+
     print_step("Step 4: Verifying configuration")
     verify_lifecycle(bucket_name)
-    
+
     print(f"\n{GREEN}{'='*60}")
     print("Lifecycle configuration completed successfully!")
     print(f"{'='*60}{RESET}\n")
-    
+
     print(f"{BLUE}Cost Savings Estimate:{RESET}")
     print("  Current: 10 TB in STANDARD = $230/month")
     print("  After optimization:")

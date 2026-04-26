@@ -72,7 +72,7 @@ def create_lifecycle_policy(bucket_name: str) -> bool:
             'Expiration': {'Days': 365}
         }]
     }
-    
+
     try:
         s3.put_bucket_lifecycle_configuration(
             Bucket=bucket_name,
@@ -92,14 +92,14 @@ def create_sqs_queue(queue_name: str) -> tuple:
         # Create queue
         response = sqs.create_queue(QueueName=queue_name)
         queue_url = response['QueueUrl']
-        
+
         # Get ARN
         attrs = sqs.get_queue_attributes(
             QueueUrl=queue_url,
             AttributeNames=['QueueArn']
         )
         queue_arn = attrs['Attributes']['QueueArn']
-        
+
         return (queue_url, queue_arn)
     except Exception as e:
         return (None, None)
@@ -145,7 +145,7 @@ def create_replication_role() -> str:
             "Action": "sts:AssumeRole"
         }]
     }
-    
+
     replication_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -175,19 +175,19 @@ def create_replication_role() -> str:
             }
         ]
     }
-    
+
     try:
         role_response = iam.create_role(
             RoleName='s3-replication-role',
             AssumeRolePolicyDocument=json.dumps(trust_policy)
         )
-        
+
         iam.put_role_policy(
             RoleName='s3-replication-role',
             PolicyName='S3ReplicationPolicy',
             PolicyDocument=json.dumps(replication_policy)
         )
-        
+
         return role_response['Role']['Arn']
     except:
         return "arn:aws:iam::000000000000:role/s3-replication-role"
@@ -210,7 +210,7 @@ def configure_bucket_notification(bucket_name: str, queue_arn: str) -> bool:
             }
         }]
     }
-    
+
     try:
         s3.put_bucket_notification_configuration(
             Bucket=bucket_name,
@@ -227,26 +227,26 @@ def configure_bucket_notification(bucket_name: str, queue_arn: str) -> bool:
 ```python
 def test_notifications(bucket_name: str, queue_url: str) -> bool:
     import time
-    
+
     test_key = 'uploads/test-notification.txt'
-    
+
     # Upload file
     s3.put_object(
         Bucket=bucket_name,
         Key=test_key,
         Body=b'Testing event notifications'
     )
-    
+
     # Wait for event
     time.sleep(5)
-    
+
     # Check SQS
     response = sqs.receive_message(
         QueueUrl=queue_url,
         MaxNumberOfMessages=1,
         WaitTimeSeconds=5
     )
-    
+
     if 'Messages' in response:
         message = json.loads(response['Messages'][0]['Body'])
         if 'Records' in message:
@@ -254,7 +254,7 @@ def test_notifications(bucket_name: str, queue_url: str) -> bool:
             if event['eventName'].startswith('ObjectCreated'):
                 print_success("Event notification received!")
                 return True
-    
+
     return False
 ```
 

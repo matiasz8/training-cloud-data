@@ -22,7 +22,7 @@ curl http://localhost:4566
 aws configure list
 ```
 
-**Problema común:**  
+**Problema común:**
 Si ves "Unable to locate credentials", configura credentials dummy:
 ```bash
 aws configure
@@ -80,13 +80,13 @@ Para filtrar solo app-logs, usa el prefix correcto: `source=app-logs`
 ```bash
 create_bucket() {
     local bucket_name=$1
-    
+
     log_info "Creating bucket: $bucket_name"
-    
+
     aws s3 mb "s3://$bucket_name" \
         --endpoint-url="$ENDPOINT_URL" \
         --region="$REGION"
-    
+
     # ... resto del código
 }
 ```
@@ -100,14 +100,14 @@ upload_file() {
     local local_file=$1
     local bucket=$2
     local s3_key=$3
-    
+
     log_info "Uploading: $local_file → s3://$bucket/$s3_key"
-    
+
     # Detectar content-type automáticamente
     aws s3 cp "$local_file" "s3://$bucket/$s3_key" \
         --endpoint-url="$ENDPOINT_URL" \
         --region="$REGION"
-    
+
     # ... resto del código
 }
 ```
@@ -118,9 +118,9 @@ upload_file() {
 list_objects() {
     local bucket=$1
     local prefix=$2
-    
+
     log_info "Listing objects in s3://$bucket/ with prefix: '$prefix'"
-    
+
     if [ -z "$prefix" ]; then
         # Sin prefix: lista todo
         aws s3 ls "s3://$bucket/" \
@@ -143,13 +143,13 @@ copy_object() {
     local source_key=$2
     local dest_bucket=$3
     local dest_key=$4
-    
+
     log_info "Copying: s3://$source_bucket/$source_key → s3://$dest_bucket/$dest_key"
-    
+
     aws s3 cp "s3://$source_bucket/$source_key" "s3://$dest_bucket/$dest_key" \
         --endpoint-url="$ENDPOINT_URL" \
         --region="$REGION"
-    
+
     # ... resto del código
 }
 ```
@@ -164,9 +164,9 @@ Para metadata, necesitas usar `s3api` (no `s3`):
 get_object_metadata() {
     local bucket=$1
     local key=$2
-    
+
     log_info "Getting metadata for: s3://$bucket/$key"
-    
+
     aws s3api head-object \
         --bucket "$bucket" \
         --key "$key" \
@@ -265,11 +265,11 @@ echo ""
 count_objects() {
     local bucket=$1
     local prefix=$2
-    
+
     local count=$(aws s3 ls "s3://$bucket/$prefix" \
         --endpoint-url="$ENDPOINT_URL" \
         --recursive | wc -l)
-    
+
     echo "$count"
 }
 ```
@@ -284,30 +284,30 @@ count_objects() {
 ```bash
 delete_all_objects() {
     local bucket=$1
-    
+
     log_warning "Deleting all objects from: $bucket"
-    
+
     aws s3 rm "s3://$bucket/" \
         --endpoint-url="$ENDPOINT_URL" \
         --recursive
-    
+
     # ... resto del código
 }
 
 delete_bucket() {
     local bucket=$1
-    
+
     log_warning "Deleting bucket: $bucket"
-    
+
     # Opción 1: Bucket ya vacío
     aws s3 rb "s3://$bucket/" \
         --endpoint-url="$ENDPOINT_URL"
-    
+
     # Opción 2: Forzar eliminación con objetos
     # aws s3 rb "s3://$bucket/" \
     #     --endpoint-url="$ENDPOINT_URL" \
     #     --force
-    
+
     # ... resto del código
 }
 ```

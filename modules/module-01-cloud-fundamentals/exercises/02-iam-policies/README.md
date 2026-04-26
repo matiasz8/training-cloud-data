@@ -1,7 +1,7 @@
 # Exercise 02: IAM Policies & Security
 
-**Dificultad:** ⭐⭐ Básico-Intermedio  
-**Tiempo estimado:** 60-75 minutos  
+**Dificultad:** ⭐⭐ Básico-Intermedio
+**Tiempo estimado:** 60-75 minutos
 **Prerequisitos:** Exercise 01 completado
 
 ---

@@ -67,7 +67,7 @@ echo -e "${BLUE}[3/4]${NC} Deploying stack..."
 if [ "$ACTION" == "update" ]; then
     # Use change set for updates
     CHANGE_SET_NAME="update-$(date +%Y%m%d-%H%M%S)"
-    
+
     aws --endpoint-url=$ENDPOINT_URL cloudformation create-change-set \
       --stack-name $STACK_NAME-$ENVIRONMENT \
       --change-set-name $CHANGE_SET_NAME \
@@ -77,12 +77,12 @@ if [ "$ACTION" == "update" ]; then
         ParameterKey=DataRetentionDays,ParameterValue=$RETENTION_DAYS \
         ParameterKey=GlacierTransitionDays,ParameterValue=$GLACIER_DAYS \
       --capabilities CAPABILITY_NAMED_IAM
-    
+
     echo "Waiting for change set..."
     aws --endpoint-url=$ENDPOINT_URL cloudformation wait change-set-create-complete \
       --stack-name $STACK_NAME-$ENVIRONMENT \
       --change-set-name $CHANGE_SET_NAME 2>/dev/null || true
-    
+
     # Show changes
     echo -e "\n${BLUE}Proposed Changes:${NC}"
     aws --endpoint-url=$ENDPOINT_URL cloudformation describe-change-set \
@@ -90,7 +90,7 @@ if [ "$ACTION" == "update" ]; then
       --change-set-name $CHANGE_SET_NAME \
       --query 'Changes[].{Action:ResourceChange.Action,Resource:ResourceChange.LogicalResourceId,Type:ResourceChange.ResourceType}' \
       --output table || echo "No changes detected"
-    
+
     # Execute change set
     echo ""
     read -p "Execute update? (y/n) " -n 1 -r
@@ -99,7 +99,7 @@ if [ "$ACTION" == "update" ]; then
         aws --endpoint-url=$ENDPOINT_URL cloudformation execute-change-set \
           --stack-name $STACK_NAME-$ENVIRONMENT \
           --change-set-name $CHANGE_SET_NAME
-        
+
         WAIT_TYPE="stack-update-complete"
     else
         echo -e "${YELLOW}⚠ Update cancelled${NC}"
@@ -119,7 +119,7 @@ else
         Key=Environment,Value=$ENVIRONMENT \
         Key=Project,Value=QuickMart \
         Key=ManagedBy,Value=CloudFormation
-    
+
     WAIT_TYPE="stack-create-complete"
 fi
 

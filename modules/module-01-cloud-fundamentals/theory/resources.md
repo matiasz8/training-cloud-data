@@ -1,29 +1,29 @@
-# Recursos de Aprendizaje: Cloud Fundamentals
+# Learning Resources: Cloud Fundamentals
 
-Esta lista contiene recursos oficiales y de calidad verificada para profundizar en los conceptos del módulo.
+This list contains official and quality-verified Resources to delve deeper into the Module's Concepts.
 
 ---
 
-## 📚 Documentación Oficial AWS
+## 📚 Official AWS Documentation
 
 ### Essential Reading
 
 1. **AWS Well-Architected Framework**
    - URL: https://aws.amazon.com/architecture/well-architected/
    - Tiempo: 2-3 horas
-   - Por qué: Framework de best practices usado por arquitectos AWS
-   - Enfócate en: Los 5 pilares y cómo aplicarlos a data engineering
+   - Why: Best practices framework used by AWS architects
+   - Focus on: The 5 pillars and how to apply them to data engineering
 
 2. **AWS Global Infrastructure**
    - URL: https://aws.amazon.com/about-aws/global-infrastructure/
    - Tiempo: 30 minutos
-   - Interactive map de regiones, AZs y edge locations
-   - Entiende: Cómo elegir región según latency, compliance, costos
+   - Interactive map of regions, AZs and edge locations
+   - Understand: How to choose region according to latency, compliance, costs
 
 3. **IAM Best Practices**
    - URL: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
    - Tiempo: 1 hora
-   - Crítico para seguridad en todos tus proyectos
+   - Critical for security in all your projects
    - Memoriza: Principle of least privilege, MFA, roles vs users
 
 4. **Amazon S3 User Guide**
@@ -52,97 +52,97 @@ Esta lista contiene recursos oficiales y de calidad verificada para profundizar 
 
 **1. AWS re:Invent 2023: Building Data Lakes on AWS**
 - YouTube: Buscar "AWS re:Invent 2023 data lakes"
-- Duración: 50 minutos
+- Duration: 50 minutes
 - Speaker: AWS Solutions Architect
 - Key Timestamps:
   - 00:00-10:00: Data lake architecture overview
   - 10:00-25:00: S3 as foundation (zones, partitioning)
   - 25:00-35:00: AWS Glue for cataloging and ETL
   - 35:00-50:00: Real customer case study
-- Por qué: Aprende arquitectura de data lakes directamente de AWS
+- Why: Learn data lake architecture directly from AWS
 
 **2. AWS re:Invent 2022: Security Best Practices for Data Engineers**
-- Duración: 45 minutos
+- Duration: 45 minutes
 - Key Timestamps:
   - 00:00-15:00: IAM policies and roles
   - 15:00-30:00: Encryption (KMS, at rest, in transit)
   - 30:00-45:00: VPC, security groups, endpoints
-- Por qué: Seguridad desde el inicio, no como afterthought
+- Why: Security from the start, not as an afterthought
 
 **3. AWS re:Invent 2023: Serverless Data Processing at Scale**
-- Duración: 60 minutos
+- Duration: 60 minutes
 - Key Timestamps:
   - 00:00-20:00: Lambda patterns for data processing
   - 20:00-40:00: Step Functions for orchestration
   - 40:00-60:00: Cost optimization techniques
-- Por qué: Aprende cuándo usar serverless vs. containers/VMs
+- Why: Learn when to use serverless vs. containers/VMs
 
 ### AWS Digital Courses
 
 **4. AWS Skill Builder: AWS Cloud Practitioner Essentials**
 - URL: https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/
-- Duración: 6 horas (self-paced)
-- Gratis con cuenta AWS
+- Duration: 6 hours (self-paced)
+- Free with AWS account
 - Cubre:
   - AWS global infrastructure
   - Compute, storage, databases
   - Security and compliance
   - Pricing and support
-- Por qué: Fundamentos sólidos antes de especializarte en data
+- Why: Solid fundamentals before specializing in data
 
 **5. AWS Skill Builder: Getting Started with AWS Storage**
-- Duración: 4 horas
+- Duration: 4 hours
 - Gratis
-- Deep dive en S3, EBS, EFS
-- Por qué: S3 es el corazón de data engineering en AWS
+- Deep dive on S3, EBS, EFS
+- Why: S3 is the heart of data engineering in AWS
 
 ---
 
-## 🎓 Cursos de Instructores Reconocidos
+## 🎓 Courses from Recognized Instructors
 
 ### Stephane Maarek (Highly Recommended)
 
 **6. Ultimate AWS Certified Cloud Practitioner**
 - Plataforma: Udemy
-- Duración: 14 horas
-- Precio: ~$15-20 (espera sales de Udemy)
+- Duration: 14 hours
+- Price: ~$15-20 (wait for it from Udemy)
 - Rating: 4.7/5 (500K+ students)
-- Por qué: Mejor curso introductorio a AWS, muy didáctico
-- Cubre: Todo lo necesario para entender AWS desde cero
+- Why: Best introductory course to AWS, very educational
+- Covers: Everything you need to understand AWS from scratch
 
 **7. Ultimate AWS Certified Solutions Architect Associate**
 - Plataforma: Udemy
-- Duración: 27 horas
+- Duration: 27 hours
 - Precio: ~$15-20
 - Rating: 4.7/5 (800K+ students)
-- Por qué: Profundiza en arquitecturas, incluye muchos servicios de data
-- Nota: Más avanzado, considera para después de Module 04
+- Why: Goes deeper into architectures, includes many data services
+- Note: More advanced, consider after Module 04
 
 ### FreeCodeCamp (YouTube - GRATIS)
 
 **8. AWS Certified Cloud Practitioner Training 2023**
 - URL: https://www.youtube.com/watch?v=SOTamWNgDKc
-- Duración: 13 horas
+- Duration: 13 hours
 - Gratis
 - Instructor: Andrew Brown (ExamPro)
-- Por qué: Alternativa gratuita excelente a cursos pagos
-- Tip: Velocidad 1.25x para contenido ya conocido
+- Why: Great free alternative to paid courses
+- Tip: 1.25x speed for already known Content
 
 **9. AWS Certified Solutions Architect - Associate 2023**
-- URL: Buscar en YouTube FreeCodeCamp AWS Solutions Architect
-- Duración: 10+ horas
+- URL: Search YouTube FreeCodeCamp AWS Solutions Architect
+- Duration: 10+ hours
 - Gratis
-- Por qué: Cubre arquitecturas más complejas, útil para data engineering
+- Why: Covers more complex architectures, useful for data engineering
 
 ---
 
-## 📖 Blogs y Artículos Técnicos
+## 📖 Blogs and Technical Articles
 
 **10. AWS Architecture Blog**
 - URL: https://aws.amazon.com/blogs/architecture/
 - Frecuencia: Semanal
-- Por qué: Arquitecturas de referencia con diagramas y código
-- Artículos recomendados:
+- Why: Reference architectures with diagrams and code
+- Recommended articles:
   - "Building a Data Lake on AWS"
   - "Serverless Analytics Architecture"
   - "Cost Optimization for Data Workloads"
@@ -150,13 +150,13 @@ Esta lista contiene recursos oficiales y de calidad verificada para profundizar 
 **11. AWS Big Data Blog**
 - URL: https://aws.amazon.com/blogs/big-data/
 - Frecuencia: 2-3 veces/semana
-- Por qué: Específico para data engineering
-- Busca artículos sobre: Glue, EMR, Athena, Lake Formation
+- Why: Specific for data engineering
+- Search articles about: Glue, EMR, Athena, Lake Formation
 
 **12. AWS Startups Blog - Data & Analytics**
 - URL: https://aws.amazon.com/blogs/startups/tag/data-analytics/
-- Por qué: Casos de uso reales de startups con presupuestos limitados
-- Aprende: Cómo hacer más con menos ($)
+- Why: Real Usage Cases from startups with limited budgets
+- Learn: How to do more with less ($)
 
 ---
 
@@ -164,24 +164,24 @@ Esta lista contiene recursos oficiales y de calidad verificada para profundizar 
 
 **13. AWS Workshops**
 - URL: https://workshops.aws/
-- Categoría: Analytics & Data Lakes
+- Category: Analytics & Data Lakes
 - Workshops recomendados:
   - "Building a Data Lake on AWS"
   - "Serverless Data Processing"
   - "AWS Glue ETL Workshop"
-- Tiempo: 2-3 horas por workshop
-- Por qué: Práctica guiada con cuenta AWS real
-- Costo: Free tier suficiente, cuidado de limpiar recursos después
+- Time: 2-3 hours per workshop
+- Why: Guided practice with a real AWS account
+- Cost: Free tier enough, careful to clean Resources after
 
 **14. AWS Free Tier Hands-On Tutorials**
 - URL: https://aws.amazon.com/getting-started/hands-on/
-- Filtrar por: Storage, Analytics, Serverless
+- Filter by: Storage, Analytics, Serverless
 - Tutoriales paso a paso:
   - "Store and Retrieve a File with S3"
   - "Run a Serverless Hello World"
   - "Query Data in S3 with Athena"
-- Tiempo: 15-30 min por tutorial
-- Por qué: Familiarizarte con AWS Console y servicios básicos
+- Time: 15-30 min per tutorial
+- Why: Get familiar with the AWS Console and basic services
 
 ---
 
@@ -189,114 +189,114 @@ Esta lista contiene recursos oficiales y de calidad verificada para profundizar 
 
 **15. AWS Well-Architected Framework - Data Analytics Lens**
 - URL: https://docs.aws.amazon.com/wellarchitected/latest/analytics-lens/
-- Páginas: ~80
+- Pages: ~80
 - Tiempo: 3-4 horas
-- Por qué: Best practices específicas para data workloads
-- Lee después de: Completar ejercicios del módulo
+- Why: Specific best practices for data workloads
+- Read after: Completing Module Exercises
 
 **16. Cost Optimization for Data Lakes**
-- URL: Buscar en AWS whitepapers
-- Por qué: Aprende a diseñar arquitecturas cost-effective desde el inicio
+- URL: Search AWS whitepapers
+- Why: Learn to design cost-effective architectures from the beginning
 
 ---
 
-## 🎙️ Podcasts (Opcional - Para commutes)
+## 🎙️ Podcasts (Optional - For commutes)
 
 **17. AWS Podcast**
 - URL: https://aws.amazon.com/podcasts/aws-podcast/
-- Episodios relevantes: Buscar "data" en el catálogo
-- Duración: 20-30 min por episodio
-- Por qué: Mantente actualizado con novedades AWS
+- Relevant episodes: Search "data" in the catalog
+- Duration: 20-30 min per episode
+- Why: Stay up to date with AWS news
 
 **18. The Data Engineering Podcast**
 - URL: https://www.dataengineeringpodcast.com/
-- Episodios con "AWS" en el título
-- Por qué: Perspectiva de practitioners, no solo teoría AWS
+- Episodes with "AWS" in the title
+- Why: Perspective of practitioners, not just Theory AWS
 
 ---
 
-## 📱 Herramientas de Referencia
+## 📱 Reference Tools
 
 **19. AWS CLI Command Reference**
 - URL: https://docs.aws.amazon.com/cli/
-- Usa como referencia durante ejercicios
-- Tip: Bookmarkea secciones de S3, IAM, Lambda
+- Usa como referencia durante Exercises
+- Tip: Bookmark sections of S3, IAM, Lambda
 
 **20. AWS SDK for Python (Boto3) Documentation**
 - URL: https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
-- Imprescindible para automatizar con Python
+- Essential to automate with Python
 - Secciones clave: S3, Lambda, Glue, Athena
 
 **21. AWS Pricing Calculator**
 - URL: https://calculator.aws/
-- Práctica: Estima costos de arquitecturas antes de implementar
-- Usa en ejercicio 06 (Cost Optimization)
+- Practice: Estimate architecture costs before implementing
+- Use in Exercise 06 (Cost Optimization)
 
 ---
 
-## 🌐 Comunidades y Foros
+## 🌐 Communities and Forums
 
 **22. AWS re:Post (Official Q&A)**
 - URL: https://repost.aws/
-- Reemplazo oficial de AWS Forums
-- Por qué: Respuestas de AWS Solutions Architects y community experts
+- Official replacement for AWS Forums
+- Why: Answers from AWS Solutions Architects and community experts
 
 **23. r/aws (Reddit)**
 - URL: https://reddit.com/r/aws
-- Por qué: Comunidad activa, troubleshooting, arquitecturas compartidas
-- Tip: Busca posts con "data engineering" o "data lake"
+- Why: Active community, troubleshooting, shared architectures
+- Tip: Look for posts with "data engineering" or "data lake"
 
 **24. AWS Slack Community**
-- URL: Buscar "AWS Community Slack" en Google
-- Canales relevantes: #analytics, #serverless, #lambda
-- Por qué: Chat en tiempo real con otros learners y professionals
+- URL: Search "AWS Community Slack" on Google
+- Channels relevantes: #analytics, #serverless, #lambda
+- Why: Chat in real time with other learners and professionals
 
 ---
 
-## 📝 Cheat Sheets y Referencias Rápidas
+## 📝 Cheat Sheets and Quick References
 
 **25. AWS Services Overview**
 - URL: https://aws.amazon.com/products/
-- Uso: Vista general de todos los servicios AWS
-- Tip: Explora categorías Analytics, Storage, Compute
+- Usage: Overview of all AWS services
+- Tip: Explore categories Analytics, Storage, Compute
 
 **26. AWS Service Limits**
 - URL: https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html
-- Por qué: Conocer límites (ej: 1000 concurrent Lambdas) antes de diseñar
+- Why: Know limits (ex: 1000 concurrent Lambdas) before designing
 
-**27. Markdown Cheat Sheet para Mermaid Diagrams**
+**27. Markdown Cheat Sheet for Mermaid Diagrams**
 - URL: https://mermaid.js.org/syntax/examples.html
-- Usa en: architecture.md y tus propios diagramas
-- Por qué: Diagramas as code, versionables en Git
+- Use in: architecture.md and your own diagrams
+- Why: Diagrams as code, versionable in Git
 
 ---
 
-## 🎯 Roadmap de Consumo Sugerido
+## 🎯 Suggested Consumption Roadmap
 
-### Antes de Ejercicios (8-10 horas)
+### Before Exercises (8-10 hours)
 
-1. **Día 1-2:** Lee concepts.md completo (este módulo)
-2. **Día 3:** AWS Cloud Practitioner Essentials (digital course) - Primeras 3 horas
-3. **Día 4:** Video FreeCodeCamp AWS Cloud Practitioner (velocidad 1.5x) - Secciones IAM, S3, Lambda
-4. **Día 5:** Lee architecture.md + AWS Well-Architected Framework overview
+1. **Day 1-2:** Read complete concepts.md (this Module)
+2. **Day 3:** AWS Cloud Practitioner Essentials (digital course) - First 3 hours
+3. **Day 4:** FreeCodeCamp AWS Cloud Practitioner Video (1.5x speed) - IAM, S3, Lambda Sections
+4. **Day 5:** Read architecture.md + AWS Well-Architected Framework overview
 
-### Durante Ejercicios (5-8 horas)
+### Durante Exercises (5-8 horas)
 
 - Usa AWS CLI Reference como consulta
 - Consulta Boto3 docs cuando escribas Python
 - Si te atascas: re:Post o Stack Overflow
 
-### Después de Ejercicios (Opcional, profundizar)
+### After Exercises (Optional, go deeper)
 
 - Stephane Maarek course (si quieres certificarte)
 - AWS Workshops hands-on
-- Whitepapers para diseño avanzado
+- Whitepapers for advanced design
 
 ---
 
 ## 🔖 Bookmarks Sugeridos
 
-Crea carpeta en tu browser: **"AWS Data Engineering"**
+Create a folder in your browser: **"AWS Data Engineering"**
 
 Subcarpetas:
 ```
@@ -325,32 +325,32 @@ Subcarpetas:
 
 ## ⚠️ Advertencias
 
-**No caigas en "Tutorial Hell":**
-- No veas todos los videos antes de practicar
-- Alterna teoría (1 hora) → práctica (2 horas)
-- Los ejercicios son más importantes que videos adicionales
+**Don't fall for "Tutorial Hell":**
+- Don't watch all the videos before practicing
+- Alterna Theory (1 hora) → Practice (2 horas)
+- Exercises are more important than additional videos
 
 **Evita distracciones:**
 - No persigas cada servicio AWS (hay 200+)
-- Enfócate en: S3, IAM, Lambda, Glue, Athena para data engineering
-- Otros servicios los aprenderás cuando los necesites
+- Focus on: S3, IAM, Lambda, Glue, Athena for data engineering
+- You will learn other services when you need them
 
 **Free Tier limits:**
-- Monitorea uso con AWS Budgets (configura alarma $5)
-- Elimina recursos después de cada ejercicio
-- LocalStack (en este curso) evita costos reales
+- Monitor Usage with AWS Budgets (set $5 alarm)
+- Delete Resources after each Exercise
+- LocalStack (in this course) avoids real costs
 
 ---
 
-## 📈 Próximos Pasos
+## 📈 Next Steps
 
-Has revisado los recursos disponibles. Ahora:
+You have reviewed the available Resources. Now:
 
-1. ✅ Completa la lectura de `concepts.md` y `architecture.md`
-2. ⏭️ Mira al menos 2 horas de videos recomendados
+1. ✅ Complete the reading of`concepts.md`and`architecture.md`
+2. ⏭️ Watch at least 2 hours of recommended videos
 3. 🏗️ Comienza Exercise 01: AWS CLI & S3 Basics
-4. 📖 Consulta estos recursos cuando tengas dudas específicas
+4. 📖 Consult these Resources when you have specific questions
 
-**Recuerda:** La mejor forma de aprender cloud es **construyendo**. Estos recursos son complementarios a los ejercicios prácticos.
+**Remember:** The best way to learn cloud is by **building**. These Resources are complementary to the practical Exercises.
 
-¡Adelante con los ejercicios! 🚀
+Onward with the Exercises! 🚀

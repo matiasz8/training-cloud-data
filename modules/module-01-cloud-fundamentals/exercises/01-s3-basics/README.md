@@ -1,7 +1,7 @@
 # Exercise 01: AWS CLI & S3 Basics
 
-**Dificultad:** ⭐ Básico  
-**Tiempo estimado:** 45-60 minutos  
+**Dificultad:** ⭐ Básico
+**Tiempo estimado:** 45-60 minutos
 **Prerequisitos:** AWS CLI instalado, LocalStack corriendo
 
 ---

@@ -219,7 +219,7 @@ if role_arn:
             }
         ]
     }
-    
+
     lambda_policy_arn = create_policy('LambdaDataProcessorPolicy', lambda_policy)
     if lambda_policy_arn:
         attach_policy_to_role('lambda-data-processor-role', lambda_policy_arn)
@@ -235,7 +235,7 @@ bucket_policy_file = Path(__file__).parent / 'bucket_policy.json'
 if bucket_policy_file.exists():
     with open(bucket_policy_file, 'r') as f:
         bucket_policy = json.load(f)
-    
+
     apply_bucket_policy('my-data-lake-raw', bucket_policy)
 else:
     print_error("bucket_policy.json not found")
@@ -289,8 +289,8 @@ def create_role(role_name: str, trust_policy: Dict) -> str:
 python3
 
 >>> import boto3
->>> iam = boto3.client('iam', endpoint_url='http://localhost:4566', 
-...     region_name='us-east-1', aws_access_key_id='test', 
+>>> iam = boto3.client('iam', endpoint_url='http://localhost:4566',
+...     region_name='us-east-1', aws_access_key_id='test',
 ...     aws_secret_access_key='test')
 
 >>> # Test create group

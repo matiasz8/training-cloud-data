@@ -11,7 +11,7 @@ Parameters:
       - staging
       - prod
     Description: Deployment environment
-  
+
   DataRetentionDays:
     Type: Number
     Default: 90
@@ -31,18 +31,18 @@ Resources:
   # - Enable versioning
   # - Add lifecycle rules
   # - Set DeletionPolicy to Retain for production
-  
+
   DataLakeBucket:
     Type: AWS::S3::Bucket
     # TODO: Add DeletionPolicy (Retain for prod, Delete for dev)
     Properties:
       # TODO: Define bucket name using Environment parameter
       # BucketName: !Sub 'quickmart-data-lake-${Environment}'
-      
+
       # TODO: Enable versioning
       # VersioningConfiguration:
       #   Status: Enabled
-      
+
       # TODO: Add lifecycle configuration
       # LifecycleConfiguration:
       #   Rules:
@@ -51,7 +51,7 @@ Resources:
       #       Transitions:
       #         - TransitionInDays: !Ref DataRetentionDays
       #           StorageClass: STANDARD_IA
-      
+
       # TODO: Add tags
       Tags:
         - Key: Environment
@@ -65,7 +65,7 @@ Resources:
   # Hints:
   # - Require encryption on upload
   # - Deny unencrypted object uploads
-  
+
   DataLakeBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -88,7 +88,7 @@ Resources:
   # - Allow assumption by EC2 and Lambda
   # - Attach managed policy for S3 access
   # - Add inline policy for specific permissions
-  
+
   DataEngineerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -103,11 +103,11 @@ Resources:
                 - ec2.amazonaws.com
                 - lambda.amazonaws.com
             Action: 'sts:AssumeRole'
-      
+
       # TODO: Attach managed policies
       # ManagedPolicyArns:
       #   - arn:aws:iam::aws:policy/AmazonS3FullAccess
-      
+
       # TODO: Add inline policies
       # Policies:
       #   - PolicyName: DataLakeAccess
@@ -119,7 +119,7 @@ Resources:
       #             - s3:GetObject
       #             - s3:PutObject
       #           Resource: !Sub '${DataLakeBucket.Arn}/*'
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -133,13 +133,13 @@ Outputs:
     # TODO: Add export name
     # Export:
     #   Name: !Sub '${AWS::StackName}-BucketName'
-  
+
   # TODO: Export bucket ARN
   BucketArn:
     Description: Data Lake S3 bucket ARN
     Value: !GetAtt DataLakeBucket.Arn
     # TODO: Add export
-  
+
   # TODO: Export IAM role ARN
   DataEngineerRoleArn:
     Description: IAM role ARN for data engineers

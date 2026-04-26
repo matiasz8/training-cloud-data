@@ -209,13 +209,13 @@ s3 = boto3.client('s3', endpoint_url='http://localhost:4566')
 
 def test_mi_nuevo_test(wait_for_localstack):
     """Descripción del test"""
-    
+
     # Arrange
     bucket_name = 'test-bucket'
-    
+
     # Act
     response = s3.create_bucket(Bucket=bucket_name)
-    
+
     # Assert
     assert response['ResponseMetadata']['HTTPStatusCode'] == 200
 ```

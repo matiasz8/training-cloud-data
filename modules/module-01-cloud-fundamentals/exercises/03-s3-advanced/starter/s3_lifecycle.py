@@ -5,8 +5,6 @@ Implements cost optimization with lifecycle policies
 """
 
 import boto3
-import json
-from typing import Dict
 
 # Initialize S3 client
 s3 = boto3.client(
@@ -39,13 +37,13 @@ def print_step(message: str):
 def enable_versioning(bucket_name: str) -> bool:
     """
     Enable versioning on an S3 bucket
-    
+
     Args:
         bucket_name: Name of the bucket
-        
+
     Returns:
         True if successful, False otherwise
-        
+
     Hint: Use s3.put_bucket_versioning() with VersioningConfiguration
     """
     # TODO: Implement versioning enablement
@@ -56,21 +54,21 @@ def enable_versioning(bucket_name: str) -> bool:
 def create_lifecycle_policy(bucket_name: str) -> bool:
     """
     Create and apply lifecycle policy to bucket
-    
+
     The policy should:
     - Transition to STANDARD_IA after 30 days
     - Transition to GLACIER after 90 days
     - Expire (delete) after 365 days
-    
+
     Args:
         bucket_name: Name of the bucket
-        
+
     Returns:
         True if successful, False otherwise
-        
+
     Hint: Use s3.put_bucket_lifecycle_configuration() with Rules list
     """
-    
+
     lifecycle_config = {
         'Rules': [
             {
@@ -83,7 +81,7 @@ def create_lifecycle_policy(bucket_name: str) -> bool:
             }
         ]
     }
-    
+
     # TODO: Apply lifecycle configuration
     # Your code here
     pass
@@ -92,13 +90,13 @@ def create_lifecycle_policy(bucket_name: str) -> bool:
 def verify_lifecycle(bucket_name: str) -> bool:
     """
     Verify that lifecycle policy is configured correctly
-    
+
     Args:
         bucket_name: Name of the bucket
-        
+
     Returns:
         True if lifecycle is configured, False otherwise
-        
+
     Hint: Use s3.get_bucket_lifecycle_configuration()
     """
     # TODO: Get and print lifecycle configuration
@@ -111,9 +109,9 @@ def main():
     print(f"\n{BLUE}{'='*60}{RESET}")
     print(f"{BLUE}S3 Lifecycle Configuration{RESET}")
     print(f"{BLUE}{'='*60}{RESET}")
-    
+
     bucket_name = 'my-data-lake-raw'
-    
+
     # Step 1: Create bucket if not exists
     print_step("Step 1: Ensuring bucket exists")
     try:
@@ -122,7 +120,7 @@ def main():
     except:
         s3.create_bucket(Bucket=bucket_name)
         print_success(f"Created bucket: {bucket_name}")
-    
+
     # Step 2: Enable versioning
     print_step("Step 2: Enabling versioning")
     if enable_versioning(bucket_name):
@@ -130,7 +128,7 @@ def main():
     else:
         print_error("Failed to enable versioning")
         return
-    
+
     # Step 3: Create lifecycle policy
     print_step("Step 3: Applying lifecycle policy")
     if create_lifecycle_policy(bucket_name):
@@ -138,14 +136,14 @@ def main():
     else:
         print_error("Failed to apply lifecycle policy")
         return
-    
+
     # Step 4: Verify configuration
     print_step("Step 4: Verifying configuration")
     if verify_lifecycle(bucket_name):
         print_success("Configuration verified")
     else:
         print_error("Verification failed")
-    
+
     print(f"\n{GREEN}Lifecycle configuration completed!{RESET}\n")
 
 

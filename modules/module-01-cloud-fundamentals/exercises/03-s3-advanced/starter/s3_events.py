@@ -5,8 +5,6 @@ Implements disaster recovery with cross-region replication
 """
 
 import boto3
-import json
-from typing import Dict
 
 # Initialize clients
 s3 = boto3.client(
@@ -47,13 +45,13 @@ def print_step(message: str):
 def create_backup_bucket(bucket_name: str) -> bool:
     """
     Create backup/destination bucket for replication
-    
+
     Args:
         bucket_name: Name of backup bucket
-        
+
     Returns:
         True if successful, False otherwise
-        
+
     Hint: Versioning must be enabled on destination bucket too!
     """
     # TODO: Create backup bucket
@@ -65,14 +63,14 @@ def create_backup_bucket(bucket_name: str) -> bool:
 def create_replication_role() -> str:
     """
     Create IAM role for S3 replication
-    
+
     Returns:
         Role ARN if successful, empty string otherwise
-        
+
     Hint: Role needs trust policy for s3.amazonaws.com
     and permissions for s3:ReplicateObject
     """
-    
+
     trust_policy = {
         "Version": "2012-10-17",
         "Statement": [{
@@ -82,7 +80,7 @@ def create_replication_role() -> str:
             # "Action": "sts:AssumeRole"
         }]
     }
-    
+
     replication_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -104,7 +102,7 @@ def create_replication_role() -> str:
             }
         ]
     }
-    
+
     # TODO: Create role and attach policy
     # Your code here
     pass
@@ -113,18 +111,18 @@ def create_replication_role() -> str:
 def setup_replication(source_bucket: str, dest_bucket: str, role_arn: str) -> bool:
     """
     Configure replication from source to destination bucket
-    
+
     Args:
         source_bucket: Source bucket name
         dest_bucket: Destination bucket name
         role_arn: ARN of replication role
-        
+
     Returns:
         True if successful, False otherwise
-        
+
     Hint: Use s3.put_bucket_replication() with ReplicationConfiguration
     """
-    
+
     replication_config = {
         'Role': role_arn,
         'Rules': [
@@ -139,7 +137,7 @@ def setup_replication(source_bucket: str, dest_bucket: str, role_arn: str) -> bo
             }
         ]
     }
-    
+
     # TODO: Apply replication configuration
     # Your code here
     pass
@@ -148,21 +146,20 @@ def setup_replication(source_bucket: str, dest_bucket: str, role_arn: str) -> bo
 def test_replication(source_bucket: str, dest_bucket: str) -> bool:
     """
     Test that replication is working
-    
+
     Args:
         source_bucket: Source bucket name
         dest_bucket: Destination bucket name
-        
+
     Returns:
         True if replication works, False otherwise
-        
+
     Hint: Upload file to source, check if it appears in destination
     """
-    import time
-    
+
     test_key = 'replication-test.txt'
     test_content = b'Testing replication'
-    
+
     # TODO: Upload test file to source bucket
     # TODO: Wait a few seconds
     # TODO: Check if file exists in destination bucket
@@ -175,10 +172,10 @@ def main():
     print(f"\n{BLUE}{'='*60}{RESET}")
     print(f"{BLUE}S3 Replication Configuration{RESET}")
     print(f"{BLUE}{'='*60}{RESET}")
-    
+
     source_bucket = 'my-data-lake-raw'
     backup_bucket = 'my-data-lake-backup'
-    
+
     # Step 1: Create source bucket
     print_step("Step 1: Ensuring source bucket exists")
     try:
@@ -191,7 +188,7 @@ def main():
             VersioningConfiguration={'Status': 'Enabled'}
         )
         print_success(f"Created source bucket: {source_bucket}")
-    
+
     # Step 2: Create backup bucket
     print_step("Step 2: Creating backup bucket")
     if create_backup_bucket(backup_bucket):
@@ -199,7 +196,7 @@ def main():
     else:
         print_error("Failed to create backup bucket")
         return
-    
+
     # Step 3: Create IAM role for replication
     print_step("Step 3: Creating replication role")
     role_arn = create_replication_role()
@@ -208,7 +205,7 @@ def main():
     else:
         print_error("Failed to create replication role")
         return
-    
+
     # Step 4: Setup replication
     print_step("Step 4: Configuring replication")
     if setup_replication(source_bucket, backup_bucket, role_arn):
@@ -216,14 +213,14 @@ def main():
     else:
         print_error("Failed to configure replication")
         return
-    
+
     # Step 5: Test replication
     print_step("Step 5: Testing replication")
     if test_replication(source_bucket, backup_bucket):
         print_success("Replication is working!")
     else:
         print_error("Replication test failed")
-    
+
     print(f"\n{GREEN}Replication setup completed!{RESET}\n")
 
 

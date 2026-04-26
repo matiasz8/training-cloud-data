@@ -145,20 +145,20 @@ s3 = boto3.client('s3')
 
 def analyze_bucket(bucket_name):
     """Analyze object age distribution"""
-    
+
     age_buckets = {
         'hot': 0,      # 0-30 days
         'warm': 0,     # 31-90 days
         'cold': 0,     # 91-365 days
         'archive': 0   # 365+ days
     }
-    
+
     paginator = s3.get_paginator('list_objects_v2')
     for page in paginator.paginate(Bucket=bucket_name):
         for obj in page.get('Contents', []):
             age = (datetime.now(obj['LastModified'].tzinfo) - obj['LastModified']).days
             size = obj['Size']
-            
+
             if age <= 30:
                 age_buckets['hot'] += size
             elif age <= 90:
@@ -167,7 +167,7 @@ def analyze_bucket(bucket_name):
                 age_buckets['cold'] += size
             else:
                 age_buckets['archive'] += size
-    
+
     return age_buckets
 ```
 
@@ -180,27 +180,27 @@ logs = boto3.client('logs')
 
 def analyze_lambda(function_name):
     """Get memory usage and duration stats"""
-    
+
     log_group = f'/aws/lambda/{function_name}'
-    
+
     # Query CloudWatch Logs Insights
     query = """
     fields @memorySize / 1000000 as memoryUsedMB, @duration, @billedDuration
-    | stats 
+    | stats
         avg(@duration) as avg_duration,
         max(@duration) as max_duration,
         avg(memoryUsedMB) as avg_memory,
         max(memoryUsedMB) as max_memory,
         count() as invocations
     """
-    
+
     response = logs.start_query(
         logGroupName=log_group,
         startTime=int((datetime.now() - timedelta(days=7)).timestamp()),
         endTime=int(datetime.now().timestamp()),
         queryString=query
     )
-    
+
     # Get results...
     return {
         'current_memory': 512,
@@ -223,7 +223,7 @@ Resources:
           Unit: USD
         TimeUnit: MONTHLY
         BudgetType: COST
-      
+
       NotificationsWithSubscribers:
         - Notification:
             NotificationType: ACTUAL
@@ -232,7 +232,7 @@ Resources:
           Subscribers:
             - SubscriptionType: EMAIL
               Address: engineering@quickmart.com
-        
+
         - Notification:
             NotificationType: FORECASTED
             ComparisonOperator: GREATER_THAN
@@ -296,22 +296,22 @@ aws budgets create-budget \
 | Unused Resources | $200 | $0 | $200 | 100% |
 | **Total** | **$1,035** | **$290** | **$745** | **72%** |
 
-**Target:** 40% reduction ($414 savings)  
-**Achieved:** 72% reduction ($745 savings)  
+**Target:** 40% reduction ($414 savings)
+**Achieved:** 72% reduction ($745 savings)
 **Over-delivered:** +32 percentage points 🎯
 
 ## 🎓 Learning Outcomes
 
 After this exercise:
 
-✅ Analyze S3 storage patterns  
-✅ Create intelligent lifecycle policies  
-✅ Right-size Lambda functions  
-✅ Set up AWS Budgets and alerts  
-✅ Build cost monitoring dashboards  
-✅ Identify and clean unused resources  
-✅ Calculate ROI of optimizations  
-✅ Create cost reports  
+✅ Analyze S3 storage patterns
+✅ Create intelligent lifecycle policies
+✅ Right-size Lambda functions
+✅ Set up AWS Budgets and alerts
+✅ Build cost monitoring dashboards
+✅ Identify and clean unused resources
+✅ Calculate ROI of optimizations
+✅ Create cost reports
 
 ---
 

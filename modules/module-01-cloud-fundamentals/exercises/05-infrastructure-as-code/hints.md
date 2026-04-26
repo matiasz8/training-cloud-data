@@ -54,10 +54,10 @@ DataLakeBucket:
   DeletionPolicy: Retain  # Don't delete on stack deletion
   Properties:
     BucketName: !Sub 'quickmart-data-lake-${Environment}'
-    
+
     VersioningConfiguration:
       Status: Enabled
-    
+
     LifecycleConfiguration:
       Rules:
         - Id: TransitionToIA
@@ -67,7 +67,7 @@ DataLakeBucket:
               StorageClass: STANDARD_IA
             - TransitionInDays: !Ref GlacierTransitionDays
               StorageClass: GLACIER
-        
+
         - Id: DeleteOldVersions
           Status: Enabled
           NoncurrentVersionExpirationInDays: 90
@@ -90,7 +90,7 @@ DataLakeBucketPolicy:
           Condition:
             StringNotEquals:
               s3:x-amz-server-side-encryption: 'AES256'
-        
+
         - Sid: DenyInsecureTransport
           Effect: Deny
           Principal: '*'
@@ -110,7 +110,7 @@ DataEngineerRole:
   Type: AWS::IAM::Role
   Properties:
     RoleName: !Sub 'data-engineer-role-${Environment}'
-    
+
     AssumeRolePolicyDocument:
       Version: '2012-10-17'
       Statement:
@@ -120,10 +120,10 @@ DataEngineerRole:
               - ec2.amazonaws.com
               - lambda.amazonaws.com
           Action: 'sts:AssumeRole'
-    
+
     ManagedPolicyArns:
       - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-    
+
     Policies:
       - PolicyName: DataLakeAccess
         PolicyDocument:
@@ -210,7 +210,7 @@ Parameters:
   DataLakeStackName:
     Type: String
     Description: Name of the data lake stack
-  
+
   Environment:
     Type: String
     AllowedValues: [dev, staging, prod]
@@ -222,7 +222,7 @@ Resources:
       QueueName: !Sub 'validation-results-${Environment}'
       VisibilityTimeout: 300
       MessageRetentionPeriod: 1209600  # 14 days
-  
+
   ValidatorFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -231,22 +231,22 @@ Resources:
       Handler: lambda_csv_validator.lambda_handler
       Timeout: 30
       MemorySize: 256
-      
-      Role: !ImportValue 
+
+      Role: !ImportValue
         Fn::Sub: '${DataLakeStackName}-DataEngineerRoleArn'
-      
+
       Environment:
         Variables:
-          BUCKET_NAME: !ImportValue 
+          BUCKET_NAME: !ImportValue
             Fn::Sub: '${DataLakeStackName}-BucketName'
           QUEUE_URL: !Ref ValidationQueue
-      
+
       Code:
         ZipFile: |
           import json
           def lambda_handler(event, context):
               return {'statusCode': 200}
-  
+
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -258,7 +258,7 @@ Outputs:
     Value: !Ref ValidationQueue
     Export:
       Name: !Sub '${AWS::StackName}-QueueUrl'
-  
+
   FunctionArn:
     Value: !GetAtt ValidatorFunction.Arn
     Export:
@@ -304,11 +304,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     aws --endpoint-url=$ENDPOINT_URL cloudformation execute-change-set \
       --stack-name $STACK_NAME \
       --change-set-name $CHANGE_SET_NAME
-    
+
     echo "Waiting for update to complete..."
     aws --endpoint-url=$ENDPOINT_URL cloudformation wait stack-update-complete \
       --stack-name $STACK_NAME
-    
+
     echo "✓ Update complete"
 fi
 ```

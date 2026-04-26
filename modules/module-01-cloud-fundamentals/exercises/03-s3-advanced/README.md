@@ -1,6 +1,6 @@
 # Exercise 03: S3 Advanced Features
 
-**Duración estimada:** 60-75 minutos  
+**Duración estimada:** 60-75 minutos
 **Dificultad:** ⭐⭐⭐ Intermedia
 
 ## 🎯 Objetivos de Aprendizaje

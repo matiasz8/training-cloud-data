@@ -124,7 +124,7 @@ s3 = boto3.client('s3')
 def lambda_handler(event, context):
     """
     Lambda handler for S3 event
-    
+
     Event structure:
     {
         "Records": [{
@@ -135,24 +135,24 @@ def lambda_handler(event, context):
         }]
     }
     """
-    
+
     try:
         # Extract S3 info from event
         bucket = event['Records'][0]['s3']['bucket']['name']
         key = event['Records'][0]['s3']['object']['key']
-        
+
         print(f"Processing {bucket}/{key}")
-        
+
         # Download file from S3
         response = s3.get_object(Bucket=bucket, Key=key)
         content = response['Body'].read().decode('utf-8')
-        
+
         # Process content
         results = process_csv(content)
-        
+
         # Upload results
         upload_results(bucket, key, results)
-        
+
         return {
             'statusCode': 200,
             'body': json.dumps({
@@ -160,7 +160,7 @@ def lambda_handler(event, context):
                 'rejected': len(results['invalid'])
             })
         }
-        
+
     except Exception as e:
         print(f"ERROR: {str(e)}")
         raise
@@ -169,16 +169,16 @@ def lambda_handler(event, context):
 def process_csv(content):
     """Process CSV content and validate"""
     reader = csv.DictReader(StringIO(content))
-    
+
     valid = []
     invalid = []
-    
+
     for row in reader:
         if validate_row(row):
             valid.append(row)
         else:
             invalid.append(row)
-    
+
     return {'valid': valid, 'invalid': invalid}
 
 
@@ -222,12 +222,12 @@ aws lambda create-function \
 
 After completing this exercise:
 
-✅ Understand Lambda execution model  
-✅ Configure S3 event triggers  
-✅ Handle errors gracefully  
-✅ Optimize Lambda performance  
-✅ Monitor with CloudWatch  
-✅ Calculate serverless costs  
+✅ Understand Lambda execution model
+✅ Configure S3 event triggers
+✅ Handle errors gracefully
+✅ Optimize Lambda performance
+✅ Monitor with CloudWatch
+✅ Calculate serverless costs
 
 ---
 

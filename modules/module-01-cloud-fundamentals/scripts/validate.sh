@@ -20,9 +20,9 @@ echo ""
 test_exercise() {
     local exercise_name=$1
     local test_command=$2
-    
+
     echo -e "${BLUE}Testing: ${exercise_name}${NC}"
-    
+
     if eval "$test_command" &> /dev/null; then
         echo -e "${GREEN}  ✓ Passed${NC}"
         ((PASSED++))

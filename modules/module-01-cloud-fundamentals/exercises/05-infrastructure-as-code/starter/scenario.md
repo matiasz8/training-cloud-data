@@ -108,7 +108,7 @@ Parameters:
       - staging
       - prod
     Description: Deployment environment
-  
+
   DataRetentionDays:
     Type: Number
     Default: 90
@@ -122,7 +122,7 @@ Parameters:
 ```yaml
 Conditions:
   IsProduction: !Equals [!Ref Environment, prod]
-  
+
 Resources:
   ProductionAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -146,12 +146,12 @@ Parameters:
   DataLakeStackName:
     Type: String
     Description: Name of the data lake stack
-    
+
 Resources:
   LambdaFunction:
     Environment:
       Variables:
-        BUCKET_NAME: !ImportValue 
+        BUCKET_NAME: !ImportValue
           Fn::Sub: '${DataLakeStackName}-BucketName'
 ```
 
@@ -240,14 +240,14 @@ Audit Trail: Git history + CloudFormation events
 
 After this exercise:
 
-✅ Write CloudFormation templates in YAML  
-✅ Use parameters for flexibility  
-✅ Implement conditions for environment logic  
-✅ Export/import values between stacks  
-✅ Tag resources properly  
-✅ Handle stack updates safely  
-✅ Implement rollback strategies  
-✅ Version control infrastructure  
+✅ Write CloudFormation templates in YAML
+✅ Use parameters for flexibility
+✅ Implement conditions for environment logic
+✅ Export/import values between stacks
+✅ Tag resources properly
+✅ Handle stack updates safely
+✅ Implement rollback strategies
+✅ Version control infrastructure
 
 ---
 

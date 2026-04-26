@@ -12,7 +12,7 @@ Validar que los resultados de queries SQL, transformaciones de datos y análisis
 ```python
 def test_aggregation_matches_expected():
     """Comparar agregaciones con resultados esperados"""
-    
+
 def test_transformation_output_correct():
     """Verificar transformación de datos"""
 ```
@@ -27,7 +27,7 @@ def test_sql_query_returns_correct_results():
 ```python
 def test_csv_to_parquet_conversion():
     """Verificar conversión de formatos"""
-    
+
 def test_data_enrichment():
     """Verificar enriquecimiento de datos"""
 ```
@@ -42,21 +42,21 @@ from io import StringIO
 
 def test_transaction_aggregation():
     """Verificar agregación de transacciones por país"""
-    
+
     s3 = boto3.client('s3', endpoint_url='http://localhost:4566')
-    
+
     # 1. Descargar datos procesados
     response = s3.get_object(
         Bucket='quickmart-data-lake',
         Key='processed/aggregated_by_country.csv'
     )
-    
+
     # 2. Leer CSV
     df = pd.read_csv(StringIO(response['Body'].read().decode('utf-8')))
-    
+
     # 3. Cargar expected results
     expected_df = pd.read_csv('validation/query-results/expected_aggregation.csv')
-    
+
     # 4. Comparar
     pd.testing.assert_frame_equal(df, expected_df, check_dtype=False)
 ```

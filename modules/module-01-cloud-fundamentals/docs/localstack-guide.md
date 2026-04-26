@@ -252,7 +252,7 @@ Error: Could not resolve host: my-bucket.s3.localhost.localstack.cloud
 aws s3 ls s3://my-bucket --endpoint-url=http://localhost:4566
 
 # Or configure boto3
-s3 = boto3.client('s3', 
+s3 = boto3.client('s3',
     endpoint_url='http://localhost:4566',
     config=boto3.session.Config(s3={'addressing_style': 'path'})
 )
@@ -262,7 +262,7 @@ s3 = boto3.client('s3',
 
 ```bash
 # Symptom
-An error occurred (InvalidParameterValueException): 
+An error occurred (InvalidParameterValueException):
 The role defined for the function cannot be assumed by Lambda.
 
 # Solution - Create role first

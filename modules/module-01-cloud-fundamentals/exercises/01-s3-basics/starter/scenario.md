@@ -36,7 +36,7 @@ El CTO te pidió crear un **sistema centralizado de almacenamiento** usando S3 c
        └── year=2024/month=01/day=15/
            └── inventory-2024-01-15.json
    ```
-   
+
    **Por qué esta estructura:**
    - `source=X`: Permite filtrar por origen de datos
    - `year=YYYY/month=MM/day=DD`: Particionamiento para queries eficientes

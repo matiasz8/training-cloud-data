@@ -6,10 +6,6 @@ Validates transaction CSV files uploaded to S3
 
 import json
 import boto3
-import csv
-from io import StringIO
-from datetime import datetime
-from decimal import Decimal
 
 s3 = boto3.client('s3')
 
@@ -17,21 +13,21 @@ s3 = boto3.client('s3')
 def lambda_handler(event, context):
     """
     Main Lambda handler
-    
+
     TODO: Extract bucket and key from event
     TODO: Download file from S3
     TODO: Validate CSV content
     TODO: Upload valid and invalid records to different S3 paths
     TODO: Return summary
     """
-    
+
     try:
         # TODO: Parse S3 event
         # bucket = event['Records'][0]['s3']['bucket']['name']
         # key = event['Records'][0]['s3']['object']['key']
-        
+
         pass
-        
+
     except Exception as e:
         print(f"ERROR: {str(e)}")
         return {
@@ -43,13 +39,13 @@ def lambda_handler(event, context):
 def validate_csv(content: str) -> dict:
     """
     Validate CSV content
-    
+
     Args:
         content: CSV content as string
-        
+
     Returns:
         dict with 'valid' and 'invalid' lists
-        
+
     TODO: Parse CSV
     TODO: Validate each row
     TODO: Separate valid from invalid
@@ -60,7 +56,7 @@ def validate_csv(content: str) -> dict:
 def validate_row(row: dict) -> tuple:
     """
     Validate a single transaction row
-    
+
     Required fields:
     - transaction_id: not empty
     - user_id: format USER####
@@ -68,10 +64,10 @@ def validate_row(row: dict) -> tuple:
     - amount: > 0 and < 10000
     - timestamp: valid ISO 8601
     - country: 2-letter code
-    
+
     Returns:
         (is_valid: bool, error_message: str)
-        
+
     TODO: Implement validation rules
     TODO: Return (True, "") if valid
     TODO: Return (False, "error description") if invalid
@@ -82,10 +78,10 @@ def validate_row(row: dict) -> tuple:
 def upload_results(bucket: str, original_key: str, valid_records: list, invalid_records: list):
     """
     Upload validated results to S3
-    
+
     Valid records → validated/ folder
     Invalid records → rejected/ folder
-    
+
     TODO: Convert records to CSV format
     TODO: Upload to S3 with appropriate keys
     """
@@ -95,7 +91,7 @@ def upload_results(bucket: str, original_key: str, valid_records: list, invalid_
 def format_csv(records: list) -> str:
     """
     Convert list of dicts to CSV string
-    
+
     TODO: Use csv.DictWriter with StringIO
     TODO: Return CSV as string
     """
@@ -113,6 +109,6 @@ if __name__ == "__main__":
             }
         }]
     }
-    
+
     result = lambda_handler(test_event, None)
     print(json.dumps(result, indent=2))

@@ -17,7 +17,7 @@ def wait_for_localstack():
         aws_access_key_id='test',
         aws_secret_access_key='test'
     )
-    
+
     max_retries = 30
     for i in range(max_retries):
         try:

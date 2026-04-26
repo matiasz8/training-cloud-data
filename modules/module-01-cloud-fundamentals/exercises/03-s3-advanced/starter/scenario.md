@@ -31,7 +31,7 @@ You're tasked with implementing AWS S3 advanced features:
 Current: 10 TB × $0.023/GB × 12 months = $2,820/year
 After optimization:
   - 1 TB in STANDARD (0-30 days): $282/year
-  - 2 TB in STANDARD_IA (30-90 days): $307/year  
+  - 2 TB in STANDARD_IA (30-90 days): $307/year
   - 7 TB in GLACIER (90-365 days): $344/year
 Total: $933/year → 67% savings ✅
 ```
@@ -186,7 +186,7 @@ Storage:
 Requests:
   1M PUT/POST: $5.50
   10M GET: $4.00
-  
+
 Total: ~$240/month
 ```
 
@@ -196,7 +196,7 @@ Storage:
   1,000 GB STANDARD: $23/month
   2,000 GB STANDARD_IA: $25/month
   7,000 GB GLACIER: $28/month
-  
+
 Total: ~$76/month (68% savings!)
 ```
 
@@ -209,11 +209,11 @@ Total: ~$76/month (68% savings!)
 
 After completing this scenario, you will:
 
-✅ Understand storage class economics  
-✅ Implement cost-effective lifecycle policies  
-✅ Configure disaster recovery with replication  
-✅ Build event-driven architectures with S3+SQS  
-✅ Design for resilience and compliance  
+✅ Understand storage class economics
+✅ Implement cost-effective lifecycle policies
+✅ Configure disaster recovery with replication
+✅ Build event-driven architectures with S3+SQS
+✅ Design for resilience and compliance
 ✅ Calculate ROI of cloud optimization
 
 ---
