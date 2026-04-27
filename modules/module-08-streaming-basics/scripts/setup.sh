@@ -124,7 +124,7 @@ echo -e "${YELLOW}[4/6] Creating Kafka topics...${NC}"
 create_topic() {
     local TOPIC_NAME=$1
     local PARTITIONS=$2
-    
+
     docker exec kafka kafka-topics \
         --create \
         --bootstrap-server localhost:9092 \
@@ -132,7 +132,7 @@ create_topic() {
         --partitions "$PARTITIONS" \
         --replication-factor 1 \
         --if-not-exists &> /dev/null
-    
+
     echo -e "  ${GREEN}✓${NC} Created topic: $TOPIC_NAME (partitions: $PARTITIONS)"
 }
 

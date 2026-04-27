@@ -1,7 +1,7 @@
 # Exercise 03: Avro Schema Management
 
-**Difficulty**: ⭐⭐ Intermediate  
-**Estimated Time**: 2-3 hours  
+**Difficulty**: ⭐⭐ Intermediate
+**Estimated Time**: 2-3 hours
 **Prerequisites**: Exercise 01-02 completed
 
 ---
@@ -77,18 +77,18 @@ from confluent_kafka.schema_registry import SchemaRegistryClient, Schema
 
 def register_schemas():
     sr_client = SchemaRegistryClient({'url': 'http://localhost:8081'})
-    
+
     # Load schema from file
     with open('../../data/schemas/user_event.avsc') as f:
         schema_str = f.read()
-    
+
     # Register schema
     schema = Schema(schema_str, schema_type='AVRO')
     schema_id = sr_client.register_schema(
         subject_name='user-events-value',
         schema=schema
     )
-    
+
     print(f"Schema registered with ID: {schema_id}")
 ```
 
@@ -110,22 +110,22 @@ class AvroProducer:
         self.sr_client = SchemaRegistryClient({
             'url': schema_registry_url
         })
-        
+
         # TODO: Load schema
         with open('../../data/schemas/user_event.avsc') as f:
             schema_str = f.read()
-        
+
         # TODO: Create Avro serializer
         self.avro_serializer = AvroSerializer(
             self.sr_client,
             schema_str
         )
-        
+
         # TODO: Create producer
         self.producer = Producer({
             'bootstrap.servers': bootstrap_servers
         })
-    
+
     def send_event(self, topic: str, event: dict):
         """TODO: Serialize and send event"""
         try:
@@ -134,14 +134,14 @@ class AvroProducer:
                 event,
                 SerializationContext(topic, MessageField.VALUE)
             )
-            
+
             # Send to Kafka
             self.producer.produce(
                 topic=topic,
                 value=serialized_value,
                 key=event.get('user_id', '').encode('utf-8')
             )
-            
+
             self.producer.flush()
         except Exception as e:
             print(f"Error: {e}")
@@ -185,38 +185,38 @@ class AvroConsumer:
         self.sr_client = SchemaRegistryClient({
             'url': schema_registry_url
         })
-        
+
         # TODO: Create Avro deserializer
         self.avro_deserializer = AvroDeserializer(self.sr_client)
-        
+
         # TODO: Create consumer
         self.consumer = Consumer({
             'bootstrap.servers': bootstrap_servers,
             'group.id': group_id,
             'auto.offset.reset': 'earliest'
         })
-    
+
     def consume(self, topic: str, process_fn):
         """TODO: Consume and deserialize events"""
         self.consumer.subscribe([topic])
-        
+
         try:
             while True:
                 msg = self.consumer.poll(1.0)
-                
+
                 if msg is None:
                     continue
-                
+
                 if msg.error():
                     print(f"Error: {msg.error()}")
                     continue
-                
+
                 # Deserialize value
                 event = self.avro_deserializer(
                     msg.value(),
                     SerializationContext(topic, MessageField.VALUE)
                 )
-                
+
                 # Process event
                 process_fn(event)
         except KeyboardInterrupt:
@@ -254,16 +254,16 @@ class AvroConsumer:
 def check_compatibility(new_schema_str: str, subject: str):
     """TODO: Check if new schema is compatible"""
     sr_client = SchemaRegistryClient({'url': 'http://localhost:8081'})
-    
+
     # Get latest schema
     latest = sr_client.get_latest_version(subject)
-    
+
     # Test compatibility
     is_compatible = sr_client.test_compatibility(
         subject_name=subject,
         schema=Schema(new_schema_str, 'AVRO')
     )
-    
+
     return is_compatible
 ```
 
@@ -293,7 +293,7 @@ from fastavro.schema import load_schema
 class SchemaValidator:
     def __init__(self, schema_file: str):
         self.schema = load_schema(schema_file)
-    
+
     def validate_event(self, event: dict) -> bool:
         """TODO: Validate event against schema"""
         try:
@@ -302,7 +302,7 @@ class SchemaValidator:
         except Exception as e:
             print(f"Validation error: {e}")
             return False
-    
+
     def get_required_fields(self) -> list:
         """TODO: Return required fields from schema"""
         required = []

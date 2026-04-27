@@ -1,7 +1,7 @@
 # Exercise 02: Stream Processing
 
-**Difficulty**: ⭐⭐ Intermediate  
-**Estimated Time**: 2-3 hours  
+**Difficulty**: ⭐⭐ Intermediate
+**Estimated Time**: 2-3 hours
 **Prerequisites**: Exercise 01 completed
 
 ---
@@ -72,12 +72,12 @@ class StreamFilter:
         self.consumer = KafkaConsumer(input_topic, ...)
         self.producer = KafkaProducer(...)
         self.output_topic = output_topic
-    
+
     def filter_high_value(self, threshold: float = 100.0):
         """TODO: Filter and forward events where amount > threshold"""
         for message in self.consumer:
             event = message.value
-            
+
             # Filter logic
             if event.get('amount', 0) > threshold:
                 # Forward to output topic
@@ -108,13 +108,13 @@ class StreamMapper:
         - device_category: mobile vs desktop
         """
         enriched = event.copy()
-        
+
         # Add hour_of_day
-        # Add is_weekend 
+        # Add is_weekend
         # Add device_category
-        
+
         return enriched
-    
+
     def process_stream(self):
         for message in self.consumer:
             event = message.value
@@ -132,19 +132,19 @@ class StreamMapper:
 class StreamAggregator:
     def __init__(self):
         self.state = {}  # user_id -> {'count': int, 'total': float}
-    
+
     def aggregate_per_user(self, event: dict) -> dict:
         """TODO: Maintain running totals per user"""
         user_id = event['user_id']
         amount = event.get('amount', 0)
-        
+
         # Update state
         if user_id not in self.state:
             self.state[user_id] = {'count': 0, 'total': 0}
-        
+
         # Increment count and total
         # ...
-        
+
         return {
             'user_id': user_id,
             'count': self.state[user_id]['count'],
@@ -167,27 +167,27 @@ class TumblingWindowAggregator:
     def __init__(self, window_size_seconds: int = 60):
         self.window_size = window_size_seconds
         self.windows = defaultdict(lambda: {'count': 0, 'total': 0})
-    
+
     def get_window_key(self, timestamp_ms: int) -> int:
         """TODO: Calculate window bucket"""
         # Example: timestamp_ms // (window_size * 1000)
         pass
-    
+
     def aggregate(self, event: dict):
         """TODO: Aggregate into windows"""
         window_key = self.get_window_key(event['timestamp'])
-        
+
         # Update window
         self.windows[window_key]['count'] += 1
         self.windows[window_key]['total'] += event.get('amount', 0)
-        
+
         # Emit completed windows
         self.emit_completed_windows()
-    
+
     def emit_completed_windows(self):
         """Emit and clean up old windows"""
         current_window = self.get_window_key(int(time.time() * 1000))
-        
+
         for window_key in list(self.windows.keys()):
             if window_key < current_window - 1:
                 # Window is complete, emit
@@ -211,17 +211,17 @@ class StreamJoiner:
     def __init__(self):
         # Load user profiles (dimension table)
         self.user_profiles = self.load_user_profiles()
-    
+
     def load_user_profiles(self) -> dict:
         """Load user profiles from file or database"""
         # TODO: Load from users.json
         return {}
-    
+
     def join_with_profile(self, event: dict) -> dict:
         """TODO: Enrich event with user profile data"""
         user_id = event['user_id']
         profile = self.user_profiles.get(user_id, {})
-        
+
         return {
             **event,
             'user_tier': profile.get('tier'),
@@ -230,7 +230,7 @@ class StreamJoiner:
         }
 ```
 
-### Part 6: Complex Pipeline (30 min)
+### Part 6: Complex pipeline (30 min)
 
 **Task**: Chain multiple transformations
 
@@ -240,22 +240,22 @@ class StreamPipeline:
         self.filter = StreamFilter(...)
         self.mapper = StreamMapper(...)
         self.aggregator = StreamAggregator(...)
-    
+
     def process(self):
         """Pipeline: filter → map → aggregate → output"""
         for message in self.consumer:
             event = message.value
-            
+
             # Step 1: Filter
             if not self.should_process(event):
                 continue
-            
+
             # Step 2: Transform
             enriched = self.mapper.enrich(event)
-            
+
             # Step 3: Aggregate
             aggregate = self.aggregator.update(enriched)
-            
+
             # Step 4: Output
             self.producer.send('processed-events', aggregate)
 ```
@@ -275,7 +275,7 @@ pytest test_stream_processing.py -v
 - ✅ Aggregation maintains correct state
 - ✅ Windows aggregate correctly
 - ✅ Join enriches with profile data
-- ✅ Pipeline chains transformations
+- ✅ pipeline chains transformations
 
 ---
 

@@ -1,25 +1,25 @@
 # Exercise 01: Data Profiling
 
-⏱️ **Duración estimada:** 1.5-2 horas  
-⭐ **Dificultad:** Básico
+⏱️ **Estimated duration:** 1.5-2 hours
+⭐ **Difficulty:** Basic
 
-## 🎯 Objetivos
+## 🎯 Goals
 
-Al completar este ejercicio, podrás:
-- Analizar datasets para entender su estructura y contenido
-- Identificar problemas de calidad básicos (nulls, duplicates,
+By completing this exercise, you will be able to:
+- Analyze datasets to understand their structure and content
+- Identify basic quality problems (nulls, duplicates,
 
  outliers)
-- Generar reportes de profiling automáticos
-- Calcular métricas estadísticas descriptivas
-- Visualizar distribuciones de datos
+- Generate automatic profiling reports
+- Calculate descriptive statistical metrics
+- Visualize data distributions
 
 ## 📚 Conceptos Clave
 
-- **Data Profiling**: Proceso de examinar datos para entender estructura, contenido y calidad
+- **Data Profiling**: Process of examining data to understand structure, content and quality
 - **Descriptive Statistics**: Mean, median, std dev, quartiles
 - **Data Distribution**: Normal, skewed, multimodal
-- **Cardinality**: Número de valores únicos en una columna
+- **Cardinality**: Number of unique values ​​in a column
 - **Missing Data Patterns**: MAR, MCAR, MNAR
 
 ## 📁 Archivos
@@ -45,11 +45,11 @@ python data/scripts/generate_data.py --quality poor
 jupyter notebook exercises/01-data-profiling/exercises.ipynb
 ```
 
-## 📝 Ejercicios
+## 📝 Exercises
 
 ### Parte 1: Profiling Manual con Pandas
 
-**Objetivo**: Implementar funciones de profiling desde cero.
+**Goal**: Implement profiling functions from scratch.
 
 ```python
 import pandas as pd
@@ -63,15 +63,15 @@ products = pd.read_csv('../../data/samples/products_poor.csv')
 
 **Task 1.1: Profiling de Dataset Completo**
 
-Implementa una función que genere un reporte de profiling básico:
+Implement a function that generates a basic profiling report:
 
 ```python
 def profile_dataset(df: pd.DataFrame, name: str) -> dict:
     """
     Genera perfil básico de un DataFrame.
-    
+
     Returns:
-        dict con keys: name, rows, columns, missing_cells, 
+        dict con keys: name, rows, columns, missing_cells,
                       missing_percentage, duplicates, memory_mb
     """
     # TODO: Implementar
@@ -95,20 +95,20 @@ print(profile)
 }
 ```
 
-**Task 1.2: Profiling por Columna**
+**Task 1.2: Profiling por column**
 
-Implementa análisis detallado por columna:
+Implement detailed analysis by column:
 
 ```python
 def profile_column(df: pd.DataFrame, column: str) -> dict:
     """
     Genera perfil detallado de una columna.
-    
+
     Returns:
         dict con stats relevantes según tipo de dato
     """
     series = df[column]
-    
+
     profile = {
         'column': column,
         'dtype': str(series.dtype),
@@ -118,17 +118,17 @@ def profile_column(df: pd.DataFrame, column: str) -> dict:
         'unique': series.nunique(),
         'cardinality_ratio': series.nunique() / len(series)
     }
-    
+
     # Para columnas numéricas
     if pd.api.types.is_numeric_dtype(series):
         # TODO: Agregar stats numéricas (mean, std, min, max, quartiles)
         pass
-    
+
     # Para columnas categóricas
     elif pd.api.types.is_object_dtype(series):
         # TODO: Agregar stats categóricas (mode, top values)
         pass
-    
+
     return profile
 
 # Uso
@@ -138,17 +138,17 @@ amount_profile = profile_column(transactions, 'amount')
 
 **Task 1.3: Detectar Outliers**
 
-Implementa detección de outliers usando IQR y Z-score:
+Implements outlier detection using IQR and Z-score:
 
 ```python
 def detect_outliers_iqr(df: pd.DataFrame, column: str, multiplier: float = 1.5) -> pd.DataFrame:
     """
     Detecta outliers usando método IQR (Interquartile Range).
-    
+
     Args:
         column: Columna numérica a analizar
         multiplier: Multiplicador de IQR (típicamente 1.5 o 3.0)
-    
+
     Returns:
         DataFrame con outliers detectados
     """
@@ -163,11 +163,11 @@ def detect_outliers_iqr(df: pd.DataFrame, column: str, multiplier: float = 1.5) 
 def detect_outliers_zscore(df: pd.DataFrame, column: str, threshold: float = 3.0) -> pd.DataFrame:
     """
     Detecta outliers usando Z-score.
-    
+
     Args:
         column: Columna numérica a analizar
         threshold: Umbral de Z-score (típicamente 3.0)
-    
+
     Returns:
         DataFrame con outliers detectados
     """
@@ -183,17 +183,17 @@ print(f"Outliers por IQR: {len(outliers_iqr)}")
 print(f"Outliers por Z-score: {len(outliers_zscore)}")
 ```
 
-**Task 1.4: Análisis de Missing Data**
+**Task 1.4: Missing Data Analysis**
 
-Analiza patrones de datos faltantes:
+Analyze patterns of missing data:
 
 ```python
 def analyze_missing_patterns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Analiza patrones de missing data.
-    
+
     Returns:
-        DataFrame con columnas: column, missing_count, missing_pct, 
+        DataFrame con columnas: column, missing_count, missing_pct,
                                 missing_pattern
     """
     # TODO: Implementar
@@ -210,7 +210,7 @@ import seaborn as sns
 def visualize_missing(df: pd.DataFrame):
     """Visualiza distribución de missing values."""
     missing_matrix = df.isnull()
-    
+
     plt.figure(figsize=(12, 6))
     sns.heatmap(missing_matrix, cbar=False, yticklabels=False, cmap='viridis')
     plt.title('Missing Values Heatmap')
@@ -223,9 +223,9 @@ visualize_missing(customers)
 
 ---
 
-### Parte 2: Profiling Automático
+### Part 2: Automatic Profiling
 
-**Objetivo**: Usar ydata-profiling para generar reportes completos.
+**Goal**: Use ydata-profiling to generate complete reports.
 
 **Task 2.1: Generar Reporte HTML**
 
@@ -250,7 +250,7 @@ webbrowser.open("customers_profile.html")
 
 **Task 2.2: Comparar Datasets**
 
-Compara datasets con diferentes niveles de calidad:
+Compare datasets with different quality levels:
 
 ```python
 # Generar datasets de diferentes calidades
@@ -275,9 +275,9 @@ comparison.to_file("comparison_report.html")
 
 ---
 
-### Parte 3: Visualización de Distribuciones
+### Part 3: Viewing Distributions
 
-**Objetivo**: Visualizar distribuciones para identificar anomalías.
+**Objective**: Visualize distributions to identify anomalies.
 
 **Task 3.1: Histogramas**
 
@@ -286,19 +286,19 @@ def plot_distributions(df: pd.DataFrame, numeric_columns: list):
     """Plotea distribuciones de columnas numéricas."""
     n_cols = len(numeric_columns)
     fig, axes = plt.subplots(n_cols, 2, figsize=(15, n_cols * 3))
-    
+
     for i, col in enumerate(numeric_columns):
         # Histogram
         axes[i, 0].hist(df[col].dropna(), bins=50, edgecolor='black')
         axes[i, 0].set_title(f'{col} - Distribution')
         axes[i, 0].set_xlabel(col)
         axes[i, 0].set_ylabel('Frequency')
-        
+
         # Box plot
         axes[i, 1].boxplot(df[col].dropna())
         axes[i, 1].set_title(f'{col} - Box Plot')
         axes[i, 1].set_ylabel(col)
-    
+
     plt.tight_layout()
     plt.show()
 
@@ -314,13 +314,13 @@ def plot_correlation_matrix(df: pd.DataFrame):
     """Plotea matriz de correlación."""
     # Select numeric columns only
     numeric_df = df.select_dtypes(include=[np.number])
-    
+
     # Calculate correlation
     corr = numeric_df.corr()
-    
+
     # Plot
     plt.figure(figsize=(10, 8))
-    sns.heatmap(corr, annot=True, cmap='coolwarm', center=0, 
+    sns.heatmap(corr, annot=True, cmap='coolwarm', center=0,
                 square=True, linewidths=1, cbar_kws={"shrink": 0.8})
     plt.title('Correlation Matrix')
     plt.tight_layout()
@@ -333,19 +333,19 @@ plot_correlation_matrix(transactions)
 
 ### Parte 4: Profiling Report Custom
 
-**Objetivo**: Crear tu propio reporte de profiling consolidado.
+**Objective**: Create your own consolidated profiling report.
 
 **Task 4.1: Clase ProfilerReport**
 
 ```python
 class DataQualityProfiler:
     """Profiler personalizado para análisis de calidad."""
-    
+
     def __init__(self, df: pd.DataFrame, name: str):
         self.df = df
         self.name = name
         self.report = {}
-    
+
     def run_full_profile(self):
         """Ejecuta profiling completo."""
         self.report['overview'] = self._profile_overview()
@@ -353,17 +353,17 @@ class DataQualityProfiler:
         self.report['quality_issues'] = self._detect_quality_issues()
         self.report['recommendations'] = self._generate_recommendations()
         return self.report
-    
+
     def _profile_overview(self) -> dict:
         """Overview del dataset."""
         # TODO: Implementar
         pass
-    
+
     def _profile_columns(self) -> list:
         """Perfil de cada columna."""
         # TODO: Implementar
         pass
-    
+
     def _detect_quality_issues(self) -> dict:
         """Detecta problemas de calidad."""
         issues = {
@@ -374,12 +374,12 @@ class DataQualityProfiler:
         }
         # TODO: Implementar detección
         return issues
-    
+
     def _generate_recommendations(self) -> list:
         """Genera recomendaciones de limpieza."""
         # TODO: Basado en issues, sugerir acciones
         pass
-    
+
     def print_report(self):
         """Imprime reporte formateado."""
         print("=" * 70)
@@ -396,9 +396,9 @@ profiler.print_report()
 
 ---
 
-## ✅ Criterios de Éxito
+## ✅ Success Criteria
 
-Has completado exitosamente este ejercicio si:
+You have successfully completed this exercise if:
 
 - [ ] Implementaste todas las funciones de profiling
 - [ ] Generaste reportes HTML con ydata-profiling
@@ -409,19 +409,19 @@ Has completado exitosamente este ejercicio si:
 
 ## 🎓 Conceptos Aprendidos
 
-- Data profiling manual vs automático
-- Métricas estadísticas descriptivas
-- Detección de outliers (IQR, Z-score)
-- Análisis de missing data
-- Visualización de distribuciones
+- Manual vs automatic data profiling
+- Descriptive statistical metrics
+- Outlier detection (IQR, Z-score)
+- Missing data analysis
+- Viewing distributions
 - Correlaciones entre variables
 
-## 📚 Recursos Adicionales
+## 📚 resources Adicionales
 
 - **ydata-profiling docs**: https://docs.profiling.ydata.ai/
 - **Pandas profiling**: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html
 - **Seaborn gallery**: https://seaborn.pydata.org/examples/index.html
 
-## ➡️ Próximo Ejercicio
+## ➡️ Next Exercise
 
-**Exercise 02: Validation Rules** - Implementar reglas de validación personalizadas
+**Exercise 02: Validation Rules** - Implement custom validation rules

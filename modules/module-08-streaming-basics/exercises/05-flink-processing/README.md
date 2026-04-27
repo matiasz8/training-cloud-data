@@ -1,7 +1,7 @@
 # Exercise 05: Apache Flink Processing
 
-**Difficulty**: ⭐⭐⭐ Advanced  
-**Estimated Time**: 3-4 hours  
+**Difficulty**: ⭐⭐⭐ Advanced
+**Estimated Time**: 3-4 hours
 **Prerequisites**: Exercise 01-04 completed
 
 ---
@@ -24,7 +24,7 @@ Master Apache Flink:
 ```
 Source → Transformations → Sink
          ├─ Map
-         ├─ Filter  
+         ├─ Filter
          ├─ KeyBy
          ├─ Window
          └─ Aggregate
@@ -38,7 +38,7 @@ Source → Transformations → Sink
 ```
 Event occurs → Network delay → Flink processes
    t=0              ?              t=5s
-   
+
 Use Event Time for accurate windows!
 ```
 
@@ -79,31 +79,31 @@ def main():
     # Create execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_parallelism(2)
-    
+
     # TODO: Create source
     source = create_kafka_source(
         bootstrap_servers='localhost:9092',
         topic='user-events',
         group_id='flink-consumer'
     )
-    
+
     # TODO: Read stream
     stream = env.from_source(
         source,
         watermark_strategy=...,
         source_name='Kafka Source'
     )
-    
+
     # TODO: Transform
     transformed = stream \
         .map(lambda x: json.loads(x)) \
         .filter(lambda x: x['event_type'] == 'PURCHASE') \
         .map(lambda x: json.dumps(x))
-    
+
     # TODO: Write to sink
     sink = create_kafka_sink('localhost:9092', 'purchases')
     transformed.sink_to(sink)
-    
+
     # Execute job
     env.execute('Simple Flink Job')
 
@@ -137,20 +137,20 @@ class SumAmounts(ReduceFunction):
 
 def main():
     env = StreamExecutionEnvironment.get_execution_environment()
-    
+
     stream = env.from_source(...)
-    
+
     # TODO: Key by user_id
     keyed_stream = stream \
         .map(ParseEvent()) \
         .key_by(lambda x: x['user_id'])
-    
+
     # TODO: Reduce (running sum)
     aggregated = keyed_stream.reduce(SumAmounts())
-    
+
     # Print results
     aggregated.print()
-    
+
     env.execute('Keyed Aggregation')
 
 if __name__ == '__main__':
@@ -173,11 +173,11 @@ class WindowAggregator(ProcessWindowFunction):
     def process(self, key, context, elements):
         total = 0
         count = 0
-        
+
         for element in elements:
             total += element.get('amount', 0)
             count += 1
-        
+
         yield {
             'user_id': key,
             'window_start': context.window().start,
@@ -189,27 +189,27 @@ class WindowAggregator(ProcessWindowFunction):
 
 def main():
     env = StreamExecutionEnvironment.get_execution_environment()
-    
+
     # TODO: Set watermark strategy
     watermark_strategy = WatermarkStrategy \
         .for_monotonous_timestamps() \
         .with_timestamp_assigner(lambda event, ts: event['timestamp'])
-    
+
     stream = env.from_source(
         source=...,
         watermark_strategy=watermark_strategy,
         source_name='...'
     )
-    
+
     # TODO: Windowed aggregation
     windowed = stream \
         .map(ParseEvent()) \
         .key_by(lambda x: x['user_id']) \
         .window(TumblingEventTimeWindows.of(Time.minutes(1))) \
         .process(WindowAggregator())
-    
+
     windowed.print()
-    
+
     env.execute('Windowed Aggregation')
 
 if __name__ == '__main__':
@@ -229,7 +229,7 @@ from pyflink.common.typeinfo import Types
 
 class StatefulProcessor(KeyedProcessFunction):
     """TODO: Process with state"""
-    
+
     def open(self, runtime_context: RuntimeContext):
         """Initialize state"""
         # Value state: stores single value per key
@@ -238,7 +238,7 @@ class StatefulProcessor(KeyedProcessFunction):
             Types.TUPLE([Types.FLOAT(), Types.INT()])  # (total, count)
         )
         self.state = runtime_context.get_state(state_descriptor)
-    
+
     def process_element(self, value, ctx):
         """TODO: Update state and emit result"""
         # Get current state
@@ -247,14 +247,14 @@ class StatefulProcessor(KeyedProcessFunction):
             total, count = 0.0, 0
         else:
             total, count = current
-        
+
         # Update state
         amount = value.get('amount', 0)
         total += amount
         count += 1
-        
+
         self.state.update((total, count))
-        
+
         # Emit result
         yield {
             'user_id': value['user_id'],
@@ -265,14 +265,14 @@ class StatefulProcessor(KeyedProcessFunction):
 
 def main():
     env = StreamExecutionEnvironment.get_execution_environment()
-    
+
     stream = env.from_source(...) \
         .map(ParseEvent()) \
         .key_by(lambda x: x['user_id']) \
         .process(StatefulProcessor())
-    
+
     stream.print()
-    
+
     env.execute('Stateful Processing')
 
 if __name__ == '__main__':
@@ -297,18 +297,18 @@ class EventTimestampAssigner(TimestampAssigner):
 
 def main():
     env = StreamExecutionEnvironment.get_execution_environment()
-    
+
     # TODO: Watermark strategy with allowed lateness
     watermark_strategy = WatermarkStrategy \
         .for_bounded_out_of_orderness(timedelta(seconds=10)) \
         .with_timestamp_assigner(EventTimestampAssigner())
-    
+
     stream = env.from_source(
         source=...,
         watermark_strategy=watermark_strategy,
         source_name='...'
     )
-    
+
     # TODO: Window with allowed lateness
     windowed = stream \
         .map(ParseEvent()) \
@@ -316,14 +316,14 @@ def main():
         .window(TumblingEventTimeWindows.of(Time.minutes(1))) \
         .allowed_lateness(Time.seconds(30)) \
         .process(WindowAggregator())
-    
+
     # TODO: Side output for very late events
     late_output_tag = OutputTag('late-events', Types.STRING())
-    
+
     windowed.get_side_output(late_output_tag).print_to_err()
-    
+
     windowed.print()
-    
+
     env.execute('Late Events Handling')
 
 if __name__ == '__main__':
@@ -341,31 +341,31 @@ from pyflink.datastream.checkpointing_mode import CheckpointingMode
 
 def main():
     env = StreamExecutionEnvironment.get_execution_environment()
-    
+
     # TODO: Enable checkpointing
     env.enable_checkpointing(60000)  # 60 seconds
-    
+
     # TODO: Set checkpointing mode
     env.get_checkpoint_config().set_checkpointing_mode(
         CheckpointingMode.EXACTLY_ONCE
     )
-    
+
     # TODO: Set checkpoint storage
     env.get_checkpoint_config().set_checkpoint_storage(
         'file:///tmp/flink-checkpoints'
     )
-    
+
     # TODO: Set min pause between checkpoints
     env.get_checkpoint_config().set_min_pause_between_checkpoints(30000)
-    
+
     # TODO: Set max concurrent checkpoints
     env.get_checkpoint_config().set_max_concurrent_checkpoints(1)
-    
+
     # TODO: Enable unaligned checkpoints for low latency
     env.get_checkpoint_config().enable_unaligned_checkpoints()
-    
+
     # ... rest of job ...
-    
+
     env.execute('Checkpointed Job')
 
 if __name__ == '__main__':

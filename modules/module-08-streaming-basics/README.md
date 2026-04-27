@@ -1,47 +1,47 @@
-# Módulo 08: Fundamentos de Streaming
+# Module 08: Streaming Fundamentals
 
-Procesamiento de streams en tiempo real listo para producción con Apache Kafka, Flink y AWS Kinesis.
+Production-ready real-time stream processing with Apache Kafka, Flink, and AWS Kinesis.
 
 ---
 
-## 🎯 Descripción General
+## 🎯 General Description
 
-Domina el streaming de datos en tiempo real y construye aplicaciones de streaming de grado productivo. Aprende Apache Kafka para mensajería distribuida, implementa transformaciones de streams con Python, y despliega procesamiento avanzado con Apache Flink.
+Master real-time data streaming and build production-grade streaming applications. Learn Apache Kafka for distributed messaging, implement stream transformations with Python, and deploy advanced processing with Apache Flink.
 
-**Duración**: 4-5 semanas (40-50 horas)  
-**Nivel**: Intermedio a Avanzado  
+**Duration**: 4-5 weeks (40-50 hours)
+**Level**: Intermediate to Advanced
 **Prerequisitos**: Python, Docker, fundamentos de SQL
 
 ---
 
-## 📚 Lo Que Aprenderás
+## 📚 What You Will Learn
 
 ### Conceptos Centrales de Streaming
 - Paradigmas de procesamiento stream vs batch
-- Fundamentos de arquitectura orientada a eventos
-- Arquitectura de Apache Kafka (topics, particiones, grupos de consumidores)
-- Semántica de entrega de mensajes (at-most-once, at-least-once, exactly-once)
+- Fundamentals of event-driven architecture
+- Apache Kafka architecture (topics, partitions, consumer groups)
+- Message delivery semantics (at-most-once, at-least-once, exactly-once)
 - Estrategias de ventanas (tumbling, sliding, session)
-- Gestión de estado en procesamiento de streams
+- State management in stream processing
 
-### Habilidades Técnicas
-- **Kafka**: Productores, consumidores, topics, particionamiento, replicación
-- **Gestión de Esquemas**: Serialización Avro, Schema Registry, evolución de esquemas
-- **Procesamiento de Streams**: Filtrado, mapeo, agregación, joins
+### Technical Skills
+- **Kafka**: Productores, consumidores, topics, particionamiento, replication
+- **Schema Management**: Avro Serialization, Schema Registry, schema evolution
+- **Stream Processing**: Filtering, mapping, aggregation, joins
 - **Apache Flink**: DataStream API, event time, watermarks, checkpointing
 - **AWS Kinesis**: Data Streams, Firehose, consumidores KCL
-- **Patrones de Producción**: Monitoreo, manejo de errores (DLQ), escalado
+- **Production Patterns**: Monitoring, error handling (DLQ), scaling
 
-### Patrones de Arquitectura
+### Architecture Patterns
 - Arquitecturas Lambda vs Kappa
-- Microservicios orientados a eventos
+- Microservices orientados a eventos
 - CQRS (Command Query Responsibility Segregation)
-- Patrón Saga para transacciones distribuidas
+- Saga pattern for distributed transactions
 - Change Data Capture (CDC)
 
 ---
 
-## 🚀 Inicio Rápido
+## 🚀 Quick Start
 
 ### 1. Configurar Ambiente (5 minutos)
 
@@ -50,13 +50,13 @@ cd modules/module-08-streaming-basics
 ./scripts/setup.sh
 \`\`\`
 
-Esto hará:
+This will do:
 - ✅ Iniciar Kafka, Zookeeper, Schema Registry (Docker)
 - ✅ Crear topics (user-events, sensor-readings, transactions)
 - ✅ Generar 300 eventos de ejemplo
-- ✅ Verificar que todos los servicios estén corriendo
+- ✅ Verify that all services are running
 
-### 2. Verificar Instalación
+### 2. Verify Installation
 
 \`\`\`bash
 ./scripts/validate.sh
@@ -66,34 +66,34 @@ Esto hará:
 
 Abre http://localhost:8080 en tu navegador para:
 - Explorar topics y mensajes
-- Monitorear grupos de consumidores
+- monitor grupos de consumidores
 - Ver salud del cluster
 
 ### 4. Comenzar a Aprender
 
-Comienza con [Ejercicio 01: Fundamentos de Kafka](exercises/01-kafka-basics/)
+Start with [Exercise 01: Kafka Basics](exercises/01-kafka-basics/)
 
-Guía completa: [GETTING-STARTED.md](GETTING-STARTED.md)
+Complete guide: [GETTING-STARTED.md](GETTING-STARTED.md)
 
 ---
 
-## ✅ ¡Módulo Completo!
+## ✅ Complete Module!
 
-Este módulo incluye:
-- ✅ **18,500 palabras** de teoría comprensiva
-- ✅ **6 ejercicios progresivos** (Kafka → Flink → Producción)
-- ✅ **Infraestructura basada en Docker** (sin costos de nube)
+This module includes:
+- ✅ **18,500 words** of comprehensive theory
+- ✅ **6 progressive exercises** (Kafka → Flink → Production)
+- ✅ **Infraestructura basada en Docker** (sin costos de cloud)
 - ✅ **3 esquemas Avro** para casos de uso realistas
-- ✅ **Generador de eventos** con 350 líneas de código
-- ✅ **40+ pruebas de validación**
-- ✅ **Scripts de automatización** (setup, validate)
-- ✅ **Referencias rápidas** (Kafka CLI, patrones de streaming)
+- ✅ **Event generator** with 350 lines of code
+- ✅ **40+ validation tests**
+- ✅ **Automation scripts** (setup, validate)
+- ✅ **Quick References** (Kafka CLI, streaming patterns)
 
 Ver [GETTING-STARTED.md](GETTING-STARTED.md) para la ruta de aprendizaje completa.
 
 ---
 
-## 🛠️ Tecnologías
+## 🛠️ Technologies
 
 - Apache Kafka 2.13
 - Apache Flink 1.18
@@ -104,9 +104,9 @@ Ver [GETTING-STARTED.md](GETTING-STARTED.md) para la ruta de aprendizaje complet
 
 ---
 
-## 📖 Documentación
+## 📖 Documentation
 
-- [GETTING-STARTED.md](GETTING-STARTED.md) - Guía completa
+- [GETTING-STARTED.md](GETTING-STARTED.md) - Complete Guide
 - [theory/01-concepts.md](theory/01-concepts.md) - 8K palabras sobre fundamentos
 - [theory/02-architecture.md](theory/02-architecture.md) - 7K palabras sobre Kafka/Flink/Kinesis
 - [theory/03-resources.md](theory/03-resources.md) - 3.5K palabras sobre herramientas y aprendizaje
@@ -115,4 +115,22 @@ Ver [GETTING-STARTED.md](GETTING-STARTED.md) para la ruta de aprendizaje complet
 
 ---
 
-**¿Listo para empezar?** Ejecuta `./scripts/setup.sh` y comienza tu viaje en streaming!
+**Ready to get started?** Run`./scripts/setup.sh` y comienza tu viaje en streaming!
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

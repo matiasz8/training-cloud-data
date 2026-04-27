@@ -71,7 +71,7 @@ echo -e "${YELLOW}[3/7] Checking Schema Registry...${NC}"
 
 if curl -s http://localhost:8081/subjects &> /dev/null; then
     echo -e "  ${GREEN}✓${NC} Schema Registry is accessible"
-    
+
     SUBJECT_COUNT=$(curl -s http://localhost:8081/subjects | jq '. | length')
     echo -e "  ${GREEN}✓${NC} Registered schemas: $SUBJECT_COUNT"
 else
@@ -158,7 +158,7 @@ echo -e "${YELLOW}[6/7] Checking theory content...${NC}"
 check_theory() {
     local FILE=$1
     local MIN_SIZE=$2
-    
+
     if [ -f "$MODULE_DIR/theory/$FILE" ]; then
         local SIZE=$(wc -c < "$MODULE_DIR/theory/$FILE")
         if [ $SIZE -ge $MIN_SIZE ]; then

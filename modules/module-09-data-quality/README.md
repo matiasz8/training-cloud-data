@@ -1,47 +1,47 @@
 # Module 09: Data Quality
 
-⏱️ **Duración estimada:** 15-20 horas  
-🎯 **Nivel:** Intermedio-Avanzado  
-📊 **Estado:** ✅ Completado
+⏱️ **Estimated duration:** 15-20 hours
+🎯 **Level:** Intermediate-Advanced
+📊 **Status:** ✅ Completed
 
-## 📋 Descripción
+## 📋 Description
 
-Módulo completo sobre calidad de datos que cubre las 6 dimensiones de calidad, frameworks empresariales (Great Expectations, Pandera, PyDeequ), detección de anomalías, monitoreo continuo y quality gates en producción.
+Complete module on data quality that covers the 6 dimensions of quality, business frameworks (Great Expectations, Pandera, PyDeequ), anomaly detection, continuous monitoring and quality gates in production.
 
-## 🎯 Objetivos de Aprendizaje
+## 🎯 Learning Objectives
 
-Al completar este módulo, serás capaz de:
+By completing this module, you will be able to:
 
-- ✅ Entender y aplicar las **6 dimensiones de calidad** de datos
-- ✅ Implementar **data profiling** manual y automático
-- ✅ Crear **reglas de validación** personalizadas
+- ✅ Understand and apply the **6 dimensions of data quality**
+- ✅ Implement manual and automatic **data profiling**
+- ✅ Create custom **validation rules**
 - ✅ Dominar **Great Expectations** para validaciones empresariales
-- ✅ Detectar **anomalías** usando métodos estadísticos y ML
-- ✅ Implementar **monitoreo continuo** de calidad
-- ✅ Configurar **quality gates** en pipelines de producción
-- ✅ Gestionar **quarantine zones** y rollback automático
+- ✅ Detect **anomalies** using statistical methods and ML
+- ✅ Implement **continuous quality monitoring**
+- ✅ Configure **quality gates** in production pipelines
+- ✅ Manage **quarantine zones** and automatic rollback
 
-## 📚 Contenido
+## 📚 Content
 
 ### Theory (45,000 palabras)
 
-- **01-concepts.md** - 6 Dimensiones de calidad, profiling, métricas
-- **02-architecture.md** - Great Expectations, Pandera, PyDeequ, patrones de arquitectura
-- **03-resources.md** - Herramientas, cloud services, recursos de aprendizaje
+- **01-concepts.md** - 6 Quality dimensions, profiling, metrics
+- **02-architecture.md** - Great Expectations, Pandera, PyDeequ, architecture patterns
+- **03-resources.md** - Herramientas, cloud services, resources de aprendizaje
 
-### Exercises (6 ejercicios progresivos)
+### Exercises (6 progressive exercises)
 
-1. **Data Profiling** - Profiling manual y automático, detección de outliers
-2. **Validation Rules** - Reglas personalizadas, framework de validación
+1. **Data Profiling** - Manual and automatic profiling, outlier detection
+2. **Validation Rules** - Custom rules, validation framework
 3. **Great Expectations** - Setup, expectation suites, checkpoints, Data Docs
-4. **Anomaly Detection** - Métodos estadísticos y ML, series temporales
-5. **Quality Monitoring** - Métricas continuas, quality drift, alertas
-6. **Production Quality Gates** - Integración con Airflow, circuit breakers, versioning
+4. **Anomaly Detection** - Statistical and ML methods, time series
+5. **Quality Monitoring** - Continuous metrics, quality drift, alerts
+6. **Production Quality Gates** - Integration with Airflow, circuit breakers, versioning
 
 ### Data
 
-- **generate_data.py** - Script para generar datasets con calidad configurable
-- **Schemas** - JSON schemas con qualityRules para 3 tablas
+- **generate_data.py** - Script to generate datasets with configurable quality
+- **Schemas** - JSON schemas con qualityRules para 3 tables
 - **3 quality levels** - clean, medium, poor
 
 ### Validation
@@ -119,9 +119,9 @@ pytest validation/ --cov=. --cov-report=html
 
 - **Files**: 30+ archivos
 - **Documentation**: ~45,000 palabras
-- **Code**: ~2,000 líneas Python
+- **Code**: ~2,000 Python lines
 - **Tests**: 50+ tests
-- **Exercises**: 6 ejercicios progresivos
+- **Exercises**: 6 progressive exercises
 
 ## 🔗 Resources
 
@@ -136,5 +136,15 @@ pytest validation/ --cov=. --cov-report=html
 
 ---
 
-**Status**: ✅ Completado 100%  
+**Status**: ✅ 100% Completed
 **Last Updated**: 2024
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.

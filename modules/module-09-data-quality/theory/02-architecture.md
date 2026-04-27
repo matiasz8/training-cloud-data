@@ -1,33 +1,33 @@
 # Data Quality - Arquitecturas y Frameworks
 
-## Introducción
+## Introduction
 
-Construir un sistema de data quality robusto requiere más que validaciones ad-hoc. Necesitamos **frameworks**, **patrones de arquitectura** y **mejores prácticas** que escalen con nuestros datos. En este documento exploramos las principales herramientas y arquitecturas para implementar data quality en producción.
+Building a robust data quality system requires more than ad-hoc validations. We need **frameworks**, **architecture patterns** and **best practices** that scale with our data. In this document we explore the main tools and architectures to implement data quality in production.
 
 ---
 
 ## Great Expectations Framework
 
-**Great Expectations** es el framework open-source más popular para data quality en Python. Proporciona un lenguaje declarativo para definir "expectations" (expectativas) sobre tus datos y validarlas automáticamente.
+**Great Expectations** is the most popular open-source framework for data quality in Python. Provides a declarative language to define expectations about your data and automatically validate them.
 
 ### Conceptos Clave
 
 **1. Expectations:**
-Aserciones sobre tus datos (ej: "esta columna no debe tener nulls").
+Assertions about your data (e.g. "this column should not have nulls").
 
 **2. Expectation Suites:**
-Colecciones de expectations que definen el contrato de calidad de un dataset.
+Collections of expectations that define the quality contract of a dataset.
 
 **3. Data Docs:**
-Documentación auto-generada con resultados de validaciones.
+Self-generated documentation with validation results.
 
 **4. Checkpoints:**
-Puntos de validación en tu pipeline que ejecutan suites.
+Validation points in your pipeline that execute suites.
 
 **5. Data Context:**
-Configuración central del proyecto GE.
+GE project core configuration.
 
-### Instalación y Setup
+### Installation and Setup
 
 ```bash
 # Instalar Great Expectations
@@ -51,7 +51,7 @@ great_expectations/
 
 ### Creating Expectations
 
-**Método 1: Programáticamente**
+**Method 1: Programmatically**
 
 ```python
 import great_expectations as gx
@@ -98,7 +98,7 @@ validator.expect_column_values_to_be_in_set(
 validator.save_expectation_suite(discard_failed_expectations=False)
 ```
 
-**Método 2: Interactivamente**
+**Method 2: Interactively**
 
 ```bash
 # Crear suite interactivamente
@@ -110,7 +110,7 @@ great_expectations suite new
 # 3. Agregar expectations con autocompletado
 ```
 
-**Método 3: Auto-profiling**
+**Method 3: Auto-profiling**
 
 ```python
 from great_expectations.profile.user_configurable_profiler import (
@@ -199,17 +199,17 @@ from great_expectations.execution_engine import PandasExecutionEngine
 
 class ExpectColumnValuesToBeValidEmail(ColumnMapExpectation):
     """Expect column values to be valid email addresses."""
-    
+
     # Metadata
     map_metric = "column_values.match.email"
     success_keys = ("mostly",)
-    
+
     # Implementation para Pandas
     @classmethod
     def _pandas(cls, column, **kwargs):
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         return column.str.match(email_regex)
-    
+
     # Description
     library_metadata = {
         "maturity": "production",
@@ -264,7 +264,7 @@ else:
 
 ### Data Docs
 
-Great Expectations genera documentación HTML automáticamente:
+Great Expectations generates HTML documentation automatically:
 
 ```python
 # Construir data docs
@@ -276,7 +276,7 @@ context.open_data_docs()
 
 Los Data Docs incluyen:
 - **Overview** de todas las suites
-- **Validation results** con gráficos
+- **Validation results** with graphs
 - **Expectation details** con ejemplos
 - **Historical trends** de quality metrics
 
@@ -291,7 +291,7 @@ import great_expectations as gx
 def validate_data(**context):
     """Task para validar datos con GE."""
     ge_context = gx.get_context()
-    
+
     results = ge_context.run_checkpoint(
         checkpoint_name="daily_transactions_checkpoint",
         batch_request={
@@ -300,23 +300,23 @@ def validate_data(**context):
             }
         }
     )
-    
+
     if not results["success"]:
         raise ValueError("Data quality validation failed!")
-    
+
     return results
 
 with DAG("etl_with_validation", schedule_interval="@daily") as dag:
-    
+
     extract = PythonOperator(...)
-    
+
     validate = PythonOperator(
         task_id="validate_quality",
         python_callable=validate_data
     )
-    
+
     load = PythonOperator(...)
-    
+
     extract >> validate >> load  # Validar antes de load
 ```
 
@@ -328,16 +328,16 @@ version: 2
 models:
   - name: transactions
     description: "Daily transactions"
-    
+
     # dbt tests (se integran con GE)
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 1000
           max_value: 1000000
-      
+
       - dbt_expectations.expect_column_values_to_not_be_null:
           column_name: transaction_id
-    
+
     columns:
       - name: amount
         tests:
@@ -350,15 +350,15 @@ models:
 
 ## PyDeequ (Amazon's Data Quality Library)
 
-**PyDeequ** es un wrapper de Python sobre **Deequ**, la librería de data quality de Amazon construida sobre Apache Spark. Es ideal para datasets grandes.
+**PyDeequ** is a Python wrapper on **Deequ**, Amazon's data quality library built on Apache Spark. It is ideal for large datasets.
 
 ### Key Features
 
 - **Scala-based**: Corre en Spark para big data
-- **Profiling**: Auto-generación de estadísticas
+- **Profiling**: Auto-generation of statistics
 - **Constraints**: Validaciones declarativas
-- **Metrics Repository**: Histórico de métricas
-- **Anomaly Detection**: Detección estadística de anomalías
+- **Metrics Repository**: Metrics history
+- **Anomaly Detection**: Statistical anomaly detection
 
 ### Setup
 
@@ -391,7 +391,7 @@ for col, profile in result.profiles.items():
     print(f"  Completeness: {profile.completeness}")
     print(f"  Approx distinct: {profile.approximateNumDistinctValues}")
     print(f"  Data type: {profile.dataType}")
-    
+
     if profile.dataType == "Integral":
         print(f"  Min: {profile.minimum}")
         print(f"  Max: {profile.maximum}")
@@ -513,7 +513,7 @@ anomalyDetection = (AnomalyDetectionRunner(spark)
 
 ## Pandera: Statistical Data Validation
 
-**Pandera** es una librería de validación de DataFrames con un enfoque en **data contracts** y **type checking** estático.
+**Pandera** is a DataFrames validation library with a focus on **data contracts** and static **type checking**.
 
 ### Key Features
 
@@ -607,12 +607,12 @@ from pandera.typing import Series
 
 class TransactionSchema(DataFrameModel):
     """Schema for transaction data."""
-    
+
     transaction_id: Series[pa.Int64] = pa.Field(unique=True, gt=0)
     customer_id: Series[pa.Int64] = pa.Field(nullable=False)
     amount: Series[pa.Float64] = pa.Field(ge=0, le=1000000)
     status: Series[pa.String] = pa.Field(isin=["pending", "completed", "failed"])
-    
+
     class Config:
         strict = True
         coerce = True  # Auto-convert types
@@ -627,45 +627,45 @@ TransactionSchema.validate(df)
 
 ### 1. Quality Gates en Pipelines
 
-**Concepto:** Puntos de validación que deben pasar antes de continuar.
+**Concept:** Validation points that must be passed before continuing.
 
 ```
 [Extract] → [Gate 1: Schema] → [Transform] → [Gate 2: Business Rules] → [Load] → [Gate 3: Completeness]
 ```
 
-**Implementación:**
+**Implementation:**
 
 ```python
 class DataPipeline:
     """Pipeline con quality gates."""
-    
+
     def __init__(self):
         self.gates = []
         self.data = None
-    
+
     def add_gate(self, name: str, validator: callable):
         """Agrega quality gate."""
         self.gates.append({"name": name, "validator": validator})
         return self
-    
+
     def run(self, input_data: pd.DataFrame):
         """Ejecuta pipeline con gates."""
         self.data = input_data
-        
+
         for gate in self.gates:
             print(f"🚦 Quality Gate: {gate['name']}")
-            
+
             result = gate['validator'](self.data)
-            
+
             if not result['passed']:
                 print(f"❌ GATE FAILED: {gate['name']}")
                 print(f"   Reason: {result['reason']}")
                 raise DataQualityException(
                     f"Quality gate '{gate['name']}' failed"
                 )
-            
+
             print(f"✅ GATE PASSED: {gate['name']}")
-        
+
         return self.data
 
 # Definir gates
@@ -708,7 +708,7 @@ except DataQualityException as e:
 
 ### 2. Data Quality Monitoring
 
-**Arquitectura de monitoreo continuo:**
+**Continuous monitoring architecture:**
 
 ```
 ┌─────────────┐
@@ -731,7 +731,7 @@ except DataQualityException as e:
 └──────────────────┘
 ```
 
-**Implementación con Prometheus:**
+**Implementation with Prometheus:**
 
 ```python
 from prometheus_client import Counter, Gauge, Histogram, start_http_server
@@ -759,7 +759,7 @@ validation_duration = Histogram(
 def validate_with_metrics(df: pd.DataFrame, dataset_name: str):
     """Validación con métricas."""
     start_time = time.time()
-    
+
     try:
         # Run validations
         checks = {
@@ -767,7 +767,7 @@ def validate_with_metrics(df: pd.DataFrame, dataset_name: str):
             'validity': check_validity(df),
             'uniqueness': check_uniqueness(df)
         }
-        
+
         # Record metrics
         for check_type, result in checks.items():
             status = 'success' if result['passed'] else 'failure'
@@ -776,12 +776,12 @@ def validate_with_metrics(df: pd.DataFrame, dataset_name: str):
                 check_type=check_type,
                 status=status
             ).inc()
-            
+
             quality_score.labels(
                 dataset=dataset_name,
                 dimension=check_type
             ).set(result['score'])
-        
+
     finally:
         duration = time.time() - start_time
         validation_duration.labels(dataset=dataset_name).observe(duration)
@@ -800,13 +800,13 @@ rate(data_quality_checks_total{status="failure"}[5m])
   / rate(data_quality_checks_total[5m])
 
 # P95 validation duration
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(data_quality_validation_seconds_bucket[5m]))
 ```
 
 ### 3. Data Contracts
 
-**Concepto:** Contrato formal entre producer y consumer de datos.
+**Concept:** Formal contract between data producer and consumer.
 
 ```yaml
 # data_contract.yaml
@@ -822,19 +822,19 @@ schema:
       nullable: false
       unique: true
       description: "Unique transaction ID"
-    
+
     - name: customer_id
       type: integer
       nullable: false
       description: "Customer ID (foreign key to customers.id)"
-    
+
     - name: amount
       type: decimal(10,2)
       nullable: false
       constraints:
         min: 0
         max: 1000000
-    
+
     - name: timestamp
       type: timestamp
       nullable: false
@@ -859,7 +859,7 @@ consumers:
   - team: analytics
     contact: analytics@company.com
     usage: "Daily reporting dashboard"
-  
+
   - team: ml-platform
     contact: ml@company.com
     usage: "Fraud detection model training"
@@ -887,18 +887,18 @@ def validate_against_contract(df: pd.DataFrame, contract_path: str) -> Dict:
     # Load contract
     with open(contract_path) as f:
         contract_spec = yaml.safe_load(f)
-    
+
     contract = DataContract(**contract_spec)
     violations = []
-    
+
     # Validate schema
     for col_spec in contract.schema['columns']:
         col_name = col_spec['name']
-        
+
         if col_name not in df.columns:
             violations.append(f"Missing column: {col_name}")
             continue
-        
+
         # Check nullability
         if not col_spec.get('nullable', True):
             null_count = df[col_name].isna().sum()
@@ -906,7 +906,7 @@ def validate_against_contract(df: pd.DataFrame, contract_path: str) -> Dict:
                 violations.append(
                     f"{col_name}: {null_count} nulls (not nullable)"
                 )
-        
+
         # Check uniqueness
         if col_spec.get('unique', False):
             dupes = df[col_name].duplicated().sum()
@@ -914,34 +914,34 @@ def validate_against_contract(df: pd.DataFrame, contract_path: str) -> Dict:
                 violations.append(
                     f"{col_name}: {dupes} duplicates (must be unique)"
                 )
-        
+
         # Check constraints
         if 'constraints' in col_spec:
             constraints = col_spec['constraints']
-            
+
             if 'min' in constraints:
                 below_min = (df[col_name] < constraints['min']).sum()
                 if below_min > 0:
                     violations.append(
                         f"{col_name}: {below_min} values < {constraints['min']}"
                     )
-            
+
             if 'max' in constraints:
                 above_max = (df[col_name] > constraints['max']).sum()
                 if above_max > 0:
                     violations.append(
                         f"{col_name}: {above_max} values > {constraints['max']}"
                     )
-    
+
     # Validate quality SLA
     completeness = df.notna().sum().sum() / (df.shape[0] * df.shape[1]) * 100
     sla_completeness = float(contract.quality_sla['completeness'].strip('%'))
-    
+
     if completeness < sla_completeness:
         violations.append(
             f"Completeness {completeness:.1f}% < SLA {sla_completeness}%"
         )
-    
+
     return {
         'contract_version': contract.version,
         'compliant': len(violations) == 0,
@@ -957,7 +957,7 @@ if not result['compliant']:
 
 ### 4. Quarantine Pattern
 
-**Concepto:** Aislar datos de mala calidad sin detener el pipeline.
+**Concept:** Isolate poor quality data without stopping the pipeline.
 
 ```
                     ┌─────────────┐
@@ -978,63 +978,63 @@ if not result['compliant']:
   └──────────────┘                   └─────────────┘
 ```
 
-**Implementación:**
+**Implementation:**
 
 ```python
 class QuarantineHandler:
     """Maneja datos en cuarentena."""
-    
+
     def __init__(self, quarantine_path: str):
         self.quarantine_path = quarantine_path
         self.quarantined_records = []
-    
+
     def process_batch(self, df: pd.DataFrame, validations: List[callable]) -> tuple:
         """Procesa batch separando válidos de cuarentena."""
         valid_mask = pd.Series([True] * len(df))
-        
+
         for validation in validations:
             validation_result = validation(df)
             valid_mask &= validation_result
-        
+
         valid_df = df[valid_mask]
         quarantine_df = df[~valid_mask]
-        
+
         if len(quarantine_df) > 0:
             self._save_to_quarantine(quarantine_df)
             self._send_alert(len(quarantine_df), len(df))
-        
+
         return valid_df, quarantine_df
-    
+
     def _save_to_quarantine(self, df: pd.DataFrame):
         """Guarda datos en cuarentena."""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         path = f"{self.quarantine_path}/quarantine_{timestamp}.parquet"
-        
+
         df['quarantine_timestamp'] = datetime.now()
         df['quarantine_reason'] = 'validation_failed'
-        
+
         df.to_parquet(path)
         self.quarantined_records.append(path)
-        
+
         print(f"📦 {len(df)} records quarantined: {path}")
-    
+
     def _send_alert(self, quarantined_count: int, total_count: int):
         """Alerta sobre datos en cuarentena."""
         rate = (quarantined_count / total_count) * 100
-        
+
         if rate > 10:  # Threshold
             send_pagerduty_alert(
                 f"High quarantine rate: {rate:.1f}% ({quarantined_count}/{total_count})"
             )
-    
+
     def review_quarantine(self) -> pd.DataFrame:
         """Review all quarantined data."""
         all_quarantined = []
-        
+
         for path in self.quarantined_records:
             df = pd.read_parquet(path)
             all_quarantined.append(df)
-        
+
         return pd.concat(all_quarantined, ignore_index=True)
 
 # Uso
@@ -1081,23 +1081,23 @@ class ValidationSeverity:
     INFO = "info"          # Solo log
 
 validations = [
-    {'check': lambda df: df['id'].notna().all(), 
+    {'check': lambda df: df['id'].notna().all(),
      'severity': ValidationSeverity.CRITICAL},
-    
-    {'check': lambda df: (df['amount'] > 0).all(), 
+
+    {'check': lambda df: (df['amount'] > 0).all(),
      'severity': ValidationSeverity.CRITICAL},
-    
-    {'check': lambda df: df['phone'].notna().sum() / len(df) > 0.90, 
+
+    {'check': lambda df: df['phone'].notna().sum() / len(df) > 0.90,
      'severity': ValidationSeverity.WARNING},
-    
-    {'check': lambda df: df['notes'].notna().sum() / len(df) > 0.50, 
+
+    {'check': lambda df: df['notes'].notna().sum() / len(df) > 0.50,
      'severity': ValidationSeverity.INFO},
 ]
 ```
 
 ### 3. Version Control for Expectations
 
-Tratar expectations como código:
+Treat expectations as code:
 
 ```bash
 # Git history de expectation suites
@@ -1152,14 +1152,14 @@ def enforce_rules(df: pd.DataFrame, rules: List[QualityRule]):
 
 ---
 
-## Conclusión
+## Conclusion
 
 Un sistema de data quality robusto requiere:
 1. **Framework adecuado** (Great Expectations, PyDeequ, Pandera)
-2. **Arquitectura bien diseñada** (quality gates, monitoring, contracts)
-3. **Automatización** (CI/CD, alertas, dashboards)
+2. **Well designed architecture** (quality gates, monitoring, contracts)
+3. **Automation** (CI/CD, alerts, dashboards)
 4. **Cultura** (ownership, data contracts, continuous improvement)
 
-En el siguiente documento exploramos herramientas adicionales y recursos de aprendizaje.
+En el siguiente documento exploramos herramientas adicionales y resources de aprendizaje.
 
-➡️ **theory/03-resources.md**: Herramientas y recursos adicionales
+➡️ **theory/03-resources.md**: Herramientas y resources adicionales

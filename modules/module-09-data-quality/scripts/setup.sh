@@ -128,11 +128,11 @@ python3 data/scripts/generate_data.py --quality clean --output data/generated/ >
 
 if [ -f "data/generated/customers_clean.csv" ]; then
     print_success "Clean dataset generated"
-    
+
     print_info "Generating medium quality dataset..."
     python3 data/scripts/generate_data.py --quality medium --output data/generated/ > /dev/null 2>&1
     print_success "Medium quality dataset generated"
-    
+
     print_info "Generating poor quality dataset..."
     python3 data/scripts/generate_data.py --quality poor --output data/generated/ > /dev/null 2>&1
     print_success "Poor quality dataset generated"

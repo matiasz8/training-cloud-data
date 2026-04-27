@@ -73,7 +73,7 @@
     "account_status"
   ],
   "additionalProperties": false,
-  
+
   "qualityRules": {
     "completeness": {
       "critical_columns": ["customer_id", "email", "registration_date"],

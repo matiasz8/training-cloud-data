@@ -1,30 +1,30 @@
 # Exercise 05: Quality Monitoring
 
-⏱️ **Duración estimada:** 2-3 horas  
-⭐⭐⭐⭐ **Dificultad:** Avanzado
+⏱️ **Estimated duration:** 2-3 hours
+⭐⭐⭐⭐ **Difficulty:** Advanced
 
-## 🎯 Objetivos
+## 🎯 Goals
 
-- Implementar métricas de calidad de datos
+- Implement data quality metrics
 - Crear sistema de monitoreo continuo
-- Configurar alertas automáticas
-- Trackear métricas históricas
-- Generar dashboards de calidad
-- Establecer SLAs de calidad
+- Set up automatic alerts
+- Track historical metrics
+- Generate quality dashboards
+- Establish quality SLAs
 
 ## 📚 Conceptos Clave
 
-- **Data Quality Metrics**: Métricas cuantificables de calidad
-- **Quality Monitoring**: Supervisión continua de calidad
-- **SLA (Service Level Agreement)**: Acuerdos de nivel de servicio
-- **Quality Drift**: Degradación gradual de calidad
-- **Data Observability**: Visibilidad completa del estado de datos
+- **Data Quality Metrics**: Quantifiable quality metrics
+- **Quality Monitoring**: Continuous quality monitoring
+- **SLA (Service Level Agreement)**: Acuerdos de nivel de service
+- **Quality Drift**: Gradual degradation of quality
+- **Data Observability**: Complete visibility of data status
 
-## 📝 Ejercicios
+## 📝 Exercises
 
-### Parte 1: Métricas de Calidad
+### Part 1: Quality Metrics
 
-**Task 1.1: Calcular Métricas Básicas**
+**Task 1.1: Calculate Basic Metrics**
 
 ```python
 import pandas as pd
@@ -34,7 +34,7 @@ from typing import Dict
 
 class DataQualityMetrics:
     """Calculador de métricas de calidad."""
-    
+
     @staticmethod
     def completeness(df: pd.DataFrame, column: str = None) -> float:
         """
@@ -47,36 +47,36 @@ class DataQualityMetrics:
             total_cells = df.shape[0] * df.shape[1]
             non_null_cells = total_cells - df.isna().sum().sum()
             return (non_null_cells / total_cells) * 100
-    
+
     @staticmethod
     def uniqueness(df: pd.DataFrame, column: str) -> float:
         """
         Uniqueness = (unique values / total values) * 100
         """
         return (df[column].nunique() / len(df)) * 100
-    
+
     @staticmethod
     def validity(df: pd.DataFrame, column: str, validation_func: callable) -> float:
         """
         Validity = (valid values / total values) * 100
-        
+
         Example:
             validity(df, 'email', lambda x: '@' in str(x))
         """
         valid = df[column].apply(validation_func).sum()
         return (valid / len(df)) * 100
-    
+
     @staticmethod
     def consistency(df: pd.DataFrame, check_func: callable) -> float:
         """
         Consistency = (consistent rows / total rows) * 100
-        
+
         Example:
             consistency(df, lambda row: row['total'] == row['amount'] * row['quantity'])
         """
         consistent = df.apply(check_func, axis=1).sum()
         return (consistent / len(df)) * 100
-    
+
     @staticmethod
     def timeliness(df: pd.DataFrame, date_column: str, max_age_hours: int) -> float:
         """
@@ -84,17 +84,17 @@ class DataQualityMetrics:
         """
         df_copy = df.copy()
         df_copy[date_column] = pd.to_datetime(df_copy[date_column])
-        
+
         age_hours = (datetime.now() - df_copy[date_column]).dt.total_seconds() / 3600
         timely = (age_hours <= max_age_hours).sum()
-        
+
         return (timely / len(df)) * 100
-    
+
     @staticmethod
     def accuracy(df: pd.DataFrame, column: str, reference_values: dict) -> float:
         """
         Accuracy = (accurate values / total values) * 100
-        
+
         Compara con valores de referencia conocidos.
         """
         accurate = df[column].isin(reference_values.keys()).sum()
@@ -132,7 +132,7 @@ print(f"Consistency (total): {consistency_score:.2f}%")
 ```python
 class DataQualityScorer:
     """Calcula score agregado de calidad."""
-    
+
     def __init__(self):
         self.dimension_weights = {
             'completeness': 0.25,
@@ -142,12 +142,12 @@ class DataQualityScorer:
             'timeliness': 0.10
         }
         self.scores = {}
-    
+
     def add_score(self, dimension: str, score: float):
         """Agrega score de una dimensión."""
         self.scores[dimension] = score
         return self
-    
+
     def calculate_overall_score(self) -> float:
         """Calcula score ponderado."""
         weighted_sum = sum(
@@ -155,7 +155,7 @@ class DataQualityScorer:
             for dim, weight in self.dimension_weights.items()
         )
         return weighted_sum
-    
+
     def get_grade(self, score: float) -> str:
         """Convierte score a grado."""
         if score >= 95:
@@ -168,21 +168,21 @@ class DataQualityScorer:
             return "D (Poor)"
         else:
             return "F (Critical)"
-    
+
     def print_report(self):
         """Imprime reporte de calidad."""
         print("=" * 70)
         print("DATA QUALITY SCORE REPORT")
         print("=" * 70)
-        
+
         for dimension, score in self.scores.items():
             weight = self.dimension_weights.get(dimension, 0)
             weighted = score * weight
             print(f"{dimension:20} : {score:6.2f}% (weight: {weight:.2f}, weighted: {weighted:.2f})")
-        
+
         overall = self.calculate_overall_score()
         grade = self.get_grade(overall)
-        
+
         print("-" * 70)
         print(f"{'OVERALL SCORE':20} : {overall:6.2f}%")
         print(f"{'GRADE':20} : {grade}")
@@ -210,7 +210,7 @@ import json
 
 class QualityMonitor:
     """Monitor de calidad de datos."""
-    
+
     def __init__(self, name: str):
         self.name = name
         self.history = []
@@ -222,11 +222,11 @@ class QualityMonitor:
             'consistency': 90.0,
             'timeliness': 85.0
         }
-    
+
     def check_quality(self, df: pd.DataFrame, checks: dict):
         """
         Ejecuta checks de calidad y registra resultados.
-        
+
         Args:
             checks: dict con format {'dimension': score}
         """
@@ -238,11 +238,11 @@ class QualityMonitor:
             'scores': checks,
             'alerts': []
         }
-        
+
         # Verificar thresholds
         for dimension, score in checks.items():
             threshold = self.thresholds.get(dimension)
-            
+
             if threshold and score < threshold:
                 alert = {
                     'dimension': dimension,
@@ -252,10 +252,10 @@ class QualityMonitor:
                 }
                 results['alerts'].append(alert)
                 self.alerts.append({**alert, 'timestamp': timestamp})
-        
+
         self.history.append(results)
         return results
-    
+
     def _get_severity(self, score: float, threshold: float) -> str:
         """Determina severidad de la alerta."""
         diff = threshold - score
@@ -265,17 +265,17 @@ class QualityMonitor:
             return 'warning'
         else:
             return 'info'
-    
+
     def get_history(self, hours: int = 24) -> list:
         """Retorna historial de últimas N horas."""
         cutoff = datetime.now() - timedelta(hours=hours)
         return [h for h in self.history if h['timestamp'] >= cutoff]
-    
+
     def get_active_alerts(self, hours: int = 24) -> list:
         """Retorna alertas activas."""
         cutoff = datetime.now() - timedelta(hours=hours)
         return [a for a in self.alerts if a['timestamp'] >= cutoff]
-    
+
     def export_metrics(self, filepath: str):
         """Exporta métricas para análisis externo."""
         with open(filepath, 'w') as f:
@@ -289,7 +289,7 @@ import time
 
 for i in range(5):
     print(f"\n--- Check {i+1} ---")
-    
+
     # Calcular métricas actuales
     checks = {
         'completeness': np.random.uniform(90, 100),
@@ -298,17 +298,17 @@ for i in range(5):
         'consistency': np.random.uniform(88, 100),
         'timeliness': np.random.uniform(80, 100)
     }
-    
+
     # Ejecutar check
     results = monitor.check_quality(transactions, checks)
-    
+
     # Mostrar resultados
     print(f"Scores: {results['scores']}")
     if results['alerts']:
         print(f"⚠️ Alerts: {len(results['alerts'])}")
         for alert in results['alerts']:
             print(f"  - {alert['dimension']}: {alert['score']:.2f}% < {alert['threshold']}% ({alert['severity']})")
-    
+
     time.sleep(1)  # Esperar 1 segundo
 
 # Ver historial
@@ -322,33 +322,33 @@ print(f"Active alerts: {len(monitor.get_active_alerts())}")
 ```python
 class QualityDriftDetector:
     """Detecta degradación de calidad con el tiempo."""
-    
+
     def __init__(self, window_size: int = 10):
         self.window_size = window_size
-    
+
     def detect_drift(self, history: list, dimension: str) -> dict:
         """
         Detecta drift comparando promedio reciente vs histórico.
         """
         if len(history) < self.window_size * 2:
             return {'drift_detected': False, 'message': 'Insufficient history'}
-        
+
         # Extraer scores de la dimensión
         scores = [h['scores'].get(dimension, 0) for h in history]
-        
+
         # Recent vs historical
         recent_scores = scores[-self.window_size:]
         historical_scores = scores[:-self.window_size]
-        
+
         recent_mean = np.mean(recent_scores)
         historical_mean = np.mean(historical_scores)
-        
+
         # Calcular drift
         drift_pct = ((recent_mean - historical_mean) / historical_mean) * 100
-        
+
         # Threshold: -5% es significativo
         drift_detected = drift_pct < -5
-        
+
         return {
             'drift_detected': drift_detected,
             'dimension': dimension,
@@ -385,15 +385,15 @@ class AlertSeverity(Enum):
 
 class AlertManager:
     """Gestor de alertas."""
-    
+
     def __init__(self):
         self.alert_handlers = []
-    
+
     def add_handler(self, handler: callable):
         """Agrega handler de alertas."""
         self.alert_handlers.append(handler)
         return self
-    
+
     def send_alert(self, severity: AlertSeverity, message: str, metadata: dict = None):
         """Envía alerta a todos los handlers."""
         alert = {
@@ -402,7 +402,7 @@ class AlertManager:
             'message': message,
             'metadata': metadata or {}
         }
-        
+
         for handler in self.alert_handlers:
             try:
                 handler(alert)
@@ -462,22 +462,22 @@ alert_manager.send_alert(
 ```python
 def generate_quality_dashboard(monitor: QualityMonitor, output_file: str = 'quality_dashboard.html'):
     """Genera dashboard HTML de calidad."""
-    
+
     history = monitor.get_history(hours=24)
-    
+
     if not history:
         print("No history available")
         return
-    
+
     # Preparar datos para gráficos
     timestamps = [h['timestamp'].strftime('%H:%M') for h in history]
-    
+
     dimensions = list(history[0]['scores'].keys())
     dimension_data = {
         dim: [h['scores'].get(dim, 0) for h in history]
         for dim in dimensions
     }
-    
+
     # HTML template
     html = f"""
     <!DOCTYPE html>
@@ -501,10 +501,10 @@ def generate_quality_dashboard(monitor: QualityMonitor, output_file: str = 'qual
             <h1>Data Quality Dashboard - {monitor.name}</h1>
             <p>Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>
-        
+
         <div class="metrics">
     """
-    
+
     # Current scores (latest check)
     latest = history[-1]
     for dim, score in latest['scores'].items():
@@ -516,11 +516,11 @@ def generate_quality_dashboard(monitor: QualityMonitor, output_file: str = 'qual
                 <div class="metric-label">{dim.capitalize()} {status}</div>
             </div>
         """
-    
+
     html += """
         </div>
     """
-    
+
     # Active alerts
     active_alerts = monitor.get_active_alerts(hours=24)
     if active_alerts:
@@ -533,17 +533,17 @@ def generate_quality_dashboard(monitor: QualityMonitor, output_file: str = 'qual
         html += """
         </div>
         """
-    
+
     # Time series chart
     html += """
         <div class="chart">
             <h2>Quality Trends (Last 24 Hours)</h2>
             <div id="trendsChart"></div>
         </div>
-        
+
         <script>
     """
-    
+
     # Plot.ly data
     traces = []
     for dim, values in dimension_data.items():
@@ -554,7 +554,7 @@ def generate_quality_dashboard(monitor: QualityMonitor, output_file: str = 'qual
             'type': 'scatter',
             'mode': 'lines+markers'
         })
-    
+
     html += f"""
         var data = {json.dumps(traces)};
         var layout = {{
@@ -567,11 +567,11 @@ def generate_quality_dashboard(monitor: QualityMonitor, output_file: str = 'qual
     </body>
     </html>
     """
-    
+
     # Write file
     with open(output_file, 'w') as f:
         f.write(html)
-    
+
     print(f"✅ Dashboard generated: {output_file}")
 
 # Uso
@@ -580,14 +580,14 @@ generate_quality_dashboard(monitor, 'quality_dashboard.html')
 
 ---
 
-## ✅ Criterios de Éxito
+## ✅ Success Criteria
 
-- [ ] Calculaste métricas de calidad (6 dimensiones)
+- [ ] You calculated quality metrics (6 dimensions)
 - [ ] Implementaste sistema de monitoreo continuo
 - [ ] Detectaste quality drift
-- [ ] Configuraste alertas automáticas
-- [ ] Generaste dashboard de calidad
-- [ ] Exportaste métricas históricas
+- [ ] You set up automatic alerts
+- [ ] You generated quality dashboard
+- [ ] You exported historical metrics
 
 ## 🎓 Conceptos Aprendidos
 
@@ -598,12 +598,12 @@ generate_quality_dashboard(monitor, 'quality_dashboard.html')
 - SLA tracking
 - Data observability
 
-## 📚 Recursos
+## 📚 resources
 
 - **Prometheus**: https://prometheus.io/
 - **Grafana**: https://grafana.com/
 - **DataDog Data Quality**: https://www.datadoghq.com/
 
-## ➡️ Próximo Ejercicio
+## ➡️ Next Exercise
 
 **Exercise 06: Production Quality Gates** - Implementar gates en pipelines productivos

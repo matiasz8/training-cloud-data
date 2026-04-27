@@ -12,7 +12,7 @@ Common patterns for stream processing applications.
 ```python
 for message in consumer:
     event = message.value
-    
+
     # Filter condition
     if event['amount'] > 100:
         process_high_value_event(event)
@@ -32,14 +32,14 @@ user_profiles = load_profiles()  # Lookup table
 
 for message in consumer:
     event = message.value
-    
+
     # Enrich with profile data
     enriched = {
         **event,
         'user_tier': user_profiles[event['user_id']]['tier'],
         'user_country': user_profiles[event['user_id']]['country']
     }
-    
+
     producer.send('enriched-events', enriched)
 ```
 
@@ -58,21 +58,21 @@ state = {}  # user_id -> {'count': int, 'total': float}
 for message in consumer:
     event = message.value
     user_id = event['user_id']
-    
+
     # Update state
     if user_id not in state:
         state[user_id] = {'count': 0, 'total': 0}
-    
+
     state[user_id]['count'] += 1
     state[user_id]['total'] += event['amount']
-    
+
     # Emit aggregate
     aggregate = {
         'user_id': user_id,
         **state[user_id],
         'average': state[user_id]['total'] / state[user_id]['count']
     }
-    
+
     producer.send('user-aggregates', aggregate)
 ```
 
@@ -97,11 +97,11 @@ def get_window_key(timestamp_ms):
 for message in consumer:
     event = message.value
     window_key = get_window_key(event['timestamp'])
-    
+
     # Update window
     windows[window_key]['count'] += 1
     windows[window_key]['total'] += event['amount']
-    
+
     # Emit completed windows
     current_window = get_window_key(int(time.time() * 1000))
     for w_key in list(windows.keys()):
@@ -125,7 +125,7 @@ products = load_products()  # product_id -> product data
 
 for message in consumer:
     event = message.value
-    
+
     # Join with product
     product = products.get(event['product_id'], {})
     joined = {
@@ -134,7 +134,7 @@ for message in consumer:
         'product_category': product.get('category'),
         'product_price': product.get('price')
     }
-    
+
     producer.send('joined-events', joined)
 ```
 
@@ -159,10 +159,10 @@ def find_matching_event(event, buffer, match_key, time_window_sec=60):
 # Join streams
 for message in consumer_a:
     event_a = message.value
-    
+
     # Find matching event in stream B
     event_b = find_matching_event(event_a, stream_b_buffer, 'user_id')
-    
+
     if event_b:
         joined = {**event_a, **event_b}
         producer.send('joined-stream', joined)
@@ -194,7 +194,7 @@ def is_session_active(session_events, new_event_time):
 for message in consumer:
     event = message.value
     session_id = event['session_id']
-    
+
     if is_session_active(sessions[session_id], event['timestamp']):
         # Add to existing session
         sessions[session_id].append(event)
@@ -202,7 +202,7 @@ for message in consumer:
         # Close old session
         if sessions[session_id]:
             emit_session(session_id, sessions[session_id])
-        
+
         # Start new session
         sessions[session_id] = [event]
 ```
@@ -225,15 +225,15 @@ seen_queue = deque(maxlen=10000)  # Keep last 10K IDs
 for message in consumer:
     event = message.value
     event_id = event['event_id']
-    
+
     if event_id not in seen_ids:
         # New event, process it
         process(event)
-        
+
         # Track ID
         seen_ids.add(event_id)
         seen_queue.append(event_id)
-        
+
         # Remove oldest if needed
         if len(seen_ids) > 10000:
             oldest_id = seen_queue.popleft()
@@ -254,7 +254,7 @@ dlq_producer = KafkaProducer(...)
 
 for message in consumer:
     event = message.value
-    
+
     try:
         process(event)
         consumer.commit()
@@ -285,7 +285,7 @@ for message in consumer:
 ```python
 for message in consumer:
     event = message.value
-    
+
     # Send to multiple topics
     if event['event_type'] == 'PURCHASE':
         producer.send('analytics-events', event)
@@ -310,7 +310,7 @@ sleep_time = 1.0 / rate_limit
 
 for message in consumer:
     event = message.value
-    
+
     process(event)
     time.sleep(sleep_time)
 ```
@@ -330,11 +330,11 @@ for message in consumer:
 
 for message in consumer:
     change = message.value
-    
+
     operation = change['op']  # c=create, u=update, d=delete
     before = change.get('before', {})
     after = change.get('after', {})
-    
+
     if operation == 'c':
         handle_insert(after)
     elif operation == 'u':
@@ -365,7 +365,7 @@ materialized_view = {}
 
 for message in consumer:
     command = message.value
-    
+
     if command['type'] == 'UpdateUser':
         user_id = command['user_id']
         materialized_view[user_id] = command
@@ -384,7 +384,7 @@ for message in consumer:
 # Choreography-based saga
 for message in consumer:
     event = message.value
-    
+
     if event['type'] == 'OrderCreated':
         # Reserve inventory
         producer.send('inventory-commands', {
@@ -392,7 +392,7 @@ for message in consumer:
             'order_id': event['order_id'],
             'items': event['items']
         })
-    
+
     elif event['type'] == 'InventoryReserved':
         # Process payment
         producer.send('payment-commands', {
@@ -400,7 +400,7 @@ for message in consumer:
             'order_id': event['order_id'],
             'amount': event['amount']
         })
-    
+
     elif event['type'] == 'PaymentFailed':
         # Compensate: release inventory
         producer.send('inventory-commands', {

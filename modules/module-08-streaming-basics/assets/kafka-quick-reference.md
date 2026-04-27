@@ -277,7 +277,7 @@ except Exception:
 batch = []
 for message in consumer:
     batch.append(message.value)
-    
+
     if len(batch) >= 100:
         process_batch(batch)
         consumer.commit()

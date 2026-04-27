@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import sys
-import os
 
 # Add module root to path
 module_root = Path(__file__).parent.parent
@@ -47,7 +46,7 @@ def sample_customers():
     """Generate sample customer data."""
     np.random.seed(42)
     n = 100
-    
+
     return pd.DataFrame({
         'customer_id': range(1, n + 1),
         'email': [f'user{i}@example.com' for i in range(1, n + 1)],
@@ -66,7 +65,7 @@ def sample_transactions():
     """Generate sample transaction data."""
     np.random.seed(42)
     n = 200
-    
+
     df = pd.DataFrame({
         'transaction_id': range(1, n + 1),
         'customer_id': np.random.randint(1, 101, n),
@@ -77,10 +76,10 @@ def sample_transactions():
         'payment_method': np.random.choice(['credit_card', 'debit_card', 'paypal'], n),
         'transaction_date': pd.date_range('2024-01-01', periods=n, freq='H')
     })
-    
+
     # Add calculated field
     df['total'] = df['amount'] * df['quantity']
-    
+
     return df
 
 
@@ -89,7 +88,7 @@ def sample_products():
     """Generate sample product data."""
     np.random.seed(42)
     n = 50
-    
+
     return pd.DataFrame({
         'product_id': range(1, n + 1),
         'product_name': [f'Product {i}' for i in range(1, n + 1)],
@@ -106,19 +105,19 @@ def dirty_data():
     """Generate data with quality issues."""
     np.random.seed(42)
     n = 100
-    
+
     df = pd.DataFrame({
         'id': list(range(1, n + 1)) + [5, 10],  # Duplicates
-        'email': [f'user{i}@example.com' if i % 10 != 0 else 'invalid-email' 
+        'email': [f'user{i}@example.com' if i % 10 != 0 else 'invalid-email'
                  for i in range(1, n + 3)],
-        'amount': [np.random.uniform(0, 1000) if i % 15 != 0 else -10 
+        'amount': [np.random.uniform(0, 1000) if i % 15 != 0 else -10
                   for i in range(1, n + 3)],
-        'status': [np.random.choice(['active', 'inactive']) if i % 20 != 0 else 'unknown' 
+        'status': [np.random.choice(['active', 'inactive']) if i % 20 != 0 else 'unknown'
                   for i in range(1, n + 3)],
-        'quantity': [np.random.randint(1, 10) if i % 12 != 0 else None 
+        'quantity': [np.random.randint(1, 10) if i % 12 != 0 else None
                     for i in range(1, n + 3)]
     })
-    
+
     return df
 
 
@@ -130,17 +129,17 @@ def dirty_data():
 def ge_data_context(tmp_path_factory):
     """Create temporary Great Expectations context."""
     import great_expectations as gx
-    
+
     # Create temporary directory for GE
     temp_dir = tmp_path_factory.mktemp("ge_context")
     context_root_dir = str(temp_dir)
-    
+
     # Initialize context
     context = gx.get_context(
         project_root_dir=context_root_dir,
         mode="file"
     )
-    
+
     return context
 
 
@@ -148,10 +147,10 @@ def ge_data_context(tmp_path_factory):
 def ge_validator(ge_data_context, sample_transactions):
     """Create GE validator with sample data."""
     from great_expectations.core.batch import RuntimeBatchRequest
-    
+
     # Add datasource
     datasource = ge_data_context.sources.add_pandas("test_datasource")
-    
+
     # Create batch request
     batch_request = RuntimeBatchRequest(
         datasource_name="test_datasource",
@@ -159,17 +158,17 @@ def ge_validator(ge_data_context, sample_transactions):
         runtime_parameters={"batch_data": sample_transactions},
         batch_identifiers={"default_identifier_name": "default"},
     )
-    
+
     # Create expectation suite
     suite_name = "test_suite"
     ge_data_context.add_expectation_suite(suite_name)
-    
+
     # Get validator
     validator = ge_data_context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name
     )
-    
+
     return validator
 
 
@@ -189,16 +188,16 @@ def quality_metrics_calculator():
                 total_cells = df.shape[0] * df.shape[1]
                 non_null_cells = total_cells - df.isna().sum().sum()
                 return (non_null_cells / total_cells) * 100
-        
+
         @staticmethod
         def uniqueness(df: pd.DataFrame, column: str) -> float:
             return (df[column].nunique() / len(df)) * 100
-        
+
         @staticmethod
         def validity(df: pd.DataFrame, column: str, validation_func) -> float:
             valid = df[column].apply(validation_func).sum()
             return (valid / len(df)) * 100
-    
+
     return DataQualityMetrics()
 
 

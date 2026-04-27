@@ -202,7 +202,7 @@ print_section "Step 7: Data generation verification..."
 
 if [ -f "data/scripts/generate_data.py" ]; then
     print_info "Testing data generation script..."
-    
+
     if python3 data/scripts/generate_data.py --quality clean --output /tmp/test_data 2>&1 | grep -q "Summary"; then
         print_success "Data generation script works"
         rm -rf /tmp/test_data

@@ -61,7 +61,7 @@
     "is_active"
   ],
   "additionalProperties": false,
-  
+
   "qualityRules": {
     "completeness": {
       "critical_columns": ["product_id", "product_name", "price", "category"],

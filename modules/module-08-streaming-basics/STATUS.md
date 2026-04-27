@@ -1,48 +1,48 @@
-# Módulo 08: Fundamentos de Streaming - Estado
+# Module 08: Streaming Fundamentals - State
 
-**Última Actualización**: 2025-01-01  
+**Last Update**: 2025-01-01
 **Estado**: ✅ **COMPLETO**
 
 ---
 
 ## Resumen de Progreso
 
-| Componente | Estado | Archivos | Contenido |
+| Component | Status | Files | Content |
 |-----------|--------|-------|---------|
-| Teoría | ✅ Completo | 3 archivos | ~18,500 palabras |
+| Theory | ✅ Complete | 3 files | ~18,500 words |
 | Infraestructura | ✅ Completo | 1 archivo | Docker Compose |
-| Esquemas de Datos | ✅ Completo | 3 esquemas | Avro |
-| Generación de Datos | ✅ Completo | 2 archivos | 350+ líneas |
-| Ejercicios | ✅ Completo | 6 ejercicios | READMEs + guías |
-| Validación | ✅ Completo | 3 archivos | 40+ pruebas |
+| Data Schemes | ✅ Complete | 3 schemes | Avro |
+| Data Generation | ✅ Complete | 2 files | 350+ lines |
+| Exercises | ✅ Complete | 6 exercises | READMEs + guides |
+| Validation | ✅ Complete | 3 files | 40+ tests |
 | Scripts | ✅ Completo | 2 scripts | Setup + Validate |
-| Recursos | ✅ Completo | 3 archivos | Referencias |
-| Documentación | ✅ Completo | 3 archivos | README + Guías |
+| resources | ✅ Completo | 3 archivos | Referencias |
+| Documentation | ✅ Complete | 3 files | README + Guides |
 
-**Completitud General del Módulo**: ✅ **100%**
+**General Module Completeness**: ✅ **100%**
 
 ---
 
-## El Módulo Incluye
+## The Module Includes
 
-- ✅ **18,500 palabras** de teoría (Kafka, Flink, Kinesis)
-- ✅ **6 ejercicios progresivos** (2-4 horas cada uno)
+- ✅ **18,500 words** of theory (Kafka, Flink, Kinesis)
+- ✅ **6 progressive exercises** (2-4 hours each)
 - ✅ **Infraestructura Docker** (Kafka, Zookeeper, Schema Registry, UI)
-- ✅ **3 esquemas Avro** (eventos de usuario, lecturas de sensores, transacciones)
-- ✅ **Generador de eventos** (350 líneas con distribuciones realistas)
-- ✅ **40+ pruebas de validación** (unitarias, integración, rendimiento)
-- ✅ **Scripts de automatización** (setup.sh, validate.sh)
-- ✅ **Referencias rápidas** (Kafka CLI, patrones de streaming)
+- ✅ **3 esquemas Avro** (eventos de usuario, lecturas de sensores, transactions)
+- ✅ **Event generator** (350 lines with realistic distributions)
+- ✅ **40+ validation tests** (unitary, integration, performance)
+- ✅ **Automation scripts** (setup.sh, validate.sh)
+- ✅ **Quick References** (Kafka CLI, streaming patterns)
 
 ---
 
-## Listo Para Uso en Producción
+## Ready for Production Use
 
 Los estudiantes pueden:
 1. Ejecutar `./scripts/setup.sh` para inicializar
-2. Completar 6 ejercicios prácticos
+2. Complete 6 practical exercises
 3. Aprender Kafka, Flink, Kinesis
-4. Implementar patrones de producción
+4. Implement production patterns
 5. Construir aplicaciones de streaming del mundo real
 
-**Estado del Módulo**: ✅ **LISTO PARA PRODUCCIÓN**
+**Module Status**: ✅ **READY FOR PRODUCTION**

@@ -1,7 +1,7 @@
 # Exercise 01: Kafka Basics
 
-**Difficulty**: ⭐ Beginner  
-**Estimated Time**: 2-3 hours  
+**Difficulty**: ⭐ Beginner
+**Estimated Time**: 2-3 hours
 **Prerequisites**: Docker, Python 3.8+
 
 ---
@@ -109,15 +109,15 @@ class SimpleProducer:
             bootstrap_servers=bootstrap_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8')
         )
-    
+
     def send_event(self, topic: str, event: dict) -> None:
         """TODO: Send event to Kafka topic"""
         pass
-    
+
     def send_with_key(self, topic: str, key: str, event: dict) -> None:
         """TODO: Send event with key (for partitioning)"""
         pass
-    
+
     def close(self):
         self.producer.flush()
         self.producer.close()
@@ -152,7 +152,7 @@ from kafka import KafkaConsumer
 import json
 
 class SimpleConsumer:
-    def __init__(self, topic: str, group_id: str, 
+    def __init__(self, topic: str, group_id: str,
                  bootstrap_servers=['localhost:9092']):
         self.consumer = KafkaConsumer(
             topic,
@@ -162,11 +162,11 @@ class SimpleConsumer:
             auto_offset_reset='earliest',
             enable_auto_commit=True
         )
-    
+
     def consume(self, process_fn):
         """TODO: Consume messages and apply process_fn"""
         pass
-    
+
     def close(self):
         self.consumer.close()
 ```
@@ -223,7 +223,7 @@ for message in consumer:
     try:
         event = message.value
         process_event(event)
-        
+
         # Commit only if successful
         consumer.commit()
     except Exception as e:

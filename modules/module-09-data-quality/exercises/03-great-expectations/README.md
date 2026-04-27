@@ -1,24 +1,24 @@
 # Exercise 03: Great Expectations
 
-⏱️ **Duración estimada:** 2-3 horas  
-⭐⭐⭐ **Dificultad:** Intermedio
+⏱️ **Estimated duration:** 2-3 hours
+⭐⭐⭐ **Difficulty:** Intermediate
 
-## 🎯 Objetivos
+## 🎯 Goals
 
 - Configurar Great Expectations en un proyecto
 - Crear Expectation Suites
 - Ejecutar validaciones con Checkpoints
-- Generar Data Docs automáticos
-- Integrar GE en pipelines de datos
+- Generate automatic Data Docs
+- Integrate GE into data pipelines
 - Crear custom expectations
 
 ## 📚 Conceptos Clave
 
-- **Expectations**: Aserciones sobre datos
+- **Expectations**: Assertions about data
 - **Expectation Suites**: Colecciones de expectations
-- **Checkpoints**: Puntos de validación en pipeline
-- **Data Docs**: Documentación auto-generada
-- **Data Context**: Configuración de GE
+- **Checkpoints**: Validation points in pipeline
+- **Data Docs**: Auto-generated documentation
+- **Data Context**: GE Configuration
 
 ## 🚀 Setup
 
@@ -40,9 +40,9 @@ great_expectations init
 #     └── validations/              # Validation results
 ```
 
-## 📝 Ejercicios
+## 📝 Exercises
 
-### Parte 1: Setup y Configuración
+### Part 1: Setup and Configuration
 
 **Task 1.1: Crear Datasource**
 
@@ -59,7 +59,7 @@ datasource = context.sources.add_pandas("ecommerce_datasource")
 print("✅ Datasource creado")
 ```
 
-**Task 1.2: Crear Expectation Suite - Programáticamente**
+**Task 1.2: Create Expectation Suite - Programmatically**
 
 ```python
 # Crear suite vacía
@@ -170,7 +170,7 @@ if results["success"]:
     print("✅ Todas las validaciones pasaron")
 else:
     print("❌ Algunas validaciones fallaron")
-    
+
     # Ver failures
     for result in results["results"]:
         if not result["success"]:
@@ -220,11 +220,11 @@ if results["success"]:
     print("✅ Checkpoint passed")
 else:
     print("❌ Checkpoint failed")
-    
+
     # Detalles de failures
     for run_result in results.run_results.values():
         validation_result = run_result["validation_result"]
-        
+
         for result in validation_result["results"]:
             if not result["success"]:
                 print(f"\nFailed Expectation:")
@@ -277,10 +277,10 @@ import re
 
 class ExpectColumnValuesToBeValidEmail(ColumnMapExpectation):
     """Expect column values to be valid email addresses."""
-    
+
     map_metric = "column_values.match_email_pattern"
     success_keys = ("mostly",)
-    
+
     @classmethod
     def _pandas(cls, column, **kwargs):
         """Pandas implementation."""
@@ -311,17 +311,17 @@ pass
 
 ---
 
-### Parte 5: Integración en Pipeline
+### Part 5: pipeline integration
 
-**Task 5.1: Pipeline con Quality Gates**
+**Task 5.1: pipeline con Quality Gates**
 
 ```python
 def data_pipeline_with_quality_gates():
     """Pipeline con validaciones GE integradas."""
-    
+
     print("Step 1: Extract")
     raw_data = extract_from_source()
-    
+
     print("Step 2: Validate Raw Data")
     raw_validation = context.run_checkpoint(
         checkpoint_name="raw_data_checkpoint",
@@ -330,13 +330,13 @@ def data_pipeline_with_quality_gates():
             "batch_identifiers": {"default_identifier_name": "raw"},
         },
     )
-    
+
     if not raw_validation["success"]:
         raise ValueError("Raw data validation failed!")
-    
+
     print("Step 3: Transform")
     transformed_data = transform(raw_data)
-    
+
     print("Step 4: Validate Transformed Data")
     transformed_validation = context.run_checkpoint(
         checkpoint_name="transformed_data_checkpoint",
@@ -345,13 +345,13 @@ def data_pipeline_with_quality_gates():
             "batch_identifiers": {"default_identifier_name": "transformed"},
         },
     )
-    
+
     if not transformed_validation["success"]:
         raise ValueError("Transformed data validation failed!")
-    
+
     print("Step 5: Load")
     load_to_warehouse(transformed_data)
-    
+
     print("✅ Pipeline completed successfully")
 
 # Ejecutar pipeline
@@ -372,7 +372,7 @@ import great_expectations as gx
 def run_ge_validation(**context):
     """Airflow task para ejecutar validación GE."""
     ge_context = gx.get_context()
-    
+
     results = ge_context.run_checkpoint(
         checkpoint_name="daily_transactions_checkpoint",
         batch_request={
@@ -381,33 +381,33 @@ def run_ge_validation(**context):
             }
         }
     )
-    
+
     if not results["success"]:
         raise AirflowException("Data quality validation failed!")
-    
+
     return results
 
 with DAG("etl_with_ge_validation", schedule_interval="@daily") as dag:
-    
+
     extract = PythonOperator(task_id="extract", python_callable=extract_data)
-    
+
     validate = PythonOperator(
         task_id="validate_quality",
         python_callable=run_ge_validation,
         provide_context=True
     )
-    
+
     load = PythonOperator(task_id="load", python_callable=load_data)
-    
+
     extract >> validate >> load
 ```
 
 ---
 
-## ✅ Criterios de Éxito
+## ✅ Success Criteria
 
 - [ ] Configuraste Great Expectations
-- [ ] Creaste expectation suites para 3 tablas
+- [ ] Creaste expectation suites para 3 tables
 - [ ] Ejecutaste validaciones con checkpoints
 - [ ] Generaste Data Docs
 - [ ] Creaste custom expectations
@@ -420,14 +420,14 @@ with DAG("etl_with_ge_validation", schedule_interval="@daily") as dag:
 - Checkpoints y validations
 - Data Docs generation
 - Custom expectations
-- Pipeline integration
+- pipeline integration
 
-## 📚 Recursos
+## 📚 resources
 
 - **GE Docs**: https://docs.greatexpectations.io/
 - **Expectations Gallery**: https://greatexpectations.io/expectations/
 - **Tutorials**: https://docs.greatexpectations.io/docs/tutorials/
 
-## ➡️ Próximo Ejercicio
+## ➡️ Next Exercise
 
-**Exercise 04: Anomaly Detection** - Detectar anomalías estadísticas
+**Exercise 04: Anomaly Detection** - Detect statistical anomalies

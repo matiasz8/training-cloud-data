@@ -7,7 +7,6 @@ from typing import Generator
 from kafka import KafkaProducer, KafkaConsumer, KafkaAdminClient
 from kafka.admin import NewTopic
 from kafka.errors import TopicAlreadyExistsError
-import subprocess
 
 
 # ==================== Kafka Fixtures ====================
@@ -39,21 +38,21 @@ def kafka_admin_client(kafka_bootstrap_servers) -> Generator[KafkaAdminClient, N
 def test_topic(kafka_admin_client) -> Generator[str, None, None]:
     """Create a unique test topic"""
     topic_name = f'test-topic-{int(time.time() * 1000)}'
-    
+
     topic = NewTopic(
         name=topic_name,
         num_partitions=3,
         replication_factor=1
     )
-    
+
     try:
         kafka_admin_client.create_topics([topic])
         time.sleep(1)  # Wait for topic creation
     except TopicAlreadyExistsError:
         pass
-    
+
     yield topic_name
-    
+
     # Cleanup
     try:
         kafka_admin_client.delete_topics([topic_name])

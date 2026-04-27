@@ -1,10 +1,10 @@
-# Data Quality - Recursos y Herramientas
+# Data Quality - resources y Herramientas
 
 ##
 
- Introducción
+ Introduction
 
-El ecosistema de data quality ha evolucionado significativamente. En este documento exploramos las herramientas disponibles, sus casos de uso, comparaciones, y recursos para profundizar tu conocimiento.
+El ecosistema de data quality ha evolucionado significativamente. En este documento exploramos las herramientas disponibles, sus casos de uso, comparaciones, y resources para profundizar tu conocimiento.
 
 ---
 
@@ -12,51 +12,51 @@ El ecosistema de data quality ha evolucionado significativamente. En este docume
 
 ### 1. Great Expectations ⭐ (Recommended)
 
-**Website:** https://greatexpectations.io/  
-**GitHub:** https://github.com/great-expectations/great_expectations  
+**Website:** https://greatexpectations.io/
+**GitHub:** https://github.com/great-expectations/great_expectations
 **Stars:** ~9k | **License:** Apache 2.0
 
 **Pros:**
 - ✅ API intuitiva y bien documentada
 - ✅ Data Docs auto-generados (HTML)
-- ✅ Integración con Airflow, dbt, Spark
+- ✅ Integration with Airflow, dbt, Spark
 - ✅ Checkpoints para CI/CD
 - ✅ Comunidad activa
 
 **Cons:**
 - ⚠️ Puede ser lento en datasets grandes (usar Spark backend)
 - ⚠️ Curva de aprendizaje inicial
-- ⚠️ Configuración inicial extensa
+- ⚠️ Extensive initial setup
 
 **Cuando Usar:**
 - Equipos que necesitan data docs para stakeholders
-- Validaciones complejas con múltiples expectations
-- Integración con pipelines existentes (Airflow, dbt)
+- Complex validations with multiple expectations
+- Integration with existing pipelines (Airflow, dbt)
 
 **Alternativas:**
-- Para datasets pequeños: Pandera (más liviano)
+- For small datasets: Pandera (lighter)
 - Para big data en Spark: PyDeequ
 
 ---
 
 ### 2. Pandera
 
-**Website:** https://pandera.readthedocs.io/  
-**GitHub:** https://github.com/unionai-oss/pandera  
+**Website:** https://pandera.readthedocs.io/
+**GitHub:** https://github.com/unionai-oss/pandera
 **Stars:** ~3k | **License:** MIT
 
 **Pros:**
 - ✅ Syntax compacta (menos verbose que GE)
-- ✅ Integración con mypy (static type checking)
+- ✅ Integration with mypy (static type checking)
 - ✅ Hypothesis testing built-in
-- ✅ Rápido setup
+- ✅ Quick setup
 
 **Cons:**
 - ⚠️ Sin Data Docs (solo errores)
 - ⚠️ Menos features que Great Expectations
-- ⚠️ Comunidad más pequeña
+- ⚠️ Smaller community
 
-**Ejemplo Básico:**
+**Basic Example:**
 ```python
 import pandera as pa
 from pandera import Column, DataFrameSchema
@@ -71,29 +71,29 @@ validated_df = schema.validate(df)
 
 **Cuando Usar:**
 - Proyectos Python puro (sin Spark)
-- Equipos pequeños que valoran simplicidad
-- Integración con mypy/static typing
+- Small teams that value simplicity
+- Integration with mypy/static typing
 
 ---
 
 ### 3. PyDeequ (Amazon)
 
-**Website:** https://github.com/awslabs/python-deequ  
-**GitHub:** https://github.com/awslabs/python-deequ  
+**Website:** https://github.com/awslabs/python-deequ
+**GitHub:** https://github.com/awslabs/python-deequ
 **Stars:** ~700 | **License:** Apache 2.0
 
 **Pros:**
-- ✅ Diseñado para big data (PySpark)
-- ✅ Anomaly detection avanzado
+- ✅ Designed for big data (PySpark)
+- ✅ Advanced Anomaly detection
 - ✅ Metrics repository (historical trends)
-- ✅ Usado en producción en Amazon
+- ✅ Used in production on Amazon
 
 **Cons:**
 - ⚠️ Requiere Spark (overhead)
-- ⚠️ Documentación limitada
-- ⚠️ Setup más complejo
+- ⚠️ Limited documentation
+- ⚠️ More complex setup
 
-**Ejemplo Básico:**
+**Basic Example:**
 ```python
 from pydeequ.checks import Check, CheckLevel
 from pydeequ.verification import VerificationSuite
@@ -118,7 +118,7 @@ verification = (VerificationSuite(spark)
 
 ### 4. DuckDB for Data Quality
 
-**Website:** https://duckdb.org/  
+**Website:** https://duckdb.org/
 **GitHub:** https://github.com/duckdb/duckdb
 
 **Feature:** SQL sobre Parquet sin cargar en memoria.
@@ -129,7 +129,7 @@ import duckdb
 
 # Check completeness
 result = duckdb.sql("""
-    SELECT 
+    SELECT
         COUNT(*) as total,
         COUNT(customer_id) as non_null_customers,
         (COUNT(customer_id) * 100.0 / COUNT(*)) as completeness_pct
@@ -146,16 +146,16 @@ dupes = duckdb.sql("""
 
 # Check business rules
 violations = duckdb.sql("""
-    SELECT * 
+    SELECT *
     FROM 'transactions.parquet'
     WHERE amount < 0 OR amount > 1000000
 """).df()
 ```
 
 **Pros:**
-- ✅ Extremadamente rápido
-- ✅ No requiere cargar datos en memoria
-- ✅ SQL estándar
+- ✅ Extremely fast
+- ✅ Does not require loading data into memory
+- ✅ Standard SQL
 
 **Cuando Usar:**
 - Quality checks ad-hoc
@@ -166,11 +166,11 @@ violations = duckdb.sql("""
 
 ### 5. ydata-profiling (formerly pandas-profiling)
 
-**Website:** https://docs.profiling.ydata.ai/  
-**GitHub:** https://github.com/ydataai/ydata-profiling  
+**Website:** https://docs.profiling.ydata.ai/
+**GitHub:** https://github.com/ydataai/ydata-profiling
 **Stars:** ~11k | **License:** MIT
 
-**Feature:** Auto-generación de reportes de profiling.
+**Feature:** Auto-generation of profiling reports.
 
 ```python
 from ydata_profiling import ProfileReport
@@ -186,31 +186,31 @@ profile.to_file("report.html")
 
 **El reporte incluye:**
 - Overview (tipos, missing, duplicates)
-- Variables (distribución, stats, extreme values)
-- Correlaciones (Pearson, Spearman, Cramér's V)
+- Variables (distribution, stats, extreme values)
+- Correlations (Pearson, Spearman, Cramer's V)
 - Missing values (matriz, dendrogram)
 - Sample data
 
 **Pros:**
 - ✅ Genera reportes HTML hermosos
-- ✅ Identifica automáticamente problemas
-- ✅ Mínimo código
+- ✅ Automatically identifies problems
+- ✅ Minimal code
 
 **Cons:**
 - ⚠️ Lento en datasets grandes (>1M rows)
-- ⚠️ Solo para exploración, no para producción
+- ⚠️ Only for exploration, not for production
 
 **Cuando Usar:**
 - Exploratory analysis inicial
 - Entender nuevo dataset
-- Generar reportes para stakeholders no técnicos
+- Generate reports for non-technical stakeholders
 
 ---
 
 ### 6. Soda Core
 
-**Website:** https://www.soda.io/  
-**GitHub:** https://github.com/sodadata/soda-core  
+**Website:** https://www.soda.io/
+**GitHub:** https://github.com/sodadata/soda-core
 **Stars:** ~1.5k | **License:** Apache 2.0
 
 **Feature:** YAML-based data quality checks.
@@ -234,18 +234,18 @@ soda scan -d postgres -c config.yml checks.yml
 
 **Pros:**
 - ✅ Syntax declarativa (YAML)
-- ✅ Fácil para no programadores
-- ✅ Integración con dbt, Airflow
+- ✅ Easy for non-programmers
+- ✅ Integration with dbt, Airflow
 
 **Cons:**
-- ⚠️ Menos flexible que código Python
-- ⚠️ Versión cloud es paga
+- ⚠️ Less flexible than Python code
+- ⚠️ Cloud version is paid
 
 ---
 
 ### 7. Apache Griffin
 
-**Website:** https://griffin.apache.org/  
+**Website:** https://griffin.apache.org/
 **GitHub:** https://github.com/apache/griffin
 
 **Feature:** Data quality platform empresarial.
@@ -253,29 +253,29 @@ soda scan -d postgres -c config.yml checks.yml
 **Componentes:**
 - Measure: Define quality metrics
 - Service: Orchestration
-- UI: Dashboards y visualización
+- UI: Dashboards and visualization
 
 **Pros:**
-- ✅ Solución completa (no solo librería)
+- ✅ Complete solution (not just library)
 - ✅ Dashboard built-in
-- ✅ Diseñado para big data
+- ✅ Designed for big data
 
 **Cons:**
 - ⚠️ Setup complejo
-- ⚠️ Documentación limitada
-- ⚠️ Comunidad pequeña
+- ⚠️ Limited documentation
+- ⚠️ Small community
 
 ---
 
 ### 8. Talend Data Quality
 
-**Website:** https://www.talend.com/  
+**Website:** https://www.talend.com/
 **License:** Comercial (Open Studio es open-source)
 
 **Pros:**
 - ✅ GUI para definir reglas
-- ✅ Profiling avanzado
-- ✅ Integración empresarial
+- ✅ Advanced Profiling
+- ✅ Business integration
 
 **Cons:**
 - ⚠️ Costoso
@@ -283,11 +283,11 @@ soda scan -d postgres -c config.yml checks.yml
 
 ---
 
-## Comparación de Herramientas
+## Tools Comparison
 
-### Matriz de Selección
+### Selection Matrix
 
-| Herramienta | Casos de Uso | Escala de Datos | Facilidad | Costo |
+| Tool | Use Cases | Data Scale | Ease | Cost |
 |-------------|--------------|----------------|-----------|-------|
 | **Great Expectations** | General purpose, pipelines | GB-TB (Spark: PB) | ⭐⭐⭐ | Gratis |
 | **Pandera** | Python projects, type safety | GB | ⭐⭐⭐⭐⭐ | Gratis |
@@ -370,7 +370,7 @@ rules:
   - rule_type: NOT_NULL
     dimension: COMPLETENESS
     column: customer_id
-  
+
   - rule_type: RANGE
     dimension: VALIDITY
     column: amount
@@ -443,7 +443,7 @@ class Transaction(BaseModel):
     transaction_id: int = Field(gt=0)
     customer_id: int
     amount: float = Field(ge=0, le=1000000)
-    
+
     @validator('amount')
     def amount_two_decimals(cls, v):
         if round(v, 2) != v:
@@ -590,10 +590,10 @@ xsv select customer_id,amount transactions.csv | xsv frequency
    - Real-world problemas y soluciones
 
 3. **"Data Quality Assessment"** by Arkady Maydanchik
-   - Frameworks y metodologías
+   - Frameworks and methodologies
 
 4. **"The Data Warehouse Toolkit"** by Ralph Kimball
-   - Incluye capítulo extenso sobre data quality
+   - Includes extensive chapter on data quality
 
 ---
 
@@ -684,23 +684,23 @@ Busca "Data Quality" o "Data Engineering" en:
 
 ### Getting Started
 
-- [ ] Definir dimensiones de calidad críticas para tu dominio
+- [ ] Define critical quality dimensions for your domain
 - [ ] Establecer baseline metrics (medir estado actual)
 - [ ] Seleccionar framework (Great Expectations recommended)
-- [ ] Implementar 5-10 validaciones básicas
-- [ ] Configurar alertas para failures
+- [ ] Implement 5-10 basic validations
+- [ ] Configure alerts for failures
 
 ### Intermediate
 
-- [ ] Crear data contracts para datasets críticos
+- [ ] Create data contracts for critical datasets
 - [ ] Implementar quality gates en pipelines
 - [ ] Setup Data Docs / dashboards
-- [ ] Definir SLAs de calidad
+- [ ] Define quality SLAs
 - [ ] Implement quarantine pattern
 
 ### Advanced
 
-- [ ] Anomaly detection automático
+- [ ] Automatic anomaly detection
 - [ ] Historical quality metrics tracking
 - [ ] Data lineage integration
 - [ ] Custom expectations/rules
@@ -715,7 +715,7 @@ Busca "Data Quality" o "Data Engineering" en:
 ```python
 class StagedValidator:
     """Validación por etapas con diferente severidad."""
-    
+
     stages = {
         'bronze': {  # Raw data - lax validation
             'severity': 'warning',
@@ -727,7 +727,7 @@ class StagedValidator:
         },
         'gold': {  # Business data - very strict
             'severity': 'critical',
-            'checks': ['schema', 'format', 'completeness', 'validity', 
+            'checks': ['schema', 'format', 'completeness', 'validity',
                       'uniqueness', 'business_rules']
         }
     }
@@ -759,7 +759,7 @@ def calculate_dq_score(df: pd.DataFrame) -> Dict:
         'timeliness': timeliness_score(df),
         'accuracy': accuracy_score(df)
     }
-    
+
     # Weighted average
     weights = {
         'completeness': 0.20,
@@ -769,9 +769,9 @@ def calculate_dq_score(df: pd.DataFrame) -> Dict:
         'timeliness': 0.15,
         'accuracy': 0.10
     }
-    
+
     overall = sum(scores[dim] * weights[dim] for dim in scores)
-    
+
     return {
         'scores': scores,
         'overall': overall,
@@ -841,7 +841,7 @@ results = validator.validate()
 
 ### False Positives
 
-**Problem:** Validaciones fallan por edge cases legítimos
+**Problem:** Validations fail for legitimate edge cases
 
 **Solution:** Use `mostly` parameter:
 ```python
@@ -898,14 +898,14 @@ if old_schema != new_schema:
 
 ## Conclusion
 
-El ecosistema de data quality está madurando rápidamente. **Great Expectations** es el framework más completo para la mayoría de casos de uso. Complementalo con:
+The data quality ecosystem is maturing rapidly. **Great Expectations** is the most complete framework for most use cases. Complement it with:
 - **Pandera** para schemas simples
 - **PyDeequ** si ya tienes Spark
-- **ydata-profiling** para exploración
+- **ydata-profiling** for exploration
 - **DuckDB** para checks ad-hoc
 
-**Próximos pasos:**
-1. Completar ejercicios prácticos en `exercises/`
+**Next steps:**
+1. Complete practical exercises in`exercises/`
 2. Implementar quality gates en tu pipeline real
 3. Compartir aprendizajes con tu equipo
 
@@ -946,5 +946,5 @@ duckdb -c "SELECT * FROM 'data.parquet' WHERE col IS NULL"
 
 **End of Theory Section**
 
-➡️ **Next:** `exercises/` para práctica hands-on  
+➡️ **Next:** `exercises/`for hands-on practice
 ➡️ **Next:** `data/` para sample datasets

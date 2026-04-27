@@ -1,39 +1,39 @@
 # Data Quality - Conceptos Fundamentales
 
-## Introducción
+## Introduction
 
-La **calidad de los datos** es fundamental para el éxito de cualquier proyecto de datos. Datos de baja calidad conducen a decisiones incorrectas, pérdida de confianza, costos operacionales elevados y problemas de cumplimiento normativo. En este módulo aprenderemos a medir, validar y garantizar la calidad de los datos a lo largo de todo el pipeline.
+**Data quality** is critical to the success of any data project. Low-quality data leads to incorrect decisions, loss of trust, high operational costs, and regulatory compliance issues. In this module we will learn to measure, validate and guarantee the quality of data throughout the entire pipeline.
 
-> **"Garbage in, garbage out"** - Si los datos de entrada son de mala calidad, los resultados también lo serán, independientemente de cuán sofisticado sea el análisis.
+> **"Garbage in, garbage out"** - If the input data is of poor quality, the results will also be poor, regardless of how sophisticated the analysis is.
 
 ---
 
-## ¿Qué es Data Quality?
+## What is Data Quality?
 
-La calidad de datos se refiere a la **idoneidad de los datos para su propósito previsto**. Los datos de alta calidad son:
+Data quality refers to the **suitability of the data for its intended purpose**. High quality data is:
 
 - **Precisos**: Reflejan la realidad correctamente
 - **Completos**: Contienen todos los valores requeridos
 - **Consistentes**: No contienen contradicciones
-- **Oportunos**: Están disponibles cuando se necesitan
-- **Válidos**: Cumplen con reglas y formatos definidos
-- **Únicos**: Sin duplicados innecesarios
+- **Timely**: They are available when needed
+- **Valid**: They comply with defined rules and formats
+- **Unique**: No unnecessary duplicates
 
-### Impacto de la Mala Calidad de Datos
+### Impact of Poor Data Quality
 
 **Costos Empresariales:**
-- IBM estima que la mala calidad de datos cuesta a las empresas $3.1 trillones anuales solo en EE.UU.
-- Gartner reporta que la calidad deficiente de datos cuesta en promedio $12.9 millones por año a las organizaciones
+- IBM estimates that poor data quality costs companies $3.1 trillion annually in the US alone.
+- Gartner reports that poor data quality costs organizations an average of $12.9 million per year
 
 **Consecuencias Operacionales:**
 - Decisiones de negocio incorrectas
-- Pérdida de confianza del cliente
+- Loss of customer trust
 - Incumplimiento regulatorio (GDPR, CCPA)
 - Tiempo desperdiciado en limpieza manual
 - Proyectos de ML/AI fallidos
 
 **Ejemplo Real:**
-En 2018, Amazon tuvo que descontinuar su herramienta de reclutamiento basada en AI porque el modelo fue entrenado con datos históricos sesgados, discriminando contra candidatas mujeres.
+In 2018, Amazon had to discontinue its AI-based recruiting tool because the model was trained with biased historical data, discriminating against female candidates.
 
 ---
 
@@ -41,12 +41,12 @@ En 2018, Amazon tuvo que descontinuar su herramienta de reclutamiento basada en 
 
 ### 1. **Accuracy (Exactitud)**
 
-**Definición:** Los datos reflejan correctamente el mundo real que representan.
+**Definition:** Data correctly reflects the real world it represents.
 
 **Preguntas Clave:**
-- ¿Los valores son correctos?
-- ¿La información refleja la realidad?
-- ¿Los datos han sido verificados contra una fuente confiable?
+- Are the values ​​correct?
+- Does the information reflect reality?
+- Has the data been verified against a reliable source?
 
 **Ejemplos de Problemas:**
 ```python
@@ -67,28 +67,28 @@ from typing import Dict, List
 def validate_accuracy(record: Dict) -> List[str]:
     """Valida la exactitud de un registro."""
     errors = []
-    
+
     # Validar email
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if 'email' in record and not re.match(email_pattern, record['email']):
         errors.append(f"Email inválido: {record['email']}")
-    
+
     # Validar edad
     if 'age' in record:
         if not 0 <= record['age'] <= 120:
             errors.append(f"Edad fuera de rango: {record['age']}")
-    
+
     # Validar teléfono
     if 'phone' in record:
         phone_clean = re.sub(r'[^\d]', '', record['phone'])
         if len(phone_clean) < 10:
             errors.append(f"Teléfono incompleto: {record['phone']}")
-    
+
     # Validar salario
     if 'salary' in record:
         if not 0 <= record['salary'] <= 10_000_000:
             errors.append(f"Salario fuera de rango razonable: {record['salary']}")
-    
+
     return errors
 
 # Uso
@@ -98,18 +98,18 @@ for customer in customers:
         print(f"Errores en {customer['name']}: {errors}")
 ```
 
-**Métricas de Exactitud:**
+**Accuracy Metrics:**
 ```python
 def calculate_accuracy_rate(df, validation_func):
     """Calcula la tasa de exactitud de un DataFrame."""
     total_records = len(df)
     accurate_records = 0
-    
+
     for _, row in df.iterrows():
         errors = validation_func(row.to_dict())
         if not errors:
             accurate_records += 1
-    
+
     accuracy_rate = (accurate_records / total_records) * 100
     return accuracy_rate
 ```
@@ -118,12 +118,12 @@ def calculate_accuracy_rate(df, validation_func):
 
 ### 2. **Completeness (Completitud)**
 
-**Definición:** Todos los datos requeridos están presentes.
+**Definition:** All required data is present.
 
 **Preguntas Clave:**
-- ¿Faltan campos obligatorios?
-- ¿Hay valores nulos donde no deberían existir?
-- ¿Están presentes todos los registros esperados?
+- Are there any required fields missing?
+- Are there null values ​​where they shouldn't exist?
+- Are all expected records present?
 
 **Ejemplos de Problemas:**
 ```python
@@ -137,7 +137,7 @@ transactions = pd.DataFrame({
 })
 ```
 
-**Análisis de Completitud:**
+**Completeness Analysis:**
 ```python
 import pandas as pd
 import numpy as np
@@ -149,24 +149,24 @@ def analyze_completeness(df: pd.DataFrame) -> pd.DataFrame:
         'total_rows': len(df),
         'null_count': df.isnull().sum().values,
         'null_percentage': (df.isnull().sum() / len(df) * 100).values,
-        'empty_string_count': [(df[col] == '').sum() if df[col].dtype == 'object' else 0 
+        'empty_string_count': [(df[col] == '').sum() if df[col].dtype == 'object' else 0
                                for col in df.columns],
-        'whitespace_count': [(df[col].str.strip() == '').sum() 
-                            if df[col].dtype == 'object' else 0 
+        'whitespace_count': [(df[col].str.strip() == '').sum()
+                            if df[col].dtype == 'object' else 0
                             for col in df.columns]
     })
-    
+
     # Calcular completitud total (considerando NULL, empty, whitespace)
     completeness_report['missing_total'] = (
-        completeness_report['null_count'] + 
-        completeness_report['empty_string_count'] + 
+        completeness_report['null_count'] +
+        completeness_report['empty_string_count'] +
         completeness_report['whitespace_count']
     )
-    
+
     completeness_report['completeness_rate'] = (
         (1 - completeness_report['missing_total'] / len(df)) * 100
     ).round(2)
-    
+
     return completeness_report.sort_values('completeness_rate')
 
 # Uso
@@ -174,29 +174,29 @@ report = analyze_completeness(transactions)
 print(report)
 ```
 
-**Completitud por Nivel:**
+**Completitud por Level:**
 
 1. **Row-Level Completeness (Completitud de Registros)**
    ```python
    def row_completeness(df: pd.DataFrame, required_fields: List[str]) -> pd.Series:
        """Calcula completitud por registro."""
        def check_row(row):
-           missing = sum(1 for field in required_fields 
+           missing = sum(1 for field in required_fields
                         if pd.isna(row[field]) or row[field] == '')
            return (len(required_fields) - missing) / len(required_fields) * 100
-       
+
        return df.apply(check_row, axis=1)
-   
+
    # Uso
    required_fields = ['customer_id', 'amount', 'timestamp']
    transactions['completeness'] = row_completeness(transactions, required_fields)
-   
+
    # Filtrar registros incompletos
    incomplete = transactions[transactions['completeness'] < 100]
    print(f"Registros incompletos: {len(incomplete)}")
    ```
 
-2. **Column-Level Completeness (Completitud de Columnas)**
+2. **Column-Level Completeness (Completitud de columns)**
    ```python
    def column_completeness(df: pd.DataFrame) -> Dict[str, float]:
        """Calcula completitud por columna."""
@@ -219,12 +219,12 @@ print(report)
 
 ### 3. **Consistency (Consistencia)**
 
-**Definición:** Los datos son coherentes dentro del mismo dataset y entre diferentes datasets.
+**Definition:** Data is consistent within the same dataset and between different datasets.
 
 **Preguntas Clave:**
-- ¿Los datos siguen el mismo formato?
-- ¿Los valores relacionados son coherentes?
-- ¿Los datos coinciden entre sistemas?
+- Does the data follow the same format?
+- Are the related values ​​consistent?
+- Does the data match between systems?
 
 **Tipos de Inconsistencias:**
 
@@ -246,7 +246,7 @@ phones_inconsistent = [
 ]
 ```
 
-**Estandarización:**
+**Standardization:**
 ```python
 from datetime import datetime
 import re
@@ -260,25 +260,25 @@ def standardize_date(date_str: str) -> str:
         '%B %d, %Y',
         '%d %B %Y'
     ]
-    
+
     for fmt in formats:
         try:
             dt = datetime.strptime(date_str, fmt)
             return dt.strftime('%Y-%m-%d')
         except ValueError:
             continue
-    
+
     raise ValueError(f"Formato de fecha no reconocido: {date_str}")
 
 def standardize_phone(phone: str) -> str:
     """Estandariza teléfonos a formato E.164."""
     # Extraer solo dígitos
     digits = re.sub(r'[^\d]', '', phone)
-    
+
     # Agregar código de país si no existe
     if len(digits) == 10:
         digits = '1' + digits  # US/Canada
-    
+
     return f"+{digits}"
 
 # Uso
@@ -301,7 +301,7 @@ orders = pd.DataFrame({
 })
 
 def check_referential_integrity(
-    child_df: pd.DataFrame, 
+    child_df: pd.DataFrame,
     parent_df: pd.DataFrame,
     foreign_key: str,
     primary_key: str
@@ -309,12 +309,12 @@ def check_referential_integrity(
     """Detecta violaciones de integridad referencial."""
     valid_ids = set(parent_df[primary_key].dropna().unique())
     child_ids = child_df[foreign_key].dropna()
-    
+
     orphans = child_df[
-        ~child_df[foreign_key].isin(valid_ids) & 
+        ~child_df[foreign_key].isin(valid_ids) &
         child_df[foreign_key].notna()
     ]
-    
+
     return orphans
 
 # Detectar orders con customer_id inválido
@@ -324,7 +324,7 @@ orphan_orders = check_referential_integrity(
 print(f"Orders huérfanos: {len(orphan_orders)}")
 ```
 
-**3.3 Inconsistencia Lógica:**
+**3.3 Logical Inconsistency:**
 ```python
 # ❌ Inconsistencias lógicas
 employees = pd.DataFrame({
@@ -337,12 +337,12 @@ employees = pd.DataFrame({
 def validate_logical_consistency(df: pd.DataFrame) -> List[Dict]:
     """Valida reglas lógicas de negocio."""
     issues = []
-    
+
     for idx, row in df.iterrows():
         birth = pd.to_datetime(row['birth_date'])
         hire = pd.to_datetime(row['hire_date'])
         retire = pd.to_datetime(row['retirement_date']) if row['retirement_date'] else None
-        
+
         # Regla: debe tener al menos 18 años al ser contratado
         age_at_hire = (hire - birth).days / 365.25
         if age_at_hire < 18:
@@ -350,14 +350,14 @@ def validate_logical_consistency(df: pd.DataFrame) -> List[Dict]:
                 'employee_id': row['employee_id'],
                 'issue': f"Contratado con {age_at_hire:.1f} años (mínimo: 18)"
             })
-        
+
         # Regla: fecha de retiro debe ser después de contratación
         if retire and retire < hire:
             issues.append({
                 'employee_id': row['employee_id'],
                 'issue': "Fecha de retiro anterior a contratación"
             })
-        
+
         # Regla: retiro debe ser antes de muerte (asumiendo edad máxima 100)
         if retire:
             age_at_retire = (retire - birth).days / 365.25
@@ -366,7 +366,7 @@ def validate_logical_consistency(df: pd.DataFrame) -> List[Dict]:
                     'employee_id': row['employee_id'],
                     'issue': f"Edad al retiro irreal: {age_at_retire:.1f} años"
                 })
-    
+
     return issues
 
 # Validar
@@ -379,12 +379,12 @@ for issue in consistency_issues:
 
 ### 4. **Timeliness (Oportunidad)**
 
-**Definición:** Los datos están disponibles cuando se necesitan y representan el período de tiempo correcto.
+**Definition:** Data is available when needed and represents the correct time period.
 
 **Preguntas Clave:**
-- ¿Los datos están actualizados?
-- ¿Hay retrasos en la ingesta?
-- ¿Los datos representan el período correcto?
+- Is the data up to date?
+- Are there delays in intake?
+- Does the data represent the correct period?
 
 **Ejemplos de Problemas:**
 ```python
@@ -412,15 +412,15 @@ data_lake_records = pd.DataFrame({
 def analyze_timeliness(df: pd.DataFrame) -> Dict:
     """Analiza la oportunidad de los datos."""
     current_time = datetime.now()
-    
+
     # Calcular latencia (diferencia entre evento e ingesta)
     df['latency'] = (df['ingestion_timestamp'] - df['event_timestamp']
                      ).dt.total_seconds() / 3600  # en horas
-    
+
     # Calcular edad de los datos
     df['data_age'] = (current_time - df['event_timestamp']
                       ).dt.total_seconds() / 3600  # en horas
-    
+
     analysis = {
         'avg_latency_hours': df['latency'].mean(),
         'max_latency_hours': df['latency'].max(),
@@ -429,7 +429,7 @@ def analyze_timeliness(df: pd.DataFrame) -> Dict:
         'records_older_than_7days': (df['data_age'] > 168).sum(),
         'sla_compliance_rate': ((df['latency'] < 4).sum() / len(df) * 100)  # SLA: 4h
     }
-    
+
     return analysis
 
 # Analizar
@@ -440,15 +440,15 @@ print(f"Compliance con SLA (4h): {timeliness_report['sla_compliance_rate']:.1f}%
 
 **Monitoreo de Freshness:**
 ```python
-def check_data_freshness(df: pd.DataFrame, 
+def check_data_freshness(df: pd.DataFrame,
                          timestamp_col: str,
                          max_age_hours: int = 24) -> Dict:
     """Verifica que los datos sean recientes."""
     current_time = datetime.now()
     latest_record = pd.to_datetime(df[timestamp_col]).max()
-    
+
     data_age_hours = (current_time - latest_record).total_seconds() / 3600
-    
+
     return {
         'latest_record': latest_record,
         'age_hours': data_age_hours,
@@ -466,16 +466,16 @@ print(f"Último registro hace: {freshness['age_hours']:.1f} horas")
 
 ### 5. **Validity (Validez)**
 
-**Definición:** Los datos cumplen con reglas de negocio, formatos y restricciones definidas.
+**Definition:** The data complies with defined business rules, formats and restrictions.
 
 **Preguntas Clave:**
-- ¿Los valores están en el dominio permitido?
-- ¿Los formatos son correctos?
-- ¿Se cumplen las reglas de negocio?
+- Are the values ​​in the allowed domain?
+- Are the formats correct?
+- Are business rules followed?
 
 **Tipos de Validaciones:**
 
-**5.1 Validación de Dominio:**
+**5.1 Domain Validation:**
 ```python
 # Definir dominios válidos
 VALID_DOMAINS = {
@@ -485,42 +485,42 @@ VALID_DOMAINS = {
     'priority': ['low', 'medium', 'high', 'critical']
 }
 
-def validate_domain(df: pd.DataFrame, 
-                   column: str, 
+def validate_domain(df: pd.DataFrame,
+                   column: str,
                    valid_values: List) -> pd.DataFrame:
     """Valida que los valores estén en el dominio permitido."""
     invalid_records = df[~df[column].isin(valid_values)]
-    
+
     if len(invalid_records) > 0:
         print(f"❌ {len(invalid_records)} valores inválidos en '{column}':")
         print(invalid_records[[column]].value_counts())
     else:
         print(f"✅ Todos los valores de '{column}' son válidos")
-    
+
     return invalid_records
 
 # Uso
 validate_domain(transactions, 'status', VALID_DOMAINS['status'])
 ```
 
-**5.2 Validación de Rango:**
+**5.2 Range Validation:**
 ```python
-def validate_range(df: pd.DataFrame, 
+def validate_range(df: pd.DataFrame,
                    column: str,
                    min_val: float = None,
                    max_val: float = None) -> pd.DataFrame:
     """Valida que los valores estén en el rango permitido."""
     conditions = []
-    
+
     if min_val is not None:
         conditions.append(df[column] < min_val)
     if max_val is not None:
         conditions.append(df[column] > max_val)
-    
+
     if conditions:
         invalid_mask = pd.concat(conditions, axis=1).any(axis=1)
         invalid_records = df[invalid_mask]
-        
+
         if len(invalid_records) > 0:
             print(f"❌ {len(invalid_records)} valores fuera de rango en '{column}':")
             print(f"   Rango válido: [{min_val}, {max_val}]")
@@ -528,9 +528,9 @@ def validate_range(df: pd.DataFrame,
             print(f"   Max encontrado: {df[column].max()}")
         else:
             print(f"✅ Todos los valores de '{column}' están en rango")
-        
+
         return invalid_records
-    
+
     return pd.DataFrame()
 
 # Uso
@@ -538,7 +538,7 @@ validate_range(transactions, 'amount', min_val=0, max_val=100000)
 validate_range(customers, 'age', min_val=0, max_val=120)
 ```
 
-**5.3 Validación de Formato:**
+**5.3 Format Validation:**
 ```python
 import re
 
@@ -552,29 +552,29 @@ REGEX_PATTERNS = {
     'url': r'^https?://[^\s/$.?#].[^\s]*$'
 }
 
-def validate_format(df: pd.DataFrame, 
-                    column: str, 
+def validate_format(df: pd.DataFrame,
+                    column: str,
                     pattern_name: str) -> pd.DataFrame:
     """Valida que los valores cumplan un formato específico."""
     pattern = REGEX_PATTERNS.get(pattern_name)
-    
+
     if not pattern:
         raise ValueError(f"Patrón '{pattern_name}' no encontrado")
-    
+
     def matches_pattern(value):
         if pd.isna(value):
             return True  # Skip nulls
         return bool(re.match(pattern, str(value)))
-    
+
     mask = df[column].apply(matches_pattern)
     invalid_records = df[~mask]
-    
+
     if len(invalid_records) > 0:
         print(f"❌ {len(invalid_records)} valores con formato inválido en '{column}':")
         print(invalid_records[[column]].head())
     else:
         print(f"✅ Todos los valores de '{column}' tienen formato válido")
-    
+
     return invalid_records
 
 # Uso
@@ -582,36 +582,36 @@ validate_format(customers, 'email', 'email')
 validate_format(customers, 'phone', 'phone_us')
 ```
 
-**5.4 Validación de Reglas de Negocio:**
+**5.4 Business Rule Validation:**
 ```python
 class BusinessRuleValidator:
     """Valida reglas de negocio complejas."""
-    
+
     @staticmethod
     def rule_order_amount_with_discount(row):
         """Regla: Si hay descuento, el total debe ser menor al subtotal."""
         if row['discount'] > 0:
             return row['total'] < row['subtotal']
         return row['total'] == row['subtotal']
-    
+
     @staticmethod
     def rule_employee_age_vs_experience(row):
         """Regla: Años de experiencia no pueden exceder edad - 18."""
         max_experience = row['age'] - 18
         return row['years_experience'] <= max_experience
-    
+
     @staticmethod
     def rule_shipping_cost(row):
         """Regla: Free shipping para orders > $100."""
         if row['order_total'] >= 100:
             return row['shipping_cost'] == 0
         return row['shipping_cost'] > 0
-    
+
     @classmethod
     def validate_all_rules(cls, df: pd.DataFrame, rules: List[str]) -> pd.DataFrame:
         """Aplica múltiples reglas de negocio."""
         results = []
-        
+
         for rule_name in rules:
             rule_func = getattr(cls, rule_name, None)
             if rule_func:
@@ -622,7 +622,7 @@ class BusinessRuleValidator:
                     'violations': len(violations),
                     'records': violations
                 })
-        
+
         return results
 
 # Uso
@@ -643,31 +643,31 @@ for v in violations:
 
 ### 6. **Uniqueness (Unicidad)**
 
-**Definición:** Los datos no contienen duplicados innecesarios.
+**Definition:** The data does not contain unnecessary duplicates.
 
 **Preguntas Clave:**
-- ¿Hay registros duplicados?
-- ¿Los IDs son únicos?
-- ¿Los duplicados son legítimos o errores?
+- Are there duplicate records?
+- Are the IDs unique?
+- Are the duplicates legitimate or errors?
 
-**Detección de Duplicados:**
+**Duplicate Detection:**
 
 **6.1 Duplicados Exactos:**
 ```python
 def detect_exact_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     """Detecta duplicados exactos (todas las columnas iguales)."""
     duplicates = df[df.duplicated(keep=False)]
-    
+
     if len(duplicates) > 0:
         print(f"❌ {len(duplicates)} registros duplicados encontrados")
         print(f"   {df.duplicated().sum()} duplicados (excluyendo primera ocurrencia)")
-        
+
         # Agrupar duplicados
         duplicate_groups = duplicates.groupby(list(df.columns)).size().reset_index(name='count')
         print(f"\n   {len(duplicate_groups)} grupos de duplicados")
     else:
         print("✅ No se encontraron duplicados exactos")
-    
+
     return duplicates
 
 # Uso
@@ -679,10 +679,10 @@ exact_dupes = detect_exact_duplicates(customers)
 def detect_key_duplicates(df: pd.DataFrame, key_columns: List[str]) -> pd.DataFrame:
     """Detecta duplicados basados en columnas clave."""
     duplicates = df[df.duplicated(subset=key_columns, keep=False)]
-    
+
     if len(duplicates) > 0:
         print(f"❌ {len(duplicates)} registros con claves duplicadas: {key_columns}")
-        
+
         # Mostrar ejemplos
         for key_vals, group in duplicates.groupby(key_columns):
             if len(group) > 1:
@@ -691,7 +691,7 @@ def detect_key_duplicates(df: pd.DataFrame, key_columns: List[str]) -> pd.DataFr
                 print(group.head(2))
     else:
         print(f"✅ No hay duplicados en claves: {key_columns}")
-    
+
     return duplicates
 
 # Uso
@@ -703,13 +703,13 @@ key_dupes = detect_key_duplicates(transactions, ['transaction_id'])
 ```python
 from difflib import SequenceMatcher
 
-def fuzzy_duplicates(df: pd.DataFrame, 
-                     column: str, 
+def fuzzy_duplicates(df: pd.DataFrame,
+                     column: str,
                      threshold: float = 0.85) -> List[tuple]:
     """Detecta duplicados aproximados usando similitud de strings."""
     duplicates = []
     values = df[column].dropna().unique()
-    
+
     for i, val1 in enumerate(values):
         for val2 in values[i+1:]:
             similarity = SequenceMatcher(None, str(val1), str(val2)).ratio()
@@ -721,7 +721,7 @@ def fuzzy_duplicates(df: pd.DataFrame,
                     'count1': (df[column] == val1).sum(),
                     'count2': (df[column] == val2).sum()
                 })
-    
+
     return duplicates
 
 # Uso
@@ -731,15 +731,15 @@ for dupe in fuzzy_dupes:
           f"(similitud: {dupe['similarity']:.2%})")
 ```
 
-**Deduplicación:**
+**Deduplication:**
 ```python
-def deduplicate_dataframe(df: pd.DataFrame, 
+def deduplicate_dataframe(df: pd.DataFrame,
                           subset: List[str] = None,
                           keep: str = 'first',
                           priority_column: str = None) -> pd.DataFrame:
     """
     Elimina duplicados con estrategias avanzadas.
-    
+
     Args:
         subset: Columnas para identificar duplicados
         keep: 'first', 'last', o 'priority'
@@ -751,18 +751,18 @@ def deduplicate_dataframe(df: pd.DataFrame,
         df_deduped = df_sorted.drop_duplicates(subset=subset, keep='first')
     else:
         df_deduped = df.drop_duplicates(subset=subset, keep=keep)
-    
+
     removed = len(df) - len(df_deduped)
     print(f"Registros originales: {len(df)}")
     print(f"Duplicados eliminados: {removed}")
     print(f"Registros finales: {len(df_deduped)}")
-    
+
     return df_deduped
 
 # Uso
 # Mantener registro más reciente en caso de duplicados
 deduped = deduplicate_dataframe(
-    transactions, 
+    transactions,
     subset=['customer_id', 'product_id'],
     keep='priority',
     priority_column='timestamp'
@@ -773,16 +773,16 @@ deduped = deduplicate_dataframe(
 
 ## Data Profiling
 
-El **data profiling** es el proceso de examinar datos para entender su estructura, contenido y calidad.
+Data profiling is the process of examining data to understand its structure, content and quality.
 
-### Técnicas de Profiling
+### Profiling Techniques
 
-**1. Profiling Estadístico:**
+**1. Statistical Profiling:**
 ```python
 def statistical_profile(df: pd.DataFrame, column: str) -> Dict:
     """Genera perfil estadístico de una columna numérica."""
     series = df[column]
-    
+
     return {
         'count': series.count(),
         'missing': series.isna().sum(),
@@ -805,13 +805,13 @@ for key, value in profile.items():
     print(f"{key:15s}: {value}")
 ```
 
-**2. Profiling Categórico:**
+**2. Categorical Profiling:**
 ```python
 def categorical_profile(df: pd.DataFrame, column: str, top_n: int = 10) -> Dict:
     """Genera perfil de una columna categórica."""
     series = df[column]
     value_counts = series.value_counts()
-    
+
     return {
         'count': series.count(),
         'missing': series.isna().sum(),
@@ -819,7 +819,7 @@ def categorical_profile(df: pd.DataFrame, column: str, top_n: int = 10) -> Dict:
         'cardinality_ratio': series.nunique() / len(series),
         'mode': series.mode()[0] if not series.mode().empty else None,
         'top_values': value_counts.head(top_n).to_dict(),
-        'distribution_entropy': -(value_counts / len(series) * 
+        'distribution_entropy': -(value_counts / len(series) *
                                   np.log(value_counts / len(series))).sum()
     }
 ```
@@ -839,10 +839,10 @@ def generate_full_profile(df: pd.DataFrame, output_file: str = 'report.html'):
             "spearman": {"calculate": True},
         }
     )
-    
+
     profile.to_file(output_file)
     print(f"Reporte generado: {output_file}")
-    
+
     return profile
 
 # Uso
@@ -851,63 +851,63 @@ profile = generate_full_profile(transactions, 'transactions_profile.html')
 
 ---
 
-## Estrategias de Validación
+## Validation Strategies
 
-### 1. Validación en Ingesta (Input Validation)
+### 1. Input Validation
 
-**Fail Fast:** Rechazar datos inválidos en el punto de entrada.
+**Fail Fast:** Reject invalid data at the entry point.
 
 ```python
 class DataIngestor:
     """Validator para datos entrantes."""
-    
+
     def __init__(self, schema: Dict):
         self.schema = schema
         self.validation_errors = []
-    
+
     def validate_record(self, record: Dict) -> bool:
         """Valida un registro contra schema."""
         errors = []
-        
+
         # Validar campos requeridos
-        required_fields = [k for k, v in self.schema.items() 
+        required_fields = [k for k, v in self.schema.items()
                           if v.get('required', False)]
         for field in required_fields:
             if field not in record or record[field] is None:
                 errors.append(f"Campo requerido faltante: {field}")
-        
+
         # Validar tipos
         for field, rules in self.schema.items():
             if field in record and record[field] is not None:
                 value = record[field]
                 expected_type = rules.get('type')
-                
+
                 if expected_type and not isinstance(value, expected_type):
                     errors.append(f"{field}: tipo inválido (esperado: {expected_type})")
-                
+
                 # Validar rango
                 if 'min' in rules and value < rules['min']:
                     errors.append(f"{field}: valor < mínimo ({rules['min']})")
                 if 'max' in rules and value > rules['max']:
                     errors.append(f"{field}: valor > máximo ({rules['max']})")
-        
+
         if errors:
             self.validation_errors.extend(errors)
             return False
-        
+
         return True
-    
+
     def ingest(self, records: List[Dict]) -> tuple:
         """Ingesta datos con validación."""
         valid_records = []
         invalid_records = []
-        
+
         for record in records:
             if self.validate_record(record):
                 valid_records.append(record)
             else:
                 invalid_records.append(record)
-        
+
         return valid_records, invalid_records
 
 # Schema definition
@@ -924,26 +924,26 @@ valid, invalid = ingestor.ingest(incoming_transactions)
 print(f"Válidos: {len(valid)}, Inválidos: {len(invalid)}")
 ```
 
-### 2. Validación en Transformación (Pipeline Validation)
+### 2. Validation in Transformation (pipeline Validation)
 
 ```python
 class DataPipeline:
     """Pipeline con validaciones en cada etapa."""
-    
+
     def __init__(self):
         self.validations = []
         self.data = None
-    
+
     def load(self, data: pd.DataFrame) -> 'DataPipeline':
         """Carga datos."""
         self.data = data.copy()
         return self
-    
+
     def validate(self, name: str, func: callable) -> 'DataPipeline':
         """Agrega validación."""
         if self.data is None:
             raise ValueError("No hay datos cargados")
-        
+
         try:
             result = func(self.data)
             self.validations.append({
@@ -951,7 +951,7 @@ class DataPipeline:
                 'status': 'PASS' if result else 'FAIL',
                 'message': getattr(result, 'message', 'OK')
             })
-            
+
             if not result:
                 raise ValueError(f"Validación fallida: {name}")
         except Exception as e:
@@ -961,14 +961,14 @@ class DataPipeline:
                 'message': str(e)
             })
             raise
-        
+
         return self
-    
+
     def transform(self, func: callable) -> 'DataPipeline':
         """Aplica transformación."""
         self.data = func(self.data)
         return self
-    
+
     def get_results(self) -> tuple:
         """Retorna datos y reporte de validaciones."""
         return self.data, self.validations
@@ -987,7 +987,7 @@ pipeline = (
 clean_data, validation_report = pipeline.get_results()
 ```
 
-### 3. Validación en Salida (Output Validation)
+### 3. Output Validation
 
 ```python
 def validate_output(df: pd.DataFrame, expectations: Dict) -> Dict:
@@ -996,7 +996,7 @@ def validate_output(df: pd.DataFrame, expectations: Dict) -> Dict:
         'passed': True,
         'checks': []
     }
-    
+
     # Row count
     if 'min_rows' in expectations:
         check = len(df) >= expectations['min_rows']
@@ -1007,7 +1007,7 @@ def validate_output(df: pd.DataFrame, expectations: Dict) -> Dict:
             'actual': len(df)
         })
         results['passed'] &= check
-    
+
     # Schema
     if 'required_columns' in expectations:
         missing_cols = set(expectations['required_columns']) - set(df.columns)
@@ -1018,7 +1018,7 @@ def validate_output(df: pd.DataFrame, expectations: Dict) -> Dict:
             'missing': list(missing_cols)
         })
         results['passed'] &= check
-    
+
     # Quality thresholds
     if 'max_null_percentage' in expectations:
         null_pct = (df.isnull().sum().sum() / (df.shape[0] * df.shape[1])) * 100
@@ -1030,7 +1030,7 @@ def validate_output(df: pd.DataFrame, expectations: Dict) -> Dict:
             'actual': null_pct
         })
         results['passed'] &= check
-    
+
     return results
 
 # Uso
@@ -1053,46 +1053,46 @@ else:
 
 ---
 
-## Métricas de Data Quality
+## Data Quality Metrics
 
-### KPIs de Calidad
+### Quality KPIs
 
 ```python
 class DataQualityMetrics:
     """Calcula métricas de calidad de datos."""
-    
+
     @staticmethod
     def completeness_score(df: pd.DataFrame) -> float:
         """% de celdas con datos."""
         total_cells = df.shape[0] * df.shape[1]
         non_null_cells = df.notna().sum().sum()
         return (non_null_cells / total_cells) * 100
-    
+
     @staticmethod
     def uniqueness_score(df: pd.DataFrame, key_column: str) -> float:
         """% de registros únicos por clave."""
         total = len(df)
         unique = df[key_column].nunique()
         return (unique / total) * 100
-    
+
     @staticmethod
     def validity_score(df: pd.DataFrame, validation_func: callable) -> float:
         """% de registros que pasan validación."""
         results = df.apply(validation_func, axis=1)
         return (results.sum() / len(df)) * 100
-    
+
     @staticmethod
     def consistency_score(df: pd.DataFrame, rule_funcs: List[callable]) -> float:
         """% de registros que pasan todas las reglas."""
         all_passed = pd.Series([True] * len(df))
-        
+
         for rule_func in rule_funcs:
             all_passed &= df.apply(rule_func, axis=1)
-        
+
         return (all_passed.sum() / len(df)) * 100
-    
+
     @classmethod
-    def overall_quality_score(cls, df: pd.DataFrame, 
+    def overall_quality_score(cls, df: pd.DataFrame,
                              key_column: str,
                              validation_func: callable,
                              consistency_rules: List[callable],
@@ -1106,24 +1106,24 @@ class DataQualityMetrics:
                 'validity': 0.30,
                 'consistency': 0.25
             }
-        
+
         scores = {
             'completeness': cls.completeness_score(df),
             'uniqueness': cls.uniqueness_score(df, key_column),
             'validity': cls.validity_score(df, validation_func),
             'consistency': cls.consistency_score(df, consistency_rules)
         }
-        
+
         # Score global ponderado
         overall = sum(scores[dim] * weights[dim] for dim in scores)
-        
+
         return {
             'scores': scores,
             'weights': weights,
             'overall_score': overall,
             'grade': cls._get_grade(overall)
         }
-    
+
     @staticmethod
     def _get_grade(score: float) -> str:
         """Convierte score a grado."""
@@ -1170,20 +1170,20 @@ Definir → Medir → Monitorear → Mejorar
 ```
 
 **Pasos:**
-1. **Definir dimensiones críticas** para tu dominio
+1. **Define critical dimensions** for your domain
 2. **Establecer thresholds** aceptables
-3. **Implementar validaciones** automáticas
-4. **Monitorear continuamente**
+3. **Implement automatic validations**
+4. **monitor continuamente**
 5. **Iterar y mejorar**
 
-### 2. Shift Left (Validación Temprana)
+### 2. Shift Left (Early Validation)
 
-Validar lo más temprano posible en el pipeline:
+Validate as early as possible in the pipeline:
 - **Input validation**: En el punto de ingesta
 - **Schema enforcement**: Al escribir a storage
-- **Pipeline checkpoints**: Entre etapas de transformación
+- **pipeline checkpoints**: Between transformation stages
 
-### 3. Automatización
+### 3. Automation
 
 ```python
 # ❌ Mal: Validación manual
@@ -1194,7 +1194,7 @@ Validar lo más temprano posible en el pipeline:
 def automated_quality_check(data_path: str):
     """Quality check automatizado que se ejecuta en cada run."""
     df = pd.read_parquet(data_path)
-    
+
     # Suite de validaciones
     checks = [
         ('completeness', check_completeness(df)),
@@ -1202,18 +1202,18 @@ def automated_quality_check(data_path: str):
         ('validity', check_validity(df)),
         ('freshness', check_freshness(df))
     ]
-    
+
     # Si algún check falla, detener pipeline
     failed = [name for name, result in checks if not result]
     if failed:
         raise DataQualityException(f"Failed checks: {failed}")
-    
+
     return True
 ```
 
 ### 4. Data Quality SLAs
 
-Establecer Service Level Agreements para calidad:
+Establish Service Level Agreements for quality:
 
 ```python
 DATA_QUALITY_SLAS = {
@@ -1237,7 +1237,7 @@ DATA_QUALITY_SLAS = {
 def check_sla_compliance(df: pd.DataFrame, slas: Dict) -> Dict:
     """Verifica compliance con SLAs de calidad."""
     results = {}
-    
+
     for dimension, sla in slas.items():
         if dimension == 'completeness':
             score = calculate_completeness(df, sla['critical_columns'])
@@ -1246,16 +1246,16 @@ def check_sla_compliance(df: pd.DataFrame, slas: Dict) -> Dict:
                 'threshold': sla['threshold'],
                 'compliant': score >= sla['threshold']
             }
-    
+
     # Alerta si no hay compliance
     non_compliant = [d for d, r in results.items() if not r['compliant']]
     if non_compliant:
         send_alert(f"SLA violation: {non_compliant}")
-    
+
     return results
 ```
 
-### 5. Documentación de Calidad
+### 5. Quality Documentation
 
 Mantener un **data quality catalog**:
 
@@ -1326,19 +1326,19 @@ def test_completeness_threshold():
 
 ---
 
-## Conclusión
+## Conclusion
 
-La calidad de datos es un proceso continuo que requiere:
-1. **Definición clara** de dimensiones y métricas
+Data quality is a continuous process that requires:
+1. **Clear definition** of dimensions and metrics
 2. **Validaciones automatizadas** en todo el pipeline
-3. **Monitoreo proactivo** con alertas
-4. **Iteración constante** basada en feedback
+3. **Proactive monitoring** with alerts
+4. **Constant iteration** based on feedback
 
-En los siguientes archivos exploraremos frameworks específicos como **Great Expectations** y arquitecturas para implementar data quality a escala empresarial.
+In the following files we will explore specific frameworks such as **Great Expectations** and architectures to implement data quality at an enterprise scale.
 
 ---
 
-## Próximos Pasos
+## Next Steps
 
-➡️ **theory/02-architecture.md**: Arquitecturas y frameworks de Data Quality  
-➡️ **theory/03-resources.md**: Herramientas y recursos adicionales
+➡️ **theory/02-architecture.md**: Arquitecturas y frameworks de Data Quality
+➡️ **theory/03-resources.md**: Herramientas y resources adicionales

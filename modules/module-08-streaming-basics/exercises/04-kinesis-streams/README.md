@@ -1,7 +1,7 @@
 # Exercise 04: AWS Kinesis Streams
 
-**Difficulty**: ⭐⭐ Intermediate  
-**Estimated Time**: 2-3 hours  
+**Difficulty**: ⭐⭐ Intermediate
+**Estimated Time**: 2-3 hours
 **Prerequisites**: AWS account, Exercise 01-03 completed
 
 ---
@@ -44,7 +44,7 @@ Producers → Kinesis Stream → Consumers
 | Scaling | Shard-based | Partition-based |
 | Retention | 1-365 days | Unlimited |
 | Pricing | Per shard-hour | Per cluster |
-| Throughput | 1 MB/s per shard | Higher per partition |
+| throughput | 1 MB/s per shard | Higher per partition |
 
 ---
 
@@ -104,7 +104,7 @@ class KinesisProducer:
     def __init__(self, stream_name: str, region: str = 'us-east-1'):
         self.kinesis = boto3.client('kinesis', region_name=region)
         self.stream_name = stream_name
-    
+
     def send_record(self, data: Dict[str, Any], partition_key: str):
         """TODO: Send single record"""
         try:
@@ -117,7 +117,7 @@ class KinesisProducer:
         except Exception as e:
             print(f"Error: {e}")
             return None
-    
+
     def send_batch(self, records: list):
         """TODO: Send batch of records (max 500)"""
         # Format records for put_records
@@ -128,18 +128,18 @@ class KinesisProducer:
             }
             for record in records
         ]
-        
+
         try:
             response = self.kinesis.put_records(
                 StreamName=self.stream_name,
                 Records=kinesis_records
             )
-            
+
             # Check failed records
             failed = response['FailedRecordCount']
             if failed > 0:
                 print(f"Failed records: {failed}")
-            
+
             return response
         except Exception as e:
             print(f"Batch error: {e}")
@@ -179,8 +179,8 @@ class KinesisConsumer:
     def __init__(self, stream_name: str, region: str = 'us-east-1'):
         self.kinesis = boto3.client('kinesis', region_name=region)
         self.stream_name = stream_name
-    
-    def get_shard_iterator(self, shard_id: str, 
+
+    def get_shard_iterator(self, shard_id: str,
                            iterator_type: str = 'TRIM_HORIZON'):
         """TODO: Get shard iterator"""
         response = self.kinesis.get_shard_iterator(
@@ -189,34 +189,34 @@ class KinesisConsumer:
             ShardIteratorType=iterator_type  # TRIM_HORIZON, LATEST, AT_TIMESTAMP
         )
         return response['ShardIterator']
-    
+
     def consume_shard(self, shard_id: str, process_fn):
         """TODO: Consume records from single shard"""
         shard_iterator = self.get_shard_iterator(shard_id)
-        
+
         while True:
             try:
                 response = self.kinesis.get_records(
                     ShardIterator=shard_iterator,
                     Limit=100
                 )
-                
+
                 records = response['Records']
                 for record in records:
                     data = json.loads(record['Data'])
                     process_fn(data)
-                
+
                 # Get next iterator
                 shard_iterator = response['NextShardIterator']
-                
+
                 # Wait if no records
                 if len(records) == 0:
                     time.sleep(1)
-                    
+
             except Exception as e:
                 print(f"Error: {e}")
                 break
-    
+
     def consume_all_shards(self, process_fn):
         """TODO: Consume from all shards (multi-threaded)"""
         # List shards
@@ -224,11 +224,11 @@ class KinesisConsumer:
             StreamName=self.stream_name
         )
         shards = response['StreamDescription']['Shards']
-        
+
         # Create thread per shard
         import threading
         threads = []
-        
+
         for shard in shards:
             shard_id = shard['ShardId']
             thread = threading.Thread(
@@ -237,7 +237,7 @@ class KinesisConsumer:
             )
             thread.start()
             threads.append(thread)
-        
+
         # Wait for threads
         for thread in threads:
             thread.join()
@@ -257,22 +257,22 @@ class RecordProcessor(processor.RecordProcessorBase):
     def __init__(self):
         self.checkpoint_counter = 0
         self.checkpoint_freq = 100
-    
+
     def initialize(self, initialize_input):
         """Called when processor is initialized"""
         self.shard_id = initialize_input.shard_id
         print(f"Initialized processor for {self.shard_id}")
-    
+
     def process_records(self, process_records_input):
         """TODO: Process batch of records"""
         records = process_records_input.records
-        
+
         for record in records:
             data = json.loads(record.data)
-            
+
             # Process record
             self.process_event(data)
-            
+
             # Checkpoint periodically
             self.checkpoint_counter += 1
             if self.checkpoint_counter % self.checkpoint_freq == 0:
@@ -280,20 +280,20 @@ class RecordProcessor(processor.RecordProcessorBase):
                     process_records_input.checkpointer.checkpoint()
                 except Exception as e:
                     print(f"Checkpoint failed: {e}")
-    
+
     def process_event(self, event: dict):
         """Process single event"""
         print(f"Processing: {event['event_id']}")
-    
+
     def lease_lost(self, lease_lost_input):
         """Called when shard lease is lost"""
         print("Lease lost")
-    
+
     def shard_ended(self, shard_ended_input):
         """Called when shard is closed"""
         shard_ended_input.checkpointer.checkpoint()
         print("Shard ended")
-    
+
     def shutdown_requested(self, shutdown_requested_input):
         """Called when worker is shutting down"""
         shutdown_requested_input.checkpointer.checkpoint()
@@ -341,7 +341,7 @@ def get_stream_metrics(stream_name: str):
     """TODO: Get CloudWatch metrics"""
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(hours=1)
-    
+
     # Incoming records
     response = cloudwatch.get_metric_statistics(
         Namespace='AWS/Kinesis',
@@ -352,9 +352,9 @@ def get_stream_metrics(stream_name: str):
         Period=300,  # 5 minutes
         Statistics=['Sum']
     )
-    
+
     print(f"Incoming records: {response['Datapoints']}")
-    
+
     # Get other metrics: IncomingBytes, GetRecords.Latency, etc.
 ```
 
@@ -366,20 +366,20 @@ def get_stream_metrics(stream_name: str):
 def scale_stream(stream_name: str, target_shard_count: int):
     """TODO: Update shard count"""
     kinesis = boto3.client('kinesis')
-    
+
     # Update stream mode to PROVISIONED
     kinesis.update_stream_mode(
         StreamARN=f'arn:aws:kinesis:us-east-1:123456789:stream/{stream_name}',
         StreamModeDetails={'StreamMode': 'PROVISIONED'}
     )
-    
+
     # Update shard count
     kinesis.update_shard_count(
         StreamName=stream_name,
         TargetShardCount=target_shard_count,
         ScalingType='UNIFORM_SCALING'
     )
-    
+
     print(f"Scaling to {target_shard_count} shards")
 
 # Auto-scaling based on metrics

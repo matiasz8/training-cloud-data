@@ -67,7 +67,7 @@
     "status"
   ],
   "additionalProperties": false,
-  
+
   "qualityRules": {
     "completeness": {
       "critical_columns": ["transaction_id", "customer_id", "amount", "transaction_date"],

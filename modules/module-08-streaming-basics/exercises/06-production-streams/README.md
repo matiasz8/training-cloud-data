@@ -1,7 +1,7 @@
 # Exercise 06: Production Streaming
 
-**Difficulty**: ⭐⭐⭐ Advanced  
-**Estimated Time**: 3-4 hours  
+**Difficulty**: ⭐⭐⭐ Advanced
+**Estimated Time**: 3-4 hours
 **Prerequisites**: Exercise 01-05 completed
 
 ---
@@ -49,7 +49,7 @@ def configure_logging():
         format='%(message)s',
         level=logging.INFO
     )
-    
+
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
@@ -74,7 +74,7 @@ def process_event(event: dict):
         event_type=event['event_type'],
         user_id=event['user_id']
     )
-    
+
     try:
         # Process...
         logger.info('event_processed', event_id=event['event_id'])
@@ -105,52 +105,52 @@ class StreamMetrics:
             'Total events processed',
             ['event_type', 'status']
         )
-        
+
         self.events_failed = Counter(
             'stream_events_failed_total',
             'Total events failed',
             ['event_type', 'error_type']
         )
-        
+
         # Histograms
         self.processing_duration = Histogram(
             'stream_processing_duration_seconds',
             'Event processing duration',
             ['event_type']
         )
-        
+
         # Gauges
         self.consumer_lag = Gauge(
             'stream_consumer_lag',
             'Consumer lag per partition',
             ['topic', 'partition']
         )
-        
+
         self.events_in_flight = Gauge(
             'stream_events_in_flight',
             'Currently processing events'
         )
-    
+
     def record_event_processed(self, event_type: str, status: str):
         \"\"\"TODO: Record processed event\"\"\"
         self.events_processed.labels(
             event_type=event_type,
             status=status
         ).inc()
-    
+
     def record_event_failed(self, event_type: str, error_type: str):
         \"\"\"TODO: Record failed event\"\"\"
         self.events_failed.labels(
             event_type=event_type,
             error_type=error_type
         ).inc()
-    
+
     def record_processing_time(self, event_type: str, duration: float):
         \"\"\"TODO: Record processing duration\"\"\"
         self.processing_duration.labels(
             event_type=event_type
         ).observe(duration)
-    
+
     def update_consumer_lag(self, topic: str, partition: int, lag: int):
         \"\"\"TODO: Update consumer lag\"\"\"
         self.consumer_lag.labels(
@@ -165,11 +165,11 @@ start_http_server(8000)  # Expose metrics on :8000/metrics
 def process_with_metrics(event: dict):
     start_time = time.time()
     metrics.events_in_flight.inc()
-    
+
     try:
         # Process event
         result = process_event(event)
-        
+
         metrics.record_event_processed(
             event['event_type'],
             'success'
@@ -197,8 +197,8 @@ class DeadLetterQueue:
     def __init__(self, dlq_topic: str):
         self.dlq_producer = KafkaProducer(...)
         self.dlq_topic = dlq_topic
-    
-    def send_to_dlq(self, event: dict, error: Exception, 
+
+    def send_to_dlq(self, event: dict, error: Exception,
                     retry_count: int = 0):
         \"\"\"TODO: Send failed event to DLQ with metadata\"\"\"
         dlq_event = {
@@ -214,7 +214,7 @@ class DeadLetterQueue:
                 'processor': 'stream-processor-v1'
             }
         }
-        
+
         self.dlq_producer.send(
             self.dlq_topic,
             value=json.dumps(dlq_event),
@@ -225,7 +225,7 @@ class RobustStreamProcessor:
     def __init__(self, max_retries: int = 3):
         self.max_retries = max_retries
         self.dlq = DeadLetterQueue('failed-events-dlq')
-    
+
     def process_with_retry(self, event: dict):
         \"\"\"TODO: Process with retry logic\"\"\"
         for attempt in range(self.max_retries):
@@ -244,10 +244,10 @@ class RobustStreamProcessor:
                 logger.error('event_failed', event_id=event['event_id'])
                 self.dlq.send_to_dlq(event, e, retry_count=attempt)
                 return None
-        
+
         # Max retries exceeded
         logger.error('max_retries_exceeded', event_id=event['event_id'])
-        self.dlq.send_to_dlq(event, Exception('Max retries'), 
+        self.dlq.send_to_dlq(event, Exception('Max retries'),
                             retry_count=self.max_retries)
         return None
 ```
@@ -268,37 +268,37 @@ class ConsumerLagMonitor:
             bootstrap_servers=bootstrap_servers,
             enable_auto_commit=False
         )
-    
+
     def get_consumer_lag(self, group_id: str, topic: str) -> dict:
         \"\"\"TODO: Calculate consumer lag per partition\"\"\"
         # Get group offsets
         group_offsets = self.admin_client.list_consumer_group_offsets(
             group_id
         )
-        
+
         # Get end offsets (latest)
         partitions = self.consumer.partitions_for_topic(topic)
         topic_partitions = [
             TopicPartition(topic, p) for p in partitions
         ]
         end_offsets = self.consumer.end_offsets(topic_partitions)
-        
+
         # Calculate lag
         lag = {}
         for tp in topic_partitions:
             committed = group_offsets.get(tp)
             end = end_offsets.get(tp)
-            
+
             if committed and end:
                 lag[tp.partition] = end - committed.offset
-        
+
         return lag
-    
-    def check_lag_threshold(self, group_id: str, topic: str, 
+
+    def check_lag_threshold(self, group_id: str, topic: str,
                            threshold: int = 1000):
         \"\"\"TODO: Alert if lag exceeds threshold\"\"\"
         lag = self.get_consumer_lag(group_id, topic)
-        
+
         for partition, lag_count in lag.items():
             if lag_count > threshold:
                 logger.error(
@@ -309,18 +309,18 @@ class ConsumerLagMonitor:
                     lag=lag_count,
                     threshold=threshold
                 )
-                
+
                 # Send alert
                 self.send_alert(
                     f\"High lag on {topic}:{partition} = {lag_count}\"
                 )
-        
+
         return lag
 
 # Run as background thread
 def monitor_lag_continuously(interval_seconds: int = 60):
     monitor = ConsumerLagMonitor('localhost:9092')
-    
+
     while True:
         try:
             lag = monitor.check_lag_threshold(
@@ -328,13 +328,13 @@ def monitor_lag_continuously(interval_seconds: int = 60):
                 topic='user-events',
                 threshold=1000
             )
-            
+
             # Update metrics
             for partition, lag_count in lag.items():
                 metrics.update_consumer_lag('user-events', partition, lag_count)
         except Exception as e:
             logger.error('lag_monitoring_failed', error=str(e))
-        
+
         time.sleep(interval_seconds)
 ```
 
@@ -351,13 +351,13 @@ class ConsumerAutoScaler:
         self.max_consumers = max_consumers
         self.current_consumers = min_consumers
         self.lag_monitor = ConsumerLagMonitor('localhost:9092')
-    
-    def calculate_desired_consumers(self, total_lag: int, 
+
+    def calculate_desired_consumers(self, total_lag: int,
                                     lag_threshold: int = 1000) -> int:
         \"\"\"TODO: Calculate desired consumer count\"\"\"
         if total_lag == 0:
             return self.min_consumers
-        
+
         # Scale up if lag > threshold
         if total_lag > lag_threshold * self.current_consumers:
             desired = min(
@@ -372,9 +372,9 @@ class ConsumerAutoScaler:
             )
         else:
             desired = self.current_consumers
-        
+
         return desired
-    
+
     def scale_consumers(self, desired_count: int):
         \"\"\"TODO: Start/stop consumer processes\"\"\"
         if desired_count > self.current_consumers:
@@ -385,15 +385,15 @@ class ConsumerAutoScaler:
             # Scale down
             for _ in range(self.current_consumers - desired_count):
                 self.stop_consumer()
-        
+
         self.current_consumers = desired_count
-        
+
         logger.info(
             'scaled_consumers',
             previous=self.current_consumers,
             current=desired_count
         )
-    
+
     def auto_scale_loop(self, interval_seconds: int = 60):
         \"\"\"Run auto-scaling loop\"\"\"
         while True:
@@ -403,14 +403,14 @@ class ConsumerAutoScaler:
                     'user-events'
                 )
                 total_lag = sum(lag.values())
-                
+
                 desired = self.calculate_desired_consumers(total_lag)
-                
+
                 if desired != self.current_consumers:
                     self.scale_consumers(desired)
             except Exception as e:
                 logger.error('auto_scaling_failed', error=str(e))
-            
+
             time.sleep(interval_seconds)
 ```
 
@@ -433,32 +433,32 @@ def kafka_container():
 def test_stream_processing_pipeline(kafka_container):
     \"\"\"TODO: Test full pipeline\"\"\"
     bootstrap_servers = kafka_container.get_bootstrap_server()
-    
+
     # 1. Produce test events
     producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
     test_events = [
         {'event_id': 'test_1', 'amount': 100},
         {'event_id': 'test_2', 'amount': 200}
     ]
-    
+
     for event in test_events:
         producer.send('test-input', json.dumps(event).encode())
     producer.flush()
-    
+
     # 2. Process stream
     processor = StreamProcessor(
         input_topic='test-input',
         output_topic='test-output',
         bootstrap_servers=bootstrap_servers
     )
-    
+
     # Run for 5 seconds
     import threading
     thread = threading.Thread(target=processor.run)
     thread.start()
     time.sleep(5)
     processor.stop()
-    
+
     # 3. Consume and verify output
     consumer = KafkaConsumer(
         'test-output',
@@ -466,9 +466,9 @@ def test_stream_processing_pipeline(kafka_container):
         auto_offset_reset='earliest',
         consumer_timeout_ms=5000
     )
-    
+
     results = [json.loads(msg.value) for msg in consumer]
-    
+
     assert len(results) == 2
     assert results[0]['amount'] == 100
 ```

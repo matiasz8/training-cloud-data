@@ -1,14 +1,14 @@
 # Streaming - Tools & Learning Resources
 
-## Índice
+## index
 1. [Tools Ecosystem](#tools-ecosystem)
 2. [Cloud Services](#cloud-services)
-3. [Libraries & Frameworks](#libraries--frameworks)
+3. [Libraries & Frameworks](#libraries-frameworks)
 4. [Development Tools](#development-tools)
 5. [Learning Resources](#learning-resources)
 6. [Books](#books)
-7. [Courses & Certifications](#courses--certifications)
-8. [Community & Events](#community--events)
+7. [Courses & Certifications](#courses-certifications)
+8. [Community & Events](#community-events)
 
 ---
 
@@ -73,7 +73,7 @@ result.add_sink(kafka_sink)
 env.execute()
 ```
 
-**2. Apache Spark Structured Streaming** ⭐⭐⭐⭐ 
+**2. Apache Spark Structured Streaming** ⭐⭐⭐⭐
 - **Best for**: Unified batch + streaming
 - **Pros**: Familiar API (para Spark users), integrations
 - **Cons**: Micro-batch (no true streaming)
@@ -114,7 +114,7 @@ query = df.writeStream \
 - **Cons**: Less popular
 - **Used by**: LinkedIn, Optimizely
 
-### Comparación: Flink vs Spark Streaming vs Kafka Streams
+### Comparison: Flink vs Spark Streaming vs Kafka Streams
 
 | Feature | Flink | Spark Streaming | Kafka Streams |
 |---------|-------|-----------------|---------------|
@@ -217,7 +217,7 @@ future = publisher.publish(
 
 | Feature | AWS Kinesis | GCP Pub/Sub | Azure Event Hubs |
 |---------|-------------|-------------|------------------|
-| **Throughput** | 1 MB/s per shard | Auto-scaling | Auto-scaling |
+| **throughput** | 1 MB/s per shard | Auto-scaling | Auto-scaling |
 | **Retention** | Up to 365 days | 7 days | 7 days (90 premium) |
 | **Ordering** | Per shard | Per ordering key | Per partition |
 | **Pricing model** | Per shard-hour | Per GB | Per throughput unit |
@@ -390,7 +390,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-  
+
   grafana:
     image: grafana/grafana
     ports:
@@ -465,7 +465,7 @@ docker run -d \
 **1. Confluent Schema Registry Tutorial**
 - https://developer.confluent.io/tutorials/
 - Hands-on Kafka tutorials
-- Código incluido
+- Code included
 
 **2. AWS Kinesis Workshops**
 - https://streaming-data-workshop.workshop.aws/
@@ -730,20 +730,20 @@ docker run -d \
 - ✅ Module 08 Exercises 01-03
 
 ### Mes 2: Stream Processing
-- ✅ Leer "Streaming Systems" Capítulos 1-4
+- ✅ Read "Streaming Systems" Chapters 1-4
 - ✅ Aprender Flink DataStream API
 - ✅ Implementar windowing/stateful processing
 - ✅ Module 08 Exercises 04-06
 - ✅ Build personal streaming project
 
-### Mes 3: Producción
+### Month 3: Production
 - ✅ Kafka operations + monitoring
 - ✅ Deploy en AWS (MSK o self-hosted)
 - ✅ Implementar CI/CD para streaming apps
 - ✅ Performance tuning
-- ✅ Certificación CCDAK (opcional)
+- ✅ CCDAK Certification (optional)
 
-### Mes 4+: Avanzado
+### Month 4+: Advanced
 - ✅ Schema evolution strategies
 - ✅ Multi-DC replication
 - ✅ Event-driven microservices architecture
@@ -769,7 +769,7 @@ docker run -d \
 - ✅ Schema Registry
 - ✅ kcat (kafkacat)
 
-### Mejores Recursos para Empezar
+### Mejores resources para Empezar
 
 1. 📖 Confluent Kafka 101 (Free course)
 2. 🎥 Stephane Maarek's Udemy course
@@ -777,15 +777,15 @@ docker run -d \
 4. 🏋️ Module 08 hands-on exercises
 5. 💬 Join Confluent Community Slack
 
-### Próximos Pasos
+### Next Steps
 
 1. 🚀 Completar Exercise 01: Kafka Setup
 2. 📊 Build un streaming dashboard con Flink
 3. 🔍 Explorar AWS Kinesis
-4. 🎯 Certificación CCDAK
+4. 🎯 CCDAK Certification
 5. 🏆 Contribuir a proyecto open source
 
 ---
 
-**Previous**: [02-architecture.md](./02-architecture.md) - Streaming Architectures  
+**Previous**: [02-architecture.md](./02-architecture.md) - Streaming Architectures
 **Next**: Start with [exercises/01-kafka-basics/](../exercises/01-kafka-basics/)
