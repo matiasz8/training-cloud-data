@@ -1,55 +1,55 @@
-# Módulo 04: Python para Ingeniería de Datos
+# Module 04: Python for Data Engineering
 
-Domina Python y sus bibliotecas esenciales para construir pipelines de datos robustos, procesar grandes volúmenes de información y automatizar flujos de trabajo de ingeniería de datos.
+Master Python and its essential libraries to build robust data pipelines, process large volumes of information, and automate data engineering workflows.
 
-## Descripción General
+## General Description
 
-Este módulo te enseña Python desde la perspectiva de ingeniería de datos, enfocándose en las habilidades prácticas necesarias para manipular datos, construir ETL pipelines y trabajar con formatos modernos de datos. Aprenderás desde fundamentos de Python hasta técnicas avanzadas con pandas, trabajando con datos reales en múltiples formatos.
+This module teaches you Python from a data engineering perspective, focusing on the practical skills needed to manipulate data, build ETL pipelines, and work with modern data formats. You will learn from Python fundamentals to advanced techniques with Pandas, working with real data in multiple formats.
 
-**Duración**: 14-16 horas  
+**Duration**: 14-16 hours
 **Dificultad**: Principiante a Intermedio  
 **Prerequisitos**: 
-- Módulo 03: SQL Foundations (recomendado)
-- Conocimientos básicos de programación (cualquier lenguaje)
+- Module 03: SQL Foundations (recommended)
+- Basic programming knowledge (any language)
 
 ## Objetivos de Aprendizaje
 
-Al finalizar este módulo, serás capaz de:
+Upon completion of this module, you will be able to:
 
-1. **Escribir código Python idiomático** siguiendo mejores prácticas para ingeniería de datos
+1. **Write idiomatic Python code** following best practices for data engineering
 2. **Manipular estructuras de datos complejas** usando listas, diccionarios, sets y comprehensions
-3. **Trabajar con archivos en múltiples formatos** (CSV, JSON, Parquet, Excel)
-4. **Dominar pandas para análisis de datos** incluyendo DataFrames, Series y operaciones grupales
+3. **Work with files in multiple formats** (CSV, JSON, Parquet, Excel)
+4. **Master pandas for data analysis** including DataFrames, Series and group operations
 5. **Realizar transformaciones de datos complejas** con merge, join, pivot y reshape
 6. **Implementar data quality checks** usando validaciones y data profiling
 7. **Manejar errores y logging** para pipelines de datos robustos
-8. **Optimizar rendimiento** con técnicas de procesamiento eficiente
-9. **Trabajar con APIs y web scraping** para ingesta de datos
+8. **Optimize performance** with efficient processing techniques
+9. **Trabajar con APIs y web scraping** para data ingestion
 10. **Usar virtual environments** y gestionar dependencias correctamente
-11. **Escribir código testeable** con pruebas unitarias usando pytest
-12. **Aplicar patterns de ingeniería de datos** como Factory, Builder y Pipeline
+11. **Write testable code** with unit tests using pytest
+12. **Apply data engineering patterns** such as Factory, Builder and pipeline
 
 ## Prerequisitos
 
 ### Conocimientos Requeridos
-- Comprensión básica de programación (variables, loops, condicionales)
-- Familiaridad con línea de comandos
-- Módulo 03 completado (recomendado pero no obligatorio)
+- Basic programming understanding (variables, loops, conditionals)
+- Command line familiarity
+- Module 03 completed (recommended but not required)
 
 ### Software Requerido
 - Python 3.11+
 - Docker y Docker Compose
 - pip y venv
-- Editor de código (VS Code recomendado)
+- Code editor (VS Code recommended)
 - 3GB de espacio libre en disco
 
 ### Recomendado pero Opcional
 - Jupyter Lab/Notebook
 - Git para control de versiones
-- Conocimientos básicos de SQL
+- Basic knowledge of SQL
 - Familiaridad con conceptos de ETL
 
-## Estructura del Módulo
+## Module Structure
 
 ```
 module-04-python-for-data/
@@ -104,46 +104,46 @@ module-04-python-for-data/
 ## Ruta de Aprendizaje
 
 ### Fase 1: Fundamentos (4-5 horas)
-1. **Teoría**: Lee `theory/concepts.md` para entender fundamentos
+1. **Theory**: Lee`theory/concepts.md` para entender fundamentos
 2. **Setup**: Ejecuta `./scripts/setup.sh` para configurar entorno
 3. **Ejercicio 01**: Python Basics - Sintaxis, tipos, operadores
 4. **Ejercicio 02**: Data Structures - Listas, dicts, sets, comprehensions
 
 ### Fase 2: Trabajo con Archivos (3-4 horas)
 5. **Ejercicio 03**: File Operations - CSV, JSON, Parquet, Excel
-6. **Práctica**: Carga y explora los datasets en `data/raw/`
+6. **Practice**: Load and explore the datasets in`data/raw/`
 
 ### Fase 3: Pandas y Transformaciones (5-6 horas)
 7. **Ejercicio 04**: Pandas Fundamentals - DataFrames, Series, indexing
 8. **Ejercicio 05**: Data Transformation - Merge, group, pivot, reshape
-9. **Proyecto Mini**: Construye un pipeline de transformación completo
+9. **Mini Project**: Build a complete transformation pipeline
 
-### Fase 4: Producción (2-3 horas)
+### Phase 4: Production (2-3 hours)
 10. **Ejercicio 06**: Error Handling - Try/except, logging, debugging
-11. **Validación**: Ejecuta `./scripts/validate.sh` para verificar aprendizaje
-12. **Revisión**: Estudia `assets/cheatsheets/` para repasar conceptos
+11. **Validation**: Execute`./scripts/validate.sh` para verificar aprendizaje
+12. **Review**: Study`assets/cheatsheets/` para repasar conceptos
 
 ## Ejercicios Detallados
 
 ### Ejercicio 01: Python Basics (60 min)
 **Objetivos**:
-- Sintaxis básica de Python
+- Basic Python Syntax
 - Tipos de datos (int, float, str, bool)
 - Operadores y expresiones
 - Control de flujo (if/elif/else, loops)
-- Funciones básicas
+- Basic functions
 
 **Archivos**:
 - `starter/basics.py` - Ejercicios con TODO
 - `solution/basics.py` - Soluciones completas
-- `README.md` - Teoría y ejemplos
+- `README.md`- Theory and examples
 
 ---
 
 ### Ejercicio 02: Data Structures (90 min)
 **Objetivos**:
 - Listas y operaciones (append, slice, sort)
-- Diccionarios y métodos (keys, values, items)
+- Dictionaries and methods (keys, values, items)
 - Sets y operaciones de conjunto
 - Tuples e inmutabilidad
 - List/Dict/Set comprehensions
@@ -153,7 +153,7 @@ module-04-python-for-data/
 - `starter/data_structures.py` - Ejercicios
 - `solution/data_structures.py` - Soluciones
 - `examples/comprehensions.py` - Ejemplos avanzados
-- `README.md` - Guía detallada
+- `README.md`- Detailed guide
 
 ---
 
@@ -170,7 +170,7 @@ module-04-python-for-data/
 - `starter/file_io.py` - Ejercicios
 - `solution/file_io.py` - Soluciones
 - `data/` - Archivos de ejemplo
-- `README.md` - Guía de formatos
+- `README.md`- Format guide
 
 ---
 
@@ -188,7 +188,7 @@ module-04-python-for-data/
 - `starter/pandas_basics.py` - Ejercicios
 - `solution/pandas_basics.py` - Soluciones
 - `notebooks/pandas_tutorial.ipynb` - Jupyter notebook
-- `README.md` - Guía completa
+- `README.md`- Complete guide
 
 ---
 
@@ -206,8 +206,8 @@ module-04-python-for-data/
 **Archivos**:
 - `starter/transformation.py` - Ejercicios
 - `solution/transformation.py` - Soluciones
-- `examples/etl_pipeline.py` - Pipeline completo
-- `README.md` - Patrones de transformación
+- `examples/etl_pipeline.py` - pipeline completo
+- `README.md`- Transformation patterns
 
 ---
 
@@ -219,35 +219,35 @@ module-04-python-for-data/
 - Logging module (info, warning, error)
 - Log configuration
 - Debugging techniques
-- Best practices para producción
+- Best practices for production
 
 **Archivos**:
 - `starter/error_handling.py` - Ejercicios
 - `solution/error_handling.py` - Soluciones
-- `examples/production_pipeline.py` - Pipeline robusto
-- `README.md` - Guía de errores comunes
+- `examples/production_pipeline.py` - pipeline robusto
+- `README.md`- Common errors guide
 
 ---
 
-## Dataset de Práctica
+## Practice Dataset
 
-El módulo incluye un dataset realista de e-commerce con múltiples formatos:
+The module includes a realistic e-commerce dataset with multiple formats:
 
 ### Archivos Disponibles
 - `customers.csv` (10,000 registros) - Datos de clientes
-- `orders.json` (50,000 registros) - Órdenes con nested data
-- `products.parquet` (5,000 registros) - Catálogo de productos
-- `transactions.csv` (100,000 registros) - Transacciones detalladas
+- `orders.json`(50,000 records) - Orders with nested data
+- `products.parquet`(5,000 records) - Product Catalog
+- `transactions.csv` (100,000 registros) - transactions detalladas
 - `user_activity.json` (200,000 registros) - Logs de actividad
 
-### Características
+### features
 - Datos realistas con casos edge (nulls, duplicados)
-- Múltiples formatos para práctica
-- Relaciones entre tablas para joins
-- Timestamps para análisis temporal
+- Multiple formats for practice
+- Relaciones entre tables para joins
+- Timestamps for temporal analysis
 - Datos sucios para data cleaning
 
-## Validación y Testing
+## Validation and Testing
 
 ### Ejecutar Todos los Tests
 ```bash
@@ -266,14 +266,14 @@ cd modules/module-04-python-for-data
 ./scripts/validate.sh --coverage
 ```
 
-### Tests Rápidos (sin lentos)
+### Quick Tests (without slow ones)
 ```bash
 ./scripts/validate.sh --fast
 ```
 
 ## Entorno de Desarrollo
 
-### Opción 1: Docker (Recomendado)
+### Option 1: Docker (Recommended)
 ```bash
 # Setup automático
 ./scripts/setup.sh
@@ -284,7 +284,7 @@ cd modules/module-04-python-for-data
 # Acceder a: http://localhost:8888
 ```
 
-### Opción 2: Virtual Environment Local
+### Option 2: Virtual Environment Local
 ```bash
 # Crear venv
 python3 -m venv venv
@@ -298,7 +298,7 @@ pip install -r requirements.txt
 python -c "import pandas; print(pandas.__version__)"
 ```
 
-### Opción 3: Poetry (Avanzado)
+### Option 3: Poetry (Advanced)
 ```bash
 # Instalar Poetry
 curl -sSL https://install.python-poetry.org | python3 -
@@ -310,30 +310,30 @@ poetry install
 poetry shell
 ```
 
-## Recursos Adicionales
+## resources Adicionales
 
 ### Cheatsheets Incluidos
 - `assets/cheatsheets/python-basics.md` - Sintaxis fundamental
 - `assets/cheatsheets/pandas-reference.md` - Operaciones pandas
-- `assets/cheatsheets/data-cleaning.md` - Técnicas de limpieza
+- `assets/cheatsheets/data-cleaning.md`- Cleaning techniques
 - `assets/cheatsheets/file-formats.md` - CSV/JSON/Parquet
 
-### Documentación Externa
-- [Python Docs](https://docs.python.org/3/) - Documentación oficial
-- [Pandas Docs](https://pandas.pydata.org/docs/) - Guía pandas
-- [Real Python](https://realpython.com/) - Tutoriales prácticos
+### External Documentation
+- [Python Docs](https://docs.python.org/3/) - Official documentation
+- [Pandas Docs](https://pandas.pydata.org/docs/) - Pandas Guide
+- [Real Python](https://realpython.com/) - Practical tutorials
 - [Python for Data Analysis](https://wesmckinney.com/book/) - Libro de Wes McKinney
 
 ### Comunidad
-- Stack Overflow - Preguntas técnicas
+- Stack Overflow - Technical Questions
 - r/datascience - Reddit community
 - PyData - Conferencias y meetups
 
 ## Checklist de Progreso
 
 ### Fundamentos
-- [ ] Leído `theory/concepts.md`
-- [ ] Leído `theory/architecture.md`
+- [ ] Read`theory/concepts.md`
+- [ ] Read`theory/architecture.md`
 - [ ] Setup completado (`./scripts/setup.sh`)
 - [ ] Jupyter Lab funcionando
 
@@ -345,44 +345,44 @@ poetry shell
 - [ ] ✅ Ejercicio 05: Data Transformation (tests pasando)
 - [ ] ✅ Ejercicio 06: Error Handling (tests pasando)
 
-### Validación
+### Validation
 - [ ] Todos los tests pasando (`./scripts/validate.sh`)
 - [ ] Coverage > 80%
 - [ ] Revisado cheatsheets en `assets/`
 
 ### Proyecto Final
-- [ ] Pipeline ETL completo implementado
+- [ ] pipeline ETL completo implementado
 - [ ] Data quality checks incluidos
 - [ ] Error handling robusto
 - [ ] Logging configurado
-- [ ] Código documentado
+- [ ] Documented code
 
-## Próximos Pasos
+## Next Steps
 
-Después de completar este módulo, estarás listo para:
+After completing this module, you will be ready to:
 
-- **Módulo 05**: Data Lakehouse Architecture - Aplicar Python en arquitecturas modernas
-- **Módulo 06**: ETL Fundamentals - Construir pipelines completos
-- **Módulo 07**: Batch Processing - Procesar grandes volúmenes con PySpark
-- **Módulo 08**: Streaming Basics - Real-time data processing
+- **Module 05**: Data Lakehouse Architecture - Apply Python in modern architectures
+- **Module 06**: ETL Fundamentals - Build complete pipelines
+- **Module 07**: Batch Processing - Process large volumes with PySpark
+- **Module 08**: Streaming Basics - Real-time data processing
 
-## Tiempo Estimado por Sección
+## Estimated Time per Section
 
-| Sección | Tiempo Estimado | Prioridad |
+| Section | Estimated Time | Priority |
 |---------|----------------|-----------|
 | Theory (concepts + architecture) | 2-3 horas | Alta |
 | Setup (infrastructure) | 30 min | Alta |
 | Ejercicio 01 (Python Basics) | 1 hora | Alta |
 | Ejercicio 02 (Data Structures) | 1.5 horas | Alta |
 | Ejercicio 03 (File Operations) | 2 horas | Alta |
-| Ejercicio 04 (Pandas Fundamentals) | 2.5 horas | Crítica |
-| Ejercicio 05 (Data Transformation) | 3 horas | Crítica |
+| Exercise 04 (Pandas Fundamentals) | 2.5 hours | Review |
+| Exercise 05 (Data Transformation) | 3 hours | Review |
 | Ejercicio 06 (Error Handling) | 1.5 horas | Alta |
 | Assets & Cheatsheets | 1 hora | Media |
 | Proyecto Final | 2 horas | Media |
 | **TOTAL** | **14-16 horas** | - |
 
-## Comandos Rápidos
+## Quick Commands
 
 ```bash
 # Setup inicial
@@ -404,7 +404,7 @@ Después de completar este módulo, estarás listo para:
 docker-compose -f infrastructure/docker-compose.yml logs -f
 ```
 
-## Solución de Problemas
+## Troubleshooting
 
 ### Error: "Module not found"
 ```bash
@@ -434,11 +434,11 @@ find . -type d -name __pycache__ -exec rm -rf {} +
 find . -type d -name .pytest_cache -exec rm -rf {} +
 ```
 
-Ver guía completa en `docs/troubleshooting.md`
+See complete guide at`docs/troubleshooting.md`
 
 ## Contribuciones
 
-Este módulo es parte del curso **Training Cloud Data**. Para reportar errores o sugerir mejoras:
+This module is part of the **Training Cloud Data** course. To report bugs or suggest improvements:
 
 1. Revisar `STATUS.md` para ver progreso actual
 2. Verificar que el issue no exista
@@ -448,12 +448,12 @@ Este módulo es parte del curso **Training Cloud Data**. Para reportar errores o
 ## Notas Importantes
 
 - 🐍 **Python 3.11+** requerido (usa features modernas)
-- 📊 **pandas 2.0+** para mejor rendimiento
+- 📊 **pandas 2.0+** para mejor performance
 - 🐳 **Docker recomendado** para consistencia
-- 📝 **Jupyter notebooks** incluidos para exploración
+- 📝 **Jupyter notebooks** included for exploration
 - ✅ **Tests obligatorios** antes de avanzar
 - 🔧 **Code style**: Seguimos PEP 8
-- 📚 **Documentación**: Todos los ejercicios tienen README detallado
+- 📚 **Documentation**: All exercises have detailed README
 
 ## Licencia
 
@@ -461,11 +461,11 @@ Este material es parte del curso Training Cloud Data.
 
 ---
 
-**¿Listo para comenzar?** 🚀
+**Ready to get started?** 🚀
 
 ```bash
 cd modules/module-04-python-for-data
 ./scripts/setup.sh
 ```
 
-¡Éxito en tu aprendizaje de Python para Ingeniería de Datos!
+Success in your learning Python for Data Engineering!

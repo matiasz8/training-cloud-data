@@ -1,6 +1,6 @@
 # Infraestructura: Jupyter Lab con Docker
 
-Esta carpeta contiene la configuración de Docker para ejecutar Jupyter Lab y servicios auxiliares para el módulo de Python for Data Engineering.
+This folder contains the Docker configuration for running Jupyter Lab and supporting services for the Python for Data Engineering module.
 
 ## Contenido
 
@@ -13,19 +13,19 @@ infrastructure/
 └── README.md              # Este archivo
 ```
 
-## Servicios Disponibles
+## services Disponibles
 
 ### 1. Jupyter Lab (Principal)
 
 **Imagen**: Basada en `jupyter/scipy-notebook:python-3.11`
 
-**Características**:
+**features**:
 - Python 3.11 con bibliotecas de data engineering
 - pandas, NumPy, Polars, PyArrow
-- SQLAlchemy, psycopg2 para bases de datos
+- SQLAlchemy, psycopg2 para databases
 - Herramientas de testing (pytest)
 - Extensiones de JupyterLab (git, formatters, etc.)
-- Volúmenes montados para persistencia
+- Mounted volumes for persistence
 
 **Acceso**:
 - URL: http://localhost:8888
@@ -35,18 +35,18 @@ infrastructure/
 
 **Imagen**: `postgres:15-alpine`
 
-**Uso**: Para ejercicios que requieren conectar Python con bases de datos
+**Uso**: Para ejercicios que requieren conectar Python con databases
 
 **Acceso**:
-- Host: `localhost` (desde máquina) o `postgres` (desde Jupyter)
-- Puerto: 5433 (para no conflictuar con instalación local)
+- Host: `localhost`(from machine) or`postgres` (desde Jupyter)
+- Port: 5433 (so as not to conflict with local installation)
 - Credenciales: Ver `.env`
 
 ### 3. MinIO (Opcional)
 
 **Imagen**: `minio/minio:latest`
 
-**Uso**: Simulación de S3 para ejercicios con storage cloud
+**Use**: S3 simulation for exercises with storage cloud
 
 **Acceso**:
 - API: http://localhost:9000
@@ -55,7 +55,7 @@ infrastructure/
 
 ---
 
-## Setup Rápido
+## Quick Setup
 
 ### 1. Copiar variables de entorno
 
@@ -67,7 +67,7 @@ cp .env.example .env
 nano .env
 ```
 
-### 2. Iniciar servicios
+### 2. Iniciar services
 
 ```bash
 # Iniciar solo Jupyter Lab
@@ -91,9 +91,9 @@ open http://localhost:8888
 
 ---
 
-## Comandos Útiles
+## Useful Commands
 
-### Gestión de Servicios
+### Service management
 
 ```bash
 # Iniciar servicios
@@ -147,52 +147,52 @@ docker-compose up -d --build
 
 ---
 
-## Estructura de Volúmenes
+## Volume Structure
 
-Los siguientes directorios del módulo están montados en el container:
+The following module directories are mounted in the container:
 
-### Volúmenes Persistentes (Read-Write)
+### Persistent Volumes (Read-Write)
 
-| Local | Container | Descripción |
+| Local | Container | Description |
 |-------|-----------|-------------|
-| `./notebooks` | `/home/jovyan/work/notebooks` | Tus notebooks de exploración |
+| `./notebooks` | `/home/jovyan/work/notebooks`| Your exploration notebooks |
 | `../data` | `/home/jovyan/work/data` | Datasets y archivos de datos |
 
-### Volúmenes Read-Only
+### Read-Only Volumes
 
-| Local | Container | Descripción |
+| Local | Container | Description |
 |-------|-----------|-------------|
 | `../exercises` | `/home/jovyan/work/exercises` | Ejercicios (evita sobrescribir) |
 | `../scripts` | `/home/jovyan/work/scripts` | Scripts de utilidad |
-| `../assets` | `/home/jovyan/work/assets` | Cheatsheets y recursos |
+| `../assets` | `/home/jovyan/work/assets` | Cheatsheets y resources |
 
-**Nota**: Los volúmenes read-only previenen modificaciones accidentales de ejercicios y soluciones.
+**Note**: Read-only volumes prevent accidental modifications of exercises and solutions.
 
 ---
 
-## Configuración de Jupyter Lab
+## Jupyter Lab Setup
 
 ### jupyter_config.py
 
-Archivo con configuración personalizada:
+File with custom configuration:
 
-- **Autoreload**: Recarga automática de módulos modificados
-- **Autosave**: Guardado automático cada minuto
-- **Plots**: Configuración de matplotlib inline
+- **Autoreload**: Automatic reload of modified modules
+- **Autosave**: Automatic save every minute
+- **Plots**: Inline matplotlib configuration
 - **Logging**: Formato y nivel de logs
 - **Security**: CORS y acceso remoto
 
-**Modificar configuración**:
+**Modify settings**:
 
 1. Editar `jupyter_config.py`
 2. Reiniciar: `docker-compose restart jupyter`
 
 ### Extensiones Instaladas
 
-- **jupyterlab-git**: Integración con Git
-- **jupyterlab-code-formatter**: Formateo automático (Black)
+- **jupyterlab-git**: Integration with Git
+- **jupyterlab-code-formatter**: Automatic formatting (Black)
 - **jupyterlab-lsp**: Language Server Protocol (autocompletado mejorado)
-- **jupyterlab-system-monitor**: Monitor de recursos
+- **jupyterlab-system-monitor**: Monitor de resources
 
 ---
 
@@ -206,9 +206,9 @@ Archivo con configuración personalizada:
 # 3. Guardar en: work/notebooks/mi_notebook.ipynb
 ```
 
-### Imports Automáticos
+### Automatic Imports
 
-El entorno está configurado con imports comunes:
+The environment is configured with common imports:
 
 ```python
 import pandas as pd
@@ -217,7 +217,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 ```
 
-### Conectar a PostgreSQL (si está habilitado)
+### Connect to PostgreSQL (if enabled)
 
 ```python
 from sqlalchemy import create_engine
@@ -253,7 +253,7 @@ df.to_parquet('/home/jovyan/work/data/processed/datos.parquet')
 1. Click en "+" (New Launcher)
 2. Click en "Terminal" bajo "Other"
 
-### Comandos Útiles en Terminal
+### Useful Commands in Terminal
 
 ```bash
 # Ver estructura de archivos
@@ -274,12 +274,12 @@ pg_isready -h postgres -p 5432
 
 ---
 
-## Habilitar Servicios Opcionales
+## Habilitar services Opcionales
 
 ### Habilitar PostgreSQL
 
 1. Editar `docker-compose.yml`
-2. Descomentar sección `postgres`
+2. Uncomment section`postgres`
 3. Descomentar volumen `postgres_data`
 4. Guardar y ejecutar:
 
@@ -290,7 +290,7 @@ docker-compose up -d postgres
 ### Habilitar MinIO (S3 local)
 
 1. Editar `docker-compose.yml`
-2. Descomentar sección `minio`
+2. Uncomment section`minio`
 3. Descomentar volumen `minio_data`
 4. Guardar y ejecutar:
 
@@ -305,7 +305,7 @@ docker-compose up -d minio
 
 ---
 
-## Agregar Librerías Python
+## Add Python Libraries
 
 ### Temporal (se pierde al recrear container)
 
@@ -317,9 +317,9 @@ pip install nombre-libreria
 !pip install nombre-libreria
 ```
 
-### Permanente (persiste en reconstrucción)
+### Permanent (persists in reconstruction)
 
-**Método 1: Modificar requirements.txt**
+**Method 1: Modify requirements.txt**
 
 ```bash
 # 1. Editar modules/module-04-python-for-data/requirements.txt
@@ -329,7 +329,7 @@ echo "nueva-libreria>=1.0.0" >> requirements.txt
 docker-compose up -d --build
 ```
 
-**Método 2: Modificar Dockerfile**
+**Method 2: Modify Dockerfile**
 
 ```dockerfile
 # Editar infrastructure/Dockerfile
@@ -347,9 +347,9 @@ docker-compose up -d
 
 ### Problema: Jupyter no inicia
 
-**Síntomas**: Container se detiene inmediatamente
+**Yesntomas**: Container se detiene inmediatamente
 
-**Solución**:
+**Solution**:
 
 ```bash
 # Ver logs detallados
@@ -366,9 +366,9 @@ docker-compose up -d
 
 ### Problema: Puerto 8888 ocupado
 
-**Síntomas**: Error "port is already allocated"
+**Yesntomas**: Error "port is already allocated"
 
-**Solución**:
+**Solution**:
 
 ```bash
 # Opción 1: Cambiar puerto en .env
@@ -381,9 +381,9 @@ kill -9 <PID>
 
 ### Problema: No puedo guardar notebooks
 
-**Síntomas**: Error de permisos al guardar
+**Yesntomas**: Error de permisos al guardar
 
-**Solución**:
+**Solution**:
 
 ```bash
 # Verificar permisos de carpeta notebooks
@@ -398,9 +398,9 @@ docker-compose restart jupyter
 
 ### Problema: Out of Memory
 
-**Síntomas**: Kernel muere procesando datos grandes
+**Yesntomas**: Kernel muere procesando datos grandes
 
-**Solución**:
+**Solution**:
 
 ```bash
 # Editar docker-compose.yml
@@ -415,11 +415,11 @@ docker-compose down
 docker-compose up -d
 ```
 
-### Problema: Cambios en código no se reflejan
+### Problem: Code changes are not reflected
 
-**Síntomas**: Modificaciones en .py no se cargan en notebook
+**Yesntomas**: Modificaciones en .py no se cargan en notebook
 
-**Solución**:
+**Solution**:
 
 ```python
 # En notebook, habilitar autoreload
@@ -431,9 +431,9 @@ docker-compose up -d
 
 ### Problema: No puedo conectar a PostgreSQL
 
-**Síntomas**: Connection refused o timeout
+**Yesntomas**: Connection refused o timeout
 
-**Solución**:
+**Solution**:
 
 ```bash
 # 1. Verificar que postgres está corriendo
@@ -454,9 +454,9 @@ docker-compose logs postgres
 
 ## Performance Tips
 
-### 1. Asignar más recursos
+### 1. Allocate more resources
 
-Editar límites en `docker-compose.yml`:
+Edit limits on`docker-compose.yml`:
 
 ```yaml
 deploy:
@@ -466,7 +466,7 @@ deploy:
       memory: 8G     # Aumentar RAM
 ```
 
-### 2. Usar volúmenes delegados (Mac)
+### 2. Use delegated volumes (Mac)
 
 Para mejor performance en macOS:
 
@@ -515,7 +515,7 @@ Si no necesitas acceso externo, omite el mapeo de puertos:
 
 ### 3. Usar secrets para passwords
 
-Para producción, usar Docker secrets:
+For production, use Docker secrets:
 
 ```yaml
 secrets:
@@ -554,18 +554,18 @@ docker-compose exec -T postgres psql -U python_user python_data < backup.sql
 
 ---
 
-## Recursos Adicionales
+## resources Adicionales
 
-### Documentación Oficial
+### Official Documentation
 
 - **Jupyter Docker Stacks**: https://jupyter-docker-stacks.readthedocs.io/
 - **Jupyter Lab**: https://jupyterlab.readthedocs.io/
 - **Docker Compose**: https://docs.docker.com/compose/
 
-### Imágenes Base Disponibles
+### Base Images Available
 
-- `jupyter/base-notebook`: Mínima
-- `jupyter/minimal-notebook`: + herramientas básicas
+- `jupyter/base-notebook`: Minimum
+- `jupyter/minimal-notebook`: + basic tools
 - `jupyter/scipy-notebook`: + NumPy, pandas, matplotlib (usamos esta)
 - `jupyter/datascience-notebook`: + Julia, R
 - `jupyter/pyspark-notebook`: + PySpark
@@ -591,26 +591,26 @@ Si prefieres no usar Docker:
    jupyter lab
    ```
 
-3. **Google Colab**: Gratuito, en la nube (pero sin persistencia local)
+3. **Google Colab**: Gratuito, en la cloud (pero sin persistencia local)
 
 ---
 
-## Próximos Pasos
+## Next Steps
 
-Después de configurar la infraestructura:
+After configuring the infrastructure:
 
 1. ✅ Verificar que Jupyter Lab funciona
 2. ✅ Crear un notebook de prueba
 3. ✅ Importar pandas y crear un DataFrame
-4. ➡️ Continuar con **Paso 4: Data** (datasets de práctica)
-5. ➡️ Continuar con **Paso 5: Exercises** (ejercicios prácticos)
+4. ➡️ Continue with **Step 4: Data** (practice datasets)
+5. ➡️ Continue with **Step 5: Exercises** (practical exercises)
 
 ---
 
-**¿Problemas no resueltos?**
+**Unresolved problems?**
 
-Ver guía completa de troubleshooting en `docs/troubleshooting.md` (creado en Paso 8)
+See complete troubleshooting guide at`docs/troubleshooting.md` (creado en Paso 8)
 
-**¿Sugerencias de mejora?**
+**Suggestions for improvement?**
 
-Este módulo está en constante evolución. Feedback bienvenido!
+This module is constantly evolving. Feedback welcome!

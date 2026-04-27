@@ -1,30 +1,30 @@
 # Optimization Checklist
 
-## ✅ Checklist de Optimización Delta Lake
+## ✅ Delta Lake Optimization Checklist
 
 ### 1. File Size Optimization
 
-- [ ] **Problema**: Demasiados archivos pequeños (<128MB)
-  - **Síntoma**: Queries lentos, alto overhead
-  - **Solución**: `OPTIMIZE` para compactar
+- [ ] **Problem**: Too many small files (<128MB)
+  - **Yesntoma**: Queries lentos, alto overhead
+  - **Solution**:`OPTIMIZE` para compactar
   ```python
   delta_table.optimize().executeCompaction()
   ```
 
 - [ ] **Problema**: Archivos muy grandes (>1GB)
-  - **Síntoma**: Lentitud en operaciones paralelas
-  - **Solución**: Repartition antes de escribir
+  - **Yesntoma**: Lentitud en operaciones paralelas
+  - **Solution**: Repartition before writing
   ```python
   df.repartition(100).write.format("delta").save(path)
   ```
 
 ### 2. Partitioning Strategy
 
-- [ ] **Verificar**: ¿Cardinalidad media? (100-10,000 valores únicos)
+- [ ] **Check**: Average cardinality? (100-10,000 unique values)
   - ✅ Bueno: country, date, category
   - ❌ Malo: user_id (millones), is_active (2 valores)
 
-- [ ] **Partition Pruning**: Asegurar que queries filtren por partición
+- [ ] **Partition Pruning**: Ensure that queries filter by partition
   ```python
   # ✅ Bueno: Usa partición
   df.filter("date = '2024-01-15' AND country = 'USA'")
@@ -33,20 +33,20 @@
   df.filter("amount > 1000")
   ```
 
-- [ ] **Evitar**: > 10,000 particiones por tabla
+- [ ] **Evitar**: > 10,000 particiones por table
 
 ### 3. Z-Ordering (Data Skipping)
 
-- [ ] **Aplicar a**: Columnas de filtros frecuentes (no particiones)
+- [ ] **Aplicar a**: columns de filtros frecuentes (no particiones)
   ```python
   delta_table.optimize().executeZOrderBy("user_id", "product_id")
   ```
 
 - [ ] **No aplicar a**: 
-  - Columnas de alta cardinalidad (>100M valores)
-  - Columnas que nunca se filtran
+  - columns de alta cardinalidad (>100M valores)
+  - columns que nunca se filtran
 
-- [ ] **Reejecución**: Cada N días o después de writes masivos
+- [ ] **Reexecution**: Every N days or after mass writes
 
 ### 4. Data Skipping
 
@@ -69,13 +69,13 @@
 
 ### 6. Caching
 
-- [ ] **Para tablas pequeñas**: Cache en memoria
+- [ ] **For small tables**: In-memory cache
   ```python
   df.cache()
   df.count()  # Materialize cache
   ```
 
-- [ ] **Desalojar cache**: Después de uso
+- [ ] **Clear cache**: After use
   ```python
   df.unpersist()
   ```
@@ -87,7 +87,7 @@
   - DateType en lugar de StringType para fechas
   - IntegerType en lugar de LongType cuando sea suficiente
 
-- [ ] **Normalizar**: Columnas con muchos nulls en tablas separadas
+- [ ] **Normalizar**: columns con muchos nulls en tables separadas
 
 ### 8. Write Optimization
 
@@ -133,7 +133,7 @@
 
 ## 🎯 Performance Targets
 
-| Métrica | Target |
+| Metric | Target |
 |---------|--------|
 | File size promedio | 128MB - 512MB |
 | Particiones | 100 - 5,000 |
@@ -147,16 +147,16 @@
 ### Query lento?
 1. Check si usa partition pruning
 2. Check number of files (ejecutar OPTIMIZE?)
-3. Check si Z-ORDER ayudaría
+3. Check if Z-ORDER would help
 4. Check execution plan con `.explain()`
 
 ### Writes lentos?
-1. Check batch size (muy pequeño?)
-2. Check número de partitions de write
-3. Check si hay Z-ORDER automático activo
+1. Check batch size (too small?)
+2. Check number of write partitions
+3. Check if automatic Z-ORDER is active
 4. Consider disabling merge schema si no necesario
 
-### Storage creciendo rápido?
+### Storage growing fast?
 1. Ejecutar VACUUM
 2. Check retention policy
 3. Check si hay duplicate data

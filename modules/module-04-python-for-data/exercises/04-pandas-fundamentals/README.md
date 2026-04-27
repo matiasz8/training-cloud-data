@@ -2,15 +2,15 @@
 
 ## Objetivos
 
-✅ Operaciones básicas con DataFrames  
-✅ Filtrado y selección de datos  
+✅ Basic operations with DataFrames
+✅ Filtering and selection of data
 ✅ Limpieza de datos (nulls, duplicados)  
 ✅ Groupby y agregaciones  
 ✅ Merges y joins  
 
 ## Conceptos Clave
 
-### Selección de Datos
+### Data Selection
 
 ```python
 # Por columna
@@ -50,18 +50,18 @@ df.groupby(['pais', 'ciudad']).size()
 
 Usa `data/raw/customers.csv` y `data/raw/transactions.csv`.
 
-1. **cargar_y_explorar**(ruta) → dict con info básica
+1. **load_and_explore**(path) → dict with basic info
 2. **filtrar_por_pais**(df, pais) → DataFrame filtrado
 3. **limpiar_datos**(df) → DataFrame sin nulls ni duplicados
-4. **calcular_estadisticas**(df, columna) → dict con mean/median/std
-5. **agrupar_por_columna**(df, columna) → DataFrame agrupado
-6. **top_n_registros**(df, columna, n) → Top N valores
-7. **detectar_outliers**(df, columna) → DataFrame con outliers
+4. **calcular_estadisticas**(df, column) → dict con mean/median/std
+5. **agrupar_por_column**(df, column) → DataFrame agrupado
+6. **top_n_registros**(df, column, n) → Top N valores
+7. **detectar_outliers**(df, column) → DataFrame con outliers
 8. **merge_datasets**(df1, df2, on) → DataFrame merged
-9. **crear_columna_calculada**(df, formula) → DataFrame con nueva columna
-10. **resumen_completo**(df) → dict con análisis completo
+9. **crear_column_calculada**(df, formula) → DataFrame con nueva column
+10. **full_summary**(df) → dict with full analysis
 
-## Ejecución
+## Execution
 
 ```bash
 pytest exercises/04-pandas-fundamentals/tests/ -v

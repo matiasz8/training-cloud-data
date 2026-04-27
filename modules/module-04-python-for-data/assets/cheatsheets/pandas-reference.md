@@ -1,6 +1,6 @@
 # 🐼 Pandas Reference - Operaciones Esenciales
 
-## 📋 Importación y Creación
+## 📋 Import and Creation
 
 ### Importar Pandas
 ```python
@@ -38,9 +38,9 @@ df = pd.read_json('datos.json', orient='records')
 df = pd.read_parquet('datos.parquet')
 ```
 
-## 🔍 Exploración Inicial
+## 🔍 Initial Exploration
 
-### Información Básica
+### Basic Information
 ```python
 # Primeras/últimas filas
 df.head()           # 5 primeras filas
@@ -61,9 +61,9 @@ df['columna'].nunique()         # Cantidad de únicos
 df['columna'].value_counts()    # Frecuencia de valores
 ```
 
-## 🎯 Selección de Datos
+## 🎯 Data Selection
 
-### Selección de Columnas
+### Column selection
 ```python
 # Una columna (Series)
 df['nombre']
@@ -76,9 +76,9 @@ df[['nombre', 'edad']]
 df[['edad', 'nombre', 'ciudad']]
 ```
 
-### Selección de Filas
+### Row selection
 
-#### Por Posición (iloc)
+#### By Position (iloc)
 ```python
 # Una fila
 df.iloc[0]              # Primera fila
@@ -134,7 +134,7 @@ df[df['edad'].between(25, 30)]
 
 ## 🔧 Transformaciones
 
-### Crear/Modificar Columnas
+### Crear/Modificar columns
 ```python
 # Nueva columna
 df['edad_doble'] = df['edad'] * 2
@@ -203,7 +203,7 @@ df.drop_duplicates(keep='first')    # Mantener primera ocurrencia
 df.drop_duplicates(keep='last')     # Mantener última
 ```
 
-### Conversión de Tipos
+### Type Conversion
 ```python
 # Convertir tipo
 df['edad'] = df['edad'].astype(int)
@@ -214,9 +214,9 @@ df['fecha'] = pd.to_datetime(df['fecha'])
 df['ciudad'] = df['ciudad'].astype('category')
 ```
 
-## 📊 Agregación y Agrupación
+## 📊 Aggregation and Grouping
 
-### Estadísticas Básicas
+### Basic Statistics
 ```python
 # Por columna
 df['edad'].mean()       # Media
@@ -275,7 +275,7 @@ pd.pivot_table(
 )
 ```
 
-## 🔗 Combinación de DataFrames
+## 🔗 Combination of DataFrames
 
 ### Concat (Concatenar)
 ```python
@@ -363,7 +363,7 @@ df.to_parquet('datos.parquet', compression='gzip')
 df.to_excel('datos.xlsx', sheet_name='Hoja1', index=False)
 ```
 
-## ⚡ Optimización y Performance
+## ⚡ Optimization and Performance
 
 ### Memory Optimization
 ```python
@@ -397,7 +397,7 @@ subset = df[df['edad'] > 25].copy()
 subset['nueva_col'] = 0
 ```
 
-### 2. Modificar Durante Iteración
+### 2. Modify During Iteration
 ```python
 # ❌ Lento e ineficiente
 for i in range(len(df)):
@@ -419,17 +419,17 @@ df.dropna(inplace=True)
 df = df.dropna()
 ```
 
-## 💡 Tips y Mejores Prácticas
+## 💡 Tips and Best Practices
 
 1. **Operaciones vectorizadas**: Usar operaciones de Pandas en lugar de loops
-2. **Chaining**: Encadenar operaciones para código más limpio
+2. **Chaining**: Chain operations for cleaner code
 3. **copy()**: Usar cuando necesites trabajar con un subset independiente
-4. **query()**: Para filtros complejos más legibles: `df.query('edad > 25 and ciudad == "Madrid"')`
-5. **eval()**: Para operaciones aritméticas rápidas: `df.eval('total = precio * cantidad')`
-6. **Categorías**: Para columnas con valores repetidos (ahorra memoria)
-7. **reset_index()**: Después de operaciones que modifican el índice
+4. **query()**: For more readable complex filters:`df.query('edad > 25 and ciudad == "Madrid"')`
+5. **eval()**: For fast arithmetic operations:`df.eval('total = precio * cantidad')`
+6. **Categories**: For columns with repeated values ​​(saves memory)
+7. **reset_index()**: After operations that modify the index
 8. **inplace=True**: Modifica el DataFrame original (ahorra memoria)
 
 ---
 
-**Siguiente**: Ver [data-cleaning.md](data-cleaning.md) para técnicas avanzadas de limpieza
+**Next**: See [data-cleaning.md](data-cleaning.md) for advanced cleaning techniques

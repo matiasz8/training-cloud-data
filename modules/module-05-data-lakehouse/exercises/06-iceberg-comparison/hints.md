@@ -93,7 +93,7 @@ print(f"Iceberg Read: {iceberg_read_time:.2f}s")
 print(f"Iceberg Count: {iceberg_count:,}")
 ```
 
-### 3. Comparación de Features
+### 3. Feature Comparison
 
 #### Time Travel
 ```python
@@ -179,7 +179,7 @@ spark.sql("""
 ```
 ClassNotFoundException: org.apache.iceberg.spark.SparkCatalog
 ```
-**Solución:** Agregar Iceberg JAR:
+**Solution:** Add Iceberg JAR:
 ```bash
 --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.4.0
 ```
@@ -188,7 +188,7 @@ ClassNotFoundException: org.apache.iceberg.spark.SparkCatalog
 ```
 AnalysisException: Database 'default' not found
 ```
-**Solución:** Verificar configuración de catalog:
+**Solution:** Verify catalog configuration:
 ```python
 .config("spark.sql.catalog.iceberg_catalog.type", "hive")
 .config("spark.sql.catalog.iceberg_catalog.uri", "thrift://...")
@@ -214,30 +214,30 @@ df.writeTo("iceberg_catalog.default.table").using("iceberg").create()
 
 ---
 
-## 📊 Comparación Detallada
+## 📊 Detailed Comparison
 
 ### Performance
 
 | Aspecto | Delta Lake | Apache Iceberg |
 |---------|------------|----------------|
-| **Write Speed** | Rápido (optimizado Spark) | Similar |
-| **Read Speed** | Rápido (data skipping) | Similar |
+| **Write Speed** | Fast (Spark optimized) | Similar |
+| **Read Speed** | Fast (data skipping) | Similar |
 | **Metadata Overhead** | Bajo (JSON simple) | Medio (Avro + snapshots) |
 | **Small Files** | Problema (necesita OPTIMIZE) | Similar |
-| **Compaction** | Manual (OPTIMIZE) | Automático o manual |
+| **Compaction** | Manual (OPTIMIZE) | Automatic or manual |
 
 ### Features
 
 | Feature | Delta Lake | Apache Iceberg |
 |---------|------------|----------------|
-| **ACID** | ✅ Sí | ✅ Sí |
+| **ACID** | ✅ Yes | ✅ Yes |
 | **Time Travel** | ✅ Version/Timestamp | ✅ Snapshot/Timestamp |
-| **Schema Evolution** | ✅ Con mergeSchema | ✅ Automático |
-| **Partition Evolution** | ❌ No | ✅ Sí (major feature) |
-| **Hidden Partitioning** | ❌ No | ✅ Sí |
+| **Schema Evolution** | ✅ With mergeSchema | ✅ Automatic |
+| **Partition Evolution** | ❌ No | ✅ Yes (major feature) |
+| **Hidden Partitioning** | ❌ No | ✅ Yes |
 | **Multi-Engine** | ⚠️ Limitado | ✅ Excelente |
-| **Z-Ordering** | ✅ Sí | ❌ No (usa sorting) |
-| **CDF (Change Data Feed)** | ✅ Sí | ⚠️ Limitado |
+| **Z-Ordering** | ✅ Yes | ❌ No (usa sorting) |
+| **CDF (Change Data Feed)** | ✅ Yes | ⚠️ Limitado |
 
 ### Ecosistema
 
@@ -245,9 +245,9 @@ df.writeTo("iceberg_catalog.default.table").using("iceberg").create()
 |-------------|------------|---------|
 | **Spark** | ✅ Nativo | ✅ Excelente |
 | **Flink** | ⚠️ Experimental | ✅ Nativo |
-| **Trino/Presto** | ⚠️ Básico | ✅ Excelente |
+| **Trill/Presto** | ⚠️ Basic | ✅ Excellent |
 | **Databricks** | ✅ Optimizado | ⚠️ Soportado |
-| **Snowflake** | ❌ No | ✅ Sí (Iceberg Tables) |
+| **Snowflake** | ❌ No | ✅ Yes (Iceberg Tables) |
 | **AWS Athena** | ⚠️ Limitado | ✅ Nativo |
 
 ---
@@ -333,14 +333,14 @@ changes.show()
 
 ---
 
-## 🎯 Cuándo Usar Cada Uno
+## 🎯 When to Use Each One
 
 ### Usar Delta Lake cuando:
-- ✅ Estás en ecosistema Spark/Databricks
+- ✅ You are in the Spark/Databricks ecosystem
 - ✅ Necesitas Z-Ordering
 - ✅ Quieres Change Data Feed
-- ✅ Performance en Spark es crítico
-- ✅ Team ya está familiarizado con Delta
+- ✅ Performance in Spark is critical
+- ✅ Team is already familiar with Delta
 
 ### Usar Apache Iceberg cuando:
 - ✅ Necesitas multi-engine support (Flink, Trino, Presto)
@@ -352,17 +352,17 @@ changes.show()
 ### Considerar ambos cuando:
 - ⚠️ Tienes workloads mixtos (batch + streaming)
 - ⚠️ Necesitas flexibility para cambiar engines
-- ⚠️ Estás construyendo plataforma de datos nueva
+- ⚠️ You are building a new data platform
 
 ---
 
 ## ✅ Checklist de Completitud
 
 - [ ] Spark configurado con Delta Lake + Iceberg
-- [ ] Tabla Delta Lake creada y medida
-- [ ] Tabla Iceberg creada y medida
+- [ ] table Delta Lake creada y medida
+- [ ] table Iceberg creada y medida
 - [ ] Write/Read times comparados
 - [ ] Features key de ambos entendidos
 - [ ] Casos de uso claros para cada formato
-- [ ] Código ejecuta sin errores
-- [ ] Comparación impresa correctamente
+- [ ] Code runs without errors
+- [ ] Comparison printed correctly

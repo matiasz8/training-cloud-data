@@ -5,8 +5,8 @@
 ✅ Manejo robusto de excepciones  
 ✅ Logging estructurado  
 ✅ Retry logic para operaciones fallidas  
-✅ Validación de datos de entrada  
-✅ Código production-ready  
+✅ Input data validation
+✅ Production-ready code
 
 ## Conceptos Clave
 
@@ -52,14 +52,14 @@ def funcion_con_retry():
 2. **validar_schema**(df, schema) → bool + errores
 3. **procesar_con_retry**(func, *args, max_retries=3) → resultado
 4. **log_operacion**(func) → decorator que logea
-5. **validar_rango**(df, columna, min, max) → bool
+5. **validar_rango**(df, column, min, max) → bool
 6. **manejar_nulls_inteligente**(df) → DataFrame limpio
 7. **pipeline_con_checkpoint**(steps, checkpoint_dir) → resultado
 8. **validar_tipos_datos**(df, schema) → list[errores]
 9. **procesar_batch_seguro**(archivos) → dict con resultados
-10. **pipeline_production**(config) → Pipeline completo con logging
+10. **pipeline_production**(config) → pipeline completo con logging
 
-## Ejecución
+## Execution
 
 ```bash
 pytest exercises/06-error-handling/tests/ -v

@@ -4,7 +4,7 @@ Este archivo contiene pistas progresivas para ayudarte a completar el ejercicio.
 
 ---
 
-## 🎯 Tarea 1: Crear Tabla Delta
+## 🎯 Tarea 1: Crear table Delta
 
 ### Hint 1: Configurar SparkSession con Delta
 
@@ -24,12 +24,12 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 ```
 </details>
 
-### Hint 2: Leer JSON con límite
+### Hint 2: Read JSON with limit
 
 <details>
 <summary>Click para revelar Hint 2</summary>
 
-Para leer solo las primeras 10,000 filas:
+Para leer solo las primeras 10,000 rows:
 ```python
 df = spark.read.json("path/to/file.json").limit(10000)
 ```
@@ -40,20 +40,20 @@ df = spark.read.json("path/to/file.json").limit(10000)
 <details>
 <summary>Click para revelar Hint 3</summary>
 
-El campo timestamp viene como string. Conviértelo:
+The timestamp field comes as a string. Convert it:
 ```python
 from pyspark.sql.functions import to_timestamp
 
 df = df.withColumn("timestamp", to_timestamp(col("timestamp")))
 ```
 
-O si usas formato específico:
+Or if you use specific format:
 ```python
 df = df.withColumn("timestamp", to_timestamp(col("timestamp"), "yyyy-MM-dd HH:mm:ss"))
 ```
 </details>
 
-### Hint 4: Agregar fecha de ingestión
+### Hint 4: Add ingestion date
 
 <details>
 <summary>Click para revelar Hint 4</summary>
@@ -80,10 +80,10 @@ df.write \
     .save("s3a://bronze/transactions_delta")
 ```
 
-Asegúrate de usar:
+Make sure to use:
 - `.format("delta")` - especifica formato Delta
 - `.mode("overwrite")` - sobrescribe si existe (primera vez)
-- `.partitionBy("country")` - crea particiones por país
+- `.partitionBy("country")`- create partitions by country
 - `.save()` - guarda en la ruta especificada
 </details>
 
@@ -91,21 +91,21 @@ Asegúrate de usar:
 
 ## 🎯 Tarea 2: Append Data
 
-### Hint 1: Leer filas específicas
+### Hint 1: Read specific rows
 
 <details>
 <summary>Click para revelar Hint 1</summary>
 
-Puedes leer las siguientes 5,000 filas de dos formas:
+Puedes leer las siguientes 5,000 rows de dos formas:
 
-**Opción A - Usando SQL con OFFSET**:
+**Option A - Using SQL with OFFSET**:
 ```python
 df_all = spark.read.json("path/to/file.json")
 df_all.createOrReplaceTempView("all_tx")
 df_new = spark.sql("SELECT * FROM all_tx LIMIT 5000 OFFSET 10000")
 ```
 
-**Opción B - Usando window function**:
+**Option B - Using window function**:
 ```python
 from pyspark.sql.window import Window
 from pyspark.sql.functions import row_number
@@ -117,7 +117,7 @@ df_new = df_numbered.filter((col("row_num") > 10000) & (col("row_num") <= 15000)
     .drop("row_num")
 ```
 
-**Opción C - Simple (para este caso)**:
+**Option C - Simple (for this case)**:
 ```python
 df_all = spark.read.json("path/to/file.json")
 df_new = df_all.limit(15000).subtract(df_all.limit(10000))
@@ -138,7 +138,7 @@ df.write \
     .save("s3a://bronze/transactions_delta")
 ```
 
-**Importante**: El esquema y particionamiento deben coincidir con la tabla existente.
+**Importante**: El esquema y particionamiento deben coincidir con la table existente.
 </details>
 
 ---
@@ -167,7 +167,7 @@ df_modified = df.withColumn(
 <details>
 <summary>Click para revelar Hint 2</summary>
 
-Para sobrescribir solo una partición específica:
+To overwrite only a specific partition:
 ```python
 df.write \
     .format("delta") \
@@ -176,7 +176,7 @@ df.write \
     .save("s3a://bronze/transactions_delta")
 ```
 
-**Clave**: `replaceWhere` indica qué particiones sobrescribir. Esto es MUY diferente a `.mode("overwrite")` solo, que sobrescribiría TODA la tabla.
+**Clave**: `replaceWhere`indicates which partitions to overwrite. This is VERY different than`.mode("overwrite")`only, that would overwrite the ENTIRE table.
 </details>
 
 ### Hint 3: Verificar cambios
@@ -184,7 +184,7 @@ df.write \
 <details>
 <summary>Click para revelar Hint 3</summary>
 
-Para verificar que solo USA cambió:
+To verify that only USA changed:
 ```python
 # Antes
 df_before = spark.read.format("delta").load(path)
@@ -210,12 +210,12 @@ pending_after_usa = df_after.filter(
 
 ## 🎯 Tarea 4: SQL Queries
 
-### Hint 1: Registrar tabla temporal
+### Hint 1: Registrar table temporal
 
 <details>
 <summary>Click para revelar Hint 1</summary>
 
-Para poder usar SQL, registra la tabla:
+Para poder usar SQL, registra la table:
 ```python
 df = spark.read.format("delta").load("s3a://bronze/transactions_delta")
 df.createOrReplaceTempView("transactions_delta")
@@ -225,7 +225,7 @@ result = spark.sql("SELECT * FROM transactions_delta LIMIT 10")
 ```
 </details>
 
-### Hint 2: Query 1 - Contar por país
+### Hint 2: Query 1 - Count by country
 
 <details>
 <summary>Click para revelar Hint 2</summary>
@@ -240,7 +240,7 @@ ORDER BY total_transactions DESC
 ```
 </details>
 
-### Hint 3: Query 2 - Métricas por status
+### Hint 3: Query 2 - Metrics by status
 
 <details>
 <summary>Click para revelar Hint 3</summary>
@@ -259,7 +259,7 @@ ORDER BY total_amount DESC
 ```
 </details>
 
-### Hint 4: Query 3 - Top 10 transacciones
+### Hint 4: Query 3 - Top 10 transactions
 
 <details>
 <summary>Click para revelar Hint 4</summary>
@@ -278,7 +278,7 @@ LIMIT 10
 ```
 </details>
 
-### Hint 5: Query 4 - Transacciones por mes
+### Hint 5: Query 4 - transactions por mes
 
 <details>
 <summary>Click para revelar Hint 5</summary>
@@ -309,14 +309,14 @@ ORDER BY year DESC, month DESC
 
 ---
 
-## 🔧 Troubleshooting Común
+## 🔧 Common Troubleshooting
 
 ### Error: "Table not found"
 
 <details>
-<summary>Solución</summary>
+<summary>Solution</summary>
 
-1. Verifica que MinIO está corriendo:
+1. Verify that MinIO is running:
    ```bash
    docker ps | grep minio
    ```
@@ -327,13 +327,13 @@ ORDER BY year DESC, month DESC
    path = "s3a://bronze/transactions_delta"
    ```
 
-3. Verifica configuración S3 en spark-defaults.conf
+3. Check S3 configuration in spark-defaults.conf
 </details>
 
 ### Error: "AnalysisException: Path does not exist"
 
 <details>
-<summary>Solución</summary>
+<summary>Solution</summary>
 
 El archivo de datos no se encuentra. Verifica:
 ```python
@@ -348,9 +348,9 @@ path = "/opt/spark/work-dir/data/raw/transactions.json"
 ### Error: "Partitioning column not found"
 
 <details>
-<summary>Solución</summary>
+<summary>Solution</summary>
 
-Asegúrate de que la columna `country` existe en el DataFrame antes de particionar:
+Make sure the column`country` existe en el DataFrame antes de particionar:
 ```python
 # Verifica columnas
 print(df.columns)
@@ -363,14 +363,14 @@ assert 'country' in df.columns, "Falta columna country"
 ### Queries muy lentas
 
 <details>
-<summary>Solución</summary>
+<summary>Solution</summary>
 
-1. **Usa filtros en columnas particionadas** (country) para aprovechar partition pruning
-2. **Cachea** si vas a consultar múltiples veces:
+1. **Usa filtros en columns particionadas** (country) para aprovechar partition pruning
+2. **Cache** if you are going to query multiple times:
    ```python
    df.cache()
    ```
-3. **Aumenta recursos** en docker-compose.yml (más cores/memoria)
+3. **Increase resources** in docker-compose.yml (more cores/memory)
 </details>
 
 ---
@@ -383,4 +383,4 @@ assert 'country' in df.columns, "Falta columna country"
 
 ---
 
-**¿Sigues atascado?** Revisa la carpeta `solution/` para ver la implementación completa. ¡Pero intenta resolver sin mirar primero!
+**Are you still stuck?** Check the folder`solution/`to see the full implementation. But try to solve without looking first!

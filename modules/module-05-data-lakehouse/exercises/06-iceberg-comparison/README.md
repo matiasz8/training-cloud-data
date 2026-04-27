@@ -1,13 +1,13 @@
 # Ejercicio 06: Apache Iceberg Comparison
 
 ## 🎯 Objetivo
-Comparar Delta Lake vs Apache Iceberg con ejemplos prácticos.
+Compare Delta Lake vs Apache Iceberg with practical examples.
 
 **Dificultad**: ⭐⭐⭐⭐ Avanzado | **Tiempo**: 45 minutos
 
 ## 📋 Tareas
 
-1. Crear misma tabla en Delta y Iceberg
+1. Crear misma table en Delta y Iceberg
 2. Comparar operaciones: append, update, time travel
 3. Comparar performance
 4. Comparar metadata storage
@@ -27,7 +27,7 @@ spark.read.format("iceberg") \
     .load("catalog.db.table")
 ```
 
-## 🎓 Comparación
+## 🎓 Comparison
 
 | Feature | Delta Lake | Apache Iceberg |
 |---------|-----------|----------------|
@@ -39,16 +39,16 @@ spark.read.format("iceberg") \
 | Ecosystem| Databricks, Spark | Spark, Trino, Presto, Flink |
 | Metadata | Transaction log (_delta_log) | Metadata JSON |
 
-## 💡 Cuándo Usar Cada Uno
+## 💡 When to Use Each One
 
 **Delta Lake**:
 - Ecosystem Databricks
 - Optimize write habilitado
-- Z-Ordering crítico
-- Integración Spark/Python fuerte
+- Critical Z-Ordering
+- Strong Spark/Python integration
 
 **Apache Iceberg**:
 - Multi-engine (Trino, Presto, Flink)
 - Partition evolution frecuente  
 - Open governance (Apache Foundation)
-- Análisis cross-platform
+- Cross-platform analysis

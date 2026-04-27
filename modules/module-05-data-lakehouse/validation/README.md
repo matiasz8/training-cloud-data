@@ -1,4 +1,4 @@
-# Validación y Testing
+# Validation and Testing
 
 Suite completa de tests automatizados para validar ejercicios.
 

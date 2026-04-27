@@ -1,6 +1,6 @@
-# Datasets de Práctica: E-commerce Multi-formato
+# Practice Datasets: Multi-format E-commerce
 
-Esta carpeta contiene datasets realistas de un sistema de e-commerce para practicar Python data engineering. Los datos incluyen intencionalmente problemas de calidad para simular escenarios reales de data cleaning y transformación.
+This folder contains realistic datasets of an e-commerce system to practice Python data engineering. The data intentionally includes quality issues to simulate real data cleaning and transformation scenarios.
 
 ## Estructura de Carpetas
 
@@ -30,22 +30,22 @@ data/
 ### 1. customers.csv (10,000 registros)
 
 **Formato**: CSV  
-**Tamaño**: ~1.5 MB  
+**Size**: ~1.5 MB
 **Encoding**: UTF-8
 
-#### Columnas
+#### columns
 
-| Columna | Tipo | Descripción | Nulls | Issues |
+| columns | Type | Description | Nulls | Issues |
 |---------|------|-------------|-------|--------|
-| `customer_id` | int | ID único del cliente | No | Duplicados (~2%) |
-| `first_name` | str | Nombre | Sí (~5%) | Valores vacíos |
-| `last_name` | str | Apellido | Sí (~5%) | Valores vacíos |
-| `email` | str | Email | Sí (~5%) | Malformados (~2%) |
-| `phone` | str | Teléfono | Sí (~10%) | Formatos inconsistentes |
-| `country` | str | País | Sí | 15 países + nulls |
-| `city` | str | Ciudad | Sí | Valores variados |
+| `customer_id`| int | Unique customer ID | No | Duplicates (~2%) |
+| `first_name`| str | Name | Yes (~5%) | Empty values ​​|
+| `last_name`| str | Surname | Yes (~5%) | Empty values ​​|
+| `email` | str | Email | Yes (~5%) | Malformados (~2%) |
+| `phone`| str | Telephone | Yes (~10%) | Inconsistent formats |
+| `country`| str | Country | Yes | 15 countries + nulls |
+| `city` | str | Ciudad | Yes | Valores variados |
 | `registration_date` | str | Fecha registro | No | 4 formatos diferentes |
-| `is_active` | mixed | Estado activo | Sí | Boolean, string, int |
+| `is_active` | mixed | Estado activo | Yes | Boolean, string, int |
 | `loyalty_points` | int | Puntos lealtad | No | Negativos (~2%) |
 
 #### Problemas de Calidad
@@ -55,7 +55,7 @@ data/
 - ✗ **Fechas inconsistentes**: `YYYY-MM-DD`, `DD/MM/YYYY`, `MM-DD-YYYY`, `YYYY/MM/DD`
 - ✗ **is_active variado**: `true`, `false`, `True`, `False`, `1`, `0`, `yes`, `no`, `Y`, `N`
 - ✗ **Loyalty points**: Valores negativos (errores) y muy altos (>100k)
-- ✗ **Teléfonos**: Sin formato estándar
+- ✗ **Phones**: No standard format
 
 #### Uso
 
@@ -76,27 +76,27 @@ print(df[df.duplicated(subset=['customer_id'], keep=False)])
 ### 2. orders.json (50,000 registros)
 
 **Formato**: JSON (array de objetos)  
-**Tamaño**: ~50 MB  
+**Size**: ~50 MB
 **Encoding**: UTF-8  
 **Estructura**: Nested (items, shipping_address)
 
 #### Campos
 
-| Campo | Tipo | Descripción | Nulls | Issues |
+| Field | Type | Description | Nulls | Issues |
 |-------|------|-------------|-------|--------|
 | `order_id` | str | ID de orden | No | Formato inconsistente |
 | `customer_id` | int | ID cliente | No | - |
 | `order_date` | str | Fecha de orden | No | 2 formatos |
-| `status` | str | Estado | Sí | 6 valores + null |
-| `payment_method` | str | Método de pago | Sí | 5 valores + null |
-| `shipping_method` | str | Método de envío | Sí | 4 valores + null |
-| `items` | array | Items (nested) | No | Requiere explosión |
+| `status` | str | Estado | Yes | 6 valores + null |
+| `payment_method`| str | Payment method | Yes | 5 values ​​+ null |
+| `shipping_method`| str | Shipping method | Yes | 4 values ​​+ null |
+| `items`| array | Items (nested) | No | Requires explosion |
 | `subtotal` | float | Subtotal | No | Inconsistencias |
-| `tax` | float | Impuesto | Sí (~3%) | Algunos null |
-| `shipping_cost` | float | Costo envío | No | - |
+| `tax` | float | Impuesto | Yes (~3%) | Algunos null |
+| `shipping_cost`| float | Shipping cost | No | - |
 | `total` | float | Total | No | No suma bien (~5%) |
-| `shipping_address` | object | Dirección (nested) | Sí (~3%) | Algunos null |
-| `notes` | str | Notas | Sí | Mayormente null |
+| `shipping_address`| objects | Address (nested) | Yes (~3%) | Some null |
+| `notes` | str | Notas | Yes | Mayormente null |
 
 #### Estructura Nested
 
@@ -126,10 +126,10 @@ print(df[df.duplicated(subset=['customer_id'], keep=False)])
 
 - ✗ **order_id**: ~2% formato `123` en vez de `ORD-000123`
 - ✗ **Fechas**: ISO 8601 vs `YYYY-MM-DD HH:MM:SS`
-- ✗ **Cálculos erróneos**: ~5% donde `total ≠ subtotal + tax + shipping_cost`
-- ✗ **Items nested**: Requiere normalización para análisis tabular
+- ✗ **Error calculations**: ~5% where`total ≠ subtotal + tax + shipping_cost`
+- ✗ **Items nested**: Requires normalization for tabular analysis
 - ✗ **Orphan product_ids**: Algunos `product_id` no existen en products
-- ✗ **Sin dirección**: ~3% de órdenes sin `shipping_address`
+- ✗ **No address**: ~3% of orders without`shipping_address`
 
 #### Uso
 
@@ -159,30 +159,30 @@ items_df = json_normalize(
 
 ### 3. products.parquet (500 registros)
 
-**Formato**: Apache Parquet (columnar)  
-**Tamaño**: ~50 KB (comprimido con Snappy)  
-**Ventajas**: Lectura rápida, type safety, compresión eficiente
+**Formato**: Apache Parquet (columnr)  
+**Size**: ~50 KB (Compressed with Snappy)
+**Advantages**: Fast reading, type safety, efficient compression
 
-#### Columnas
+#### columns
 
-| Columna | Tipo | Descripción | Nulls | Issues |
+| columns | Type | Description | Nulls | Issues |
 |---------|------|-------------|-------|--------|
 | `product_id` | int64 | ID producto | No | - |
 | `product_name` | str | Nombre | No | - |
-| `category` | str | Categoría | Sí | 9 categorías + null |
-| `brand` | str | Marca | Sí | 6 marcas + null |
+| `category`| str | Category | Yes | 9 categories + null |
+| `brand` | str | Marca | Yes | 6 marcas + null |
 | `price` | float64 | Precio | No | Negativos (~2%) |
 | `stock` | int64 | Inventario | No | Negativos (~5%) |
-| `rating` | float64 | Calificación | Sí (~10%) | Fuera de rango (0-5) |
-| `num_reviews` | int64 | # Reseñas | No | - |
-| `weight_kg` | float64 | Peso | Sí (~10%) | - |
-| `length_cm` | float64 | Largo | Sí (~10%) | - |
-| `width_cm` | float64 | Ancho | Sí (~10%) | - |
-| `height_cm` | float64 | Alto | Sí (~10%) | - |
-| `created_at` | datetime64 | Fecha creación | No | - |
-| `is_active` | mixed | Activo | Sí | Boolean/int/null |
+| `rating`| float64 | Rating | Yes (~10%) | Out of range (0-5) |
+| `num_reviews`| int64 | # Reviews | No | - |
+| `weight_kg` | float64 | Peso | Yes (~10%) | - |
+| `length_cm` | float64 | Largo | Yes (~10%) | - |
+| `width_cm` | float64 | Ancho | Yes (~10%) | - |
+| `height_cm` | float64 | Alto | Yes (~10%) | - |
+| `created_at`| datetime64 | Creation date | No | - |
+| `is_active` | mixed | Activo | Yes | Boolean/int/null |
 
-#### Categorías
+#### Categories
 
 - Electronics, Clothing, Home & Garden, Sports, Books
 - Toys, Food & Beverage, Beauty, Automotive
@@ -217,31 +217,31 @@ print(df[(df['rating'] < 0) | (df['rating'] > 5)])  # Rating inválido
 ### 4. transactions.csv (100,000 registros)
 
 **Formato**: CSV  
-**Tamaño**: ~12 MB  
+**Size**: ~12 MB
 **Encoding**: UTF-8
 
-#### Columnas
+#### columns
 
-| Columna | Tipo | Descripción | Nulls | Issues |
+| columns | Type | Description | Nulls | Issues |
 |---------|------|-------------|-------|--------|
-| `transaction_id` | str | ID transacción | No | - |
+| `transaction_id` | str | ID transaction | No | - |
 | `order_id` | str | ID orden | No | Orphans (~5%) |
 | `customer_id` | int | ID cliente | No | - |
 | `transaction_date` | str | Fecha/hora | No | 4 formatos |
-| `transaction_type` | str | Tipo | Sí | 4 tipos + null |
+| `transaction_type` | str | Tipo | Yes | 4 tipos + null |
 | `amount` | float | Monto | No | Negativos (refunds) |
-| `currency` | str | Moneda | Sí | 5 monedas + null |
-| `payment_status` | str | Estado pago | Sí | 4 estados + null |
-| `payment_provider` | str | Proveedor | Sí | 5 proveedores + null |
-| `fee` | float | Comisión | Sí (~10%) | - |
+| `currency` | str | Moneda | Yes | 5 monedas + null |
+| `payment_status` | str | Estado pago | Yes | 4 estados + null |
+| `payment_provider` | str | Proveedor | Yes | 5 proveedores + null |
+| `fee`| float | Commission | Yes (~10%) | - |
 | `net_amount` | float | Monto neto | No | - |
 
-#### Tipos de Transacción
+#### Tipos de transaction
 
 - `purchase`: Compra (~80%)
-- `refund`: Devolución (~10%) - amount negativo
+- `refund`: Return (~10%) - negative amount
 - `adjustment`: Ajuste (~5%)
-- `bonus`: Bonificación (~3%)
+- `bonus`: Bonus (~3%)
 
 #### Monedas
 
@@ -251,11 +251,11 @@ print(df[(df['rating'] < 0) | (df['rating'] > 5)])  # Rating inválido
 
 - ✗ **Orphan order_ids**: ~5% con `order_id` que no existe en orders.json
 - ✗ **Fechas inconsistentes**: ISO, `YYYY-MM-DD HH:MM:SS`, `DD/MM/YYYY HH:MM`, `YYYY-MM-DD`
-- ✗ **Múltiples monedas**: Requiere conversión para agregaciones
-- ✗ **Fee inconsistente**: Algunos sin fee cuando deberían tenerlo
-- ✗ **Cálculos**: Validar `net_amount = amount - fee`
-- ✗ **Transacciones $0**: ~100 registros (¿válidas?)
-- ✗ **Outliers**: ~50 transacciones > $100,000
+- ✗ **Multiple currencies**: Requires conversion for aggregations
+- ✗ **Inconsistent fee**: Some without fees when they should have one
+- ✗ **Calculations**: Validate`net_amount = amount - fee`
+- ✗ **transactions $0**: ~100 records (valid?)
+- ✗ **Outliers**: ~50 transactions > $100,000
 
 #### Uso
 
@@ -283,32 +283,32 @@ print(df.groupby('transaction_type')['amount'].agg(['count', 'sum', 'mean']))
 ### 5. user_activity.json (20,000 registros)
 
 **Formato**: JSON (array de objetos)  
-**Tamaño**: ~15 MB  
+**Size**: ~15 MB
 **Encoding**: UTF-8  
 **Estructura**: Nested (device, location)
 
 #### Campos
 
-| Campo | Tipo | Descripción | Nulls | Issues |
+| Field | Type | Description | Nulls | Issues |
 |-------|------|-------------|-------|--------|
 | `event_id` | str | ID evento | No | - |
-| `user_id` | int | ID usuario | Sí (~2%) | Anónimos |
-| `session_id` | str | ID sesión | No | - |
+| `user_id`| int | User ID | Yes (~2%) | Anonymous |
+| `session_id`| str | Session ID | No | - |
 | `timestamp` | str | Timestamp | No | 2 formatos |
-| `event_type` | str | Tipo evento | Sí | 10 tipos + null |
-| `page_url` | str | URL página | Sí (~5%) | - |
-| `referrer` | str | Referrer | Sí | 3 valores + null |
-| `device` | object | Device (nested) | Sí (~5%) | - |
-| `location` | object | Location (nested) | Sí (~5%) | - |
-| `product_id` | int | ID producto | Sí (~70%) | Solo si aplica |
-| `search_query` | str | Query búsqueda | Sí (~70%) | Solo searches |
-| `duration_seconds` | int | Duración | Sí (~20%) | - |
+| `event_type` | str | Tipo evento | Yes | 10 tipos + null |
+| `page_url`| str | URL page | Yes (~5%) | - |
+| `referrer` | str | Referrer | Yes | 3 valores + null |
+| `device` | object | Device (nested) | Yes (~5%) | - |
+| `location` | object | Location (nested) | Yes (~5%) | - |
+| `product_id` | int | ID producto | Yes (~70%) | Solo si aplica |
+| `search_query`| str | Query search | Yes (~70%) | Searches only |
+| `duration_seconds`| int | Duration | Yes (~20%) | - |
 
 #### Event Types
 
-- `page_view` (~40%): Vista de página
+- `page_view`(~40%): Page View
 - `click` (~20%): Click en elemento
-- `search` (~15%): Búsqueda
+- `search`(~15%): Search
 - `add_to_cart` (~10%): Agregar al carrito
 - `remove_from_cart` (~5%): Remover del carrito
 - `checkout`, `purchase`, `login`, `logout`, `review`
@@ -336,7 +336,7 @@ print(df.groupby('transaction_type')['amount'].agg(['count', 'sum', 'mean']))
 
 #### Problemas de Calidad
 
-- ✗ **user_id null**: ~2% eventos anónimos (usuario no logueado)
+- ✗ **user_id null**: ~2% anonymous events (user not logged in)
 - ✗ **Timestamps**: ISO 8601 vs Unix timestamp (segundos desde epoch)
 - ✗ **Nested objects**: device y location requieren flattening
 - ✗ **Nulls completos**: device o location completamente null (~5%)
@@ -434,24 +434,24 @@ erDiagram
 
 ### Por Severidad
 
-#### 🔴 Crítico (Requiere corrección inmediata)
+#### 🔴 Critical (Requires immediate correction)
 
 1. **Duplicados en customers**: ~200 registros con mismo customer_id
-2. **Cálculos incorrectos en orders**: ~2,500 órdenes donde total ≠ suma de componentes
-3. **Orphan transactions**: ~5,000 transacciones sin orden correspondiente
+2. **Incorrect calculations in orders**: ~2,500 orders where total ≠ sum of components
+3. **Orphan transactions**: ~5,000 transactions sin orden correspondiente
 4. **Precios/stock negativos en products**: Datos imposibles
 
-#### 🟡 Medio (Afecta análisis)
+#### 🟡 Medium (Affects analysis)
 
 1. **Formatos de fecha inconsistentes**: 4-5 formatos diferentes
 2. **Valores booleanos inconsistentes**: true/false/1/0/yes/no
 3. **Emails malformados**: ~200 sin '@'
-4. **Estructuras nested**: Requiere flatten para análisis
+4. **Nested structures**: Requires flatten for analysis
 
 #### 🟢 Bajo (Molestias menores)
 
 1. **Valores nulos**: Estrategia a definir
-2. **Múltiples monedas**: Requiere conversión
+2. **Multiple currencies**: Requires conversion
 3. **Formato de order_id inconsistente**: ~1,000 sin prefijo
 
 ---
@@ -474,18 +474,18 @@ erDiagram
 **Tareas**:
 - Eliminar duplicados
 - Estandarizar fechas, booleanos, formatos
-- Corregir/eliminar valores anómalos
-- Rellenar o eliminar nulls (con justificación)
+- Correct/remove abnormal values
+- Fill or delete nulls (with justification)
 
 ### 3. Data Transformation
 
-**Objetivo**: Preparar datos para análisis
+**Goal**: Prepare data for analysis
 
 **Tareas**:
 - Flatten estructuras nested
 - Convertir monedas a USD
-- Crear tablas dimensionales (star schema)
-- Calcular métricas derivadas
+- Crear tables dimensionales (star schema)
+- Calculate derived metrics
 
 ### 4. Data Validation
 
@@ -493,34 +493,34 @@ erDiagram
 
 **Tareas**:
 - Validar foreign keys
-- Validar cálculos (totals, fees, etc.)
+- Validate calculations (totals, fees, etc.)
 - Validar business rules (refunds negativos, etc.)
 
 ### 5. Exploratory Data Analysis
 
-**Objetivo**: Entender el negocio a través de los datos
+**Objective**: Understand the business through data
 
 **Tareas**:
-- Top productos/categorías
-- Análisis de cohortes de clientes
+- Top products/categories
+- Customer Cohort Analysis
 - Conversion funnel
-- Análisis temporal (trends, estacionalidad)
+- Temporal analysis (trends, seasonality)
 
-### 6. Pipeline End-to-End
+### 6. pipeline End-to-End
 
 **Objetivo**: Construir pipeline completo de datos
 
 **Tareas**:
-- Extract: Leer múltiples formatos
+- Extract: Read multiple formats
 - Transform: Limpiar, flatten, join
-- Load: Guardar en processed/ en formato óptimo
+- Load: Save in processed/ in optimal format
 - Agregar logging, error handling, tests
 
 ---
 
-## Comandos Útiles
+## Useful Commands
 
-### Exploración Rápida
+### Quick Scan
 
 ```bash
 # Ver tamaños de archivos
@@ -571,29 +571,29 @@ for name, df in [('Customers', customers), ('Products', products),
 
 ---
 
-## Formatos de Archivo - Comparación
+## File Formats - Comparison
 
 | Formato | Ventajas | Desventajas | Mejor Para |
 |---------|----------|-------------|------------|
-| **CSV** | Simple, legible, universal | Sin tipos, grande, lento | Datos tabulares pequeños |
-| **JSON** | Flexible, nested data | Verboso, lento, sin tipos | APIs, configuración |
-| **Parquet** | Compacto, rápido, typed | No legible, requiere libs | Big data, analytics |
+| **CSV** | Simple, readable, universal | No types, big, slow | Small tabular data |
+| **JSON** | Flexible, nested data | Verbose, slow, without types | APIs, configuration |
+| **Parquet** | Compact, fast, typed | Not readable, requires libs | Big data, analytics |
 
 ### Benchmark (1M rows, 10 columns)
 
-| Operación | CSV | JSON | Parquet |
+| Operation | CSV | JSON | Parquet |
 |-----------|-----|------|---------|
-| Tamaño | 500 MB | 800 MB | 80 MB |
+| Size | 500MB | 800MB | 80MB |
 | Lectura | 15s | 25s | 2s |
 | Escritura | 20s | 30s | 3s |
 
 ---
 
-## Próximos Pasos
+## Next Steps
 
-Después de familiarizarte con los datos:
+After familiarizing yourself with the data:
 
-1. **Explorar**: Usa Jupyter notebooks para exploración interactiva
+1. **Explore**: Use Jupyter notebooks for interactive exploration
 2. **Limpiar**: Implementa pipeline de limpieza (Ejercicio 03)
 3. **Transformar**: Practica operaciones con pandas (Ejercicio 04)
 4. **Validar**: Escribe tests para validar calidad (Ejercicio 06)
@@ -601,9 +601,9 @@ Después de familiarizarte con los datos:
 
 ---
 
-## Recursos Adicionales
+## resources Adicionales
 
-### Documentación
+### Documentation
 
 - **Pandas**: https://pandas.pydata.org/docs/
 - **PyArrow (Parquet)**: https://arrow.apache.org/docs/python/
@@ -611,7 +611,7 @@ Después de familiarizarte con los datos:
 
 ### Herramientas
 
-- **Pandas Profiling**: Genera reportes automáticos de calidad
+- **Pandas Profiling**: Generate automatic quality reports
   ```bash
   pip install ydata-profiling
   ```
@@ -621,7 +621,7 @@ Después de familiarizarte con los datos:
   profile.to_file("report.html")
   ```
 
-- **Great Expectations**: Framework de validación de datos
+- **Great Expectations**: Data Validation Framework
   ```python
   import great_expectations as gx
   ```
@@ -634,8 +634,8 @@ Después de familiarizarte con los datos:
 
 ---
 
-**¿Preguntas sobre los datos?**
+**Questions about the data?**
 
 Revisa los schemas en `data/schemas/` para detalles completos de cada dataset, incluyendo problemas de calidad esperados y recomendaciones de limpieza.
 
-**¡Feliz data wrangling! 🐼**
+**Happy date wrangling! 🐼**

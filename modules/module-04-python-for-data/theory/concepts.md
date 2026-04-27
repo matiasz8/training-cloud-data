@@ -1,34 +1,34 @@
-# Conceptos Fundamentales: Python para Ingeniería de Datos
+# Fundamental Concepts: Python for Data Engineering
 
-## Tabla de Contenidos
+## Table of Contents
 
-1. [Introducción](#introducción)
-2. [Python para Data Engineering](#python-para-data-engineering)
-3. [Sintaxis y Fundamentos](#sintaxis-y-fundamentos)
-4. [Tipos de Datos](#tipos-de-datos)
-5. [Estructuras de Datos](#estructuras-de-datos)
-6. [Control de Flujo](#control-de-flujo)
-7. [Funciones y Programación Funcional](#funciones-y-programación-funcional)
-8. [Manejo de Archivos](#manejo-de-archivos)
-9. [Pandas y NumPy Fundamentals](#pandas-y-numpy-fundamentals)
-10. [Data Quality y Validación](#data-quality-y-validación)
-11. [Error Handling y Logging](#error-handling-y-logging)
+1. [Introduction](#introduction)
+2. [Python for Data Engineering](#python-for-data-engineering)
+3. [Syntax and Fundamentals](#syntax-and-fundamentals)
+4. [Data Types](#data-types)
+5. [Data Structures](#data-structures)
+6. [Flow Control](#flow-control)
+7. [Functions and Functional Programming](#functions-and-functional-programming)
+8. [File Handling](#file-handling)
+9. [Pandas and NumPy Fundamentals](#pandas-and-numpy-fundamentals)
+10. [Data Quality and Validation](#data-quality-and-validation)
+11. [Error Handling and Logging](#error-handling-and-logging)
 12. [Best Practices](#best-practices)
 
 ---
 
-## Introducción
+## Introduction
 
-Python se ha convertido en el lenguaje dominante para ingeniería de datos gracias a su sintaxis clara, amplio ecosistema de bibliotecas y capacidad para integrar múltiples sistemas. Este documento cubre los conceptos fundamentales necesarios para trabajar efectivamente con datos en Python.
+Python has become the dominant language for data engineering thanks to its clear syntax, extensive library ecosystem, and ability to integrate multiple systems. This document covers the fundamental concepts needed to effectively work with data in Python.
 
-### ¿Por qué Python para Data Engineering?
+### Why Python for Data Engineering?
 
-**Ventajas Clave**:
-- **Sintaxis Clara**: Código legible que se asemeja al pseudocódigo
+**Key Advantages**:
+- **Clear Syntax**: Readable code that resembles pseudocode
 - **Ecosistema Rico**: pandas, NumPy, PyArrow, SQLAlchemy, PySpark
-- **Integración Universal**: APIs REST, bases de datos, cloud providers
-- **Community Support**: Extensa documentación y comunidad activa
-- **Performance**: Con NumPy y Cython, acercándose a velocidades de C
+- **Universal Integration**: REST APIs, databases, cloud providers
+- **Community Support**: Extensive documentation and active community
+- **Performance**: With NumPy and Cython, approaching C speeds
 - **Versatilidad**: Desde scripts simples hasta pipelines distribuidos
 
 **Casos de Uso en Data Engineering**:
@@ -49,36 +49,36 @@ Python se ha convertido en el lenguaje dominante para ingeniería de datos graci
 
 | Aspecto | Data Engineering | Data Science |
 |---------|------------------|--------------|
-| **Objetivo** | Mover y transformar datos a escala | Extraer insights y modelos |
-| **Foco** | Pipelines robustos y escalables | Exploración y experimentación |
+| **Objetivo** | Mover y transformar datos a escala | Extraer insights y models |
+| **Focus** | Robust and scalable pipelines | Exploration and experimentation |
 | **Herramientas** | Airflow, Spark, Kafka, dbt | Jupyter, scikit-learn, TensorFlow |
-| **Prioridad** | Confiabilidad, performance | Precisión del modelo |
+| **Priority** | reliability, performance | Model precision |
 | **Output** | Datos limpios y estructurados | Modelos y visualizaciones |
-| **Testing** | Unit tests, integration tests | Validación de modelos |
+| **Testing** | Unit tests, integration tests | Model validation |
 
 ### Principios Core
 
-1. **Idempotencia**: Ejecutar el mismo pipeline múltiples veces produce el mismo resultado
-2. **Escalabilidad**: Código que funciona con 1MB debe funcionar con 1TB (con ajustes)
+1. **Idempotence**: Running the same pipeline multiple times produces the same result
+2. **scalability**: Code that works with 1MB must work with 1TB (with adjustments)
 3. **Observabilidad**: Logging extensivo para debugging y monitoring
 4. **Error Handling**: Graceful degradation y retry logic
-5. **Data Quality**: Validación en cada paso del pipeline
+5. **Data Quality**: Validation at each step of the pipeline
 6. **Reproducibilidad**: Mismos inputs → mismos outputs siempre
 
 ---
 
 ## Sintaxis y Fundamentos
 
-### Características del Lenguaje
+### features del Lenguaje
 
 **Python es**:
-- **Interpretado**: No requiere compilación explícita
-- **Dinámicamente Tipado**: Variables no requieren declaración de tipo
+- **Interpreted**: Does not require explicit compilation
+- **Dynamically Typed**: Variables do not require type declaration
 - **Orientado a Objetos**: Todo es un objeto
-- **Indentado**: Los bloques se definen por indentación, no por llaves
+- **Indented**: Blocks are defined by indentation, not by braces
 - **Multi-paradigma**: Soporta OOP, funcional, procedural
 
-### Sintaxis Básica
+### Basic Syntax
 
 ```python
 # Variables (sin declaración de tipo)
@@ -159,7 +159,7 @@ def extraer_datos(fuente: str, fecha: str) -> list:
 
 ### Tipos Primitivos
 
-#### Números
+#### Numbers
 
 ```python
 # Integers (int) - Precisión arbitraria
@@ -319,12 +319,12 @@ resultado: Union[str, None] = None
 
 ### Listas (Lists)
 
-**Características**:
+**features**:
 - Ordenadas
 - Mutables
 - Permiten duplicados
 - Pueden contener tipos mixtos
-- Implementadas como arrays dinámicos
+- Implemented as dynamic arrays
 
 ```python
 # Creación
@@ -364,11 +364,11 @@ procesados = [procesar(x) for x in datos if validar(x)]
 
 ### Tuplas (Tuples)
 
-**Características**:
+**features**:
 - Ordenadas
 - Inmutables
 - Permiten duplicados
-- Más eficientes que listas para datos fijos
+- More efficient than lists for fixed data
 - Pueden usarse como keys en diccionarios
 
 ```python
@@ -397,10 +397,10 @@ print(reg.nombre)   # "Cliente A"
 
 ### Diccionarios (Dicts)
 
-**Características**:
-- No ordenados (ordenados por inserción desde Python 3.7+)
+**features**:
+- Unsorted (sorted by insertion since Python 3.7+)
 - Mutables
-- Keys únicos
+- Unique keys
 - Keys deben ser inmutables (str, int, tuple)
 - Implementados como hash tables (O(1) lookup)
 
@@ -452,12 +452,12 @@ filtrado = {k: v for k, v in usuario.items() if v is not None}
 
 ### Sets
 
-**Características**:
+**features**:
 - No ordenados
 - Mutables
 - Sin duplicados
 - Elementos deben ser inmutables
-- Operaciones de conjunto rápidas
+- Fast set operations
 
 ```python
 # Creación
@@ -601,9 +601,9 @@ suma = sum(x**2 for x in range(1000000))  # No crea lista en memoria
 
 ---
 
-## Funciones y Programación Funcional
+## Functions and Functional Programming
 
-### Definición de Funciones
+### Definition of Functions
 
 ```python
 # Función básica
@@ -893,7 +893,7 @@ df.groupby(['ciudad', 'género']).agg({
 
 ---
 
-## Data Quality y Validación
+## Data Quality and Validation
 
 ### Missing Data
 
@@ -927,7 +927,7 @@ df.drop_duplicates()
 df.drop_duplicates(subset=['email'], keep='first')
 ```
 
-### Validación con Pandera
+### Validation with Pandera
 
 ```python
 import pandera as pa
@@ -1201,21 +1201,21 @@ usuario = usuarios_dict[1]
 
 ## Resumen
 
-Este documento cubrió los conceptos fundamentales de Python para ingeniería de datos:
+This document covered the fundamental concepts of Python for data engineering:
 
-1. **Sintaxis y Fundamentos**: Tipado dinámico, indentación, convenciones
-2. **Tipos de Datos**: Números, strings, booleanos, None, type hints
+1. **Syntax and Fundamentals**: Dynamic typing, indentation, conventions
+2. **Data Types**: Numbers, strings, booleans, None, type hints
 3. **Estructuras**: Listas, tuplas, dicts, sets y sus operaciones
 4. **Control de Flujo**: Condicionales, loops, comprehensions
-5. **Funciones**: Definición, lambdas, decoradores, programación funcional
+5. **Functions**: Definition, lambdas, decorators, functional programming
 6. **Archivos**: Context managers, CSV, JSON, Parquet
 7. **Pandas/NumPy**: DataFrames, Series, operaciones vectorizadas
-8. **Data Quality**: Missing data, duplicados, validación
+8. **Data Quality**: Missing data, duplicates, validation
 9. **Error Handling**: Excepciones, logging, debugging
-10. **Best Practices**: PEP 8, docstrings, código pythonic
+10. **Best Practices**: PEP 8, docstrings, pythonic code
 
-Estos conceptos forman la base para construir pipelines de datos robustos y escalables.
+Estos conceptos forman la base para construir pipelines de datos robustos y scalables.
 
 ---
 
-**Próximo paso**: Lee [architecture.md](./architecture.md) para entender patrones y arquitecturas de data engineering con Python.
+**Next step**: Read [architecture.md](./architecture.md) to understand data engineering patterns and architectures with Python.

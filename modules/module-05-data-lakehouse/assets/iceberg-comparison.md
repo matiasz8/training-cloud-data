@@ -25,15 +25,15 @@
 2. **Spark-Heavy**: Tu processing es principalmente PySpark
 3. **Z-Ordering Critical**: Necesitas data skipping avanzado
 4. **Streaming**: Procesamiento de streams continuo
-5. **Simplicity**: Quieres setup más simple
-6. **Optimize Write**: Necesitas compactación automática
+5. **Simplicity**: You want a simpler setup
+6. **Optimize Write**: You need automatic compaction
 
 ### Usa Apache Iceberg cuando:
 
-1. **Multi-Engine**: Usas Trino, Presto, Flink además de Spark
+1. **Multi-Engine**: You use Trino, Presto, Flink in addition to Spark
 2. **Partition Evolution**: Cambias estructura de particiones frecuentemente
 3. **Open Governance**: Prefieres Apache Foundation vs empresa
-4. **Cross-Platform**: Integración con múltiples plataformas
+4. **Cross-Platform**: Integration with multiple platforms
 5. **Analytics Engines**: Heavy use de query engines como Trino
 6. **Future-Proofing**: Evitar vendor lock-in
 
@@ -154,7 +154,7 @@ Delta Table
 ```
 
 **Pros**:
-- Transaction log simple y rápido
+- Simple and fast transaction log
 - Lectura secuencial del log
 - Checkpoint files para performance
 
@@ -172,9 +172,9 @@ Iceberg Table
 ```
 
 **Pros**:
-- Metadata más detallada
+- More detailed metadata
 - Partition evolution sin reescritura
-- Hidden partitioning (abstracción)
+- Hidden partitioning (abstraction)
 
 ## 📈 Performance Benchmarks
 
@@ -213,7 +213,7 @@ df = spark.read.format("iceberg").load("catalog.db.table")
 df.write.format("delta").save("/delta/path")
 ```
 
-⚠️ **Note**: Time Travel history no se preserva en migración
+⚠️ **Note**: Time Travel history no se preserva en migration
 
 ## 💡 Recommendations
 
@@ -223,11 +223,11 @@ df.write.format("delta").save("/delta/path")
 - **Hybrid**: Use both (Delta for streams, Iceberg for analytics)
 
 ### For Startups
-- **Quick MVP**: Delta Lake (más simple)
+- **Quick MVP**: Delta Lake (simpler)
 - **Future flexibility**: Iceberg (menos vendor lock-in)
 
 ### For Data Engineers
-- **Learn both**: Ambos son estándar de la industria
+- **Learn both**: Both are industry standard
 - **Lakehouse pattern**: Aplica con ambos
 - **Skills transferable**: Conceptos son similares
 

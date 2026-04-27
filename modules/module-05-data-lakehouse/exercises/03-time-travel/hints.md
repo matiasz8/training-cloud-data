@@ -3,8 +3,8 @@
 ## 🎯 Conceptos Clave
 
 ### Time Travel
-Time Travel permite acceder a versiones históricas de una tabla Delta:
-- **versionAsOf**: Acceder por número de versión
+Time Travel allows access to historical versions of a Delta table:
+- **versionAsOf**: Access by version number
 - **timestampAsOf**: Acceder por timestamp
 
 ### Operaciones que crean versiones
@@ -17,7 +17,7 @@ Time Travel permite acceder a versiones históricas de una tabla Delta:
 
 ## 📝 01_create_versions.py
 
-### Crear tabla inicial
+### Crear table inicial
 ```python
 df = spark.read.json("../../../data/raw/transactions.json").limit(10000)
 df.write.format("delta").mode("overwrite").save(path)
@@ -41,7 +41,7 @@ delta_table.update(
 )
 ```
 
-### Delete con condición
+### Delete with condition
 ```python
 delta_table.delete("amount < 0 OR amount IS NULL")
 ```
@@ -60,7 +60,7 @@ delta_table.history().select(
 
 ## 📊 02_time_travel_queries.py
 
-### Query por versión
+### Query by version
 ```python
 # Leer versión específica
 v0 = spark.read.format("delta") \
@@ -148,19 +148,19 @@ delta_table.history().select("version", "operation").show()
 ```
 AnalysisException: Path does not exist: s3a://bronze/time_travel_demo
 ```
-**Solución**: Asegúrate de ejecutar primero `01_create_versions.py`
+**Solution**: Make sure to run first`01_create_versions.py`
 
 ### Error 2: Version no existe
 ```
 AnalysisException: Version 5 does not exist
 ```
-**Solución**: Verifica el historial con `.history()` para ver qué versiones existen
+**Solution**: Check the history with`.history()`to see what versions exist
 
-### Error 3: Timestamp inválido
+### Error 3: Invalid Timestamp
 ```
 IllegalArgumentException: Invalid timestamp format
 ```
-**Solución**: Usa `str(timestamp)` al pasar el timestamp del historial
+**Solution**: Use`str(timestamp)` al pasar el timestamp del historial
 
 ### Error 4: Update con comillas incorrectas
 ```python
@@ -173,9 +173,9 @@ delta_table.update(condition="status = 'pending'", set={"status": "'expired'"})
 
 ---
 
-## 📚 Comandos Útiles
+## 📚 Useful Commands
 
-### Ver metadata de tabla
+### Ver metadata de table
 ```python
 # Ver descripción de tabla
 spark.sql(f"DESCRIBE DETAIL delta.`{path}`").show(truncate=False)
@@ -207,7 +207,7 @@ delta_table.vacuum(0)  # Elimina todo lo no referenciado
 
 ### Snapshot Isolation
 Delta Lake usa **Multi-Version Concurrency Control (MVCC)**:
-- Cada versión es un snapshot completo
+- Each version is a complete snapshot
 - Lecturas nunca bloquean escrituras
 - Escrituras nunca bloquean lecturas
 - Consistency garantizada
@@ -247,5 +247,5 @@ spark.sql("""
 - [ ] SQL Time Travel funciona
 - [ ] 03_audit_rollback.py muestra historial completo
 - [ ] Rollback a V1 funciona correctamente
-- [ ] Historial después del rollback muestra nueva versión
+- [ ] History after rollback shows new version
 - [ ] Todos los conteos de registros son correctos

@@ -1,8 +1,8 @@
-# Validación y Testing del Módulo 04
+# Validation and Testing of Module 04
 
-## Descripción
+## Description
 
-Este directorio contiene la **suite integrada de validación** para todo el Módulo 04: Python para Ingeniería de Datos.
+This directory contains the **integrated validation suite** for the entire Module 04: Python for Data Engineering.
 
 ## Estructura
 
@@ -20,27 +20,27 @@ validation/
 
 ## Tests Incluidos
 
-### 1. Tests de Integración (`test_integration.py`)
+### 1. Integration Tests (`test_integration.py`)
 
 Valida que los ejercicios funcionan juntos:
 
-- Pipeline completo: leer CSV → limpiar → transformar → guardar
+- pipeline completo: leer CSV → limpiar → transformar → guardar
 - Interoperabilidad entre funciones de diferentes ejercicios
 - Flujo end-to-end de un proyecto real
 
-### 2. Validación de Datos (`test_data_quality.py`)
+### 2. Data Validation (`test_data_quality.py`)
 
 Verifica la calidad de los datasets:
 
 - ✅ Todos los datasets existen
-- ✅ Tamaño correcto (180K registros total)
-- ✅ Schemas válidos
+- ✅ Correct size (180K total records)
+- ✅ Valid schemes
 - ✅ Problemas de calidad intencionales presentes (duplicados, nulls)
 - ✅ Relaciones entre datasets
 
-### 3. Completitud del Módulo (`test_module_completeness.py`)
+### 3. Module Completeness (`test_module_completeness.py`)
 
-Verifica que el módulo está completo:
+Verify that the module is complete:
 
 - ✅ Todos los ejercicios tienen sus archivos
 - ✅ Todos los READMEs existen
@@ -49,9 +49,9 @@ Verifica que el módulo está completo:
 
 ---
 
-## Ejecución
+## Execution
 
-### Ejecutar todos los tests de validación
+### Run all validation tests
 
 ```bash
 # Desde el root del módulo
@@ -70,7 +70,7 @@ pytest validation/test_data_quality.py -v
 pytest validation/test_module_completeness.py -v
 ```
 
-### Ejecutar TODOS los tests del módulo
+### Run ALL module tests
 
 ```bash
 # Todos los ejercicios + validación (120+ tests)
@@ -85,13 +85,13 @@ pytest exercises/ validation/ -v --lf
 
 ---
 
-## Métricas de Calidad
+## Quality Metrics
 
 ### Coverage Esperado
 
 - **Ejercicios individuales**: >90% coverage
 - **Integration tests**: >80% coverage
-- **Total del módulo**: >85% coverage
+- **Total module**: >85% coverage
 
 ### Tests Totales
 
@@ -106,9 +106,9 @@ pytest exercises/ validation/ -v --lf
 
 ---
 
-## Configuración de pytest
+## pytest configuration
 
-Ver `pytest.ini` para opciones de configuración:
+Ver `pytest.ini`for configuration options:
 
 - Markers para categorizar tests
 - Timeouts para tests lentos
@@ -149,7 +149,7 @@ jobs:
 
 ### Problema: Tests fallan por imports
 
-**Solución**: Ejecuta desde el root del workspace:
+**Solution**: Run from the root of the workspace:
 
 ```bash
 cd /home/nquiroga/Documents/personal/training-cloud-data
@@ -159,7 +159,7 @@ pytest modules/module-04-python-for-data/validation/ -v
 
 ### Problema: Datasets no encontrados
 
-**Solución**: Verifica que estés en el directorio correcto:
+**Solution**: Verify that you are in the correct directory:
 
 ```bash
 cd modules/module-04-python-for-data
@@ -168,7 +168,7 @@ ls data/raw/  # Debe mostrar los 5 datasets
 
 ### Problema: Tests lentos
 
-**Solución**: Usa pytest-xdist para paralelizar:
+**Solution**: Use pytest-xdist to parallelize:
 
 ```bash
 pip install pytest-xdist
@@ -177,17 +177,17 @@ pytest -n auto  # Usa todos los cores disponibles
 
 ---
 
-## Próximos Pasos
+## Next Steps
 
-Después de validar el módulo:
+After validating the module:
 
 1. ✅ Todos los tests pasan → Continuar con Paso 7 (Assets)
 2. ❌ Tests fallan → Revisar y corregir ejercicios
-3. 📊 Coverage bajo → Agregar más tests
+3. 📊 Low coverage → Add more tests
 
 ---
 
-## Recursos
+## resources
 
 - [pytest Documentation](https://docs.pytest.org/)
 - [pytest-cov Plugin](https://pytest-cov.readthedocs.io/)

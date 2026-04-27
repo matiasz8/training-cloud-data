@@ -1,30 +1,30 @@
-# Conceptos Fundamentales de Data Lakehouse
+# Fundamental Concepts of Data Lakehouse
 
-## 📚 Tabla de Contenidos
+## 📚 Table of Contents
 
-1. [Introducción](#introducción)
-2. [Evolución de las Arquitecturas de Datos](#evolución-de-las-arquitecturas-de-datos)
-3. [Data Lake: El Primer Paradigma](#data-lake-el-primer-paradigma)
-4. [Data Warehouse: El Paradigma Tradicional](#data-warehouse-el-paradigma-tradicional)
-5. [Data Lakehouse: Lo Mejor de Ambos Mundos](#data-lakehouse-lo-mejor-de-ambos-mundos)
-6. [Formatos de Tabla en Lakehouse](#formatos-de-tabla-en-lakehouse)
-7. [ACID en Sistemas Distribuidos](#acid-en-sistemas-distribuidos)
-8. [Casos de Uso y Cuándo Usar Cada Arquitectura](#casos-de-uso-y-cuándo-usar-cada-arquitectura)
+1. [Introduction](#introduction)
+2. [Evolution of Data Architectures](#evolution-of-data-architectures)
+3. [Data Lake: The First Paradigm](#data-lake-the-first-paradigm)
+4. [Data Warehouse: The Traditional Paradigm](#data-warehouse-the-traditional-paradigm)
+5. [Data Lakehouse: The Best of Both Worlds](#data-lakehouse-the-best-of-both-worlds)
+6. [Table Formats in Lakehouse](#table-formats-in-lakehouse)
+7. [ACID in Distributed Systems](#acid-in-distributed-systems)
+8. [Use Cases and When to Use Each Architecture](#use-cases-and-when-to-use-each-architecture)
 
 ---
 
-## Introducción
+## Introduction
 
-El **Data Lakehouse** representa la evolución más reciente en arquitecturas de almacenamiento y procesamiento de datos. Combina la **flexibilidad y bajo costo** de los Data Lakes con la **confiabilidad y rendimiento** de los Data Warehouses, creando una plataforma unificada para analytics, business intelligence y machine learning.
+The **Data Lakehouse** represents the most recent evolution in data storage and processing architectures. It combines the **flexibility and low cost** of Data Lakes with the **reliability and performance** of Data Warehouses, creating a unified platform for analytics, business intelligence and machine learning.
 
-### ¿Por qué surgió el Data Lakehouse?
+### Why did the Data Lakehouse emerge?
 
-Durante la última década, las organizaciones enfrentaron un dilema:
+Over the past decade, organizations faced a dilemma:
 
-- **Data Lakes**: Económicos y flexibles, pero sin garantías de calidad ni transaccionalidad
-- **Data Warehouses**: Confiables y rápidos, pero costosos y rígidos
+- **Data Lakes**: Economical and flexible, but without quality or transactionality guarantees
+- **Data Warehouses**: Reliable and fast, but expensive and rigid
 
-Este dilema llevó a arquitecturas complejas donde los datos se movían entre múltiples sistemas:
+This dilemma led to complex architectures where data moved between multiple systems:
 
 ```
 Sources → Data Lake → ETL → Data Warehouse → BI Tools
@@ -33,11 +33,11 @@ Sources → Data Lake → ETL → Data Warehouse → BI Tools
 ```
 
 **Problemas de esta arquitectura**:
-- 🔴 Datos duplicados en múltiples sistemas
-- 🔴 Sincronización compleja y costosa
+- 🔴 Duplicate data on multiple systems
+- 🔴 synchronization compleja y costosa
 - 🔴 Inconsistencias entre sistemas
-- 🔴 Altos costos de almacenamiento y transferencia
-- 🔴 Latencia en la disponibilidad de datos
+- 🔴 Altos costos de storage y transferencia
+- 🔴 latency en la availability de datos
 
 El **Data Lakehouse** elimina esta complejidad:
 
@@ -48,9 +48,9 @@ Sources → Data Lakehouse → BI Tools + ML/AI Tools
 
 ---
 
-## Evolución de las Arquitecturas de Datos
+## Evolution of Data Architectures
 
-### 📊 Timeline de Evolución
+### 📊 Evolution Timeline
 
 ```
 1990s: Data Warehouses
@@ -76,7 +76,7 @@ Sources → Data Lakehouse → BI Tools + ML/AI Tools
 
 ### 🎯 Factores que Impulsaron el Cambio
 
-1. **Cloud Storage**: S3, Azure Blob, GCS ofrecen almacenamiento extremadamente económico
+1. **Cloud Storage**: S3, Azure Blob, GCS offer extremely economical storage
 2. **Open Formats**: Parquet y ORC permiten lecturas eficientes
 3. **Metadata Layers**: Delta Lake, Iceberg agregaron ACID sobre object storage
 4. **Compute Separation**: Motores como Spark, Presto pueden leer el mismo storage
@@ -86,11 +86,11 @@ Sources → Data Lakehouse → BI Tools + ML/AI Tools
 
 ## Data Lake: El Primer Paradigma
 
-### 🌊 Definición
+### 🌊 Definition
 
-Un **Data Lake** es un repositorio centralizado que almacena **todos los datos** de una organización en su formato nativo (estructurado, semi-estructurado, no estructurado).
+A **Data Lake** is a centralized repository that stores **all of an organization's data** in its native format (structured, semi-structured, unstructured).
 
-### Arquitectura Típica
+### Typical Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -110,14 +110,14 @@ Un **Data Lake** es un repositorio centralizado que almacena **todos los datos**
 
 1. **Bajo costo**: ~$23/TB/mes en S3 Standard
 2. **Flexibilidad**: Cualquier formato de datos
-3. **Escalabilidad**: Petabytes sin problemas
+3. **scalability**: Petabytes sin problemas
 4. **Schema-on-read**: No necesitas definir schema al escribir
 5. **ML-friendly**: Acceso directo para Python/Spark
 6. **Decoupling**: Storage separado de compute
 
 ### ❌ Desventajas
 
-1. **Sin ACID**: No hay transacciones atómicas
+1. **No ACID**: No atomic transactions
    ```python
    # Problema: Lecturas inconsistentes
    # Proceso 1 está escribiendo 100 archivos
@@ -148,26 +148,26 @@ Un **Data Lake** es un repositorio centralizado que almacena **todos los datos**
    # ⏱️ 30+ segundos solo listando archivos
    ```
 
-5. **"Data Swamp"**: Sin governance, se vuelve caótico
-   - ¿Qué datos son actuales?
-   - ¿Quién es dueño de este dataset?
-   - ¿Qué significa esta columna?
+5. **"Data Swamp"**: Without governance, it becomes chaotic
+   - What data is current?
+   - Who owns this dataset?
+   - What does this column mean?
 
 ### 🎯 Caso de Uso Ideal
 
-- **Archiving**: Almacenar logs históricos
-- **Data Science**: Exploración ad-hoc
+- **Archiving**: Store historical logs
+- **Data Science**: Ad-hoc exploration
 - **Raw Data**: Almacenar datos tal como llegan
 
 ---
 
 ## Data Warehouse: El Paradigma Tradicional
 
-### 🏢 Definición
+### 🏢 Definition
 
-Un **Data Warehouse** es una base de datos **optimizada para análisis** con schema pre-definido, queries complejas y alta concurrencia.
+A **Data Warehouse** is an analytics-optimized database with pre-defined schema, complex queries, and high concurrency.
 
-### Arquitectura Típica
+### Typical Architecture
 
 ```
 ┌────────────────────────────────────────────┐
@@ -191,7 +191,7 @@ Un **Data Warehouse** es una base de datos **optimizada para análisis** con sch
 
 ### ✅ Ventajas
 
-1. **ACID Completo**: Garantías transaccionales
+1. **Full ACID**: Transactional guarantees
    ```sql
    BEGIN TRANSACTION;
    UPDATE accounts SET balance = balance - 100 WHERE id = 1;
@@ -214,7 +214,7 @@ Un **Data Warehouse** es una base de datos **optimizada para análisis** con sch
    -- ⚡ Segundos, no minutos
    ```
 
-3. **Schema Enforcement**: Validación automática
+3. **Schema Enforcement**: Automatic validation
    ```sql
    -- El warehouse valida tipos y constraints
    INSERT INTO users (id, email, age)
@@ -222,35 +222,35 @@ Un **Data Warehouse** es una base de datos **optimizada para análisis** con sch
    -- ❌ Error: email format invalid, age < 0
    ```
 
-4. **Concurrencia**: Miles de usuarios simultáneos
+4. **Concurrency**: Thousands of simultaneous users
    - MVCC (Multi-Version Concurrency Control)
-   - Query queuing y priorización
+   - Query queuing and prioritization
 
-5. **Governance**: Auditoría, permisos, linaje
+5. **Governance**: Audit, permissions, lineage
 
 ### ❌ Desventajas
 
-1. **Costo Alto**: $3,000-$10,000+/TB/año
+1. **High Cost**: $3,000-$10,000+/TB/year
    ```
    Redshift: $0.25/hora × 24 × 365 = $2,190/año (mínimo)
    Snowflake: ~$40/TB/mes storage + $2-$4/credit compute
    ```
 
-2. **Schema Rígido**: Difícil cambiar schema
+2. **Rigid Schema**: Difficult to change schema
    ```sql
    -- Agregar columna puede tomar horas en tablas grandes
    ALTER TABLE events ADD COLUMN user_segment VARCHAR(50);
    -- ⏱️ 4 horas en tabla de 10B filas
    ```
 
-3. **Solo Structured Data**: No soporta JSON anidado, XML, imágenes
+3. **Structured Data only**: Does not support nested JSON, XML, images
    ```sql
    -- ❌ No puedes hacer esto eficientemente:
    SELECT json_extract(event_data, '$.user.preferences.notifications')
    FROM events;
    ```
 
-4. **No ML-Friendly**: Difícil acceso para Python/Spark
+4. **Not ML-Friendly**: Difficult to access for Python/Spark
    ```python
    # Necesitas exportar datos primero
    # Redshift → S3 → Spark → Train model
@@ -258,22 +258,22 @@ Un **Data Warehouse** es una base de datos **optimizada para análisis** con sch
    ```
 
 5. **Vendor Lock-in**: Formato propietario
-   - No puedes mover fácilmente entre Snowflake ↔ Redshift
+   - You can't easily move between Snowflake ↔ Redshift
    - Dependencia del proveedor
 
 ### 🎯 Caso de Uso Ideal
 
-- **BI/Dashboards**: Queries complejas, baja latencia
-- **Financial Reporting**: ACID crítico
-- **High Concurrency**: Cientos de usuarios simultáneos
+- **BI/Dashboards**: Queries complejas, baja latency
+- **Financial Reporting**: Critical ACID
+- **High Concurrency**: Hundreds of simultaneous users
 
 ---
 
 ## Data Lakehouse: Lo Mejor de Ambos Mundos
 
-### 🏛️ Definición
+### 🏛️ Definition
 
-Un **Data Lakehouse** es una arquitectura que implementa estructuras y características de data warehouses **directamente sobre data lakes** utilizando formatos de tabla open-source.
+Un **Data Lakehouse** es una arquitectura que implementa estructuras y features de data warehouses **directamente sobre data lakes** utilizando formatos de table open-source.
 
 ### Arquitectura del Lakehouse
 
@@ -316,7 +316,7 @@ Un **Data Lakehouse** es una arquitectura que implementa estructuras y caracter�
 
 #### 1. ACID Transactions
 
-Garantías ACID sobre object storage (S3, ADLS, GCS):
+ACID guarantees on object storage (S3, ADLS, GCS):
 
 ```python
 # Delta Lake example
@@ -333,14 +333,14 @@ deltaTable.update(
 )
 ```
 
-**Cómo funciona**:
+**How ​​it works**:
 - Transaction log (`_delta_log/`) rastrea todas las operaciones
-- Commit atómico: o todo el batch se escribe, o nada
+- Atomic commit: either the entire batch is written, or nothing
 - Isolation: lectores ven snapshot consistente
 
 #### 2. Time Travel (Data Versioning)
 
-Acceso a versiones históricas:
+Access to historical versions:
 
 ```python
 # Leer versión 10 minutos atrás
@@ -358,8 +358,8 @@ deltaTable.history().show()
 ```
 
 **Casos de uso**:
-- Auditoría y compliance
-- Rollback después de errores
+- Audit and compliance
+- Rollback after errors
 - Reproducibilidad en ML (entrenar con mismos datos)
 
 #### 3. Schema Evolution
@@ -379,7 +379,7 @@ df_with_new_col.write.format("delta") \
 
 #### 4. Unified Batch + Streaming
 
-Misma tabla para ambos workloads:
+Misma table para ambos workloads:
 
 ```python
 # Batch write
@@ -398,7 +398,7 @@ df_stream_read = spark.readStream.format("delta").load("/path/to/table")
 
 #### 5. Open Format
 
-No vendor lock-in, múltiples engines:
+No vendor lock-in, multiple engines:
 
 ```python
 # Spark
@@ -418,83 +418,83 @@ df = dt.to_pandas()
 | Aspecto | Data Lake | Data Warehouse | Data Lakehouse |
 |---------|-----------|----------------|----------------|
 | **Costo** | 💰 $23/TB/mes | 💰💰💰 $250+/TB/mes | 💰💰 $40/TB/mes |
-| **ACID** | ❌ No | ✅ Sí | ✅ Sí |
-| **Performance** | ⚠️ Lento | ✅ Rápido | ✅ Rápido |
+| **ACID** | ❌ No | ✅ Yes | ✅ Yes |
+| **Performance** | ⚠️ Slow | ✅ Fast | ✅ Fast |
 | **Flexibilidad** | ✅ Todos los formatos | ❌ Solo structured | ✅ Todos los formatos |
-| **Time Travel** | ❌ No | ⚠️ Limitado | ✅ Sí (completo) |
+| **Time Travel** | ❌ No | ⚠️ Limitado | ✅ Yes (completo) |
 | **ML Support** | ✅ Excelente | ❌ Limitado | ✅ Excelente |
-| **Schema Evolution** | ⚠️ Manual | ❌ Difícil | ✅ Automático |
+| **Schema Evolution** | ⚠️ Manual | ❌ Difficult | ✅ Automatic |
 | **Streaming** | ⚠️ Complejo | ❌ No soportado | ✅ Nativo |
-| **Open Format** | ✅ Sí | ❌ Propietario | ✅ Sí |
+| **Open Format** | ✅ Yes | ❌ Propietario | ✅ Yes |
 
 ### ❌ Desventajas/Limitaciones
 
 1. **Complejidad Inicial**: Curva de aprendizaje
 2. **Overhead de Metadata**: Transaction log puede crecer
 3. **Requiere Tuning**: Compaction, partitioning, etc.
-4. **Madurez**: Menos maduro que warehouses tradicionales (pero evolucionando rápido)
+4. **Maturity**: Less mature than traditional warehouses (but evolving quickly)
 
 ### 🎯 Caso de Uso Ideal
 
 - **Todo**: BI, ML, Real-time analytics en una plataforma
-- **Reducir costos** manteniendo confiabilidad
+- **Reducir costos** manteniendo reliability
 - **Unificar arquitectura** (eliminar silos)
 
 ---
 
-## Formatos de Tabla en Lakehouse
+## Formatos de table en Lakehouse
 
-Existen tres formatos principales de tabla open-source:
+Existen tres formatos principales de table open-source:
 
 ### 1. Delta Lake (Databricks)
 
-**Características**:
+**features**:
 - Transaction log en JSON (`_delta_log/`)
 - Optimistic concurrency control
-- ACID via log único
-- Mejor integración con Spark
+- ACID via single log
+- Better integration with Spark
 
 **Strengths**:
 - ✅ Madurez y estabilidad
 - ✅ Performance en Spark
-- ✅ Documentación y comunidad
+- ✅ Documentation and community
 - ✅ Upserts eficientes (MERGE)
 
 **Weaknesses**:
 - ⚠️ Optimizado para Spark (otros engines con limitaciones)
-- ⚠️ Log puede crecer en tablas con muchas actualizaciones
+- ⚠️ Log puede crecer en tables con muchas actualizaciones
 
-**Cuándo usar**:
+**When to use**:
 - Pipelines batch pesados en Spark
 - Necesitas MERGE/UPSERT frecuente
 - Ecosistema Databricks
 
 ### 2. Apache Iceberg (Netflix → Apache)
 
-**Características**:
+**features**:
 - Metadata en Avro/Parquet
 - Hidden partitioning (particiones transparentes)
 - Partition evolution (cambiar estrategia sin reescribir)
-- Multi-engine desde diseño
+- Multi-engine by design
 
 **Strengths**:
 - ✅ Multi-engine (Spark, Flink, Presto, Trino)
 - ✅ Partition evolution
-- ✅ Hidden partitioning (más fácil para usuarios)
+- ✅ Hidden partitioning (easier for users)
 - ✅ Snapshots eficientes
 
 **Weaknesses**:
 - ⚠️ Menos maduro que Delta
-- ⚠️ Metadata complexity en tablas grandes
+- ⚠️ Metadata complexity en tables grandes
 
-**Cuándo usar**:
-- Múltiples query engines
+**When to use**:
+- Multiple query engines
 - Streaming con Flink
 - Necesitas partition evolution
 
 ### 3. Apache Hudi (Uber → Apache)
 
-**Características**:
+**features**:
 - Copy-on-Write y Merge-on-Read
 - Incremental processing
 - Record-level updates
@@ -502,26 +502,26 @@ Existen tres formatos principales de tabla open-source:
 **Strengths**:
 - ✅ Updates incrementales eficientes
 - ✅ CDC (Change Data Capture) nativo
-- ✅ Retención de datos configurablefacilmente
+- ✅ Easily configurable data retention
 
 **Weaknesses**:
 - ⚠️ Complejidad en tuning
 - ⚠️ Menos adoption que Delta/Iceberg
 
-**Cuándo usar**:
+**When to use**:
 - CDC pipelines
 - Updates frecuentes row-level
 - Ecosistema AWS (EMR tiene soporte nativo)
 
-### Comparación Directa
+### Direct Comparison
 
-| Característica | Delta Lake | Iceberg | Hudi |
+| feature | Delta Lake | Iceberg | Hudi |
 |----------------|------------|---------|------|
-| **ACID** | ✅ Sí | ✅ Sí | ✅ Sí |
-| **Time Travel** | ✅ Sí | ✅ Sí | ✅ Sí |
-| **Schema Evolution** | ✅ Sí | ✅ Sí | ✅ Sí |
-| **Partition Evolution** | ❌ No | ✅ Sí | ❌ No |
-| **Hidden Partitioning** | ❌ No | ✅ Sí | ❌ No |
+| **ACID** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Time Travel** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Schema Evolution** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Partition Evolution** | ❌ No | ✅ Yes | ❌ No |
+| **Hidden Partitioning** | ❌ No | ✅ Yes | ❌ No |
 | **Multi-Engine** | ⚠️ Limitado | ✅ Excelente | ⚠️ Limitado |
 | **Streaming** | ✅ Spark Streaming | ✅ Flink, Spark | ✅ Spark Streaming |
 | **Upserts** | ✅ MERGE | ⚠️ Overwrite | ✅ Upsert (MoR) |
@@ -532,16 +532,16 @@ Existen tres formatos principales de tabla open-source:
 
 ## ACID en Sistemas Distribuidos
 
-### ¿Qué es ACID?
+### What is ACID?
 
-ACID son garantías fundamentales en bases de datos:
+ACID are fundamental guarantees in databases:
 
 - **A**tomicity: Todo o nada
-- **C**onsistency: Reglas de negocio siempre válidas
-- **I**solation: Transacciones concurrentes no interfieren
+- **C**onsistency: Always valid business rules
+- **I**solation: transactions concurrentes no interfieren
 - **D**urability: Datos committed no se pierden
 
-### El Desafío en Object Storage
+### The Challenge in Object Storage
 
 Object storage (S3, ADLS, GCS) **NO** provee ACID nativamente:
 
@@ -553,7 +553,7 @@ for file in files:
     # Tienes datos parciales ❌
 ```
 
-### Cómo Delta Lake Implementa ACID
+### How Delta Lake Implements ACID
 
 Delta Lake usa un **transaction log** para coordinar escrituras:
 
@@ -594,9 +594,9 @@ Cada commit genera un archivo JSON en `_delta_log/`:
 
 1. Escritor escribe archivos Parquet
 2. Escritor crea archivo JSON en `_delta_log/`
-3. **Rename atómico** (garantizado por S3)
-4. Si falla antes del rename → transacción no sucedió
-5. Si rename exitoso → transacción committed
+3. **Atomic rename** (guaranteed by S3)
+4. If it fails before rename → transaction did not happen
+5. Si rename exitoso → transaction committed
 
 ```python
 # Delta Lake garantiza atomicidad
@@ -607,9 +607,9 @@ df.write.format("delta").mode("append").save("/path/to/table")
 #### Isolation
 
 - **Optimistic Concurrency Control** (OCC)
-- Múltiples escritores pueden trabajar simultáneamente
+- Multiple writers can work simultaneously
 - En commit, se valida que no haya conflictos
-- Si conflicto → retry automático
+- If conflict → automatic retry
 
 ```python
 # Writer 1 y Writer 2 escriben en paralelo
@@ -620,32 +620,32 @@ df.write.format("delta").mode("append").save("/path/to/table")
 #### Consistency & Durability
 
 - **Consistency**: Schema enforcement + CHECK constraints
-- **Durability**: Una vez committed, el log garantiza no-pérdida
+- **Durability**: Once committed, the log guarantees no-loss
 
 ---
 
-## Casos de Uso y Cuándo Usar Cada Arquitectura
+## Use Cases and When to Use Each Architecture
 
 ### Data Lake
 
 **Usa cuando**:
-- Archiving de datos históricos (logs, eventos)
-- Exploración ad-hoc sin schema definido
+- Archiving of historical data (logs, events)
+- Ad-hoc exploration without defined schema
 - Presupuesto limitado
 - No necesitas ACID
 
 **Ejemplos**:
-- Logs de aplicaciones (30 días de retención)
+- Application logs (30 day retention)
 - Archivos raw de IoT devices
 - Data science exploration
 
 ### Data Warehouse
 
 **Usa cuando**:
-- BI crítico con SLAs estrictos (<1s)
+- Critical BI with strict SLAs (<1s)
 - High concurrency (100+ usuarios)
 - Queries extremadamente complejas
-- Presupuesto no es limitación
+- Budget is not a limitation
 
 **Ejemplos**:
 - Dashboards ejecutivos
@@ -666,18 +666,18 @@ df.write.format("delta").mode("append").save("/path/to/table")
 - Real-time + historical analytics
 - Reducir costos manteniendo calidad
 
-### Tabla de Decisión Rápida
+### Quick Decision table
 
 | Pregunta | Lake | Warehouse | Lakehouse |
 |----------|------|-----------|-----------|
-| ¿Necesitas ACID? | ❌ | ✅ | ✅ |
-| ¿Presupuesto limitado? | ✅ | ❌ | ✅ |
-| ¿ML workloads? | ✅ | ❌ | ✅ |
-| ¿BI crítico (<1s)? | ❌ | ✅ | ⚠️ |
-| ¿100+ usuarios concurrentes? | ❌ | ✅ | ⚠️ |
-| ¿Streaming + batch? | ⚠️ | ❌ | ✅ |
-| ¿Schema flexible? | ✅ | ❌ | ✅ |
-| ¿Time travel necesario? | ❌ | ⚠️ | ✅ |
+| Do you need ACID? | ❌ | ✅ | ✅ |
+| Limited budget? | ✅ | ❌ | ✅ |
+| ML workloads? | ✅ | ❌ | ✅ |
+| BI critical (<1s)? | ❌ | ✅ | ⚠️ |
+| 100+ concurrent users? | ❌ | ✅ | ⚠️ |
+| Streaming + batch? | ⚠️ | ❌ | ✅ |
+| Flexible schema? | ✅ | ❌ | ✅ |
+| Time travel necessary? | ❌ | ⚠️ | ✅ |
 
 ---
 
@@ -686,22 +686,22 @@ df.write.format("delta").mode("append").save("/path/to/table")
 ### Key Takeaways
 
 1. **Data Lakehouse** = Data Lake + Data Warehouse features
-2. **Formatos de tabla** (Delta, Iceberg, Hudi) agregan ACID sobre object storage
+2. **Formatos de table** (Delta, Iceberg, Hudi) agregan ACID sobre object storage
 3. **ACID en distributed systems** requiere transaction log y coordination
-4. **Delta Lake** es el formato más maduro (70% de este módulo)
-5. **Apache Iceberg** destaca en multi-engine y partition evolution (30% de este módulo)
-6. La elección depende de tus requisitos específicos (cost, performance, features)
+4. **Delta Lake** is the most mature format (70% of this module)
+5. **Apache Iceberg** stands out in multi-engine and partition evolution (30% of this module)
+6. The choice depends on your specific requirements (cost, performance, features)
 
-### Próximos Pasos
+### Next Steps
 
 Ahora que comprendes los conceptos fundamentales, continuaremos con:
 
 1. **Arquitectura** ([02-architecture.md](02-architecture.md)): Patrones como Medallion, optimizaciones
-2. **Recursos** ([03-resources.md](03-resources.md)): Documentación oficial, papers, guías
-3. **Ejercicios prácticos**: Implementar lo aprendido con Delta Lake y Iceberg
+2. **resources** ([03-resources.md](03-resources.md)): Official documentation, papers, guides
+3. **Practical exercises**: Implement what you learned with Delta Lake and Iceberg
 
 ---
 
-**Última actualización**: Febrero 2026  
+**Last update**: February 2026
 **Tiempo de lectura**: ~45 minutos  
 **Nivel**: Intermedio-Avanzado

@@ -2,13 +2,13 @@
 
 ## Objetivos de Aprendizaje
 
-Después de completar este ejercicio, serás capaz de:
+After completing this exercise, you will be able to:
 
 1. ✅ Trabajar con **listas**, **tuplas**, **diccionarios** y **sets**
 2. ✅ Usar **list/dict/set comprehensions** de forma efectiva
 3. ✅ Manipular estructuras de datos anidadas
 4. ✅ Aplicar operaciones avanzadas (filter, map, reduce)
-5. ✅ Optimizar código usando estructuras apropiadas
+5. ✅ Optimize code using appropriate structures
 
 ---
 
@@ -111,7 +111,7 @@ print(p.x, p.y)
 
 ### 1. filtrar_pares(numeros) ⭐
 
-Filtra números pares de una lista.
+Filters even numbers from a list.
 
 ```python
 assert filtrar_pares([1, 2, 3, 4, 5]) == [2, 4]
@@ -120,7 +120,7 @@ assert filtrar_pares([]) == []
 
 ### 2. sumar_valores(diccionario) ⭐
 
-Suma todos los valores numéricos de un diccionario.
+Add all numeric values ​​in a dictionary.
 
 ```python
 assert sumar_valores({"a": 1, "b": 2, "c": 3}) == 6
@@ -181,9 +181,9 @@ assert flatten_list([[1, 2], [3, 4], [5]]) == [1, 2, 3, 4, 5]
 assert flatten_list([[1], [[2, 3]], [4]]) == [1, [2, 3], 4]  # Solo un nivel
 ```
 
-### 9. crear_matriz(filas, columnas, valor) ⭐⭐
+### 9. crear_matriz(rows, columns, valor) ⭐⭐
 
-Crea una matriz de filas × columnas con un valor inicial.
+Crea una matriz de rows × columns con un valor inicial.
 
 ```python
 matriz = crear_matriz(2, 3, 0)
@@ -192,7 +192,7 @@ assert matriz == [[0, 0, 0], [0, 0, 0]]
 
 ### 10. transponer_matriz(matriz) ⭐⭐⭐
 
-Transpone una matriz (filas ↔ columnas).
+Transpone una matriz (rows ↔ columns).
 
 ```python
 matriz = [[1, 2, 3], [4, 5, 6]]
@@ -202,7 +202,7 @@ assert resultado == [[1, 4], [2, 5], [3, 6]]
 
 ---
 
-## Ejecución
+## Execution
 
 ```bash
 # Ejecutar tests
@@ -219,15 +219,15 @@ pytest exercises/02-data-structures/tests/test_data_structures.py::test_filtrar_
 
 ## Tips
 
-1. **Comprehensions**: Úsalas en lugar de bucles cuando sea posible
-2. **Sets**: Para búsquedas rápidas y eliminar duplicados
+1. **Comprehensions**: Use them instead of loops when possible
+2. **Sets**: For quick searches and removing duplicates
 3. **get()**: Usa `.get()` en dicts para evitar KeyError
-4. **Unpacking**: Útil para retornar múltiples valores
+4. **Unpacking**: Useful for returning multiple values
 5. **Inmutabilidad**: Tuplas para datos que no deben cambiar
 
 ---
 
-## Recursos
+## resources
 
 - [Python Data Structures](https://docs.python.org/3/tutorial/datastructures.html)
 - [List Comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)

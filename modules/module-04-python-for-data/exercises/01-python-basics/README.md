@@ -2,10 +2,10 @@
 
 ## Objetivos de Aprendizaje
 
-Después de completar este ejercicio, serás capaz de:
+After completing this exercise, you will be able to:
 
 1. ✅ Escribir funciones con **type hints** y **docstrings**
-2. ✅ Usar operadores y control de flujo básico
+2. ✅ Use operators and basic flow control
 3. ✅ Manejar **valores None** y casos edge
 4. ✅ Trabajar con **strings** y formateo
 5. ✅ Aplicar best practices de Python (PEP 8)
@@ -34,9 +34,9 @@ def buscar_usuario(id: int) -> Optional[dict]:
     return None  # o dict
 ```
 
-**Por qué son importantes**:
-- Mejoran legibilidad del código
-- Permiten detección de errores con mypy
+**Why they are important**:
+- Improve code readability
+- Allow error detection with mypy
 - Facilitan autocompletado en IDEs
 - Documentan contratos de funciones
 
@@ -118,7 +118,7 @@ Implementa las siguientes funciones en `starter/basics.py`.
 
 ### 1. suma(a, b) ⭐
 
-Suma dos números.
+Add two numbers.
 
 ```python
 assert suma(2, 3) == 5
@@ -128,7 +128,7 @@ assert suma(0, 0) == 0
 
 ### 2. es_par(numero) ⭐
 
-Determina si un número es par.
+Determine if a number is even.
 
 ```python
 assert es_par(4) == True
@@ -138,7 +138,7 @@ assert es_par(0) == True
 
 ### 3. mayor_de_tres(a, b, c) ⭐
 
-Retorna el mayor de tres números.
+Returns the largest of three numbers.
 
 ```python
 assert mayor_de_tres(1, 2, 3) == 3
@@ -169,7 +169,7 @@ assert revertir_string("") == ""
 
 ### 6. es_palindromo(texto) ⭐⭐
 
-Verifica si un texto es palíndromo (ignora espacios y mayúsculas).
+Checks if a text is palindrome (ignores spaces and capital letters).
 
 ```python
 assert es_palindromo("oso") == True
@@ -190,7 +190,7 @@ assert factorial(5) == 120
 
 ### 8. fibonacci(n) ⭐⭐⭐
 
-Retorna los primeros n números de Fibonacci.
+Returns the first n Fibonacci numbers.
 
 ```python
 assert fibonacci(0) == []
@@ -201,7 +201,7 @@ assert fibonacci(10) == [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
 
 ### 9. validar_email(email) ⭐⭐⭐
 
-Valida formato básico de email (contiene @ y .).
+Validates basic email format (contains @ and .).
 
 ```python
 assert validar_email("user@example.com") == True
@@ -212,7 +212,7 @@ assert validar_email(None) == False
 
 ### 10. calcular_promedio(numeros) ⭐⭐
 
-Calcula el promedio de una lista de números.
+Calculates the average of a list of numbers.
 
 ```python
 assert calcular_promedio([1, 2, 3, 4, 5]) == 3.0
@@ -222,7 +222,7 @@ assert calcular_promedio([10]) == 10.0
 
 ---
 
-## Ejecución
+## Execution
 
 ```bash
 # Ejecutar tests
@@ -239,15 +239,15 @@ pytest exercises/01-python-basics/tests/test_basics.py::test_suma -v
 
 ## Tips
 
-1. **Type hints**: Agrégalos a todas las funciones
+1. **Type hints**: Add them to all functions
 2. **Docstrings**: Usa formato Google
-3. **Edge cases**: Maneja valores vacíos, None, negativos
+3. **Edge cases**: Handles empty, None, negative values
 4. **PEP 8**: Usa nombres descriptivos en snake_case
 5. **Tests primero**: Lee los tests antes de implementar
 
 ---
 
-## Recursos
+## resources
 
 - [Python Type Hints](https://docs.python.org/3/library/typing.html)
 - [PEP 8 Style Guide](https://pep8.org/)

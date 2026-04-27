@@ -1,22 +1,22 @@
-# 📁 File Formats - Guía de Formatos de Datos
+# 📁 File Formats - Data Formats Guide
 
-## 📊 Comparación Rápida
+## 📊 Quick Comparison
 
-| Formato | Tipo | Tamaño | Velocidad | Esquema | Compresión | Uso Típico |
+| Format | Type | Size | Speed ​​| Scheme | Compression | Typical Use |
 |---------|------|--------|-----------|---------|------------|------------|
 | **CSV** | Texto | Grande | Lenta | No | Baja | Intercambio simple |
 | **JSON** | Texto | Grande | Media | Flexible | Baja | APIs, configs |
-| **Parquet** | Binario | Pequeño | Rápida | Sí | Alta | Data lakes, analytics |
-| **Avro** | Binario | Medio | Rápida | Sí | Media | Streaming, Kafka |
+| **Parquet** | Binary | Small | Quick | Yes | High | Data lakes, analytics |
+| **Avro** | Binary | Medium | Quick | Yes | Medium | Streaming, Kafka |
 | **Excel** | Binario | Grande | Lenta | No | Media | Business users |
 
 ## 📄 CSV (Comma-Separated Values)
 
-### Características
+### features
 - ✅ **Pros**: Universal, legible, simple, soportado por todo
-- ❌ **Cons**: Sin tipos de datos, sin compresión, lento con archivos grandes
-- 📦 **Tamaño**: ~100 MB para 1M filas
-- 🎯 **Cuándo usar**: Intercambio de datos simple, compatibilidad máxima
+- ❌ **Cons**: No data types, no compression, slow with large files
+- 📦 **Size**: ~100 MB for 1M rows
+- 🎯 **When to use**: Simple data exchange, maximum compatibility
 
 ### Lectura
 ```python
@@ -87,15 +87,15 @@ df = pd.read_csv('datos.csv', dtype={'codigo': str})  # '001' sería int sin est
 
 ## 📋 JSON (JavaScript Object Notation)
 
-### Características
-- ✅ **Pros**: Estructura anidada, legible, estándar web, esquema flexible
-- ❌ **Cons**: Verboso, sin compresión, más lento que binarios
-- 📦 **Tamaño**: ~150 MB para 1M filas
-- 🎯 **Cuándo usar**: APIs, configs, datos jerárquicos
+### features
+- ✅ **Pros**: Nested structure, readable, web standard, flexible schema
+- ❌ **Cons**: Verbose, no compression, slower than binaries
+- 📦 **Size**: ~150 MB for 1M rows
+- 🎯 **When to use**: APIs, configs, hierarchical data
 
-### Tipos de Orientación
+### Types of Guidance
 
-#### 1. Records (Más común)
+#### 1. Records (Most common)
 ```json
 [
     {"nombre": "Ana", "edad": 25, "ciudad": "Madrid"},
@@ -195,15 +195,15 @@ df = json_normalize(
 
 ## 🚀 Parquet (Columnar Storage)
 
-### Características
-- ✅ **Pros**: Compresión excelente, muy rápido, esquema incluido, tipos de datos preservados
-- ❌ **Cons**: No legible por humanos, requiere librería especial
-- 📦 **Tamaño**: ~15 MB para 1M filas (¡85% menos que CSV!)
-- 🎯 **Cuándo usar**: Data lakes, analytics, almacenamiento de datasets grandes
+### features
+- ✅ **Pros**: Excellent compression, very fast, schema included, data types preserved
+- ❌ **Cons**: Not human readable, requires special library
+- 📦 **Size**: ~15 MB for 1M rows (85% less than CSV!)
+- 🎯 **When to use**: Data lakes, analytics, storage of large datasets
 
-### Por Qué Parquet es Superior
+### Why Parquet is Superior
 
-#### 1. Compresión
+#### 1. Compression
 ```python
 # Comparación de tamaño
 df.to_csv('datos.csv', index=False)         # 100 MB
@@ -225,7 +225,7 @@ df = pd.read_parquet('datos.parquet')
 print(f"Parquet: {time.time() - start:.2f}s")  # ~2s (5x más rápido!)
 ```
 
-#### 3. Preservación de Tipos
+#### 3. Type Preservation
 ```python
 # CSV pierde tipos
 df.to_csv('datos.csv', index=False)
@@ -275,7 +275,7 @@ df.to_parquet(
 )
 ```
 
-### Compresión Comparada
+### Comparative Compression
 ```python
 # Sin compresión
 df.to_parquet('sin_comp.parquet', compression=None)      # 50 MB
@@ -292,11 +292,11 @@ df.to_parquet('lz4.parquet', compression='lz4')          # 18 MB, muy rápido
 
 ## 📊 Excel (XLS/XLSX)
 
-### Características
-- ✅ **Pros**: Familiar para business users, múltiples sheets, formato visual
-- ❌ **Cons**: Lento, límite de 1M filas, no para producción
-- 📦 **Tamaño**: ~80 MB para 1M filas
-- 🎯 **Cuándo usar**: Reportes para usuarios de negocio
+### features
+- ✅ **Pros**: Familiar for business users, multiple sheets, visual format
+- ❌ **Cons**: Slow, 1M rows limit, not for production
+- 📦 **Size**: ~80 MB for 1M rows
+- 🎯 **When to use**: Reports for business users
 
 ### Lectura
 ```python
@@ -342,7 +342,7 @@ worksheet.set_row(0, None, format)  # Formatear header
 writer.close()
 ```
 
-## 🔄 Conversión Entre Formatos
+## 🔄 Conversion Between Formats
 
 ### CSV → Parquet
 ```python
@@ -371,9 +371,9 @@ df = pd.read_parquet('datos.parquet')
 df.to_csv('reporte.csv', index=False)
 ```
 
-## 📐 Guía de Decisión
+## 📐 Decision Guide
 
-### Flujo de Decisión
+### Decision Flow
 ```
 ¿Necesitas compatibilidad universal?
 ├─ SÍ → CSV
@@ -389,9 +389,9 @@ df.to_csv('reporte.csv', index=False)
     │       │       │   └─ NO → CSV o PARQUET
 ```
 
-### Casos de Uso Específicos
+### Specific Use Cases
 
-#### 1. Data Engineering Pipeline
+#### 1. Data Engineering pipeline
 ```python
 # Extract: CSV/JSON de fuentes externas
 raw_df = pd.read_csv('fuente_externa.csv')
@@ -427,7 +427,7 @@ df = df[df['valor'] > 100]
 return df.to_json(orient='records')
 ```
 
-## 💾 Almacenamiento en la Nube
+## 💾 storage en la cloud
 
 ### S3 (AWS)
 ```python
@@ -450,26 +450,26 @@ df.to_parquet('gs://my-bucket/output.parquet')
 
 ## 📊 Benchmark Comparativo
 
-### Dataset: 1 millón de filas, 10 columnas
+### Dataset: 1 million rows, 10 columns
 
-| Operación | CSV | JSON | Parquet | Excel |
+| Operation | CSV | JSON | Parquet | Excel |
 |-----------|-----|------|---------|-------|
-| **Tamaño** | 100 MB | 150 MB | 15 MB | 80 MB |
+| **Size** | 100MB | 150MB | 15MB | 80MB |
 | **Escribir** | 10s | 15s | 2s | 45s |
 | **Leer** | 8s | 12s | 1.5s | 60s |
 | **Leer 2 cols** | 8s | 12s | 0.3s | 55s |
-| **Compresión** | ❌ | ❌ | ✅ Excelente | ⚠️ Media |
+| **Compression** | ❌ | ❌ | ✅ Excellent | ⚠️ Average |
 | **Tipos** | ❌ Se pierden | ⚠️ Parcial | ✅ Preserva | ⚠️ Parcial |
 
-## 💡 Mejores Prácticas
+## 💡 Best Practices
 
-1. **Almacenamiento interno**: Usa **Parquet**
+1. **storage interno**: Usa **Parquet**
 2. **Intercambio externo**: Usa **CSV** (universal)
-3. **APIs**: Usa **JSON** (estándar web)
+3. **APIs**: Use **JSON** (web standard)
 4. **Reportes**: Usa **Excel** (usuarios de negocio)
 5. **Datos anidados**: Usa **JSON** o **Parquet**
 6. **Archivos grandes**: Usa **Parquet** con particionado
-7. **Compresión**: 
+7. **Compression**:
    - Parquet: `snappy` (balanceado)
    - CSV: `.csv.gz` si es necesario
 8. **Siempre especifica**: `index=False` al escribir

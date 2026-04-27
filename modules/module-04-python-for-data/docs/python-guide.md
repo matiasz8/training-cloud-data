@@ -1,21 +1,21 @@
-# 🐍 Python Guide - Mejores Prácticas para Ingeniería de Datos
+# 🐍 Python Guide - Best Practices for Data Engineering
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-1. [Principios Fundamentales](#principios-fundamentales)
-2. [Estilo de Código (PEP 8)](#estilo-de-código-pep-8)
-3. [Estructuras de Datos](#estructuras-de-datos)
-4. [Manejo de Errores](#manejo-de-errores)
-5. [Performance y Optimización](#performance-y-optimización)
+1. [Fundamental Principles](#fundamental-principles)
+2. [Code Style (PEP 8)](#code-style-pep-8)
+3. [Data Structures](#data-structures)
+4. [Error Handling](#error-handling)
+5. [Performance and Optimization](#performance-and-optimization)
 6. [Testing](#testing)
-7. [Documentación](#documentación)
+7. [Documentation](#documentation)
 8. [Logging](#logging)
-9. [Seguridad](#seguridad)
-10. [Patrones Comunes](#patrones-comunes)
+9. [Security](#security)
+10. [Common Patterns](#common-patterns)
 
 ---
 
-## 🎯 Principios Fundamentales
+## 🎯 Fundamental Principles
 
 ### The Zen of Python
 
@@ -24,22 +24,22 @@ import this
 ```
 
 **Principios clave**:
-- **Explícito es mejor que implícito**: Código claro sobre código "inteligente"
-- **Simple es mejor que complejo**: Evita sobre-ingeniería
-- **Legibilidad cuenta**: Código que se lee como prosa
-- **Los errores nunca deben pasar silenciosamente**: Manejo explícito de errores
+- **Explicit is better than implicit**: Clear code over "smart" code
+- **Simple is better than complex**: Avoid over-engineering
+- **Readability counts**: Code that reads like prose
+- **Errors should never pass silently**: Explicit error handling
 
-### Filosofía para Data Engineering
+### Philosophy for Data Engineering
 
-1. **Idempotencia**: El código debe producir el mismo resultado si se ejecuta múltiples veces
+1. **Idempotence**: Code must produce the same result if executed multiple times
 2. **Reproducibilidad**: Mismo input → mismo output
 3. **Observabilidad**: Log suficiente para debug
 4. **Fail Fast**: Detectar errores temprano
-5. **Validación**: Validar datos en cada paso crítico
+5. **Validation**: Validate data at each critical step
 
 ---
 
-## 📝 Estilo de Código (PEP 8)
+## 📝 Code Style (PEP 8)
 
 ### Naming Conventions
 
@@ -66,7 +66,7 @@ def CalculateSales():  # Debería ser snake_case
 MaxRetries = 3  # Debería ser UPPER_CASE
 ```
 
-### Indentación y Espaciado
+### Indentation and Spacing
 
 ```python
 # ✅ Correcto: 4 espacios
@@ -89,7 +89,7 @@ def bad_function():
 result=(value1+value2)*factor
 ```
 
-### Longitud de Línea
+### Line Length
 
 ```python
 # ✅ Correcto: máximo 79 caracteres
@@ -273,9 +273,9 @@ except ValueError as e:
 
 ---
 
-## ⚡ Performance y Optimización
+## ⚡ Performance and Optimization
 
-### Vectorización (Pandas/NumPy)
+### Vectorization (Pandas/NumPy)
 
 ```python
 import pandas as pd
@@ -386,7 +386,7 @@ def test_process_data(sample_dataframe):
     assert len(result) == 3
 ```
 
-### Parametrización
+### Parameterization
 
 ```python
 # ✅ Probar múltiples casos
@@ -420,7 +420,7 @@ def test_fetch_data():
 
 ---
 
-## 📖 Documentación
+## 📖 Documentation
 
 ### Docstrings (Google Style)
 
@@ -495,7 +495,7 @@ def merge_data(
 
 ## 📝 Logging
 
-### Configuración Básica
+### Basic Configuration
 
 ```python
 import logging
@@ -563,7 +563,7 @@ logger.info(
 
 ---
 
-## 🔒 Seguridad
+## 🔒 security
 
 ### No Hardcodear Credenciales
 
@@ -581,7 +581,7 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_PASSWORD = "my_secret_password"  # NUNCA!
 ```
 
-### Validación de Inputs
+### Input Validation
 
 ```python
 # ✅ Validar y sanitizar inputs
@@ -631,7 +631,7 @@ processor = DataProcessorFactory.create_processor('csv')
 processor.process(data)
 ```
 
-### Pipeline Pattern
+### pipeline Pattern
 
 ```python
 # ✅ Pipeline para transformaciones
@@ -683,33 +683,33 @@ assert config1 is config2  # True
 
 ---
 
-## 💡 Checklist de Mejores Prácticas
+## 💡 Best Practices Checklist
 
 ### Antes de Commit
 
-- [ ] Código sigue PEP 8
+- [ ] Code follows PEP 8
 - [ ] Funciones tienen docstrings
 - [ ] Tests pasan
 - [ ] No hay print() de debug
 - [ ] No hay credenciales hardcodeadas
 - [ ] Imports organizados
 - [ ] Variables tienen nombres descriptivos
-- [ ] Código es DRY (Don't Repeat Yourself)
+- [ ] Code is DRY (Don't Repeat Yourself)
 
 ### Antes de Deploy
 
-- [ ] Tests de integración pasan
+- [ ] Integration tests pass
 - [ ] Logging configurado adecuadamente
 - [ ] Manejo de errores implementado
-- [ ] Documentación actualizada
+- [ ] Updated documentation
 - [ ] Performance aceptable
-- [ ] Código revisado por peer
+- [ ] Peer reviewed code
 - [ ] Variables de entorno configuradas
 - [ ] Dependencias documentadas
 
 ---
 
-## 📚 Recursos Adicionales
+## 📚 resources Adicionales
 
 - **PEP 8**: https://pep8.org/
 - **Python Type Hints**: https://docs.python.org/3/library/typing.html
@@ -719,5 +719,5 @@ assert config1 is config2  # True
 
 ---
 
-**Última actualización**: Módulo 04 - Paso 8  
-**Versión**: 1.0
+**Last update**: Module 04 - Step 8
+**Version**: 1.0

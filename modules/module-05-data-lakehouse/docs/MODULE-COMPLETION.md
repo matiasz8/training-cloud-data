@@ -1,54 +1,54 @@
 # Module 05: Data Lakehouse Architecture - 100% COMPLETO ✅
 
-¡Felicitaciones! Has completado el módulo de arquitectura de Data Lakehouse.
+Congratulations! You have completed the Data Lakehouse architecture module.
 
-## 📊 Resumen del Módulo
+## 📊 Module Summary
 
 ### Contenido Completo
 
 - **✅ Paso 1**: Estructura Base (4 archivos)
-- **✅ Paso 2**: Teoría Completa (3 archivos, 22,000 palabras)
-- **✅ Paso 3**: Infraestructura Docker (8 archivos, 6 servicios)
-- **✅ Paso 4**: Datasets Sintéticos (8 archivos, 614,500 registros)
-- **✅ Paso 5**: 6 Ejercicios Prácticos (32 archivos)
-- **✅ Paso 6**: Suite de Validación (5 archivos, 26 tests)
+- **✅ Step 2**: Complete Theory (3 files, 22,000 words)
+- **✅ Paso 3**: Infraestructura Docker (8 archivos, 6 services)
+- **✅ Step 4**: Synthetic Datasets (8 files, 614,500 records)
+- **✅ Step 5**: 6 Practical Exercises (32 files)
+- **✅ Step 6**: Validation Suite (5 files, 26 tests)
 - **✅ Paso 7**: Assets y Cheatsheets (5 archivos)
 - **✅ Paso 8**: Scripts y Docs (3 archivos)
 
-**Total**: 68 archivos, ~30,000 líneas de código, ~35,000 palabras de documentación
+**Total**: 68 files, ~30,000 lines of code, ~35,000 words of documentation
 
-### Tecnologías Dominadas
+### Mastered Technologies
 
 - ✅ **Apache Spark 3.5.0**: Procesamiento distribuido
 - ✅ **Delta Lake 3.0.0**: ACID transactions, Time Travel, Z-Ordering
-- ✅ **Apache Iceberg 0.6.0**: Formato alternativo, comparación
+- ✅ **Apache Iceberg 0.6.0**: Alternative format, comparison
 - ✅ **MinIO**: S3-compatible storage (Bronze/Silver/Gold)
 - ✅ **Hive Metastore**: Metadata management
-- ✅ **Docker**: Orquestación de 6 servicios
+- ✅ **Docker**: orchestration de 6 services
 
 ### Conceptos Aprendidos
 
-1. **Data Lakehouse**: Unión de Data Lake + Data Warehouse
+1. **Data Lakehouse**: Union of Data Lake + Data Warehouse
 2. **Medallion Architecture**: Bronze → Silver → Gold
 3. **ACID Transactions**: Atomicidad, Consistencia, Isolation, Durabilidad
-4. **Time Travel**: Versioning y auditoría
+4. **Time Travel**: Versioning and auditing
 5. **Schema Evolution**: Cambios de schema sin downtime
 6. **Z-Ordering**: Data skipping para performance
-7. **OPTIMIZE & VACUUM**: Mantenimiento de tablas
-8. **Partition Strategies**: Optimización de queries
+7. **OPTIMIZE & VACUUM**: Mantenimiento de tables
+8. **Partition Strategies**: Query optimization
 
 ### Ejercicios Completados
 
 | Ejercicio | Tema | Dificultad | Tiempo |
 |-----------|------|------------|--------|
-| 01 | Delta Basics | ⭐ Básico | 45-60 min |
+| 01 | Delta Basics | ⭐ Basic | 45-60 min |
 | 02 | Medallion Architecture | ⭐⭐⭐ Intermedio | 90-120 min |
 | 03 | Time Travel | ⭐⭐⭐ Intermedio | 45-60 min |
 | 04 | Schema Evolution | ⭐⭐⭐⭐ Avanzado | 30-45 min |
 | 05 | Optimization | ⭐⭐⭐⭐ Avanzado | 45 min |
 | 06 | Iceberg Comparison | ⭐⭐⭐⭐ Avanzado | 45 min |
 
-**Total tiempo práctico**: ~6 horas
+**Total practical time**: ~6 hours
 
 ## 🎯 Quick Start
 
@@ -115,7 +115,7 @@ module-05-data-lakehouse/
 
 ## 🚀 URLs Disponibles
 
-| Servicio | URL | Credenciales |
+| service | URL | Credenciales |
 |----------|-----|--------------|
 | MinIO Console | http://localhost:9001 | admin / password123 |
 | Spark Master UI | http://localhost:8080 | - |
@@ -123,7 +123,7 @@ module-05-data-lakehouse/
 | Jupyter Lab | http://localhost:8888 | - |
 | Hive Metastore | thrift://localhost:9083 | - |
 
-## 💡 Comandos Útiles
+## 💡 Useful Commands
 
 ```bash
 # Ver servicios running
@@ -148,9 +148,9 @@ pytest validation/test_01_delta_basics.py -v
 pytest --cov=exercises --cov-report=html
 ```
 
-## 📚 Recursos Adicionales
+## 📚 resources Adicionales
 
-### Documentación
+### Documentation
 - [Delta Lake Official Docs](https://docs.delta.io/)
 - [Apache Iceberg Documentation](https://iceberg.apache.org/docs/latest/)
 - [Databricks Lakehouse Platform](https://www.databricks.com/product/data-lakehouse)
@@ -171,20 +171,20 @@ pytest --cov=exercises --cov-report=html
 - **Databricks Certified Data Engineer Associate**
 - **Databricks Certified Data Engineer Professional**
 - **Apache Spark Certification**
-- **AWS Certified Data Analytics - Specialty** (tiene sección Lakehouse)
+- **AWS Certified Data Analytics - Specialty** (has Lakehouse section)
 
-## 🔄 Próximos Pasos Sugeridos
+## 🔄 Suggested Next Steps
 
 ### Ampliar Conocimientos
 1. **Streaming con Delta Lake**: readStream/writeStream
-2. **Delta Lake on AWS Glue**: Integración con AWS
+2. **Delta Lake on AWS Glue**: Integration with AWS
 3. **Unity Catalog**: Governance y security
 4. **Delta Sharing**: Compartir datos cross-org
 5. **Photon Engine**: Query acceleration
 
-### Proyectos Prácticos
+### Practical Projects
 1. **Real-time Analytics**: Streaming pipeline con Kafka + Delta
-2. **ML Pipeline**: Bronze→Silver→Gold para feature engineering
+2. **ML pipeline**: Bronze→Silver→Gold para feature engineering
 3. **Data Quality Framework**: Automated data validation
 4. **Cost Optimization**: Analizar storage costs y optimizar
 5. **Multi-cloud Lakehouse**: Delta Lake en AWS + Azure
@@ -231,19 +231,19 @@ Total Module Time:    16-20 horas
 
 ```
 
-## 🎉 ¡Felicitaciones!
+## 🎉 Congratulations!
 
-Has completado uno de los módulos más importantes del training:
+You have completed one of the most important modules of the training:
 
 - ✅ **Arquitectura Lakehouse** entendida
 - ✅ **Delta Lake** dominado
 - ✅ **Medallion pattern** implementado
 - ✅ **ACID transactions** en practice
 - ✅ **Time Travel** y versioning
-- ✅ **Optimization** técnicas aplicadas
+- ✅ **Optimization** applied techniques
 - ✅ **Testing** automatizado funcionando
 
-**Estás listo para trabajar con Data Lakehouses en entornos productivos!** 🚀
+**You are ready to work with Data Lakehouses in productive environments!** 🚀
 
 ---
 

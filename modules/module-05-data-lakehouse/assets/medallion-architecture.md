@@ -70,24 +70,24 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🎯 Características de Cada Layer
+## 🎯 features de Cada Layer
 
 ### Bronze (Raw Zone)
 
-| Aspecto | Característica |
+| Aspecto | feature |
 |---------|---------------|
-| **Propósito** | Preservar datos originales |
-| **Calidad** | Sin validación |
+| **Purpose** | Preserve original data |
+| **Quality** | No validation |
 | **Operaciones** | Solo append |
 | **Schema** | Schema original + metadata |
-| **Retention** | Largo plazo (años) |
+| **Retention** | Long term (years) |
 | **Usuarios** | Data Engineers |
 
 ### Silver (Curated Zone)
 
-| Aspecto | Característica |
+| Aspecto | feature |
 |---------|---------------|
-| **Propósito** | Datos limpios y validados |
+| **Purpose** | Clean and validated data |
 | **Calidad** | Validaciones aplicadas |
 | **Operaciones** | Append + Updates (por dedup) |
 | **Schema** | Normalizado y tipado |
@@ -96,24 +96,24 @@
 
 ### Gold (Business Zone)
 
-| Aspecto | Característica |
+| Aspecto | feature |
 |---------|---------------|
-| **Propósito** | Métricas de negocio |
+| **Purpose** | Business metrics |
 | **Calidad** | Agregaciones precisas |
 | **Operaciones** | Overwrite diario/horario |
-| **Schema** | Dimensiones + Métricas |
+| **Schema** | Dimensions + Metrics |
 | **Retention** | Corto plazo (semanas) |
 | **Usuarios** | Business Analysts + BI Tools |
 
 ## 💡 Best Practices
 
-1. **Bronze**: Nunca borres datos, usa Time Travel si necesitas auditoría
+1. **Bronze**: Never delete data, use Time Travel if you need auditing
 2. **Silver**: Aplica validaciones estrictas, documenta reglas de negocio
-3. **Gold**: Optimiza con OPTIMIZE y Z-ORDER para queries rápidos
+3. **Gold**: Optimize with OPTIMIZE and Z-ORDER for fast queries
 4. **Partitions**: Bronze por ingestion_date, Silver por business dimensions
-5. **Idempotencia**: Diseña pipelines que puedan re-ejecutarse sin duplicados
+5. **Idempotence**: Design pipelines that can be re-executed without duplicates
 
-## 🔄 Pipeline Incremental
+## 🔄 pipeline Incremental
 
 ```python
 # Bronze: Incremental append
@@ -134,8 +134,8 @@ aggregated_data.write.format("delta") \
     .save(gold_path)
 ```
 
-## 📈 Métricas Clave
+## 📈 Key Metrics
 
-- **Bronze → Silver**: Data Quality Rate (% registros válidos)
-- **Silver → Gold**: Transformation Time (latencia)
+- **Bronze → Silver**: Data Quality Rate (% valid records)
+- **Silver → Gold**: Transformation Time (latency)
 - **Gold**: Query Performance (tiempo promedio de BI queries)

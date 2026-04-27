@@ -3,21 +3,21 @@
 ## 🎯 Conceptos Clave
 
 ### Schema Evolution
-Delta Lake permite evolucionar el schema de una tabla sin romper pipelines existentes:
-- **Add columns**: Agregar nuevas columnas
-- **Remove columns**: Eliminar columnas (lectura ignora columnas inexistentes)
+Delta Lake permite evolucionar el schema de una table sin romper pipelines existentes:
+- **Add columns**: Agregar nuevas columns
+- **Remove columns**: Eliminar columns (lectura ignora columns inexistentes)
 - **Change types**: Cambiar tipos de datos (requiere overwriteSchema)
 - **Rename columns**: Renombrar (complejo, requiere mapping)
 
 ### Opciones Importantes
-- `mergeSchema=true`: Merge automático de schemas al escribir
+- `mergeSchema=true`: Automatic merge of schemas when writing
 - `overwriteSchema=true`: Permite cambios incompatibles (cambio de tipos, orden)
 
 ---
 
 ## 📝 schema_evolution.py
 
-### 1. Crear tabla inicial
+### 1. Crear table inicial
 ```python
 df = spark.read.json("../../../data/raw/transactions.json").limit(1000)
 df.write.format("delta").mode("overwrite").save(path)
@@ -26,7 +26,7 @@ df.write.format("delta").mode("overwrite").save(path)
 spark.read.format("delta").load(path).printSchema()
 ```
 
-### 2. Agregar columna con mergeSchema
+### 2. Agregar column con mergeSchema
 ```python
 # Opción A: Agregar columna calculada
 df_with_segment = df.withColumn(
@@ -62,7 +62,7 @@ df_with_segment.write.format("delta") \
     .save(path)
 ```
 
-### 3. Cambiar tipo de columna
+### 3. Cambiar tipo de column
 ```python
 from pyspark.sql.types import DecimalType, StringType, TimestampType
 
@@ -96,10 +96,10 @@ df_retyped.write.format("delta") \
 
 **⚠️ Importante:**
 - Cambios de tipo requieren `overwriteSchema=true`
-- Algunos cambios pueden causar pérdida de datos (ej: String → Int)
-- Verificar siempre después del cambio
+- Some changes may cause data loss (ex: String → Int)
+- Always check after change
 
-### 4. Eliminar columnas (Projection)
+### 4. Eliminar columns (Projection)
 ```python
 # Delta Lake no tiene "drop column" físico
 # En su lugar, proyecta solo las columnas deseadas
@@ -146,15 +146,15 @@ details.select("name", "location", "numFiles", "sizeInBytes").show(truncate=Fals
 ```
 AnalysisException: A schema mismatch detected when writing to the Delta table
 ```
-**Solución:** Agregar `.option("mergeSchema", "true")`
+**Solution:** Add`.option("mergeSchema", "true")`
 
 ### Error 2: Cambio de tipo sin overwriteSchema
 ```
 AnalysisException: Cannot change data type: amount
 ```
-**Solución:** Agregar `.option("overwriteSchema", "true")`
+**Solution:** Add`.option("overwriteSchema", "true")`
 
-### Error 3: Incompatibilidad en orden de columnas
+### Error 3: Incompatibilidad en orden de columns
 ```python
 # ❌ MAL - diferentes órdenes
 df1 = spark.createDataFrame([(1, "a")], ["id", "name"])
@@ -167,7 +167,7 @@ df2.write.format("delta").mode("append").save(path)  # Error!
 df2.write.format("delta").mode("append").option("mergeSchema", "true").save(path)
 ```
 
-### Error 4: Pérdida de datos en cast
+### Error 4: Data loss in cast
 ```python
 # ⚠️ PRECAUCIÓN
 df.withColumn("text_field", col("text_field").cast("int"))  # Nulls si no es numérico
@@ -180,7 +180,7 @@ df.filter(col("text_field").cast("int").isNotNull())
 
 ## 📚 Patterns Avanzados
 
-### Pattern 1: Agregar múltiples columnas
+### Pattern 1: Add multiple columns
 ```python
 df_enhanced = df \
     .withColumn("created_date", current_date()) \
@@ -308,11 +308,11 @@ print(f"Schema fingerprint: {fingerprint}")
 
 ## ✅ Checklist de Completitud
 
-- [ ] Tabla inicial creada con schema base
-- [ ] Columna `customer_segment` agregada correctamente
+- [ ] table inicial creada con schema base
+- [ ] column `customer_segment` agregada correctamente
 - [ ] Tipo de `amount` cambiado a Decimal(10,2)
 - [ ] Schema final muestra todos los cambios
 - [ ] Historial muestra operaciones con mergeSchema/overwriteSchema
-- [ ] Código usa .option("mergeSchema", "true") apropiadamente
-- [ ] Código usa .option("overwriteSchema", "true") para cambios de tipo
+- [ ] Code uses .option("mergeSchema", "true") appropriately
+- [ ] Code uses .option("overwriteSchema", "true") for type changes
 - [ ] No hay errors de schema mismatch

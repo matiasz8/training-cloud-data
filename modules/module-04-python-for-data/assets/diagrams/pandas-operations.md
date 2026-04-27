@@ -1,6 +1,6 @@
 # 🐼 Pandas Operations - Operaciones Visualizadas
 
-## 📊 Anatomía de un DataFrame
+## 📊 Anatomy of a DataFrame
 
 ```mermaid
 flowchart LR
@@ -21,7 +21,7 @@ flowchart LR
     style E fill:#e8f5e9
 ```
 
-## 🎯 Selección de Datos
+## 🎯 Data Selection
 
 ### loc vs iloc
 
@@ -49,7 +49,7 @@ flowchart TD
     style K fill:#f3e5f5
 ```
 
-## 🔄 Pipeline de Transformación
+## 🔄 Transformation pipeline
 
 ```mermaid
 flowchart LR
@@ -196,7 +196,7 @@ flowchart LR
     style OUTPUT fill:#c8e6c9
 ```
 
-## 🧹 Pipeline de Limpieza
+## 🧹 pipeline de Limpieza
 
 ```mermaid
 flowchart TD
@@ -245,7 +245,7 @@ flowchart TD
     style G fill:#c8e6c9
 ```
 
-## 📈 Agregación Multi-Nivel
+## 📈 Multi-Level Aggregation
 
 ```mermaid
 flowchart TD
@@ -417,7 +417,7 @@ flowchart TD
     style I fill:#ffebee
 ```
 
-### ✅ Vectorizado (Rápido)
+### ✅ Vectorized (Fast)
 ```mermaid
 flowchart LR
     A[Operación<br/>Vectorizada] --> B[Todas las Filas]
@@ -430,7 +430,7 @@ flowchart LR
     style D fill:#c8e6c9
 ```
 
-## 🎯 Estrategia de Optimización
+## 🎯 Optimization Strategy
 
 ```mermaid
 flowchart TD
@@ -567,5 +567,5 @@ flowchart LR
 
 ---
 
-**Nota**: Estos diagramas se renderizan en GitHub, VS Code (con extensión), y Mermaid Live Editor.
+**Note**: These diagrams are rendered in GitHub, VS Code (with extension), and Mermaid Live Editor.
 

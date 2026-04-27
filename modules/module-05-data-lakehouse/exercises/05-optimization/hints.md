@@ -2,20 +2,20 @@
 
 ## 🎯 Conceptos Clave
 
-### Optimización en Delta Lake
-Delta Lake provee varias técnicas para optimizar performance:
-- **OPTIMIZE**: Compacta archivos pequeños (reduce small file problem)
+### Optimization in Delta Lake
+Delta Lake provides several techniques to optimize performance:
+- **OPTIMIZE**: Compact small files (reduce small file problem)
 - **Z-ORDERING**: Co-localiza datos relacionados (mejora data skipping)
 - **VACUUM**: Limpia archivos antiguos no referenciados
-- **Data Skipping**: Automático basado en statistics
+- **Data Skipping**: Automatic based on statistics
 
 ### Small File Problem
-Muchos archivos pequeños → Overhead en metadata → Queries lentos
-**Solución**: OPTIMIZE compacta archivos en archivos más grandes
+Many small files → Metadata overhead → Slow queries
+**Fix**: OPTIMIZE compacts files into larger files
 
 ### Z-Ordering
-Co-locates relacionados datos basado en múltiples columnas
-**Beneficio**: Reduce datos leídos en queries con múltiples filtros
+Co-locates related data based on multiple columns
+**Benefit**: Reduce data read in queries with multiple filters
 
 ---
 
@@ -44,7 +44,7 @@ detail.select(
 ).show(truncate=False)
 ```
 
-### 2. OPTIMIZE - Compactación
+### 2. OPTIMIZE - Compaction
 ```python
 # Compactar todos los archivos
 delta_table.optimize().executeCompaction()
@@ -59,14 +59,14 @@ delta_table.optimize() \
     .executeCompaction()
 ```
 
-**Cómo funciona:**
-- Lee archivos pequeños de la misma partición
-- Los combina en archivos más grandes (target: 1GB)
-- Crea nueva versión (old files removibles con VACUUM)
+**How ​​it works:**
+- Read small files from the same partition
+- Combines them into larger files (target: 1GB)
+- Create new version (old files removable with VACUUM)
 
-**Cuándo usar:**
-- Después de muchos appends pequeños
-- Después de streaming con micro-batches
+**When to use:**
+- After many small appends
+- After streaming with micro-batches
 - Antes de queries heavy de analytics
 
 ### 3. Z-ORDER
@@ -83,11 +83,11 @@ delta_table.optimize() \
     .executeZOrderBy("country", "product_id")
 ```
 
-**Cuándo usar Z-ORDER:**
-- Columnas usadas frecuentemente en WHERE
-- Columnas con alta cardinalidad
-- Múltiples columnas de filtro en queries
-- NO en columnas ya particionadas (redundante)
+**When to use Z-ORDER:**
+- columns usadas frecuentemente en WHERE
+- columns con alta cardinalidad
+- Multiple filter columns in queries
+- NO en columns ya particionadas (redundante)
 
 **Ejemplo:**
 ```python
@@ -171,10 +171,10 @@ delta_table.vacuum(0)  # Borra TODO no referenciado en versión actual
 spark.conf.set("spark.databricks.delta.retentionDurationCheck.enabled", "true")
 ```
 
-**⚠️ PRECAUCIÓN con VACUUM:**
-- Elimina archivos físicos → NO puedes hacer Time Travel a versiones vacuumed
+**⚠️ CAUTION with VACUUM:**
+- Delete physical files → You CANNOT Time Travel vacuumed versions
 - Puede romper operaciones concurrentes (usa retention adecuado)
-- En producción: NUNCA uses vacuum(0), usa 168+ horas
+- In production: NEVER use vacuum(0), use 168+ hours
 
 **Ejemplo seguro:**
 ```python
@@ -196,12 +196,12 @@ spark.conf.set(
 ```
 AnalysisException: Are you sure you want to vacuum files with such a low retention period?
 ```
-**Solución:** Deshabilitar check (solo para testing):
+**Solution:** Disable check (for testing only):
 ```python
 spark.conf.set("spark.databricks.delta.retentionDurationCheck.enabled", "false")
 ```
 
-### Error 2: Z-ORDER en columna particionada
+### Error 2: Z-ORDER en column particionada
 ```python
 # ❌ MAL - date ya es partition column
 delta_table.optimize().executeZOrderBy("date")
@@ -214,7 +214,7 @@ delta_table.optimize().executeZOrderBy("country", "customer_id")
 ```
 OutOfMemory: Not enough memory to execute compaction
 ```
-**Solución:** Optimizar por partición:
+**Solution:** Optimize by partition:
 ```python
 # En lugar de
 delta_table.optimize().executeCompaction()
@@ -319,7 +319,7 @@ df.filter("customer_id = '12345'")  # Muy rápido
 
 ## 📊 Monitoring y Metrics
 
-### Ver métricas de OPTIMIZE
+### View OPTIMIZE metrics
 ```python
 result = delta_table.optimize().executeCompaction()
 
@@ -331,7 +331,7 @@ print(f"Bytes added: {metrics.get('numBytesAdded', 0)}")
 print(f"Bytes removed: {metrics.get('numBytesRemoved', 0)}")
 ```
 
-### Ver métricas de Z-ORDER
+### View Z-ORDER metrics
 ```python
 result = delta_table.optimize().executeZOrderBy("country", "date")
 metrics = result.metrics
@@ -358,10 +358,10 @@ result = df.filter("country = 'USA'").count()
 ## ✅ Checklist de Completitud
 
 - [ ] Estado inicial muestra numFiles y sizeInBytes
-- [ ] OPTIMIZE reduce número de archivos
-- [ ] Z-ORDER se aplica correctamente a columnas apropiadas
-- [ ] Estado después de optimización muestra mejoras
+- [ ] OPTIMIZE reduces number of files
+- [ ] Z-ORDER se aplica correctamente a columns apropiadas
+- [ ] Status after optimization shows improvements
 - [ ] Test de performance muestra speedup
 - [ ] VACUUM ejecuta sin errores
-- [ ] Código maneja retentionDurationCheck apropiadamente
+- [ ] Code handles retentionDurationCheck appropriately
 - [ ] No hay errors de memoria en OPTIMIZE

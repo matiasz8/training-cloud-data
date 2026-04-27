@@ -1,8 +1,8 @@
 # Infraestructura - Data Lakehouse
 
-## 📋 Descripción
+## 📋 Description
 
-Este directorio contiene la configuración completa de infraestructura Docker para el módulo de Data Lakehouse. Incluye todos los servicios necesarios para trabajar con Delta Lake, Apache Iceberg y Apache Spark.
+This directory contains the complete Docker infrastructure configuration for the Data Lakehouse module. It includes all the services necessary to work with Delta Lake, Apache Iceberg and Apache Spark.
 
 ## 🏗️ Arquitectura
 
@@ -24,7 +24,7 @@ Este directorio contiene la configuración completa de infraestructura Docker pa
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🐳 Servicios
+## 🐳 services
 
 ### 1. **MinIO** (S3-Compatible Storage)
 - **Puerto API**: 9000
@@ -43,27 +43,27 @@ Este directorio contiene la configuración completa de infraestructura Docker pa
 - **Master UI**: 8080
 - **Worker UI**: 8081
 - **Master URL**: spark://spark-master:7077
-- **Configuración**:
+- **Configuration**:
   - Spark 3.5.0
   - Delta Lake 3.0.0
   - Apache Iceberg 1.4.3
-  - Integración con S3/MinIO
+  - Integration with S3/MinIO
   - Hive Metastore
 
 ### 3. **Hive Metastore**
 - **Puerto**: 9083
 - **Backend**: PostgreSQL
-- **Propósito**: Metadata catalog para Delta Lake e Iceberg
+- **Purpose**: Metadata catalog for Delta Lake and Iceberg
 
 ### 4. **PostgreSQL**
 - **Puerto**: 5432
 - **Database**: metastore
 - **Usuario**: hive/hive
-- **Propósito**: Backend para Hive Metastore
+- **Purpose**: Backend for Hive Metastore
 
 ### 5. **Jupyter Lab**
 - **Puerto**: 8888
-- **Sin autenticación** (desarrollo local)
+- **No authentication** (local development)
 - **Pre-instalado**:
   - PySpark
   - Delta Lake
@@ -76,7 +76,7 @@ Este directorio contiene la configuración completa de infraestructura Docker pa
 
 - Docker Engine 20.10+
 - Docker Compose 2.0+
-- 8GB RAM mínimo (16GB recomendado)
+- 8GB RAM minimum (16GB recommended)
 - 10GB espacio en disco
 
 ### Paso 1: Descargar JARs necesarios
@@ -93,7 +93,7 @@ Este script descarga:
 - Hadoop AWS connector
 - AWS SDK Bundle
 
-### Paso 2: Iniciar servicios
+### Paso 2: Iniciar services
 
 ```bash
 # Iniciar todos los servicios
@@ -106,7 +106,7 @@ docker-compose logs -f
 docker-compose ps
 ```
 
-### Paso 3: Verificar que todo está corriendo
+### Step 3: Verify that everything is running
 
 ```bash
 # Verificar Spark Master
@@ -149,11 +149,11 @@ infrastructure/
     └── download-jars.sh         # Descarga JARs necesarios
 ```
 
-## 🔧 Configuración
+## 🔧 Settings
 
 ### Variables de Entorno
 
-Copia `.env.example` a `.env` y ajusta según necesites:
+Copia `.env.example` a `.env`and adjust as needed:
 
 ```bash
 cp .env.example .env
@@ -161,12 +161,12 @@ cp .env.example .env
 
 Variables principales:
 - `MINIO_ROOT_USER/PASSWORD`: Credenciales MinIO
-- `SPARK_WORKER_CORES`: Núcleos por worker
+- `SPARK_WORKER_CORES`: Cores per worker
 - `SPARK_WORKER_MEMORY`: Memoria por worker
 - `SPARK_DRIVER_MEMORY`: Memoria del driver
 - `SPARK_EXECUTOR_MEMORY`: Memoria del executor
 
-### Escalar Workers
+### scale Workers
 
 ```bash
 # Escalar a 3 workers
@@ -175,7 +175,7 @@ docker-compose up -d --scale spark-worker=3
 # Verificar en Spark Master UI (http://localhost:8080)
 ```
 
-### Recursos Recomendados
+### resources Recomendados
 
 | Componente | CPU | RAM | Disco |
 |------------|-----|-----|-------|
@@ -187,7 +187,7 @@ docker-compose up -d --scale spark-worker=3
 | Jupyter Lab | 2 cores | 2GB | 2GB |
 | **Total** | **8+ cores** | **12+ GB** | **20+ GB** |
 
-## 📝 Uso Común
+## 📝 Common Use
 
 ### PySpark en Jupyter
 
@@ -285,7 +285,7 @@ docker-compose logs -f minio
 docker-compose logs -f jupyter
 ```
 
-### Reiniciar Servicios
+### Reiniciar services
 
 ```bash
 # Reiniciar servicio específico
@@ -308,7 +308,7 @@ docker-compose down -v
 docker-compose up -d
 ```
 
-### Actualizar Imágenes
+### Update Images
 
 ```bash
 # Descargar últimas versiones
@@ -320,7 +320,7 @@ docker-compose up -d --force-recreate
 
 ## 🐛 Troubleshooting
 
-### Problema: Servicios no inician
+### Problema: services no inician
 
 ```bash
 # Verificar recursos disponibles
@@ -367,7 +367,7 @@ lsof -i :9000
 # Cambiar puerto en docker-compose.yml o .env
 ```
 
-## 📚 Recursos Adicionales
+## 📚 resources Adicionales
 
 - [Spark Configuration](https://spark.apache.org/docs/latest/configuration.html)
 - [Delta Lake Quickstart](https://docs.delta.io/latest/quick-start.html)
@@ -376,12 +376,12 @@ lsof -i :9000
 
 ## ⚠️ Notas Importantes
 
-1. **Seguridad**: Esta configuración es para **desarrollo local** únicamente
-   - Autenticación deshabilitada en Jupyter
+1. **security**: This configuration is for **local development** only
+   - Authentication disabled in Jupyter
    - Credenciales por defecto en MinIO
    - Sin SSL/TLS
 
-2. **Recursos**: Ajusta según tu máquina
+2. **resources**: Adjust according to your machine
    - Reduce workers si tienes menos de 16GB RAM
    - Reduce memoria de executor/driver si es necesario
 
@@ -391,12 +391,12 @@ lsof -i :9000
    - `spark-warehouse`: Spark warehouse
    - Usar `docker-compose down -v` elimina TODO
 
-4. **Performance**: Para mejor rendimiento
+4. **Performance**: Para mejor performance
    - Aumenta `SPARK_WORKER_CORES` y `SPARK_WORKER_MEMORY`
    - Escala workers: `--scale spark-worker=3`
    - Usa SSD para Docker volumes
 
 ---
 
-**Última actualización**: Febrero 2026  
-**Versión**: 1.0.0
+**Last update**: February 2026
+**Version**: 1.0.0

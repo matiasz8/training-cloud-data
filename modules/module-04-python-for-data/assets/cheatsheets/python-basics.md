@@ -1,8 +1,8 @@
-# 🐍 Python Basics - Referencia Rápida
+# 🐍 Python Basics - Quick Reference
 
 ## 📋 Variables y Tipos de Datos
 
-### Declaración de Variables
+### Declaration of Variables
 ```python
 # Tipos básicos
 nombre = "Juan"                    # str
@@ -16,7 +16,7 @@ type(nombre)  # <class 'str'>
 isinstance(edad, int)  # True
 ```
 
-### Conversión de Tipos
+### Type Conversion
 ```python
 # String a número
 int("42")        # 42
@@ -158,7 +158,7 @@ persona.items()                # dict_items([('nombre', 'Ana'), ...])
 "nombre" in persona            # True
 ```
 
-### Sets (No ordenados, únicos)
+### Sets (Not ordered, unique)
 ```python
 # Creación
 numeros = {1, 2, 3, 4, 5}
@@ -254,7 +254,7 @@ while True:
 
 ## 🎯 Funciones
 
-### Definición Básica
+### Basic Definition
 ```python
 # Función simple
 def saludar():
@@ -277,7 +277,7 @@ def dividir(a, b):
 resultado, mensaje = dividir(10, 2)
 ```
 
-### Parámetros
+### Parameters
 
 ```python
 # Parámetros por defecto
@@ -300,7 +300,7 @@ def crear_persona(**datos):
 crear_persona(nombre="Ana", edad=25, ciudad="Madrid")
 ```
 
-### Lambda (Funciones Anónimas)
+### Lambda (Anonymous Functions)
 ```python
 # Sintaxis: lambda argumentos: expresión
 suma = lambda a, b: a + b
@@ -360,7 +360,7 @@ unicos = {x % 3 for x in range(10)}
 
 ## ⚠️ Errores Comunes
 
-### 1. Indentación Inconsistente
+### 1. Inconsistent Indentation
 ```python
 # ❌ Incorrecto
 def funcion():
@@ -403,15 +403,15 @@ def agregar_item(item, lista=None):
     return lista
 ```
 
-## 💡 Tips y Mejores Prácticas
+## 💡 Tips and Best Practices
 
 1. **Usa nombres descriptivos**: `edad_usuario` mejor que `e`
-2. **PEP 8**: 4 espacios para indentación, snake_case para variables
+2. **PEP 8**: 4 spaces for indentation, snake_case for variables
 3. **Docstrings**: Documenta funciones complejas
-4. **List comprehensions**: Más Pythonic que loops simples
+4. **List comprehensions**: More Pythonic than simple loops
 5. **f-strings**: Preferir sobre `.format()` o `%`
 6. **Usa `in`**: Para verificar pertenencia en colecciones
-7. **Evita modificar listas durante iteración**: Crea una copia
+7. **Avoid modifying lists during iteration**: Create a copy
 
 ---
 

@@ -1,35 +1,35 @@
-# Arquitectura Data Lakehouse: Patrones y Optimizaciones
+# Data Lakehouse Architecture: Patterns and Optimizations
 
-## 📚 Tabla de Contenidos
+## 📚 Table of Contents
 
-1. [Introducción](#introducción)
-2. [Arquitectura Medallion](#arquitectura-medallion)
-3. [Time Travel y Versionado](#time-travel-y-versionado)
+1. [Introduction](#introduction)
+2. [Medallion Architecture](#medallion-architecture)
+3. [Time Travel and Versioning](#time-travel-and-versioning)
 4. [Schema Evolution](#schema-evolution)
 5. [Partitioning Strategies](#partitioning-strategies)
-6. [Optimizaciones de Performance](#optimizaciones-de-performance)
-7. [Gestión del Ciclo de Vida de Datos](#gestión-del-ciclo-de-vida-de-datos)
-8. [Patrones de Ingesta](#patrones-de-ingesta)
+6. [Performance Optimizations](#performance-optimizations)
+7. [Data Lifecycle Management](#data-lifecycle-management)
+8. [Ingestion Patterns](#ingestion-patterns)
 
 ---
 
-## Introducción
+## Introduction
 
-La arquitectura de un Data Lakehouse no se trata solo de elegir un formato de tabla (Delta Lake, Iceberg). Se trata de **diseñar pipelines confiables, eficientes y escalables** que aprovechen las características únicas del lakehouse.
+The architecture of a Data Lakehouse is not just about choosing a table format (Delta Lake, Iceberg). It's about **designing reliable, efficient and scalable pipelines** that take advantage of the unique features of the lakehouse.
 
-En este documento exploraremos:
+In this document we will explore:
 
-- **Patrones de diseño** probados en producción
-- **Estrategias de optimización** para performance
-- **Best practices** de la industria
+- **Design patterns** tested in production
+- **Optimization strategies** for performance
+- **Industry best practices**
 
 ---
 
-## Arquitectura Medallion
+## Medallion Architecture
 
-### 🥉🥈🥇 ¿Qué es la Arquitectura Medallion?
+### 🥉🥈🥇 What is Medallion Architecture?
 
-La **arquitectura Medallion** es un patrón de diseño que organiza los datos en tres capas progresivamente refinadas:
+The Medallion architecture is a design pattern that organizes data into three progressively refined layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -48,16 +48,16 @@ La **arquitectura Medallion** es un patrón de diseño que organiza los datos en
 
 ### 🥉 Bronze Layer (Raw Data)
 
-**Propósito**: Preservar datos tal como llegan de las fuentes, sin pérdida de información.
+**Purpose**: Preserve data as it arrives from sources, without loss of information.
 
-**Características**:
+**features**:
 - ✅ **Append-only**: Solo se agregan datos, nunca se eliminan
 - ✅ **Immutable**: Datos originales nunca se modifican
 - ✅ **Full lineage**: Rastreo completo del origen
-- ✅ **Schema minimal**: Solo tipos básicos de datos
+- ✅ **Schema minimal**: Only basic data types
 - ✅ **Metadata**: timestamp de ingesta, source, filename
 
-**Ejemplo de implementación**:
+**Implementation example**:
 
 ```python
 from pyspark.sql import SparkSession
@@ -81,7 +81,7 @@ bronze_df.write \
     .save("s3://lakehouse/bronze/events/")
 ```
 
-**Schema Bronze típico**:
+**Typical Bronze Scheme**:
 
 ```
 events_bronze
@@ -97,28 +97,28 @@ events_bronze
 
 **Ventajas**:
 - 🔄 **Reprocessing**: Si hay bug, reprocesas desde Bronze
-- 📊 **Audit trail**: Sabes exactamente qué datos llegaron y cuándo
+- 📊 **Audit trail**: You know exactly what data arrived and when
 - 🔒 **Compliance**: Datos originales preservados
 - 🐛 **Debugging**: Puedes investigar issues en datos crudos
 
-**¿Qué NO hacer en Bronze?**:
+**What NOT to do in Bronze?**:
 - ❌ NO filtrar datos (incluso si parecen malos)
 - ❌ NO transformar tipos de datos agresivamente
-- ❌ NO descartar columnas
-- ❌ NO hacer joins con otras tablas
+- ❌ NO descartar columns
+- ❌ NO hacer joins con otras tables
 
 ### 🥈 Silver Layer (Refined Data)
 
-**Propósito**: Datos limpios, validados y listos para analytics.
+**Purpose**: Clean, validated and analytics-ready data.
 
-**Características**:
+**features**:
 - ✅ **Cleaned**: Nulls manejados, formatos correctos
 - ✅ **Validated**: Business rules aplicadas
 - ✅ **Deduplicated**: Sin registros duplicados
 - ✅ **Strongly typed**: Tipos de datos correctos
 - ✅ **Enriched**: Puede incluir joins con dimensions
 
-**Ejemplo de implementación**:
+**Implementation example**:
 
 ```python
 from pyspark.sql.functions import col, to_timestamp, when, regexp_replace
@@ -157,7 +157,7 @@ silver_df.write \
     .save("s3://lakehouse/silver/events/")
 ```
 
-**Schema Silver típico**:
+**Typical Silver Schema**:
 
 ```
 events_silver
@@ -208,23 +208,23 @@ df.withColumn("email", lower(trim(col("email"))))
 df.withColumn("phone", regexp_replace(col("phone"), "[^0-9]", ""))
 ```
 
-**¿Qué NO hacer en Silver?**:
+**What NOT to do in Silver?**:
 - ❌ NO agregar (SUM, AVG, etc.) - eso es Gold
-- ❌ NO crear métricas de negocio complejas
-- ❌ NO hacer joins pesados (solo enrichment básico)
+- ❌ DO NOT create complex business metrics
+- ❌ DO NOT do heavy joins (only basic enrichment)
 
 ### 🥇 Gold Layer (Business-Level Aggregates)
 
-**Propósito**: Datos optimizados para consumo en BI, dashboards y ML.
+**Purpose**: Data optimized for consumption in BI, dashboards and ML.
 
-**Características**:
+**features**:
 - ✅ **Aggregated**: SUMs, AVGs, COUNTs por dimensiones
-- ✅ **Denormalized**: Optimizado para queries específicos
+- ✅ **Denormalized**: Optimized for specific queries
 - ✅ **Business metrics**: KPIs, ratios, conversions
 - ✅ **Dimensional models**: Star schema, fact/dimension tables
 - ✅ **ML features**: Feature engineering aplicado
 
-**Ejemplo de implementación**:
+**Implementation example**:
 
 ```python
 from pyspark.sql.functions import sum, avg, count, countDistinct, round
@@ -249,7 +249,7 @@ gold_df.write \
     .save("s3://lakehouse/gold/daily_events_summary/")
 ```
 
-**Ejemplos de tablas Gold**:
+**Ejemplos de tables Gold**:
 
 1. **Daily Sales Summary** (BI):
 ```python
@@ -362,16 +362,16 @@ medallion_pipeline()
 
 ## Time Travel y Versionado
 
-### ¿Qué es Time Travel?
+### What is Time Travel?
 
-**Time Travel** es la capacidad de acceder a **versiones históricas** de una tabla. Cada escritura crea una nueva versión.
+**Time Travel** is the ability to access **historical versions** of a table. Each write creates a new version.
 
 ```
 Version 0 ───→ Version 1 ───→ Version 2 ───→ Version 3 (current)
 2024-02-01    2024-02-05     2024-02-10     2024-02-12
 ```
 
-### Cómo Funciona en Delta Lake
+### How It Works at Delta Lake
 
 Delta Lake mantiene un **transaction log** que registra cada cambio:
 
@@ -385,9 +385,9 @@ s3://bucket/table/_delta_log/
 
 Cada archivo JSON contiene:
 - Archivos agregados/removidos
-- Metadata de la operación
+- Operation metadata
 - Timestamp
-- Métricas (rows, bytes)
+- Metrics (rows, bytes)
 
 ### Queries con Time Travel
 
@@ -409,7 +409,7 @@ df = spark.read \
     .load("s3://lakehouse/silver/events/")
 ```
 
-#### 2. Query por Versión
+#### 2. Query by Version
 
 ```python
 # Leer versión específica
@@ -441,7 +441,7 @@ history_df.select("version", "timestamp", "operation", "operationMetrics").show(
 # +-------+-------------------+---------+---------------------------+
 ```
 
-### Rollback a Versión Anterior
+### Rollback to Previous Version
 
 ```python
 # Opción 1: Restore a versión específica
@@ -454,7 +454,7 @@ deltaTable.restoreToVersion(5)  # Volver a versión 5
 deltaTable.restoreToTimestamp("2024-02-10 10:00:00")
 ```
 
-**⚠️ Cuidado**: Restore crea una nueva versión, no elimina las posteriores.
+**⚠️ Caution**: Restore creates a new version, it does not delete subsequent ones.
 
 ```
 Versiones: 0 → 1 → 2 → 3 → 4 → 5 → 6 (current)
@@ -464,7 +464,7 @@ Versiones: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 (copia de 3)
 
 ### Casos de Uso de Time Travel
 
-#### 1. Auditoría y Compliance
+#### 1. Audit and Compliance
 
 ```python
 # Recrear estado exacto de datos para auditoría
@@ -479,7 +479,7 @@ df_audit.write \
     .save("s3://audit-reports/2024-01-15/financial_summary/")
 ```
 
-#### 2. Rollback después de Error
+#### 2. Rollback after Error
 
 ```python
 # Detectaste que el pipeline de ayer tenía un bug
@@ -537,16 +537,16 @@ last_week_stats = last_week_data.describe()
 
 ## Schema Evolution
 
-### ¿Qué es Schema Evolution?
+### What is Schema Evolution?
 
-**Schema Evolution** es la capacidad de **modificar el schema** de una tabla sin:
+**Schema Evolution** es la capacidad de **modificar el schema** de una table sin:
 - Reescribir todos los datos
 - Romper pipelines existentes
 - Downtime
 
 ### Tipos de Schema Evolution
 
-#### 1. Add Column (Más Común)
+#### 1. Add Column (Most Common)
 
 ```python
 # Schema actual:
@@ -602,9 +602,9 @@ deltaTable.alterColumn("user_id", "LONG")  # Si era INT
 ```
 
 Para narrowing, necesitas:
-1. Agregar nueva columna con tipo deseado
+1. Agregar nueva column con tipo deseado
 2. Copiar y transformar datos
-3. Eliminar columna anterior
+3. Eliminar column anterior
 
 #### 3. Rename Column
 
@@ -636,7 +636,7 @@ df_without_col.write \
 
 ### Schema Enforcement
 
-Delta Lake valida automáticamente que nuevos datos coincidan con el schema:
+Delta Lake automatically validates that new data matches the schema:
 
 ```python
 # Schema actual: user_id (string), name (string), age (int)
@@ -655,9 +655,9 @@ except Exception as e:
 
 ### Manejo de Breaking Changes
 
-¿Qué hacer cuando necesitas un cambio incompatible?
+What to do when you need an incompatible change?
 
-**Estrategia 1: Dual Write (Transición gradual)**
+**Strategy 1: Dual Write (Gradual Transition)**
 
 ```python
 # Paso 1: Crear nueva tabla con nuevo schema
@@ -698,14 +698,14 @@ s3://lakehouse/silver/events_v3/
 
 ## Partitioning Strategies
 
-### ¿Por qué Particionar?
+### Why Partition?
 
-El particionamiento divide físicamente los datos para:
+Partitioning physically divides data to:
 - ✅ **Mejor performance**: Solo leer particiones necesarias
-- ✅ **Mejor organización**: Datos agrupados lógicamente
-- ✅ **Mejor mantenimiento**: Eliminar particiones antiguas fácilmente
+- ✅ **Better organization**: Data logically grouped
+- ✅ **Better maintenance**: Delete old partitions easily
 
-### Partitioning por Fecha (Más Común)
+### Partitioning by Date (Most Common)
 
 ```python
 # Particionar por año/mes/día
@@ -739,7 +739,7 @@ df = spark.read \
 # Pruning: Evita escanear 365 días completos
 ```
 
-### Partitioning por Categoría
+### Category Partitioning
 
 ```python
 # Particionar por columna categórica
@@ -757,7 +757,7 @@ s3://lakehouse/silver/sales/
 └── country=UK/
 ```
 
-**Cuidado**: No particionar por columnas con alta cardinalidad
+**Cuidado**: No particionar por columns con alta cardinalidad
 
 ❌ **Malo** (demasiadas particiones):
 ```python
@@ -775,9 +775,9 @@ df.partitionBy("country")  # ✅ 200 directorios manejables
 
 1. **Cardinalidad**: 100-10,000 particiones ideal
    - Menos de 100: Poco beneficio
-   - Más de 10,000: Overhead de metadata
+   - More than 10,000: Metadata Overhead
 
-2. **Tamaño de partición**: 1GB por partición ideal
+2. **Partition size**: 1GB per partition ideal
    ```python
    # Muy pequeño ❌
    # 10,000 partitions × 10MB = 100GB total
@@ -787,7 +787,7 @@ df.partitionBy("country")  # ✅ 200 directorios manejables
    # 100 partitions × 1GB = 100GB total
    ```
 
-3. **Query patterns**: Particionar por columnas filtradas frecuentemente
+3. **Query patterns**: Particionar por columns filtradas frecuentemente
    ```python
    # Si queries siempre filtran por fecha y región
    SELECT * FROM events WHERE date = '2024-02-12' AND region = 'US'
@@ -796,13 +796,13 @@ df.partitionBy("country")  # ✅ 200 directorios manejables
    df.partitionBy("date", "region")
    ```
 
-4. **Evolución**: No puedes cambiar particionamiento sin reescribir
+4. **Evolution**: You cannot change partitioning without rewriting
    - Delta Lake: NO soporta partition evolution
-   - Iceberg: SÍ soporta partition evolution
+   - Iceberg: YES supports partition evolution
 
 ### Partition Pruning
 
-Spark automáticamente **elimina particiones** que no cumplen filtros:
+Spark automatically **removes partitions** that do not match filters:
 
 ```python
 # Tabla particionada por date
@@ -816,7 +816,7 @@ result = df.filter(col("date") == "2024-02-12")
 # ✅ No escanea otras 364 fechas
 ```
 
-**Ver pruning en acción**:
+**See pruning in action**:
 
 ```python
 # Explain plan para ver pruning
@@ -835,7 +835,7 @@ df.filter(col("date") == "2024-02-12").explain()
 
 ### 1. Z-Ordering
 
-**Z-ordering** coloca datos relacionados físicamente cercanos para mejorar **data skipping**.
+**Z-ordering** places related data physically close to improve **data skipping**.
 
 ```python
 from delta.tables import DeltaTable
@@ -846,7 +846,7 @@ deltaTable = DeltaTable.forPath(spark, "s3://lakehouse/silver/events/")
 deltaTable.optimize().executeZOrderBy("user_id", "event_type")
 ```
 
-**Cómo funciona**:
+**How ​​it works**:
 
 ```
 Sin Z-ordering:
@@ -860,14 +860,14 @@ File 2: [user=Y,type=view], [user=Z,type=view], [user=C,type=purchase]
 → Query "user=A" solo lee File 1 ✅
 ```
 
-**Cuándo usar**:
-- Columnas filtradas frecuentemente
+**When to use**:
+- columns filtradas frecuentemente
 - Alta cardinalidad (user_id, product_id)
 - NO usar para particiones (redundante)
 
 ### 2. Compaction
 
-Con el tiempo, tablas Delta acumulan muchos archivos pequeños:
+Over time, Delta tables accumulate many small files:
 
 ```
 s3://lakehouse/silver/events/date=2024-02-12/
@@ -878,9 +878,9 @@ s3://lakehouse/silver/events/date=2024-02-12/
 ├── part-01000.parquet (5MB)
 ```
 
-**Problema**: Leer 1000 archivos pequeños es **mucho más lento** que leer 10 archivos grandes.
+**Problem**: Reading 1000 small files is **much slower** than reading 10 large files.
 
-**Solución**: Compaction (combinar archivos)
+**Solution**: Compaction (combine files)
 
 ```python
 from delta.tables import DeltaTable
@@ -895,7 +895,7 @@ deltaTable.optimize().executeCompaction()
 # → combined-00001.parquet (1GB)
 ```
 
-**Configuración**:
+**Configuration**:
 
 ```python
 # Target file size (default: 1GB)
@@ -910,7 +910,7 @@ df.write \
 
 ### 3. Data Skipping
 
-Delta Lake mantiene **estadísticas** de cada archivo:
+Delta Lake maintains **statistics** for each file:
 
 ```json
 {
@@ -961,7 +961,7 @@ result2 = df.filter(col("event_type") == "view").count()   # Lee cache ⚡
 df.unpersist()
 ```
 
-**Cache automático con OPTIMIZE**:
+**Automatic cache with OPTIMIZE**:
 
 ```python
 # OPTIMIZE + CACHE juntos
@@ -975,7 +975,7 @@ spark.read.format("delta").load("s3://lakehouse/gold/daily_summary/").cache()
 
 ---
 
-## Gestión del Ciclo de Vida de Datos
+## Data Lifecycle Management
 
 ### Vacuum: Eliminar Archivos Antiguos
 
@@ -995,7 +995,7 @@ deltaTable.vacuum(retentionHours=168)  # 7 días × 24 horas
 # Deleted 1250 files (15.3 GB) from s3://lakehouse/silver/events/
 ```
 
-**⚠️ Importante**: No puedes hacer time travel más allá de retentionHours
+**⚠️ Important**: You cannot do time travel beyond retentionHours
 
 ```python
 # Después de vacuum(168):
@@ -1006,7 +1006,7 @@ df = spark.read \
 # ❌ Error: Files no longer exist
 ```
 
-**Safety check** (retención mínima 7 días):
+**Safety check** (minimum retention 7 days):
 
 ```python
 # Por defecto, no puedes vacuum con menos de 7 días
@@ -1019,7 +1019,7 @@ deltaTable.vacuum(0)  # Elimina TODO inmediatamente
 
 ### Retention Policies
 
-Implementar políticas de retención:
+Implement retention policies:
 
 ```python
 def apply_retention_policy(table_path, retention_days):
@@ -1054,7 +1054,7 @@ apply_retention_policy("s3://lakehouse/gold/summary/", retention_days=365)  # 1 
 
 ## Patrones de Ingesta
 
-### 1. Append-Only (Más Simple)
+### 1. Append-Only (Simpler)
 
 ```python
 # Cada día agrega nuevos datos
@@ -1066,7 +1066,7 @@ df_today.write \
     .save("s3://lakehouse/bronze/events/")
 ```
 
-**Pros**: Simple, rápido, no duplica  
+**Pros**: Simple, fast, does not duplicate
 **Cons**: No maneja updates/deletes
 
 ### 2. Upsert (MERGE)
@@ -1090,7 +1090,7 @@ deltaTable.alias("target").merge(
 ```
 
 **Pros**: Maneja updates y inserts  
-**Cons**: Más lento que append
+**Cons**: Slower than append
 
 ### 3. SCD Type 2 (Slowly Changing Dimensions)
 
@@ -1130,22 +1130,22 @@ new_data_with_metadata.write \
 ### Key Takeaways
 
 1. **Medallion Architecture**: Bronze (raw) → Silver (refined) → Gold (aggregated)
-2. **Time Travel**: Accede a versiones históricas para auditoría y reproducibilidad
+2. **Time Travel**: Access historical versions for auditing and reproducibility
 3. **Schema Evolution**: Modifica schemas sin downtime con `mergeSchema`
 4. **Partitioning**: Mejora performance con particiones de 1GB y cardinalidad moderada
 5. **Optimizaciones**: Z-ordering, compaction, data skipping, caching
 6. **Lifecycle**: VACUUM para liberar espacio, retention policies por capa
 7. **Ingesta**: Append (simple), MERGE (upserts), SCD Type 2 (historial)
 
-### Próximos Pasos
+### Next Steps
 
 Ahora que dominas la arquitectura y patrones, exploraremos:
 
-- **Recursos adicionales** ([03-resources.md](03-resources.md))
-- **Ejercicios prácticos** para implementar todo lo aprendido
+- **resources adicionales** ([03-resources.md](03-resources.md))
+- **Practical exercises** to implement everything learned
 
 ---
 
-**Última actualización**: Febrero 2026  
+**Last update**: February 2026
 **Tiempo de lectura**: ~60 minutos  
 **Nivel**: Avanzado

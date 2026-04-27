@@ -1,34 +1,34 @@
-# Arquitecturas y Patrones: Python para Ingeniería de Datos
+# Architectures and Patterns: Python for Data Engineering
 
-## Tabla de Contenidos
+## Table of Contents
 
-1. [Introducción](#introducción)
-2. [Arquitectura de Pipelines de Datos](#arquitectura-de-pipelines-de-datos)
-3. [Patrones de Diseño para Data Engineering](#patrones-de-diseño-para-data-engineering)
-4. [Arquitectura de Proyectos Python](#arquitectura-de-proyectos-python)
-5. [Virtual Environments y Gestión de Dependencias](#virtual-environments-y-gestión-de-dependencias)
+1. [Introduction](#introduction)
+2. [Data Pipeline Architecture](#data-pipeline-architecture)
+3. [Design Patterns for Data Engineering](#design-patterns-for-data-engineering)
+4. [Python Project Architecture](#python-project-architecture)
+5. [Virtual Environments and Dependency Management](#virtual-environments-and-dependency-management)
 6. [Testing Strategy](#testing-strategy)
-7. [CI/CD para Data Pipelines](#cicd-para-data-pipelines)
-8. [Observabilidad y Monitoring](#observabilidad-y-monitoring)
-9. [Escalabilidad y Performance](#escalabilidad-y-performance)
-10. [Security y Secrets Management](#security-y-secrets-management)
+7. [CI/CD for Data Pipelines](#cicd-for-data-pipelines)
+8. [Observability and Monitoring](#observability-and-monitoring)
+9. [Scalability and Performance](#scalability-and-performance)
+10. [Security and Secrets Management](#security-and-secrets-management)
 
 ---
 
-## Introducción
+## Introduction
 
-Una buena arquitectura es fundamental para construir pipelines de datos mantenibles, escalables y robustos. Este documento explora patrones arquitectónicos, mejores prácticas y estructuras de proyecto para ingeniería de datos con Python.
+Good architecture is essential to building maintainable, scalable and robust data pipelines. This document explores architectural patterns, best practices, and project structures for data engineering with Python.
 
-### Principios Arquitectónicos
+### Architectural Principles
 
-**SOLID en Data Engineering**:
-- **S**ingle Responsibility: Cada módulo/función tiene una responsabilidad
-- **O**pen/Closed: Abierto para extensión, cerrado para modificación
-- **L**iskov Substitution: Implementaciones intercambiables
-- **I**nterface Segregation: Interfaces específicas, no monolíticas
-- **D**ependency Inversion: Depender de abstracciones, no implementaciones
+**SOLID in Data Engineering**:
+- **S**ingle Responsibility: Each module/function has a responsibility
+- **O**pen/Closed: Open for extension, closed for modification
+- **L**iskov Substitution: Interchangeable implementations
+- **I**nterface Segregation: Specific, non-monolithic interfaces
+- **D**ependency Inversion: Depend on abstractions, not implementations
 
-**Principios Específicos de Data**:
+**Data Specific Principles**:
 - **Idempotencia**: Mismos inputs → mismos outputs siempre
 - **Atomicidad**: Operaciones completas o rollback completo
 - **Incrementalidad**: Procesar solo datos nuevos/modificados
@@ -125,7 +125,7 @@ class ELTPipeline:
             raise
 ```
 
-### Pipeline Pattern: Composición de Transformaciones
+### pipeline Pattern: Composition of Transformations
 
 ```python
 from typing import Callable, List, Any
@@ -266,7 +266,7 @@ class MicroBatchProcessor:
 
 ---
 
-## Patrones de Diseño para Data Engineering
+## Design Patterns for Data Engineering
 
 ### Factory Pattern
 
@@ -623,7 +623,7 @@ mi_data_pipeline/
     └── .gitkeep
 ```
 
-### Configuración con archivos YAML
+### Configuration with YAML files
 
 ```python
 # src/mi_pipeline/utils/config.py
@@ -695,7 +695,7 @@ batch_size = config.get('pipeline.batch_size', 500)
 
 ---
 
-## Virtual Environments y Gestión de Dependencias
+## Virtual Environments and Dependency Management
 
 ### venv (Built-in)
 
@@ -831,7 +831,7 @@ volumes:
 
 ## Testing Strategy
 
-### Pirámide de Testing
+### Testing Pyramid
 
 ```
         /\
@@ -1094,7 +1094,7 @@ logger.info(
 )
 ```
 
-### Métricas con decoradores
+### Metrics with decorators
 
 ```python
 import time
@@ -1139,7 +1139,7 @@ def procesar_datos(df):
 
 ---
 
-## Escalabilidad y Performance
+## scalability y Performance
 
 ### Procesamiento Paralelo
 
@@ -1226,20 +1226,20 @@ connection_string = f"postgresql://{db_credentials['username']}:{db_credentials[
 
 ## Resumen
 
-Este documento cubrió:
+This document covered:
 
 1. **Arquitecturas**: ETL vs ELT, batch vs streaming, pipeline patterns
 2. **Patrones**: Factory, Strategy, Builder, Repository
-3. **Estructura de Proyectos**: Organización modular y mantenible
+3. **Project Structure**: Modular and maintainable organization
 4. **Ambientes**: venv, Poetry, Docker
 5. **Testing**: Unit, integration, mocking
-6. **CI/CD**: GitHub Actions, automatización
-7. **Observabilidad**: Logging estructurado, métricas
-8. **Performance**: Paralelización, chunking
+6. **CI/CD**: GitHub Actions, automation
+7. **Observability**: Structured logging, metrics
+8. **Performance**: Parallelization, chunking
 9. **Security**: Secrets management
 
-Estos patrones y arquitecturas son fundamentales para construir pipelines de datos robustos y escalables.
+Estos patrones y arquitecturas son fundamentales para construir pipelines de datos robustos y scalables.
 
 ---
 
-**Próximo paso**: Lee [resources.md](./resources.md) para recursos adicionales de aprendizaje.
+**Next Step**: Read [resources.md](./resources.md) for additional learning resources.

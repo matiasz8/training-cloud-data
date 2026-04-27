@@ -1,16 +1,16 @@
-# Assets y Recursos
+# Assets y resources
 
-Recursos visuales y cheatsheets para referencia rápida.
+visual resources and cheatsheets for quick reference.
 
 ## 📂 Contenido
 
 - **delta-lake-cheatsheet.md**: Comandos Delta Lake
 - **medallion-architecture.md**: Diagrama Bronze→Silver→Gold
-- **time-travel-guide.md**: Guía de Time Travel
-- **optimization-checklist.md**: Checklist de optimización
-- **iceberg-comparison.md**: Tabla comparativa
+- **time-travel-guide.md**: Time Travel Guide
+- **optimization-checklist.md**: Optimization checklist
+- **iceberg-comparison.md**: table comparativa
 - **troubleshooting.md**: Problemas comunes
 
 ## 📖 Uso
 
-Estos recursos sirven como referencia rápida durante los ejercicios.
+These resources serve as a quick reference during the exercises.

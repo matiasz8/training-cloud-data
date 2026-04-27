@@ -1,6 +1,6 @@
 # 🔄 Data Flow - Flujos de Datos y Pipelines ETL
 
-## 📊 Pipeline ETL Completo
+## 📊 pipeline ETL Completo
 
 ```mermaid
 flowchart TD
@@ -31,7 +31,7 @@ flowchart TD
     style L fill:#fff3e0
 ```
 
-## 🎯 Pipeline del Módulo (Ejercicios 01-06)
+## 🎯 Module pipeline (Exercises 01-06)
 
 ```mermaid
 flowchart LR
@@ -124,7 +124,7 @@ flowchart TD
     style Z fill:#c8e6c9
 ```
 
-## 🔄 Pipeline de Transformación Detallado
+## 🔄 Detailed Transformation pipeline
 
 ### Extract → Transform → Load (ETL)
 
@@ -269,7 +269,7 @@ flowchart LR
     style J fill:#ffcdd2
 ```
 
-## 🔁 Pipeline con Error Handling
+## 🔁 pipeline con Error Handling
 
 ```mermaid
 flowchart TD
@@ -316,7 +316,7 @@ flowchart TD
     style G2 fill:#ffe0b2
 ```
 
-## 📈 Flujo de Agregación
+## 📈 Aggregation Flow
 
 ```mermaid
 flowchart TD
@@ -355,9 +355,9 @@ flowchart TD
     style Q fill:#c8e6c9
 ```
 
-## 💡 Mejores Prácticas
+## 💡 Best Practices
 
-### 1. Separación de Responsabilidades
+### 1. Separation of Responsibilities
 ```python
 def extract(source):
     """Solo extracción"""
@@ -414,7 +414,7 @@ def process_data(df):
     return df
 ```
 
-### 4. Validación en Cada Paso
+### 4. Validation at Every Step
 ```python
 def validate_and_transform(df):
     # Validar antes

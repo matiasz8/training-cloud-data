@@ -1,12 +1,12 @@
-# Módulo 04: Python para Ingeniería de Datos - Seguimiento de Progreso
+# Module 04: Python for Data Engineering - Progress Tracking
 
-## Información del Módulo
+## Module Information
 
-**Módulo**: 04 - Python para Ingeniería de Datos  
+**Module**: 04 - Python for Data Engineering
 **Estado**: ✅ Completado (100%)  
 **Iniciado**: Febrero 2, 2026  
 **Finalizado**: Febrero 10, 2026  
-**Fase Actual**: 🎉 Módulo Completo  
+**Current Phase**: 🎉 Complete Module
 **Tiempo Estimado**: 14-16 horas de contenido
 
 ---
@@ -26,25 +26,25 @@
 ### ✅ Paso 1/8: Estructura Base
 **Estado**: ✅ Completo  
 **Archivos**: 4/4 creados
-- [x] README.md - Descripción general del módulo
+- [x] README.md - Module Overview
 - [x] requirements.txt - Dependencias Python
-- [x] .gitignore - Patrones de exclusión
+- [x].gitignore - Exclusion Patterns
 - [x] STATUS.md - Este archivo
 
 **Contenido Creado**:
-- README.md (3,500+ palabras) en español
+- README.md (3,500+ words) in Spanish
 - requirements.txt (60+ dependencias organizadas)
 - .gitignore (200+ patrones)
 - STATUS.md con seguimiento detallado
 
 ---
 
-### 📚 Paso 2/8: Teoría
+### 📚 Step 2/8: Theory
 **Estado**: ✅ Completo  
 **Archivos Creados**: 3/3
 - [x] theory/concepts.md - Fundamentos de Python para datos (14,500 palabras)
 - [x] theory/architecture.md - Patrones y arquitecturas (10,000 palabras)
-- [x] theory/resources.md - Recursos de aprendizaje (9,000 palabras)
+- [x] theory/resources.md - resources de aprendizaje (9,000 palabras)
 
 **Contenido Implementado**:
 - ✅ Sintaxis y fundamentos de Python
@@ -52,15 +52,15 @@
 - ✅ Control de flujo y funciones
 - ✅ Manejo de archivos (CSV, JSON, Parquet)
 - ✅ Pandas y NumPy fundamentals
-- ✅ Data quality y validación
+- ✅ Data quality and validation
 - ✅ Error handling y logging
-- ✅ Best practices y código pythonic
+- ✅ Best practices and pythonic code
 - ✅ Arquitecturas de pipelines (ETL vs ELT)
-- ✅ Patrones de diseño (Factory, Strategy, Builder, Repository)
+- ✅ Design patterns (Factory, Strategy, Builder, Repository)
 - ✅ Testing strategy (unit, integration)
 - ✅ CI/CD y observabilidad
 - ✅ Virtual environments y dependencias
-- ✅ 200+ recursos externos curados
+- ✅ 200+ resources externos curados
 - ✅ Roadmaps de aprendizaje por nivel
 
 ---
@@ -68,21 +68,21 @@
 ### 🐳 Paso 3/8: Infraestructura
 **Estado**: ✅ Completo  
 **Archivos Creados**: 6/6
-- [x] infrastructure/docker-compose.yml - Orquestación completa
+- [x] infrastructure/docker-compose.yml - orchestration completa
 - [x] infrastructure/Dockerfile - Imagen personalizada
 - [x] infrastructure/.env.example - Variables de entorno
-- [x] infrastructure/jupyter_config.py - Configuración Jupyter Lab
-- [x] infrastructure/README.md - Guía completa de setup
+- [x] infrastructure/jupyter_config.py - Jupyter Lab Configuration
+- [x] infrastructure/README.md - Complete setup guide
 - [x] infrastructure/notebooks/ - Directorio para notebooks
 
 **Contenido Implementado**:
 - ✅ Docker Compose con Jupyter Lab, PostgreSQL, MinIO
 - ✅ Dockerfile con Python 3.11 y 60+ dependencias
-- ✅ Configuración avanzada de Jupyter Lab
-- ✅ Volúmenes para notebooks, data, exercises
+- ✅ Advanced Jupyter Lab settings
+- ✅ Volumes for notebooks, data, exercises
 - ✅ Health checks y auto-restart
 - ✅ Template de variables de entorno
-- ✅ README con setup, troubleshooting y mejores prácticas (650 líneas)
+- ✅ README with setup, troubleshooting and best practices (650 lines)
 
 ---
 
@@ -99,15 +99,15 @@
 - [x] data/schemas/products_schema.json
 - [x] data/schemas/transactions_schema.json
 - [x] data/schemas/user_activity_schema.json
-- [x] data/README.md (documentación completa)
-- [x] data/generate_all_datasets.py (scripts de generación)
+- [x] data/README.md (full documentation)
+- [x] data/generate_all_datasets.py (generation scripts)
 
 **Contenido Implementado**:
-- ✅ 180,000 registros totales en múltiples formatos
+- ✅ 180,000 total records in multiple formats
 - ✅ Datos sucios intencionalmente (duplicados, nulls, inconsistencias)
-- ✅ Estructuras nested (JSON) para práctica de flatten
-- ✅ Múltiples formatos: CSV, JSON, (Parquet via conversion)
-- ✅ 5 schemas JSON con documentación detallada
+- ✅ Nested structures (JSON) for flattening practice
+- ✅ Multiple formats: CSV, JSON, (Parquet via conversion)
+- ✅ 5 JSON schemas with detailed documentation
 - ✅ README.md con data dictionary completo
 - ✅ Problemas de calidad documentados (duplicados ~2%, nulls ~5-10%)
 - ✅ Relaciones entre datasets (foreign keys, orphans ~5%)
@@ -122,7 +122,7 @@
 **Ejercicios Implementados**:
 
 **01-python-basics/** (⭐☆☆☆☆, 1-2h, 15 tests)
-- [x] README.md - Teoría fundamentos Python
+- [x] README.md - Python fundamentals theory
 - [x] starter/basics.py - 10 funciones con TODOs
 - [x] solution/basics.py - Soluciones completas
 - [x] tests/test_basics.py - 15 tests unitarios
@@ -147,10 +147,10 @@
 - [x] tests/test_pandas.py - 25 tests con datasets
 
 **05-data-transformation/** (⭐⭐⭐⭐☆, 3-4h, 22 tests)
-- [x] README.md - ETL, flatten, joins, validación
-- [x] starter/transformation.py - Pipeline components
+- [x] README.md - ETL, flatten, joins, validation
+- [x] starter/transformation.py - pipeline components
 - [x] solution/transformation.py - ETL completo
-- [x] tests/test_transformation.py - 22 tests integración
+- [x] tests/test_transformation.py - 22 integration tests
 
 **06-error-handling/** (⭐⭐⭐⭐☆, 2-3h, 20 tests)
 - [x] README.md - Logging, excepciones, retry, production
@@ -159,18 +159,18 @@
 - [x] tests/test_error_handling.py - 20 tests error scenarios
 
 **Contenido Implementado**:
-- ✅ 6 ejercicios completos con progresión de dificultad
+- ✅ 6 complete exercises with difficulty progression
 - ✅ 120 tests unitarios totales
 - ✅ 60 funciones (starter + solution)
-- ✅ Type hints y docstrings en todo el código
-- ✅ Ejemplos prácticos con datasets reales
+- ✅ Type hints and docstrings throughout the code
+- ✅ Practical examples with real datasets
 - ✅ Patrones production-ready (logging, error handling, retry)
-- ✅ README teórico en español para cada ejercicio
-- ✅ Progresión: Python basics → DataFrames → ETL → Production code
+- ✅ Theoretical README in Spanish for each exercise
+- ✅ Progression: Python basics → DataFrames → ETL → Production code
 
 ---
 
-### 🧪 Paso 6/8: Validación
+### 🧪 Step 6/8: Validation
 **Estado**: ⏳ Pendiente  
 **Archivos Objetivo**: 6-8
 ├── starter/transformation.py
@@ -217,18 +217,18 @@
 
 ---
 
-### 📋 Paso 7/8: Assets y Recursos
+### 📋 Paso 7/8: Assets y resources
 **Estado**: ✅ Completo  
 **Archivos Creados**: 7/7
 - [x] assets/README.md - Guía completa de uso de assets
 - [x] assets/cheatsheets/python-basics.md - Fundamentos de Python
 - [x] assets/cheatsheets/pandas-reference.md - Operaciones esenciales de Pandas
-- [x] assets/cheatsheets/data-cleaning.md - Pipeline completo de limpieza
+- [x] assets/cheatsheets/data-cleaning.md - pipeline completo de limpieza
 - [x] assets/cheatsheets/file-formats.md - Guía comparativa de formatos
 - [x] assets/diagrams/data-flow.md - 8 diagramas Mermaid de flujos ETL
 - [x] assets/diagrams/pandas-operations.md - 12 diagramas visuales de operaciones
 
-**Recursos Visuales Implementados**:
+**resources Visuales Implementados**:
 - 📝 **4 Cheatsheets completos** en español (Python, Pandas, Limpieza, Formatos)
 - 📊 **20 Diagramas Mermaid** (flujos ETL, pipelines, joins, groupby, optimización)
 - 🎯 **Guías prácticas** de cuándo usar cada herramienta/formato
@@ -259,7 +259,7 @@
 - 📚 **python-guide.md**: 10 secciones de mejores prácticas + ejemplos
 - ⚡ Comandos listos para copiar/pegar
 - 🎯 Casos de uso reales
-- 💡 Tips de performance y seguridad
+- 💡 Tips de performance y security
 
 ---
 
@@ -344,7 +344,7 @@ El Módulo 04 está listo para uso en producción con:
 - 📖 Documentación exhaustiva
 
 **Próximos pasos sugeridos**:
-1. Continuar con **Módulo 05: SQL & Bases de Datos**
+1. Continuar con **Módulo 05: SQL & databases**
 2. Realizar un **mini proyecto** integrando lo aprendido
 3. Explorar **casos de uso reales** con datasets externos
 - [x] Código funcional (si aplica)
@@ -369,7 +369,7 @@ El Módulo 04 está listo para uso en producción con:
 1. **Paso 2/8**: Crear documentación de teoría
    - concepts.md (fundamentos Python)
    - architecture.md (patrones)
-   - resources.md (recursos)
+   - resources.md (resources)
 
 ### Corto Plazo (Después)
 2. **Paso 3/8**: Setup de infraestructura Docker
@@ -406,7 +406,7 @@ El Módulo 04 está listo para uso en producción con:
 - **Idioma**: TODO en español (aprendizaje del Módulo 03)
 - **Workflow**: 8 pasos incrementales (validado en Módulo 03)
 - **Python Version**: 3.11+ (features modernas)
-- **Pandas**: 2.0+ (mejor rendimiento)
+- **Pandas**: 2.0+ (mejor performance)
 - **Testing**: pytest con coverage
 - **Environment**: Docker + venv local
 
@@ -444,7 +444,7 @@ El Módulo 04 está listo para uso en producción con:
 - 📊 Progreso: 37% → 50%
 
 ### 2026-02-02 - Paso 3: Infraestructura Docker Completa
-- ✅ infrastructure/docker-compose.yml - Orquestación de servicios
+- ✅ infrastructure/docker-compose.yml - orchestration de services
 - ✅ infrastructure/Dockerfile - Imagen personalizada con 60+ dependencias
 - ✅ infrastructure/.env.example - Template de configuración
 - ✅ infrastructure/jupyter_config.py - Configuración avanzada
@@ -456,7 +456,7 @@ El Módulo 04 está listo para uso en producción con:
 ### 2026-02-02 - Paso 2: Teoría Completa
 - ✅ theory/concepts.md (14,500 palabras) - Fundamentos exhaustivos
 - ✅ theory/architecture.md (10,000 palabras) - Patrones y arquitecturas
-- ✅ theory/resources.md (9,000 palabras) - Recursos curados
+- ✅ theory/resources.md (9,000 palabras) - resources curados
 - ✅ 33,500 palabras de teoría en español
 - ✅ Cobertura completa: sintaxis → arquitecturas avanzadas
 - 📊 Progreso: 12% → 25%
@@ -471,7 +471,7 @@ El Módulo 04 está listo para uso en producción con:
 
 ---
 
-## Recursos para Referencia
+## resources para Referencia
 
 ### Módulos Relacionados
 - **Módulo 03**: SQL Foundations (completado) - Workflow validado

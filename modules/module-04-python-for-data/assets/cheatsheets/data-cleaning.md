@@ -1,6 +1,6 @@
-# 🧹 Data Cleaning - Limpieza y Validación de Datos
+# 🧹 Data Cleaning - Data Cleaning and Validation
 
-## 📋 Pipeline de Limpieza Típico
+## 📋 Typical Cleaning pipeline
 
 ```python
 def clean_data(df):
@@ -28,9 +28,9 @@ def clean_data(df):
     return df
 ```
 
-## 🔍 Detección de Problemas
+## 🔍 Problem Detection
 
-### Análisis Inicial
+### Initial Analysis
 ```python
 def data_quality_report(df):
     """Reporte completo de calidad de datos"""
@@ -112,9 +112,9 @@ def detect_outliers_zscore(df, column, threshold=3):
 
 ## 🛠️ Manejo de Valores Nulos
 
-### Estrategias de Imputación
+### Imputation Strategies
 
-#### 1. Eliminación
+#### 1. Elimination
 ```python
 # Eliminar filas con cualquier null
 df_clean = df.dropna()
@@ -132,7 +132,7 @@ cols_to_keep = null_pct[null_pct < 0.5].index
 df_clean = df[cols_to_keep]
 ```
 
-#### 2. Imputación Numérica
+#### 2. Numerical Imputation
 ```python
 # Media (sensible a outliers)
 df['edad'].fillna(df['edad'].mean(), inplace=True)
@@ -154,7 +154,7 @@ df['precio'] = df['precio'].fillna(method='ffill')  # Propagar hacia adelante
 df['precio'] = df['precio'].fillna(method='bfill')  # Propagar hacia atrás
 ```
 
-#### 3. Imputación por Grupos
+#### 3. Imputation by Groups
 ```python
 # Imputar con media del grupo
 df['salario'] = df.groupby('departamento')['salario'].transform(
@@ -167,7 +167,7 @@ df['precio'] = df.groupby('categoria')['precio'].transform(
 )
 ```
 
-#### 4. Imputación Avanzada
+#### 4. Advanced Imputation
 ```python
 from sklearn.impute import SimpleImputer, KNNImputer
 
@@ -189,7 +189,7 @@ df['edad'].fillna(df['edad'].median(), inplace=True)
 
 ## 🔄 Manejo de Duplicados
 
-### Detección Inteligente
+### Intelligent Detection
 ```python
 # Duplicados exactos
 duplicates = df[df.duplicated(keep=False)]
@@ -204,7 +204,7 @@ for group_id, group in df.groupby(['customer_id', 'fecha']):
         print(group)
 ```
 
-### Eliminación Estratégica
+### Strategic Elimination
 ```python
 # Mantener primera ocurrencia
 df_clean = df.drop_duplicates(keep='first')
@@ -222,7 +222,7 @@ df_clean = df.sort_values('fecha').drop_duplicates(
 )
 ```
 
-### Agregación en lugar de Eliminación
+### Aggregation instead of Deletion
 ```python
 # Si duplicados son válidos, agregar
 df_agg = df.groupby(['customer_id', 'fecha']).agg({
@@ -232,7 +232,7 @@ df_agg = df.groupby(['customer_id', 'fecha']).agg({
 }).reset_index()
 ```
 
-## 🔧 Corrección de Tipos de Datos
+## 🔧 Correction of Data Types
 
 ### Conversiones Comunes
 ```python
@@ -253,7 +253,7 @@ df['ciudad'] = df['ciudad'].astype('category')
 df['estado'] = pd.Categorical(df['estado'], categories=['bajo', 'medio', 'alto'], ordered=True)
 ```
 
-### Limpieza Antes de Conversión
+### Cleaning Before Conversion
 ```python
 # Limpiar strings antes de convertir a número
 df['precio'] = df['precio'].str.replace('$', '').str.replace(',', '')
@@ -266,9 +266,9 @@ df['nombre'] = df['nombre'].str.strip()
 df['email'] = df['email'].str.lower().str.strip()
 ```
 
-## 📝 Normalización de Strings
+## 📝 String Normalization
 
-### Limpieza Básica
+### Basic Cleaning
 ```python
 def normalize_strings(df):
     """Normalizar todas las columnas string"""
@@ -291,7 +291,7 @@ def normalize_strings(df):
     return df
 ```
 
-### Casos Específicos
+### Specific Cases
 ```python
 # Teléfonos (formato uniforme)
 df['telefono'] = df['telefono'].str.replace(r'\D', '', regex=True)  # Solo dígitos
@@ -306,9 +306,9 @@ df['nombre'] = df['nombre'].str.title()
 df['codigo_postal'] = df['codigo_postal'].astype(str).str.zfill(5)
 ```
 
-## ✅ Validación de Rangos
+## ✅ Range Validation
 
-### Validación Numérica
+### Numerical Validation
 ```python
 def validate_numeric_ranges(df, rules):
     """
@@ -360,7 +360,7 @@ def fix_ranges(df, column, min_val=None, max_val=None):
     return df
 ```
 
-### Validación de Relaciones
+### Relationship Validation
 ```python
 def validate_relationships(df):
     """Validar relaciones lógicas entre columnas"""
@@ -385,7 +385,7 @@ def validate_relationships(df):
 
 ## 🎯 Remover Outliers
 
-### Métodos de Remoción
+### Removal Methods
 ```python
 def remove_outliers_iqr(df, column):
     """Remover outliers usando IQR"""
@@ -416,7 +416,7 @@ def cap_outliers(df, column, lower_percentile=0.01, upper_percentile=0.99):
     return df
 ```
 
-## 💡 Pipeline Completo
+## 💡 pipeline Completo
 
 ### Ejemplo Integrado
 ```python
@@ -484,16 +484,16 @@ def comprehensive_cleaning_pipeline(df):
     return df_clean, initial_report, final_report
 ```
 
-## ⚠️ Mejores Prácticas
+## ⚠️ Best Practices
 
 1. **Siempre trabaja con copias**: `df_clean = df.copy()`
-2. **Documenta decisiones**: Por qué imputaste con media vs mediana
-3. **Valida después de limpiar**: Ejecuta reportes de calidad
-4. **Preserva datos originales**: Guarda versión raw antes de limpiar
-5. **Automatiza pero revisa**: Los scripts detectan, tú decides
-6. **Considera el contexto**: Un null en "descuento" puede ser 0, pero en "email" es crítico
-7. **Logging**: Registra qué se cambió y por qué
+2. **Documents decisions**: Why did you impute with mean vs median
+3. **Validates after cleaning**: Run quality reports
+4. **Preserve original data**: Save raw version before cleaning
+5. **Automate but review**: The scripts detect, you decide
+6. **Consider the context**: A null in "discount" can be 0, but in "email" it is critical
+7. **Logging**: Records what was changed and why
 
 ---
 
-**Siguiente**: Ver [file-formats.md](file-formats.md) para estrategias de almacenamiento
+**Siguiente**: Ver [file-formats.md](file-formats.md) para estrategias de storage

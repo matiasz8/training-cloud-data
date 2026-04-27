@@ -3,9 +3,9 @@
 ## 🎯 Objetivo
 
 Dominar Delta Lake Time Travel para:
-- Consultar versiones históricas
+- Consult historical versions
 -Rollback a versiones anteriores
-- Auditoría y compliance
+- Audit and compliance
 - Reproducibilidad en ML
 
 **Dificultad**: ⭐⭐⭐ Intermedio  
@@ -15,40 +15,40 @@ Dominar Delta Lake Time Travel para:
 
 ## 📋 Tareas
 
-### Tarea 1: Crear y Modificar Tabla con Versiones
+### Tarea 1: Crear y Modificar table con Versiones
 **Script**: `01_create_versions.py`
 
-Crea una tabla con múltiples versiones:
-1. V0: Crear tabla inicial (10K registros)
+Create a table with multiple versions:
+1. V0: Crear table inicial (10K registros)
 2. V1: Append 5K registros
-3. V2: Update status='expired' para transacciones antiguas
+3. V2: Update status='expired' para transactions antiguas
 4. V3: Delete registros con error
 5. Verificar historial con `.history()`
 
 ### Tarea 2: Time Travel Queries
 **Script**: `02_time_travel_queries.py`
 
-1. Query versión específica: `versionAsOf(1)`
+1. Specific version query:`versionAsOf(1)`
 2. Query por timestamp: `timestampAsOf("2024-01-01")`
-3. Comparar V0 vs V3 (qué cambió)
+3. Compare V0 vs V3 (what changed)
 4. Restaurar archivo borrado por error
 
-### Tarea 3: Auditoría y Rollback
+### Task 3: Audit and Rollback
 **Script**: `03_audit_rollback.py`
 
 1. Ver historial completo de operaciones
-2. Identificar operación problemática
-3. Rollback a versión anterior
-4. Verificar integridad después del rollback
+2. Identify problematic operation
+3. Rollback to previous version
+4. Verify integrity after rollback
 
 ---
 
-## ✅ Criterios de Éxito
+## ✅ Success Criteria
 
-- [ ] Tabla con 4+ versiones
+- [ ] table con 4+ versiones
 - [ ] Queries time travel exitosos
 - [ ] Rollback funcional
-- [ ] Documentación de cambios por versión
+- [ ] Documentation of changes by version
 
 ---
 
@@ -70,7 +70,7 @@ spark.sql("SELECT * FROM table TIMESTAMP AS OF '2024-01-01'")
 
 ### Use Cases
 
-- **Auditoría**: ¿Qué datos había el 31/12/2023?
-- **Rollback**: Deshacer cambio erróneo
+- **Audit**: What data was there on 12/31/2023?
+- **Rollback**: Undo wrong change
 - **ML Reproducibility**: Entrenar con mismos datos
-- **A/B Testing**: Comparar métricas entre versiones
+- **A/B Testing**: Compare metrics between versions

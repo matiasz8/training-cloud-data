@@ -5,12 +5,12 @@
 ✅ Implementar pipelines ETL completos  
 ✅ Flatten datos JSON anidados  
 ✅ Joins complejos entre datasets  
-✅ Validación de calidad de datos  
+✅ Data quality validation
 ✅ Transformaciones avanzadas  
 
 ## Conceptos Clave
 
-### ETL Pipeline
+### ETL pipeline
 
 ```python
 def etl_pipeline(source, destination):
@@ -43,11 +43,11 @@ Usa TODOS los datasets en `data/raw/`.
 5. **join_customers_orders**(customers, orders) → DataFrame joined
 6. **agregar_ventas_por_cliente**(df) → DataFrame agregado
 7. **detectar_problemas_calidad**(df) → dict con issues
-8. **normalizar_fechas**(df, columnas) → DataFrame normalizado
+8. **normalizar_fechas**(df, columns) → DataFrame normalizado
 9. **pipeline_etl_completo**(source_dir, dest_dir) → Ejecuta ETL
-10. **generar_reporte_calidad**(df) → dict con métricas
+10. **generate_quality_report**(df) → dict with metrics
 
-## Ejecución
+## Execution
 
 ```bash
 pytest exercises/05-data-transformation/tests/ -v

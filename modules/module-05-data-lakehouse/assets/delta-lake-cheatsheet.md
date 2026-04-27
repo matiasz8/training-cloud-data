@@ -2,7 +2,7 @@
 
 ## 📝 Comandos Esenciales
 
-### Crear Tabla
+### Crear table
 
 ```python
 # Escribir DataFrame como Delta
@@ -19,7 +19,7 @@ df.write.format("delta") \
     .save("/path")
 ```
 
-### Leer Tabla
+### Leer table
 
 ```python
 # Leer Delta table
@@ -77,7 +77,7 @@ delta_table.detail().show()
 delta_table.toDF().show()
 ```
 
-### Optimización
+### Optimization
 
 ```python
 # Compactar archivos pequeños
@@ -131,15 +131,15 @@ DESCRIBE HISTORY events;
 
 ## 🔥 Tips Pro
 
-1. **Partitioning**: Usar columnas con cardinalidad media (country, date)
-2. **Z-Ordering**: Aplicar a columnas de filtros frecuentes
-3. **Vacuum**: Cuidado, elimina Time Travel histórico
+1. **Partitioning**: Usar columns con cardinalidad media (country, date)
+2. **Z-Ordering**: Aplicar a columns de filtros frecuentes
+3. **Vacuum**: Be careful, it eliminates historical Time Travel
 4. **mergeSchema**: Solo para esquemas compatibles (no breaking changes)
-5. **OPTIMIZE**: Ejecutar después de muchos writes pequeños
+5. **OPTIMIZE**: Run after many small writes
 
 ## ⚠️ Advertencias
 
 - VACUUM borra archivos necesarios para Time Travel
 - overwriteSchema puede romper lectores existentes
 - Z-Ordering es costoso, usar solo cuando necesario
-- Particiones con muchos valores únicos causan "small files problem"
+- Partitions with many unique values ​​cause "small files problem"

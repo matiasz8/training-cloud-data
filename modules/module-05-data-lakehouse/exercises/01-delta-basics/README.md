@@ -3,26 +3,26 @@
 ## 🎯 Objetivo
 
 Aprender los fundamentos de Delta Lake:
-- Crear tablas Delta desde DataFrames
-- Operaciones básicas: append, overwrite
-- Lectura de tablas Delta
-- Consultas básicas con Spark SQL
+- Crear tables Delta desde DataFrames
+- Basic operations: append, overwrite
+- Lectura de tables Delta
+- Basic queries with Spark SQL
 
-**Dificultad**: ⭐ Básico  
+**Difficulty**: ⭐ Basic
 **Tiempo Estimado**: 45-60 minutos  
 **Prerequisitos**: Docker y Docker Compose instalados
 
 ---
 
-## 📋 Descripción del Ejercicio
+## 📋Exercise Description
 
-Tu empresa está migrando de Parquet a Delta Lake como formato de almacenamiento. Necesitas:
+Your company is migrating from Parquet to Delta Lake as a storage format. You need:
 
-1. **Ingestar datos iniciales** de transacciones a una tabla Delta
+1. **Ingestar datos iniciales** de transactions a una table Delta
 2. **Agregar nuevos registros** con modo append
-3. **Sobrescribir datos** de una partición específica
-4. **Consultar la tabla** con Spark SQL
-5. **Verificar metadatos** de la tabla Delta
+3. **Overwrite data** from a specific partition
+4. **Consultar la table** con Spark SQL
+5. **Verificar metadatos** de la table Delta
 
 ---
 
@@ -59,12 +59,12 @@ cd ../../infrastructure
 docker-compose up -d
 ```
 
-Verifica que todos los servicios estén corriendo:
+Verify that all services are running:
 ```bash
 docker-compose ps
 ```
 
-Deberías ver:
+You should see:
 - `spark-master` (puerto 8080)
 - `spark-worker` (puerto 8081)
 - `minio` (puertos 9000, 9001)
@@ -81,11 +81,11 @@ No requiere password (configurado para desarrollo local).
 
 Puedes ejecutar los scripts de dos formas:
 
-**Opción A: Desde Jupyter Notebook**
+**Option A: From Jupyter Notebook**
 - Carga cada script `.py` en una nueva celda
 - Ejecuta celda por celda
 
-**Opción B: Desde la terminal del contenedor**
+**Option B: From the container terminal**
 ```bash
 docker exec -it module-05-spark-master bash
 cd /opt/spark/work-dir/exercises/01-delta-basics/starter
@@ -96,28 +96,28 @@ spark-submit --master local[2] 01_create_table.py
 
 ## 📝 Tareas
 
-### Tarea 1: Crear Tabla Delta Inicial
+### Tarea 1: Crear table Delta Inicial
 
 **Archivo**: `starter/01_create_table.py`
 
-1. Lee el archivo `data/raw/transactions.json` (primeras 10,000 filas)
+1. Lee el archivo `data/raw/transactions.json` (primeras 10,000 rows)
 2. Convierte timestamps a formato datetime
-3. Agrega una columna `ingestion_date` con la fecha actual
-4. Guarda como tabla Delta en `s3a://bronze/transactions_delta`
+3. Agrega una column `ingestion_date` con la fecha actual
+4. Guarda como table Delta en `s3a://bronze/transactions_delta`
 5. Particiona por `country`
 
 **Expectativas**:
-- Tabla creada en formato Delta
-- Particionada por país
+- table creada en formato Delta
+- Partitioned by country
 - Metadatos verificables
 
 ### Tarea 2: Agregar Nuevos Registros
 
 **Archivo**: `starter/02_append_data.py`
 
-1. Lee las siguientes 5,000 transacciones del JSON
+1. Lee las siguientes 5,000 transactions del JSON
 2. Procesa igual que en Tarea 1
-3. Agrega los datos a la tabla existente usando `.mode("append")`
+3. Agrega los datos a la table existente usando `.mode("append")`
 4. Verifica que el total de registros sea 15,000
 
 **Expectativas**:
@@ -125,13 +125,13 @@ spark-submit --master local[2] 01_create_table.py
 - Total de registros correcto
 - Sin sobrescribir datos existentes
 
-### Tarea 3: Sobrescribir Partición
+### Task 3: Overwrite Partition
 
 **Archivo**: `starter/03_overwrite_partition.py`
 
-1. Lee datos de un país específico (ej: "USA")
+1. Read data from a specific country (ex: "USA")
 2. Modifica el campo `status` de "pending" a "expired"
-3. Sobrescribe solo la partición de ese país usando:
+3. Overwrite only that country's partition using:
    ```python
    .mode("overwrite")
    .option("replaceWhere", "country = 'USA'")
@@ -139,17 +139,17 @@ spark-submit --master local[2] 01_create_table.py
 4. Verifica que otras particiones no se afectaron
 
 **Expectativas**:
-- Solo la partición especificada se sobrescribe
+- Only the specified partition is overwritten
 - Otras particiones intactas
-- Cambios reflejados en consultas
+- Cambios reflejados en querys
 
 ### Tarea 4: Consultar con Spark SQL
 
 **Archivo**: `starter/04_query_table.py`
 
-Ejecuta las siguientes consultas SQL sobre la tabla Delta:
+Ejecuta las siguientes querys SQL sobre la table Delta:
 
-1. **Contar registros por país**:
+1. **Count records by country**:
    ```sql
    SELECT country, COUNT(*) as total
    FROM transactions_delta
@@ -157,7 +157,7 @@ Ejecuta las siguientes consultas SQL sobre la tabla Delta:
    ORDER BY total DESC
    ```
 
-2. **Transacciones por status**:
+2. **transactions por status**:
    ```sql
    SELECT status, COUNT(*) as count, 
           AVG(amount) as avg_amount
@@ -165,7 +165,7 @@ Ejecuta las siguientes consultas SQL sobre la tabla Delta:
    GROUP BY status
    ```
 
-3. **Top 10 transacciones más grandes**:
+3. **Top 10 largest transactions**:
    ```sql
    SELECT transaction_id, user_id, amount, currency, country
    FROM transactions_delta
@@ -173,7 +173,7 @@ Ejecuta las siguientes consultas SQL sobre la tabla Delta:
    LIMIT 10
    ```
 
-4. **Transacciones por mes**:
+4. **transactions por mes**:
    ```sql
    SELECT DATE_TRUNC('month', timestamp) as month,
           COUNT(*) as transactions,
@@ -186,26 +186,26 @@ Ejecuta las siguientes consultas SQL sobre la tabla Delta:
 **Expectativas**:
 - Todas las queries ejecutan correctamente
 - Resultados guardados en DataFrames
-- Tiempos de ejecución razonables (<5 segundos)
+- Reasonable execution times (<5 seconds)
 
 ---
 
-## ✅ Criterios de Éxito
+## ✅ Success Criteria
 
-Tu implementación debe:
+Your implementation must:
 
-1. **Crear tabla Delta** con particionamiento correcto
+1. **Crear table Delta** con particionamiento correcto
 2. **Append funcionando** sin duplicados
-3. **Overwrite de partición** sin afectar otras
+3. **Partition overwrite** without affecting others
 4. **Queries SQL** devolviendo resultados correctos
 5. **Verificaciones**:
    - `_delta_log/` directory existe
-   - Archivos Parquet en subdirectorios por país
-   - Transaction log tiene múltiples versiones
+   - Parquet files in subdirectories by country
+   - Transaction log has multiple versions
 
-### Verificación Rápida
+### Quick Verification
 
-Ejecuta este script para validar tu implementación:
+Run this script to validate your implementation:
 
 ```python
 from delta.tables import DeltaTable
@@ -259,7 +259,7 @@ bronze/transactions_delta/
 
 ### Transaction Log
 
-Cada operación crea una nueva entrada en `_delta_log/`:
+Each operation creates a new entry in`_delta_log/`:
 
 ```json
 {
@@ -279,14 +279,14 @@ Cada operación crea una nueva entrada en `_delta_log/`:
 | Modo | Comportamiento |
 |------|----------------|
 | `append` | Agrega datos sin tocar existentes |
-| `overwrite` | Reemplaza TODA la tabla |
-| `overwrite` + `replaceWhere` | Reemplaza solo particiones que cumplan condición |
-| `ignore` | No escribe si la tabla ya existe |
-| `error` | Falla si la tabla ya existe (default) |
+| `overwrite` | Reemplaza TODA la table |
+| `overwrite` + `replaceWhere`| Replace only partitions that meet the condition |
+| `ignore` | No escribe si la table ya existe |
+| `error` | Falla si la table ya existe (default) |
 
 ---
 
-## 📚 Recursos
+## 📚 resources
 
 - [Delta Lake Documentation](https://docs.delta.io/)
 - [PySpark Delta API](https://docs.delta.io/latest/api/python/index.html)
@@ -299,7 +299,7 @@ Cada operación crea una nueva entrada en `_delta_log/`:
 
 ### Error: "Table not found"
 
-Verifica que MinIO está corriendo y accesible:
+Verify that MinIO is running and accessible:
 ```bash
 docker exec -it module-05-minio mc ls local/bronze
 ```
@@ -313,7 +313,7 @@ SPARK_WORKER_MEMORY: 4g  # Aumentar a 8g
 
 ### Slow queries
 
-Verifica que los datos están particionados correctamente:
+Verify that the data is partitioned correctly:
 ```python
 # Ver distribución de particiones
 spark.read.format("delta") \
@@ -323,11 +323,11 @@ spark.read.format("delta") \
 
 ---
 
-## 🎯 Próximos Pasos
+## 🎯 Next Steps
 
 Una vez completado este ejercicio:
 1. ✅ Continuar con **Ejercicio 02: Medallion Architecture**
 2. Explorar el transaction log con `delta_table.history()`
 3. Experimentar con `df.repartition()` antes de escribir
 
-¡Buena suerte! 🚀
+Good luck! 🚀

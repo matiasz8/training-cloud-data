@@ -46,7 +46,7 @@ df_dedup = df.dropDuplicates(["transaction_id"])
 </details>
 
 <details>
-<summary>Hint 2: Filtrar inválidos</summary>
+<summary>Hint 2: Filter invalid</summary>
 
 ```python
 df_valid = df.filter(
@@ -70,7 +70,7 @@ df_normalized = df \
 ## Gold Layer
 
 <details>
-<summary>Hint 1: Agregación básica</summary>
+<summary>Hint 1: Basic Aggregation</summary>
 
 ```python
 df_gold = df.groupBy("date", "country").agg(
@@ -82,7 +82,7 @@ df_gold = df.groupBy("date", "country").agg(
 </details>
 
 <details>
-<summary>Hint 2: Métricas por status</summary>
+<summary>Hint 2: Metrics by status</summary>
 
 ```python
 from pyspark.sql.functions import when

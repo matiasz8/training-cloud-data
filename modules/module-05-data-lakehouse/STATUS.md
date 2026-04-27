@@ -1,4 +1,4 @@
-# 📊 Estado del Módulo 05 - Data Lakehouse Architecture
+# 📊 Status of Module 05 - Data Lakehouse Architecture
 
 **Estado**: ✅ COMPLETADO (100%)  
 **Iniciado**: Febrero 12, 2026  
@@ -19,14 +19,14 @@ Progreso: 8/8 pasos (100%)
 
 ---
 
-## 🎯 Objetivos del Módulo
+## 🎯 Module Objectives
 
 - [x] Comprender arquitectura Data Lakehouse
 - [x] Implementar Delta Lake con ACID transactions
 - [x] Trabajar con Apache Iceberg
-- [x] Diseñar arquitectura Medallion (Bronze/Silver/Gold)
+- [x] Design Medallion architecture (Bronze/Silver/Gold)
 - [x] Utilizar Time Travel y Schema Evolution
-- [x] Optimizar rendimiento con particionamiento
+- [x] Optimizar performance con particionamiento
 - [x] Comparar Delta Lake vs Iceberg
 
 ---
@@ -55,23 +55,23 @@ Progreso: 8/8 pasos (100%)
 #### Archivos Completados:
 - [x] theory/01-concepts.md (~8,500 palabras)
   - Data Lake vs Data Warehouse vs Data Lakehouse
-  - Formatos de tabla: Delta Lake, Iceberg, Hudi
+  - Formatos de table: Delta Lake, Iceberg, Hudi
   - ACID transactions en distributed systems
   - Table formats internals (transaction log, metadata, snapshots)
   - Comparaciones detalladas y casos de uso
   
 - [x] theory/02-architecture.md (~9,000 palabras)
   - Medallion Architecture completa (Bronze/Silver/Gold)
-  - Time Travel y versionado con ejemplos código
+  - Time Travel and versioned with code examples
   - Schema Evolution (add, drop, rename columns)
   - Partitioning strategies y best practices
   - Optimizaciones: Z-ordering, Compaction, Data Skipping, Caching
-  - Gestión ciclo de vida (VACUUM, retention policies)
+  - Life cycle management (VACUUM, retention policies)
   - Patrones de ingesta (append, upsert, SCD Type 2)
   
 - [x] theory/03-resources.md (~4,500 palabras)
-  - Documentación oficial Delta Lake/Iceberg
-  - Papers académicos (Lakehouse CIDR 2021, Iceberg VLDB 2020)
+  - Official Delta Lake/Iceberg documentation
+  - Academic papers (Lakehouse CIDR 2021, Iceberg VLDB 2020)
   - Tutoriales Databricks, AWS, Azure, GCP
   - Comparaciones y benchmarks detallados
   - Cursos gratuitos y de pago
@@ -88,7 +88,7 @@ Progreso: 8/8 pasos (100%)
 **Archivos Creados**: 8/8
 
 #### Archivos Completados:
-- [x] docker-compose.yml (300+ líneas) - Configuración completa de servicios
+- [x] docker-compose.yml (300+ lines) - Complete services configuration
   * Spark Master & Worker (Bitnami Spark 3.5.0)
   * MinIO (S3-compatible storage)
   * PostgreSQL (Hive Metastore backend)
@@ -96,7 +96,7 @@ Progreso: 8/8 pasos (100%)
   * Jupyter Lab (PySpark notebook)
   * Networking y volumes configurados
   
-- [x] infrastructure/spark/spark-defaults.conf (180+ líneas)
+- [x] infrastructure/spark/spark-defaults.conf (180+ lines)
   * Delta Lake extensions y catalog
   * Apache Iceberg catalog configuration
   * S3/MinIO integration (hadoop-aws)
@@ -108,41 +108,41 @@ Progreso: 8/8 pasos (100%)
 - [x] infrastructure/spark/log4j.properties
   * Logging levels optimizados (WARN por defecto)
   * Delta Lake e Iceberg en INFO
-  * Reducción de ruido de Hadoop/AWS/Jetty
+  * Hadoop/AWS/Jetty noise reduction
   
 - [x] infrastructure/minio/init-buckets.sh (ejecutable)
-  * Crea 7 buckets automáticamente
+  * Create 7 buckets automatically
   * lakehouse, bronze, silver, gold, warehouse, checkpoints, events
-  * Política de acceso público para lakehouse
+  * Public access policy for lakehouse
   
 - [x] infrastructure/jupyter/jupyter_notebook_config.py
-  * Configuración sin autenticación (dev local)
+  * Configuring without authentication (local dev)
   * PySpark environment variables
   * S3/MinIO y Hive Metastore integrados
   
 - [x] infrastructure/init-scripts/download-jars.sh (ejecutable)
-  * Descarga automática de JARs necesarios
+  * Automatic download of necessary JARs
   * Delta Lake (core, storage)
   * Apache Iceberg (spark-runtime)
   * Hadoop AWS + AWS SDK Bundle
-  * Validación y retry logic
+  * Validation and retry logic
   
 - [x] infrastructure/.env.example
   * Template de variables de entorno
-  * Credenciales, puertos, recursos
+  * Credenciales, puertos, resources
   
-- [x] infrastructure/README.md (500+ líneas)
+- [x] infrastructure/README.md (500+ lines)
   * Arquitectura y diagramas
-  * Guía completa de setup
-  * Troubleshooting común
+  * Complete setup guide
+  * Common troubleshooting
   * Ejemplos de uso (PySpark, Delta, Iceberg)
 
-**Características**:
-- 🐳 6 servicios Docker coordinados
-- 🔧 Configuración production-ready
+**features**:
+- 🐳 6 services Docker coordinados
+- 🔧 Production-ready configuration
 - 📊 3 buckets por capa Medallion
 - ⚡ Optimizaciones de performance
-- 📝 Documentación completa
+- 📝 Complete documentation
 
 **Tiempo invertido**: 2 horas
 
@@ -155,20 +155,20 @@ Progreso: 8/8 pasos (100%)
 **Datos Generados**: 614,500 registros, ~300 MB
 
 #### Archivos Completados:
-- [x] data/README.md (500+ líneas) - Documentación completa de datasets
-- [x] data/schemas/transactions.json - Schema con validación
+- [x] data/README.md (500+ lines) - Complete dataset documentation
+- [x] data/schemas/transactions.json - Schema with validation
 - [x] data/schemas/events.json - Schema de clickstream
 - [x] data/schemas/logs.json - Schema de logs
-- [x] data/scripts/generate_transactions.py (300+ líneas)
-- [x] data/scripts/generate_events.py (300+ líneas)
-- [x] data/scripts/generate_logs.py (250+ líneas)
-- [x] data/scripts/generate_all_datasets.py (200+ líneas)
+- [x] data/scripts/generate_transactions.py (300+ lines)
+- [x] data/scripts/generate_events.py (300+ lines)
+- [x] data/scripts/generate_logs.py (250+ lines)
+- [x] data/scripts/generate_all_datasets.py (200+ lines)
 
 #### Datasets Generados:
 - [x] data/raw/transactions.json (309,000 registros, 129 MB)
   * E-commerce transactions con 12% de issues
   * Nulls, duplicados, valores negativos, fechas futuras
-  * Múltiples monedas y métodos de pago
+  * Multiple currencies and payment methods
 - [x] data/raw/events.json (204,000 registros, 125 MB)
   * Clickstream events con 12% de issues
   * 10 tipos de eventos (page_view, click, purchase, etc.)
@@ -176,9 +176,9 @@ Progreso: 8/8 pasos (100%)
 - [x] data/raw/logs.jsonl (101,500 registros, 48 MB)
   * Application logs con 13% de issues
   * 5 niveles (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  * 5 servicios microservicios
+  * 5 services microservices
 
-**Total**: 614,500 registros (superó objetivo de 500K)  
+**Total**: 614,500 registrations (exceeded 500K goal)
 **Tiempo invertido**: 2 horas
 
 ---
@@ -190,7 +190,7 @@ Progreso: 8/8 pasos (100%)
 
 #### Ejercicios Completados:
 
-**01-delta-basics** (⭐ Básico):
+**01-delta-basics** (⭐ Basic):
 - [x] README, hints.md, requirements.txt
 - [x] starter/ (4 archivos skeleton)
 - [x] solution/ (4 archivos + README)
@@ -243,7 +243,7 @@ Progreso: 8/8 pasos (100%)
 - [x] test_04_schema_evolution.py (3 tests)
 - [x] test_05_optimization.py (3 tests)
 - [x] test_06_iceberg_comparison.py (2 tests)
-- [x] pytest.ini (Configuración completa)
+- [x] pytest.ini (Full configuration)
 - [x] requirements.txt
 
 **Tests totales**: 26+ tests automatizados
@@ -258,13 +258,13 @@ Progreso: 8/8 pasos (100%)
 **Archivos Creados**: 5/5
 
 #### Cheatsheets Creados:
-- [x] README.md (Documentación de assets)
+- [x] README.md (Asset Documentation)
 - [x] delta-lake-cheatsheet.md (Comandos y ejemplos Delta Lake)
 - [x] medallion-architecture.md (Patrones Medallion completos)
 - [x] iceberg-comparison.md (Delta vs Iceberg detallado)
-- [x] optimization-checklist.md (Checklist de optimización)
+- [x] optimization-checklist.md (Optimization Checklist)
 
-**Total**: 5 documentos de referencia rápida
+**Total**: 5 quick reference documents
 
 **Tiempo invertido**: 2 horas
 
@@ -280,22 +280,22 @@ Progreso: 8/8 pasos (100%)
 **Estado**: ✅ Completo  
 **Archivos Creados**: 6/6
 
-#### Scripts de Automatización:
+#### Automation Scripts:
 - [x] scripts/setup.sh (Setup completo automatizado)
 - [x] scripts/validate.sh (Suite completa de tests)
 - [x] scripts/run_spark.sh (PySpark interactivo)
 - [x] scripts/run_jupyter.sh (Jupyter Lab con PySpark)
 
-#### Documentación:
-- [x] docs/TROUBLESHOOTING.md (Guía de solución de problemas)
-- [x] docs/MODULE-COMPLETION.md (Guía de completitud)
+#### Documentation:
+- [x] docs/TROUBLESHOOTING.md (Troubleshooting Guide)
+- [x] docs/MODULE-COMPLETION.md (Completeness Guide)
 
 **Tiempo invertido**: 2
 ### Archivos
 **Objetivo**: ~80-90 archivos  
 **Actuales**: 15 archivos (19%)
 
-**Distribución**:
+**Distribution**:
 - Base: 4 archivos ✅
 - Theory: 3 archivos ✅
 - Infrastructure: 8 archivos ✅
@@ -306,10 +306,10 @@ Progreso: 8/8 pasos (100%)
 - Scripts & Docs: 0/6 archivos
 
 ### Contenido
-**Objetivo**: ~40,000-45,000 palabras de contenido teórico  
+**Goal**: ~40,000-45,000 words of theoretical content
 **Actuales**: ~26,300 palabras (58%)
 
-**Distribución**:
+**Distribution**:
 - README: ~3,800 palabras ✅
 - Theory: ~22,000 palabras ✅
 - Exercises: ~12,000 palabras (pendiente)
@@ -317,25 +317,25 @@ Progreso: 8/8 pasos (100%)
 - Docs: ~8,000 palabras (pendiente)
 
 ### Tests
-**Objetivo**: 100+ tests automáticos  
+**Goal**: 100+ automatic tests
 **Actuales**: 0 tests
 
-**Distribución objetivo**:
+**Target distribution**:
 - Exercises: ~60-70 tests (10-12 por ejercicio)
 - Integration: ~15 tests
 - Data Quality: ~10 tests
 - Completeness: ~5 tests
 
-### Código Python
-**Objetivo**: ~10,000-12,000 líneas  
-**Actuales**: 0 líneas
+### Python code
+**Goal**: ~10,000-12,000 lines
+**Current**: 0 lines
 
-**Distribución objetivo**:
-- Exercises (solutions): ~6,000 líneas
-- Data generation scripts: ~2,000 líneas
-- Tests: ~2,000 líneas
-- Infrastructure scripts: ~1,000 líneas
-- Utilities: ~1,000 líneas
+**Target distribution**:
+- Exercises (solutions): ~6,000 lines
+- Data generation scripts: ~2,000 lines
+- Tests: ~2,000 lines
+- Infrastructure scripts: ~1,000 lines
+- Utilities: ~1,000 lines
 
 ---
 
@@ -350,11 +350,11 @@ Progreso: 8/8 pasos (100%)
 - [x] validation/ con suite de tests
 - [x] assets/ con cheatsheets
 - [x] scripts/ con 4 scripts ejecutables
-- [x] docs/ con 2 guías
+- [x] docs/ with 2 guides
 
-### Contenido Teórico
+### Theoretical Content
 - [x] Explicaciones claras de conceptos complejos
-- [x] Ejemplos de código comentados
+- [x] Commented code examples
 - [x] Comparaciones Delta Lake vs Iceberg
 - [x] Best practices documentadas
 - [x] Hints detallados para cada ejercicio
@@ -363,78 +363,78 @@ Progreso: 8/8 pasos (100%)
 - [x] Incremento progresivo de dificultad (⭐ → ⭐⭐⭐⭐⭐)
 - [x] Cada ejercicio con starter/solution/tests/hints
 - [x] README con instrucciones claras
-- [x] Tests automáticos que validan soluciones
+- [x] Automatic tests that validate solutions
 - [x] Cobertura de todos los conceptos clave
 
 ### Tests
 - [x] 26+ tests implementados
-- [x] Tests de validación para todos los ejercicios
+- [x] Validation tests for all exercises
 - [x] pytest.ini configurado
 - [x] Fixtures compartidos en conftest.py
-- [x] Tests organizados por módulo
+- [x] Tests organized by module
 
-### Automatización
+### Automation
 - [x] Scripts ejecutables (chmod +x)
 - [x] Colored output para UX
-- [x] Help messages y documentación
+- [x] Help messages and documentation
 - [x] Setup y validate automatizados
 - [x] run_spark.sh y run_jupyter.sh listos
 
 ---
 
-## 🎯 Módulo Completado ✅
+## 🎯 Module Completed ✅
 
-El módulo se considera **100% COMPLETO** porque:
+The module is considered **100% COMPLETE** because:
 
-1. ✅ Todos los archivos (86) están creados
-2. ✅ El contenido teórico (45K+ palabras) está completo
-3. ✅ Los 6 ejercicios están completos con starter/solution/tests/hints
-4. ✅ Los 26+ tests de validación están implementados
-5. ✅ La documentación está completa y actualizada
-6. ✅ Los scripts de automatización están listos y probados
-7. ✅ Todos los objetivos de aprendizaje están cubiertos
+1. ✅ All files (86) are created
+2. ✅ The theoretical content (45K+ words) is complete
+3. ✅ The 6 exercises are complete with starter/solution/tests/hints
+4. ✅ All 26+ validation tests are implemented
+5. ✅ Documentation is complete and updated
+6. ✅ Automation scripts are ready and tested
+7. ✅ All learning objectives are covered
 
 ---
 
-## 📝 Notas de Implementación
+## 📝 Implementation Notes
 
 ### Decisiones Clave Confirmadas:
-- ✅ **Idioma**: Español (consistencia con Módulo 04)
-- ✅ **Balance tecnológico**: 70% Delta Lake / 30% Apache Iceberg
-- ✅ **Tamaño datasets**: 500K registros (complejidad moderada)
-- ⏳ **Infraestructura**: Standalone Spark (más simple para aprendizaje)
+- ✅ **Language**: Spanish (consistency with Module 04)
+- ✅ **Technological balance**: 70% Delta Lake / 30% Apache Iceberg
+- ✅ **Dataset size**: 500K records (moderate complexity)
+- ⏳ **Infrastructure**: Standalone Spark (simpler for learning)
 
-### Enfoque Pedagógico:
+### Pedagogical Approach:
 1. **Conceptos primero**: Entender lakehouse antes de implementar
-2. **Incremental**: De básico (Delta tables) a avanzado (Iceberg comparison)
-3. **Hands-on**: 70% práctica, 30% teoría
-4. **Real-world**: Patrones de producción (Medallion, Time Travel, Schema Evolution)
+2. **Incremental**: From basic (Delta tables) to advanced (Iceberg comparison)
+3. **Hands-on**: 70% practice, 30% theory
+4. **Real-world**: Production Patterns (Medallion, Time Travel, Schema Evolution)
 
-### Tecnologías Core:
+### Core Technologies:
 - **PySpark 3.5.0**: Engine principal
-- **Delta Lake 3.0.0**: Formato de tabla primario (70%)
+- **Delta Lake 3.0.0**: Formato de table primario (70%)
 - **Apache Iceberg 0.6.0**: Formato alternativo (30%)
 - **MinIO**: S3-compatible storage local
 - **Jupyter Lab**: Entorno de desarrollo interactivo
 
 ---
 
-## 🎓 Próximos Pasos de Aprendizaje
+## 🎓 Next Learning Steps
 
 ### Para Estudiantes:
-1. ✅ Revisar teoría en `theory/`
+1. ✅ Review theory in`theory/`
 2. ✅ Completar ejercicios 01-06 en orden
-3. ✅ Usar `hints.md` cuando estés atascado
-4. ✅ Ejecutar tests para validar tu solución
-5. ✅ Revisar assets para referencia rápida
+3. ✅ Usar `hints.md`when you're stuck
+4. ✅ Run tests to validate your solution
+5. ✅ Review assets for quick reference
 
 ### Para Instructores:
-1. ✅ Todos los materiales están listos
-2. ✅ Tests de validación disponibles
-3. ✅ Scripts de automatización configurados
-4. ✅ Documentación completa
+1. ✅ All materials are ready
+2. ✅ Validation tests available
+3. ✅ Automation scripts configured
+4. ✅ Complete documentation
 
-### Comandos Útiles:
+### Useful Commands:
 ```bash
 # Setup inicial
 ./scripts/setup.sh

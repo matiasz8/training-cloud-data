@@ -1,8 +1,8 @@
-# 📚 Assets - Recursos Visuales y Referencias Rápidas
+# 📚 Assets - Visual resources and Quick References
 
-## 📋 Descripción General
+## 📋 General Description
 
-Este directorio contiene recursos visuales y referencias rápidas diseñadas para facilitar el aprendizaje y consulta durante el trabajo con Python para Ingeniería de Datos.
+This directory contains visual resources and quick references designed to facilitate learning and query while working with Python for Data Engineering.
 
 ## 📂 Estructura de Assets
 
@@ -19,14 +19,14 @@ assets/
     └── pandas-operations.md          # Operaciones de Pandas
 ```
 
-## 🎯 Propósito
+## 🎯 Purpose
 
-Los assets están diseñados para:
+The assets are designed to:
 
-1. **Consulta Rápida**: Encontrar sintaxis y patrones comunes sin buscar en la documentación
+1. **Quick query**: Find common syntax and patterns without searching the documentation
 2. **Referencia Visual**: Entender flujos de datos y transformaciones mediante diagramas
 3. **Aprendizaje Activo**: Tener ejemplos concretos al alcance durante los ejercicios
-4. **Solución de Problemas**: Guías rápidas para errores comunes y mejores prácticas
+4. **Troubleshooting**: Quick Guides to Common Errors and Best Practices
 
 ## 📝 Cheatsheets Disponibles
 
@@ -36,51 +36,51 @@ Los assets están diseñados para:
 - Funciones y lambdas
 - Comprehensions
 - Manejo de strings y colecciones
-- **Cuándo usar**: Primeros ejercicios, repaso de sintaxis
+- **When to use**: First exercises, syntax review
 
 ### 2. Pandas Reference (`cheatsheets/pandas-reference.md`)
-- Creación de DataFrames
-- Selección de datos (loc/iloc/boolean indexing)
-- Filtrado y transformación
-- Operaciones de agrupación (groupby)
+- Creating DataFrames
+- Data selection (loc/iloc/boolean indexing)
+- Filtering and transformation
+- Grouping operations (groupby)
 - Joins y merges
 - Manejo de fechas
-- **Cuándo usar**: Ejercicios 04, 05 y proyectos con datasets
+- **When to use**: Exercises 04, 05 and projects with datasets
 
 ### 3. Data Cleaning (`cheatsheets/data-cleaning.md`)
-- Detección de valores nulos
+- Null value detection
 - Estrategias para manejar nulls
-- Eliminación de duplicados
-- Conversión de tipos
-- Normalización de datos
-- Validación de calidad
-- **Cuándo usar**: Ejercicio 05 (transformaciones), pipelines de limpieza
+- Duplicate removal
+- Type conversion
+- Data normalization
+- Quality validation
+- **When to use**: Exercise 05 (transformations), cleaning pipelines
 
 ### 4. File Formats (`cheatsheets/file-formats.md`)
 - CSV: Lectura/escritura, delimitadores
-- JSON: Estructuras anidadas, normalización
-- Parquet: Compresión, columnar storage
-- Comparación de formatos
-- Cuándo usar cada formato
-- **Cuándo usar**: Ejercicio 03 (operaciones de archivos), decisiones de almacenamiento
+- JSON: Nested structures, normalization
+- Parquet: Compression, columnr storage
+- Format comparison
+- When to use each format
+- **When to use**: Exercise 03 (file operations), storage decisions
 
 ## 📊 Diagramas Disponibles
 
 ### 1. Data Flow (`diagrams/data-flow.md`)
-- Pipeline ETL completo (Extract → Transform → Load)
-- Flujo de datos a través de los ejercicios
-- Puntos de validación y checkpoints
+- pipeline ETL completo (Extract → Transform → Load)
+- Data flow through exercises
+- Validation points and checkpoints
 - Transformaciones comunes
-- **Cuándo usar**: Diseño de pipelines, comprensión del flujo general
+- **When to use**: pipeline design, understanding general flow
 
 ### 2. Pandas Operations (`diagrams/pandas-operations.md`)
 - Flujo de transformaciones de DataFrames
-- Operaciones de filtrado y selección
-- Procesos de agrupación y agregación
+- Filtering and selection operations
+- Grouping and aggregation processes
 - Tipos de joins y sus resultados
-- **Cuándo usar**: Ejercicio 04 y 05, debugging de transformaciones
+- **When to use**: Exercise 04 and 05, debugging transformations
 
-## 🎨 Cómo Usar los Cheatsheets
+## 🎨 How to Use Cheatsheets
 
 ### Durante los Ejercicios
 ```bash
@@ -88,23 +88,23 @@ Los assets están diseñados para:
 # Mantén el cheatsheet visible mientras trabajas en el ejercicio
 ```
 
-### Como Referencia Rápida
-1. **¿Olvidaste sintaxis?** → Consulta el cheatsheet correspondiente
-2. **¿No estás seguro del flujo?** → Revisa los diagramas
-3. **¿Error inesperado?** → Revisa la sección de "Errores Comunes" en cada cheatsheet
+### As a Quick Reference
+1. **Forgot syntax?** → query the corresponding cheatsheet
+2. **Not sure about the flow?** → Review the diagrams
+3. **Unexpected error?** → Check the "Common Errors" section in each cheatsheet
 
 ### Durante el Estudio
-- Imprime los cheatsheets más relevantes para tu trabajo actual
+- Print the cheatsheets most relevant to your current job
 - Usa los diagramas para entender el "big picture" antes de codificar
-- Consulta ejemplos específicos cuando necesites implementar un patrón
+- query specific examples when you need to implement a pattern
 
 ## 📐 Formato de los Diagramas
 
-Los diagramas están escritos en **Mermaid**, un lenguaje de diagramas que se renderiza en Markdown. 
+The diagrams are written in **Mermaid**, a diagramming language that renders in Markdown.
 
-### Visualización
-- **GitHub**: Los diagramas se renderizan automáticamente
-- **VS Code**: Instala la extensión "Markdown Preview Mermaid Support"
+### Display
+- **GitHub**: Diagrams render automatically
+- **VS Code**: Install the "Markdown Preview Mermaid Support" extension
 - **Navegador**: Usa [Mermaid Live Editor](https://mermaid.live/)
 
 ## 💡 Tips de Uso
@@ -112,44 +112,44 @@ Los diagramas están escritos en **Mermaid**, un lenguaje de diagramas que se re
 ### Para Principiantes
 1. Comienza con `python-basics.md` para refrescar conceptos
 2. Usa `data-flow.md` para entender el objetivo final
-3. Consulta cheatsheets específicos cuando lo necesites
+3. query specific cheatsheets when you need them
 
 ### Para Usuarios Intermedios
 1. Ten `pandas-reference.md` siempre a mano
 2. Usa `data-cleaning.md` como checklist de calidad
-3. Consulta `file-formats.md` al decidir formatos de salida
+3. query `file-formats.md` al decidir formatos de salida
 
 ### Para Proyectos Reales
-1. Diseña tu pipeline usando `data-flow.md` como guía
-2. Implementa transformaciones consultando `pandas-operations.md`
+1. Design your pipeline using`data-flow.md`as a guide
+2. Implementa transformaciones queryndo `pandas-operations.md`
 3. Valida calidad usando patrones de `data-cleaning.md`
 
 ## 🔄 Actualizaciones
 
-Los assets se actualizan periódicamente para incluir:
+Assets are periodically updated to include:
 - Nuevos patrones descubiertos durante los ejercicios
 - Mejoras en diagramas basadas en feedback
 - Errores comunes reportados por estudiantes
-- Mejores prácticas de la industria
+- Industry best practices
 
-## 📚 Recursos Complementarios
+## 📚 resources Complementarios
 
 Los assets complementan:
-- **Theory/** → Conceptos teóricos detallados
-- **Exercises/** → Práctica hands-on
-- **Validation/** → Verificación de conocimientos
-- **Docs/** → Guías de troubleshooting
+- **Theory/** → Detailed theoretical concepts
+- **Exercises/** → Hands-on practice
+- **Validation/** → Knowledge verification
+- **Docs/** → Troubleshooting guides
 
 ## 🤝 Contribuciones
 
 Si encuentras errores o tienes sugerencias:
-1. Revisa que el contenido sea técnicamente correcto
-2. Asegúrate de que los ejemplos funcionen
-3. Mantén el formato consistente con los demás assets
-4. Prioriza claridad y concisión
+1. Check that the content is technically correct
+2. Make sure the examples work
+3. Keep the format consistent with other assets
+4. Prioritize clarity and conciseness
 
 ---
 
-**Última actualización**: Módulo 04 - Paso 7  
-**Versión**: 1.0  
+**Last update**: Module 04 - Step 7
+**Version**: 1.0
 **Mantenedor**: Training Cloud Data

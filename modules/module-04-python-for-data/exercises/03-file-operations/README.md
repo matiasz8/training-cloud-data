@@ -2,11 +2,11 @@
 
 ## Objetivos de Aprendizaje
 
-Después de completar este ejercicio, serás capaz de:
+After completing this exercise, you will be able to:
 
 1. ✅ Leer y escribir archivos **CSV** con pandas
 2. ✅ Manipular archivos **JSON** (simple y anidado)
-3. ✅ Trabajar con formato **Parquet** (columnar)
+3. ✅ Trabajar con formato **Parquet** (columnr)
 4. ✅ Usar **context managers** (`with` statement)
 5. ✅ Manejar errores de I/O correctamente
 
@@ -29,9 +29,9 @@ with open("datos.txt", "r") as archivo:
 ```
 
 **Beneficios**:
-- Cierra automáticamente el archivo
-- Libera recursos incluso si hay error
-- Código más limpio y seguro
+- Automatically close the file
+- Libera resources incluso si hay error
+- Cleaner and safer code
 
 ### CSV con pandas
 
@@ -85,10 +85,10 @@ df.to_parquet("salida.parquet", compression="snappy")
 ```
 
 **Ventajas de Parquet**:
-- Formato columnar (más eficiente)
-- Compresión integrada
+- columnr format (more efficient)
+- Integrated compression
 - Preserva tipos de datos
-- Más rápido que CSV para lectura
+- Faster than CSV for reading
 
 ### Manejo de Errores
 
@@ -171,9 +171,9 @@ assert contar_registros("data/raw/customers.csv") == 10000
 assert contar_registros("data/raw/orders.json") == 50000
 ```
 
-### 7. obtener_columnas_csv(ruta) ⭐
+### 7. obtener_columns_csv(ruta) ⭐
 
-Obtiene nombres de columnas de un CSV.
+Obtiene nombres de columns de un CSV.
 
 ```python
 columnas = obtener_columnas_csv("data/raw/customers.csv")
@@ -182,7 +182,7 @@ assert "customer_id" in columnas
 
 ### 8. filtrar_csv(ruta_entrada, ruta_salida, condicion) ⭐⭐⭐
 
-Filtra CSV según condición y guarda resultado.
+Filter CSV according to condition and save result.
 
 ```python
 # Ejemplo: filtrar clientes de USA
@@ -195,7 +195,7 @@ filtrar_csv(
 
 ### 9. combinar_csvs(rutas, ruta_salida) ⭐⭐
 
-Combina múltiples CSVs en uno solo.
+Combine multiple CSVs into one.
 
 ```python
 combinar_csvs(
@@ -220,7 +220,7 @@ json_a_csv_plano("data/raw/orders.json", "orders_flat.csv")
 
 ---
 
-## Ejecución
+## Execution
 
 ```bash
 # Ejecutar tests
@@ -240,12 +240,12 @@ pytest exercises/03-file-operations/tests/test_file_io.py::test_leer_csv -v
 1. **Context managers**: Siempre usa `with` para archivos
 2. **Encoding**: Especifica UTF-8 para evitar problemas
 3. **Chunks**: Para archivos grandes, procesa por chunks
-4. **Validación**: Verifica que el archivo existe antes de leer
+4. **Validation**: Verify that the file exists before reading
 5. **Cleanup**: Borra archivos temporales en tests
 
 ---
 
-## Recursos
+## resources
 
 - [Pandas I/O](https://pandas.pydata.org/docs/user_guide/io.html)
 - [JSON Module](https://docs.python.org/3/library/json.html)
