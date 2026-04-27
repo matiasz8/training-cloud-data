@@ -2,20 +2,20 @@
 
 ## 🎯 Objetivos de Aprendizaje
 
-Al completar este ejercicio, serás capaz de:
+By completing this exercise, you will be able to:
 
-- Escribir consultas SELECT básicas con proyección de columnas
-- Filtrar datos usando cláusulas WHERE con múltiples condiciones
+- Write basic SELECT queries with column projection
+- Filter data using WHERE clauses with multiple conditions
 - Ordenar resultados con ORDER BY (ascendente y descendente)
-- Limitar resultados con LIMIT y OFFSET para paginación
-- Usar operadores de comparación y lógicos (AND, OR, NOT)
+- Limit results with LIMIT and OFFSET for pagination
+- Use comparison and logical operators (AND, OR, NOT)
 - Trabajar con operadores LIKE, IN, BETWEEN para patrones
 - Manejar valores NULL correctamente con IS NULL / IS NOT NULL
-- Aplicar alias a columnas para mejorar legibilidad
+- Aplicar alias a columns para mejorar legibilidad
 
 ## 📚 Conceptos Cubiertos
 
-### 1. SELECT y Proyección
+### 1. SELECT and Projection
 ```sql
 -- Seleccionar todas las columnas
 SELECT * FROM users;
@@ -42,7 +42,7 @@ SELECT * FROM users WHERE country = 'US' OR country = 'GB';
 SELECT * FROM users WHERE NOT country = 'US';
 ```
 
-### 3. Operadores de Comparación
+### 3. Comparison Operators
 ```sql
 -- Igualdad y desigualdad
 WHERE price = 100
@@ -99,7 +99,7 @@ SELECT * FROM users ORDER BY user_id LIMIT 10 OFFSET 10; -- Página 2
 ## 🎓 Ejercicios
 
 ### Setup
-1. Asegúrate de tener la base de datos corriendo:
+1. Make sure you have the database running:
 ```bash
 cd infrastructure
 docker-compose up -d
@@ -110,74 +110,74 @@ docker-compose up -d
 cd exercises/01-basic-queries
 ```
 
-### Ejercicio 1: Proyección Básica
+### Exercise 1: Basic Projection
 **Archivo**: `starter/01_projection.sql`
 
-Escribe consultas para:
+Escribe querys para:
 - Obtener todos los usuarios con solo nombre, apellido y email
-- Obtener productos con nombre y precio, usando alias descriptivos en español
-- Obtener las primeras 5 órdenes con id, fecha y total
+- Obtain products with name and price, using descriptive aliases in Spanish
+- Get the first 5 orders with id, date and total
 
 ### Ejercicio 2: Filtrado con WHERE
 **Archivo**: `starter/02_filtering.sql`
 
-Escribe consultas para:
+Escribe querys para:
 - Usuarios activos de Estados Unidos
 - Productos con precio menor a $50
-- Órdenes con status 'delivered' o 'shipped'
+- Orders with status 'delivered' or 'shipped'
 - Usuarios que NO son de US, GB o CA
 - Productos sin stock (stock_quantity = 0)
 
 ### Ejercicio 3: Pattern Matching
 **Archivo**: `starter/03_patterns.sql`
 
-Escribe consultas para:
+Escribe querys para:
 - Usuarios con email de Gmail
 - Productos que contienen "Laptop" en el nombre
 - Usuarios cuyo nombre comienza con 'J'
-- Productos en categoría 'Electronics' o 'Books'
-- Órdenes en un rango de fechas específico
+- Products in 'Electronics' or 'Books' category
+- Orders in a specific date range
 
 ### Ejercicio 4: Ordenamiento
 **Archivo**: `starter/04_sorting.sql`
 
-Escribe consultas para:
+Escribe querys para:
 - Usuarios ordenados por puntos de lealtad (mayor a menor)
 - Productos ordenados por precio (menor a mayor)
-- Órdenes más recientes primero
-- Top 10 productos más caros
-- Usuarios por país y luego por fecha de registro
+- Most recent orders first
+- Top 10 most expensive products
+- Users by country and then by registration date
 
-### Ejercicio 5: Paginación
+### Exercise 5: Pagination
 **Archivo**: `starter/05_pagination.sql`
 
-Escribe consultas para:
+Escribe querys para:
 - Primeros 10 usuarios
-- Usuarios de la página 3 (registros 21-30)
-- Top 5 productos más caros
-- Últimos 20 usuarios registrados
+- Page 3 Users (records 21-30)
+- Top 5 most expensive products
+- Last 20 registered users
 
-### Ejercicio 6: Combinación de Técnicas
+### Exercise 6: Combination of Techniques
 **Archivo**: `starter/06_combined.sql`
 
-Consultas complejas combinando todo lo aprendido:
-- Usuarios activos de US o GB con más de 100 puntos, ordenados por puntos
+queries complejas combinando todo lo aprendido:
+- Active US or GB users with 100+ points, sorted by points
 - Productos disponibles entre $20 y $100, ordenados por precio
-- Últimas 10 órdenes completadas con total > $100
-- Productos de Electronics con stock, excluyendo los más caros que $500
+- Last 10 orders completed with total > $100
+- Electronics products in stock, excluding those more expensive than $500
 
-## ✅ Criterios de Éxito
+## ✅ Success Criteria
 
-Para cada consulta:
+Para cada query:
 - ✓ Retorna los datos correctos
-- ✓ Usa sintaxis SQL válida
-- ✓ Incluye comentarios explicando la lógica
-- ✓ Sigue las convenciones de formato (mayúsculas para keywords)
+- ✓ Use valid SQL syntax
+- ✓ Includes comments explaining the logic
+- ✓ Follow formatting conventions (capital letters for keywords)
 - ✓ Usa alias descriptivos cuando corresponda
 
 ## 🔍 Testing
 
-Ejecuta tus consultas:
+Ejecuta tus querys:
 ```bash
 # Ejecutar archivo individual
 psql -h localhost -U dataengineer -d ecommerce -f starter/01_projection.sql
@@ -191,13 +191,13 @@ done
 
 ## 💡 Hints
 
-¿Necesitas ayuda? Consulta `hints.md` para pistas sin revelar la solución completa.
+Do you need help? query`hints.md`for clues without revealing the full solution.
 
 ## 📖 Soluciones
 
-Las soluciones completas están en `solution/`. Intenta resolver los ejercicios por tu cuenta primero.
+The complete solutions are in`solution/`. Intenta resolver los ejercicios por tu cuenta primero.
 
-## 📚 Recursos Adicionales
+## 📚 resources Adicionales
 
 - [PostgreSQL SELECT Documentation](https://www.postgresql.org/docs/current/sql-select.html)
 - [PostgreSQL Pattern Matching](https://www.postgresql.org/docs/current/functions-matching.html)
@@ -209,10 +209,10 @@ Las soluciones completas están en `solution/`. Intenta resolver los ejercicios 
 - **Ejercicios**: 45-60 minutos
 - **Total**: ~75 minutos
 
-## 🎯 Próximos Pasos
+## 🎯 Next Steps
 
-Una vez completes este ejercicio, continúa con:
-- **Exercise 02**: Joins - Combinar datos de múltiples tablas
+Once you complete this exercise, continue with:
+- **Exercise 02**: Joins - Combine data from multiple tables
 
 ---
 

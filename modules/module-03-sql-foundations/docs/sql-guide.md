@@ -161,12 +161,12 @@ CREATE TABLE orders (
     status VARCHAR(20) DEFAULT 'pending',
     total_amount DECIMAL(10, 2) CHECK (total_amount >= 0),
     order_date DATE DEFAULT CURRENT_DATE,
-    
+
     -- Foreign key
-    CONSTRAINT fk_user FOREIGN KEY (user_id) 
-        REFERENCES users(user_id) 
+    CONSTRAINT fk_user FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
         ON DELETE CASCADE,
-    
+
     -- Check constraint
     CONSTRAINT valid_status CHECK (
         status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')
@@ -251,7 +251,7 @@ DROP INDEX idx_users_email;
 
 ```sql
 -- Insert single row
-INSERT INTO users (username, email) 
+INSERT INTO users (username, email)
 VALUES ('john_doe', 'john@example.com');
 
 -- Insert multiple rows
@@ -269,7 +269,7 @@ VALUES ('new_user', 'new@example.com')
 RETURNING user_id, username, created_at;
 
 -- Insert with default values
-INSERT INTO users (username, email) 
+INSERT INTO users (username, email)
 VALUES ('user', 'user@example.com')
 ON CONFLICT (email) DO NOTHING;
 ```
@@ -281,14 +281,14 @@ ON CONFLICT (email) DO NOTHING;
 UPDATE users SET is_active = FALSE WHERE user_id = 123;
 
 -- Update multiple columns
-UPDATE users 
-SET 
+UPDATE users
+SET
     email = 'newemail@example.com',
     updated_at = CURRENT_TIMESTAMP
 WHERE user_id = 123;
 
 -- Update with calculation
-UPDATE products 
+UPDATE products
 SET price = price * 1.10
 WHERE category = 'Electronics';
 
@@ -296,11 +296,11 @@ WHERE category = 'Electronics';
 UPDATE orders o
 SET status = 'cancelled'
 FROM users u
-WHERE o.user_id = u.user_id 
+WHERE o.user_id = u.user_id
   AND u.is_active = FALSE;
 
 -- Update and return updated rows
-UPDATE users 
+UPDATE users
 SET is_active = FALSE
 WHERE last_login < '2023-01-01'
 RETURNING user_id, username;
@@ -313,8 +313,8 @@ RETURNING user_id, username;
 DELETE FROM users WHERE user_id = 123;
 
 -- Delete with condition
-DELETE FROM orders 
-WHERE status = 'cancelled' 
+DELETE FROM orders
+WHERE status = 'cancelled'
   AND order_date < '2023-01-01';
 
 -- Delete using subquery
@@ -324,7 +324,7 @@ WHERE user_id IN (
 );
 
 -- Delete and return deleted rows
-DELETE FROM users 
+DELETE FROM users
 WHERE created_at < '2020-01-01'
 RETURNING user_id, username;
 
@@ -350,7 +350,7 @@ SELECT * FROM users;
 SELECT user_id, username, email FROM users;
 
 -- Calculated columns
-SELECT 
+SELECT
     product_name,
     price,
     price * 1.21 AS price_with_tax,
@@ -463,7 +463,7 @@ FROM users u
 INNER JOIN orders o ON u.user_id = o.user_id;
 
 -- Multiple joins
-SELECT 
+SELECT
     u.username,
     o.order_id,
     p.product_name,
@@ -495,7 +495,7 @@ LEFT JOIN orders o ON u.user_id = o.user_id
 WHERE o.order_id IS NULL;
 
 -- Count per user (including 0)
-SELECT 
+SELECT
     u.username,
     COUNT(o.order_id) AS order_count
 FROM users u
@@ -522,7 +522,7 @@ WHERE u.user_id IS NULL;
 
 ```sql
 -- All users and all orders
-SELECT 
+SELECT
     COALESCE(u.user_id, o.user_id) AS user_id,
     u.username,
     o.order_id
@@ -545,7 +545,7 @@ FROM users u
 CROSS JOIN products p;
 
 -- Generate combinations
-SELECT 
+SELECT
     d.day_name,
     s.shift_name
 FROM days d
@@ -556,14 +556,14 @@ CROSS JOIN shifts s;
 
 ```sql
 -- Find employees and their managers
-SELECT 
+SELECT
     e.name AS employee,
     m.name AS manager
 FROM employees e
 LEFT JOIN employees m ON e.manager_id = m.employee_id;
 
 -- Find users from same country
-SELECT 
+SELECT
     u1.username AS user1,
     u2.username AS user2,
     u1.country
@@ -597,7 +597,7 @@ SELECT MIN(price), MAX(price) FROM products;
 SELECT MIN(order_date), MAX(order_date) FROM orders;
 
 -- Multiple aggregates
-SELECT 
+SELECT
     COUNT(*) AS total_orders,
     SUM(total_amount) AS revenue,
     AVG(total_amount) AS avg_order_value,
@@ -610,7 +610,7 @@ FROM orders;
 
 ```sql
 -- Group by single column
-SELECT 
+SELECT
     country,
     COUNT(*) AS user_count
 FROM users
@@ -618,7 +618,7 @@ GROUP BY country
 ORDER BY user_count DESC;
 
 -- Group by multiple columns
-SELECT 
+SELECT
     country,
     is_active,
     COUNT(*) AS count
@@ -627,7 +627,7 @@ GROUP BY country, is_active
 ORDER BY country, is_active;
 
 -- Group by expression
-SELECT 
+SELECT
     EXTRACT(YEAR FROM order_date) AS year,
     EXTRACT(MONTH FROM order_date) AS month,
     SUM(total_amount) AS monthly_revenue
@@ -636,7 +636,7 @@ GROUP BY EXTRACT(YEAR FROM order_date), EXTRACT(MONTH FROM order_date)
 ORDER BY year, month;
 
 -- GROUP BY with JOIN
-SELECT 
+SELECT
     u.username,
     COUNT(o.order_id) AS order_count,
     COALESCE(SUM(o.total_amount), 0) AS total_spent
@@ -649,7 +649,7 @@ GROUP BY u.user_id, u.username;
 
 ```sql
 -- Filter groups
-SELECT 
+SELECT
     country,
     COUNT(*) AS user_count
 FROM users
@@ -657,7 +657,7 @@ GROUP BY country
 HAVING COUNT(*) > 100;
 
 -- Multiple conditions
-SELECT 
+SELECT
     category,
     AVG(price) AS avg_price
 FROM products
@@ -665,7 +665,7 @@ GROUP BY category
 HAVING AVG(price) > 50 AND COUNT(*) >= 10;
 
 -- HAVING with aggregate functions
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS order_count,
     SUM(total_amount) AS total_spent
@@ -675,7 +675,7 @@ HAVING SUM(total_amount) > 1000
 ORDER BY total_spent DESC;
 
 -- WHERE vs HAVING
-SELECT 
+SELECT
     country,
     COUNT(*) AS active_user_count
 FROM users
@@ -689,7 +689,7 @@ ORDER BY active_user_count DESC;
 
 ```sql
 -- STRING_AGG (PostgreSQL)
-SELECT 
+SELECT
     user_id,
     STRING_AGG(product_name, ', ') AS products_ordered
 FROM orders o
@@ -698,7 +698,7 @@ JOIN products p ON oi.product_id = p.product_id
 GROUP BY user_id;
 
 -- ARRAY_AGG (PostgreSQL)
-SELECT 
+SELECT
     category,
     ARRAY_AGG(product_name ORDER BY price DESC) AS products
 FROM products
@@ -713,35 +713,35 @@ GROUP BY category;
 
 ```sql
 -- ROW_NUMBER - unique sequential number
-SELECT 
+SELECT
     product_name,
     price,
     ROW_NUMBER() OVER (ORDER BY price DESC) AS row_num
 FROM products;
 
 -- RANK - with gaps after ties
-SELECT 
+SELECT
     product_name,
     price,
     RANK() OVER (ORDER BY price DESC) AS rank
 FROM products;
 
 -- DENSE_RANK - without gaps
-SELECT 
+SELECT
     product_name,
     price,
     DENSE_RANK() OVER (ORDER BY price DESC) AS dense_rank
 FROM products;
 
 -- NTILE - divide into N groups
-SELECT 
+SELECT
     product_name,
     price,
     NTILE(4) OVER (ORDER BY price) AS quartile
 FROM products;
 
 -- Ranking within partitions
-SELECT 
+SELECT
     category,
     product_name,
     price,
@@ -753,7 +753,7 @@ FROM products;
 
 ```sql
 -- LAG - previous row value
-SELECT 
+SELECT
     order_date,
     total_amount,
     LAG(total_amount) OVER (ORDER BY order_date) AS prev_order,
@@ -761,30 +761,30 @@ SELECT
 FROM orders;
 
 -- LEAD - next row value
-SELECT 
+SELECT
     order_date,
     total_amount,
     LEAD(total_amount) OVER (ORDER BY order_date) AS next_order
 FROM orders;
 
 -- FIRST_VALUE - first in window
-SELECT 
+SELECT
     product_name,
     category,
     price,
     FIRST_VALUE(product_name) OVER (
-        PARTITION BY category 
+        PARTITION BY category
         ORDER BY price DESC
     ) AS most_expensive_in_category
 FROM products;
 
 -- LAST_VALUE - last in window (need full frame)
-SELECT 
+SELECT
     product_name,
     category,
     price,
     LAST_VALUE(product_name) OVER (
-        PARTITION BY category 
+        PARTITION BY category
         ORDER BY price DESC
         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
     ) AS cheapest_in_category
@@ -795,24 +795,24 @@ FROM products;
 
 ```sql
 -- Running total
-SELECT 
+SELECT
     order_date,
     total_amount,
     SUM(total_amount) OVER (ORDER BY order_date) AS running_total
 FROM orders;
 
 -- Moving average
-SELECT 
+SELECT
     order_date,
     total_amount,
     AVG(total_amount) OVER (
-        ORDER BY order_date 
+        ORDER BY order_date
         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
     ) AS moving_avg_7d
 FROM orders;
 
 -- Cumulative percentage
-SELECT 
+SELECT
     product_name,
     sales,
     SUM(sales) OVER (ORDER BY sales DESC) AS running_total,
@@ -823,7 +823,7 @@ SELECT
 FROM product_sales;
 
 -- Average per group (without GROUP BY)
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -840,37 +840,37 @@ FROM products;
 
 ```sql
 -- Scalar subquery (returns single value)
-SELECT * 
+SELECT *
 FROM products
 WHERE price > (SELECT AVG(price) FROM products);
 
 -- IN subquery
-SELECT * 
+SELECT *
 FROM users
 WHERE user_id IN (
     SELECT DISTINCT user_id FROM orders WHERE total_amount > 1000
 );
 
 -- NOT IN (be careful with NULLs!)
-SELECT * 
+SELECT *
 FROM products
 WHERE product_id NOT IN (
     SELECT product_id FROM order_items
 );
 
 -- EXISTS (often faster than IN)
-SELECT * 
+SELECT *
 FROM users u
 WHERE EXISTS (
-    SELECT 1 FROM orders o 
+    SELECT 1 FROM orders o
     WHERE o.user_id = u.user_id AND o.status = 'delivered'
 );
 
 -- NOT EXISTS
-SELECT * 
+SELECT *
 FROM products p
 WHERE NOT EXISTS (
-    SELECT 1 FROM order_items oi 
+    SELECT 1 FROM order_items oi
     WHERE oi.product_id = p.product_id
 );
 ```
@@ -879,14 +879,14 @@ WHERE NOT EXISTS (
 
 ```sql
 -- Scalar subquery in SELECT
-SELECT 
+SELECT
     u.username,
     u.email,
     (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.user_id) AS order_count
 FROM users u;
 
 -- Multiple scalar subqueries
-SELECT 
+SELECT
     product_id,
     product_name,
     price,
@@ -899,11 +899,11 @@ FROM products;
 
 ```sql
 -- Derived table
-SELECT 
+SELECT
     category,
     AVG(product_count) AS avg_products_per_user
 FROM (
-    SELECT 
+    SELECT
         p.category,
         u.user_id,
         COUNT(DISTINCT oi.product_id) AS product_count
@@ -923,7 +923,7 @@ GROUP BY category;
 WITH high_value_orders AS (
     SELECT * FROM orders WHERE total_amount > 500
 )
-SELECT 
+SELECT
     u.username,
     hvo.order_id,
     hvo.total_amount
@@ -931,14 +931,14 @@ FROM high_value_orders hvo
 JOIN users u ON hvo.user_id = u.user_id;
 
 -- Multiple CTEs
-WITH 
+WITH
 active_users AS (
     SELECT * FROM users WHERE is_active = TRUE
 ),
 recent_orders AS (
     SELECT * FROM orders WHERE order_date > CURRENT_DATE - INTERVAL '30 days'
 )
-SELECT 
+SELECT
     au.username,
     COUNT(ro.order_id) AS recent_order_count
 FROM active_users au
@@ -951,9 +951,9 @@ WITH RECURSIVE org_chart AS (
     SELECT employee_id, name, manager_id, 1 AS level
     FROM employees
     WHERE manager_id IS NULL
-    
+
     UNION ALL
-    
+
     -- Recursive case: employees with managers
     SELECT e.employee_id, e.name, e.manager_id, oc.level + 1
     FROM employees e
@@ -970,10 +970,10 @@ SELECT * FROM org_chart ORDER BY level, name;
 
 ```sql
 -- Simple CASE
-SELECT 
+SELECT
     product_name,
     price,
-    CASE 
+    CASE
         WHEN price < 50 THEN 'Budget'
         WHEN price BETWEEN 50 AND 200 THEN 'Standard'
         ELSE 'Premium'
@@ -981,7 +981,7 @@ SELECT
 FROM products;
 
 -- CASE in aggregation
-SELECT 
+SELECT
     COUNT(CASE WHEN status = 'delivered' THEN 1 END) AS delivered,
     COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending,
     COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled
@@ -989,7 +989,7 @@ FROM orders;
 
 -- CASE in ORDER BY
 SELECT * FROM orders
-ORDER BY 
+ORDER BY
     CASE status
         WHEN 'pending' THEN 1
         WHEN 'processing' THEN 2
@@ -1002,14 +1002,14 @@ ORDER BY
 
 ```sql
 -- COALESCE - return first non-NULL
-SELECT 
+SELECT
     product_name,
     COALESCE(tracking_number, 'N/A') AS tracking,
     COALESCE(phone, email, 'No contact') AS contact
 FROM orders;
 
 -- NULLIF - return NULL if equal
-SELECT 
+SELECT
     product_name,
     price,
     NULLIF(discount, 0) AS discount  -- NULL when discount is 0
@@ -1136,18 +1136,18 @@ SELECT metadata @> '{"category": "electronics"}' FROM products;  -- Contains
 ALTER TABLE products ADD COLUMN search_vector tsvector;
 
 -- Update search vector
-UPDATE products 
+UPDATE products
 SET search_vector = to_tsvector('english', product_name || ' ' || description);
 
 -- Create index
 CREATE INDEX idx_search_vector ON products USING GIN(search_vector);
 
 -- Search
-SELECT * FROM products 
+SELECT * FROM products
 WHERE search_vector @@ to_tsquery('english', 'laptop & wireless');
 
 -- Ranking
-SELECT 
+SELECT
     product_name,
     ts_rank(search_vector, to_tsquery('laptop')) AS rank
 FROM products

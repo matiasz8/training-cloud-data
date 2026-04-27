@@ -10,7 +10,7 @@ Parameters:
       - staging
       - prod
     Description: Environment name
-  
+
   CompanyName:
     Type: String
     Default: globalmart
@@ -25,7 +25,7 @@ Resources:
   # ============================================================================
   # BRONZE LAYER (Raw Data Zone)
   # ============================================================================
-  
+
   BronzeBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -33,27 +33,27 @@ Resources:
       # TODO: Enable versioning
       # VersioningConfiguration:
       #   Status: ???
-      
+
       # TODO: Configure encryption
       # BucketEncryption:
       #   ServerSideEncryptionConfiguration:
       #     - ???
-      
+
       # TODO: Configure lifecycle rules
       # Move to IA after 30 days, Glacier after 90 days
       # LifecycleConfiguration:
       #   Rules:
       #     - ???
-      
+
       # TODO: Enable access logging
       # LoggingConfiguration:
       #   DestinationBucketName: ???
       #   LogFilePrefix: bronze-access-logs/
-      
+
       # TODO: Block all public access
       # PublicAccessBlockConfiguration:
       #   ???
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -69,14 +69,14 @@ Resources:
   # ============================================================================
   # SILVER LAYER (Cleaned Data Zone)
   # ============================================================================
-  
+
   SilverBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub '${CompanyName}-silver-${Environment}'
       # TODO: Configure similar to Bronze but with different lifecycle
       # Move to IA after 90 days (no Glacier)
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -90,14 +90,14 @@ Resources:
   # ============================================================================
   # GOLD LAYER (Curated Data Zone)
   # ============================================================================
-  
+
   GoldBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub '${CompanyName}-gold-${Environment}'
       # TODO: Configure for frequently accessed data
       # No lifecycle transitions (keep in Standard)
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -111,14 +111,14 @@ Resources:
   # ============================================================================
   # LOGGING BUCKET
   # ============================================================================
-  
+
   LogsBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub '${CompanyName}-logs-${Environment}'
       # TODO: Configure for access logs
       # Enable versioning, encryption, lifecycle (delete after 90 days)
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -128,7 +128,7 @@ Resources:
   # ============================================================================
   # IAM ROLES
   # ============================================================================
-  
+
   DataEngineerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -143,7 +143,7 @@ Resources:
       # TODO: Attach policies for Bronze (RW), Silver (RW), Gold (RO)
       # Policies:
       #   - ???
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -162,7 +162,7 @@ Resources:
               Service: ec2.amazonaws.com
             Action: 'sts:AssumeRole'
       # TODO: Attach policies for Silver (RO), Gold (RO)
-      
+
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -174,7 +174,7 @@ Resources:
   # ============================================================================
   # BUCKET POLICIES
   # ============================================================================
-  
+
   BronzeBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:

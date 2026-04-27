@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_login TIMESTAMP,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     loyalty_points INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Constraints
     CONSTRAINT users_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     CONSTRAINT users_loyalty_points_positive CHECK (loyalty_points >= 0)

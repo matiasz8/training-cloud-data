@@ -18,10 +18,10 @@ else
     echo -e "${YELLOW}Starting LocalStack...${NC}"
     cd "$(dirname "$0")"
     docker-compose up -d
-    
+
     echo -e "${YELLOW}Waiting for LocalStack to be ready...${NC}"
     sleep 30
-    
+
     # Health check
     for i in {1..30}; do
         if curl -s http://localhost:4566/_localstack/health | grep -q '"s3": "running"'; then

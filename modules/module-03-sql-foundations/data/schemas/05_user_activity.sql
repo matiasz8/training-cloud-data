@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS user_activity (
     activity_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     product_id INTEGER REFERENCES products(product_id) ON DELETE SET NULL,
     details JSONB,
-    
+
     -- Constraints
     CONSTRAINT user_activity_type_valid CHECK (activity_type IN ('login', 'logout', 'view_product', 'add_to_cart', 'purchase', 'review'))
 );

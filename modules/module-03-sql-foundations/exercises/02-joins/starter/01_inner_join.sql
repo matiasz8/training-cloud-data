@@ -6,7 +6,7 @@
 
 
 
--- Query 2: Items de orden con nombre del producto  
+-- Query 2: Items de orden con nombre del producto
 -- TODO: JOIN order_items con products
 
 

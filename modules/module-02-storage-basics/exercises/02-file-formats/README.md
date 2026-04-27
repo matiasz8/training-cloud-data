@@ -40,7 +40,7 @@ Create a Python script that:
 - ✅ Report generated with recommendations
 
 ## Key Learnings
-- Parquet excels for analytics (columnar, compression, predicate pushdown)
+- Parquet excels for analytics (columnr, compression, predicate pushdown)
 - Avro better for streaming (row-based, schema evolution)
 - CSV/JSON for interchange only
 - Compression trades CPU for storage

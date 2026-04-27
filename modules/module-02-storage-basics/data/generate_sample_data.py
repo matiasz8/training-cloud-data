@@ -10,15 +10,13 @@ from faker import Faker
 from pathlib import Path
 import argparse
 from datetime import datetime, timedelta
-import pyarrow as pa
-import pyarrow.parquet as pq
 import fastavro
 import json
 
 
 class SampleDataGenerator:
     """Generate realistic sample data for training exercises."""
-    
+
     def __init__(self, seed=42):
         self.fake = Faker()
         Faker.seed(seed)
@@ -26,22 +24,22 @@ class SampleDataGenerator:
         self.countries = ['USA', 'UK', 'Canada', 'Germany', 'France', 'Spain', 'Italy', 'Australia']
         self.statuses = ['completed', 'pending', 'cancelled', 'refunded']
         self.categories = ['Electronics', 'Clothing', 'Home', 'Books', 'Sports', 'Toys']
-    
+
     def generate_transactions(self, num_rows: int = 100000) -> pd.DataFrame:
         """Generate transaction data."""
         print(f"Generating {num_rows:,} transactions...")
-        
+
         # Generate dates (last 365 days)
         end_date = datetime.now()
         start_date = end_date - timedelta(days=365)
-        
+
         timestamps = [
             start_date + timedelta(
                 seconds=np.random.randint(0, int((end_date - start_date).total_seconds()))
             )
             for _ in range(num_rows)
         ]
-        
+
         data = {
             'transaction_id': range(1, num_rows + 1),
             'user_id': np.random.randint(1, 50000, num_rows),
@@ -51,20 +49,20 @@ class SampleDataGenerator:
             'country': np.random.choice(self.countries, num_rows),
             'status': np.random.choice(self.statuses, num_rows, p=[0.7, 0.15, 0.1, 0.05])
         }
-        
+
         df = pd.DataFrame(data)
         df = df.sort_values('timestamp').reset_index(drop=True)
-        
+
         print(f"✓ Generated {len(df):,} transactions")
         print(f"  Date range: {df['timestamp'].min()} to {df['timestamp'].max()}")
         print(f"  Countries: {df['country'].nunique()}")
-        
+
         return df
-    
+
     def generate_users(self, num_rows: int = 10000) -> pd.DataFrame:
         """Generate user data."""
         print(f"Generating {num_rows:,} users...")
-        
+
         data = {
             'user_id': range(1, num_rows + 1),
             'email': [self.fake.email() for _ in range(num_rows)],
@@ -77,16 +75,16 @@ class SampleDataGenerator:
             'country': np.random.choice(self.countries, num_rows),
             'age': np.random.randint(18, 75, num_rows)
         }
-        
+
         df = pd.DataFrame(data)
         print(f"✓ Generated {len(df):,} users")
-        
+
         return df
-    
+
     def generate_products(self, num_rows: int = 5000) -> pd.DataFrame:
         """Generate product catalog."""
         print(f"Generating {num_rows:,} products...")
-        
+
         data = {
             'product_id': range(1, num_rows + 1),
             'name': [self.fake.catch_phrase() for _ in range(num_rows)],
@@ -95,18 +93,18 @@ class SampleDataGenerator:
             'stock': np.random.randint(0, 1000, num_rows),
             'rating': np.round(np.random.uniform(1.0, 5.0, num_rows), 1)
         }
-        
+
         df = pd.DataFrame(data)
         print(f"✓ Generated {len(df):,} products")
-        
+
         return df
-    
+
     def generate_logs(self, num_rows: int = 50000) -> list:
         """Generate event logs (JSON format)."""
         print(f"Generating {num_rows:,} log events...")
-        
+
         events = ['page_view', 'click', 'search', 'add_to_cart', 'checkout']
-        
+
         logs = []
         for i in range(num_rows):
             logs.append({
@@ -121,29 +119,29 @@ class SampleDataGenerator:
                     'browser': np.random.choice(['Chrome', 'Firefox', 'Safari', 'Edge'])
                 }
             })
-        
+
         print(f"✓ Generated {len(logs):,} log events")
-        
+
         return logs
-    
+
     def save_transactions_csv(self, df: pd.DataFrame, output_path: Path):
         """Save transactions as CSV."""
         print(f"Saving transactions to {output_path}...")
         df.to_csv(output_path, index=False)
         size_mb = output_path.stat().st_size / (1024 * 1024)
         print(f"✓ Saved CSV: {size_mb:.2f} MB")
-    
+
     def save_users_parquet(self, df: pd.DataFrame, output_path: Path):
         """Save users as Parquet."""
         print(f"Saving users to {output_path}...")
         df.to_parquet(output_path, engine='pyarrow', compression='snappy', index=False)
         size_mb = output_path.stat().st_size / (1024 * 1024)
         print(f"✓ Saved Parquet: {size_mb:.2f} MB")
-    
+
     def save_products_avro(self, df: pd.DataFrame, output_path: Path):
         """Save products as Avro."""
         print(f"Saving products to {output_path}...")
-        
+
         schema = {
             'type': 'record',
             'name': 'Product',
@@ -157,54 +155,54 @@ class SampleDataGenerator:
                 {'name': 'rating', 'type': 'double'}
             ]
         }
-        
+
         records = df.to_dict('records')
-        
+
         with open(output_path, 'wb') as out:
             fastavro.writer(out, schema, records)
-        
+
         size_mb = output_path.stat().st_size / (1024 * 1024)
         print(f"✓ Saved Avro: {size_mb:.2f} MB")
-    
+
     def save_logs_json(self, logs: list, output_path: Path):
         """Save logs as JSONL."""
         print(f"Saving logs to {output_path}...")
-        
+
         with open(output_path, 'w') as f:
             for log in logs:
                 f.write(json.dumps(log) + '\n')
-        
+
         size_mb = output_path.stat().st_size / (1024 * 1024)
         print(f"✓ Saved JSONL: {size_mb:.2f} MB")
-    
-    def generate_all(self, output_dir: Path, 
+
+    def generate_all(self, output_dir: Path,
                      transactions: int = 100000,
                      users: int = 10000,
                      products: int = 5000,
                      logs: int = 50000):
         """Generate all sample datasets."""
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         print("\n" + "="*80)
         print("GENERATING SAMPLE DATA FOR MODULE 02")
         print("="*80 + "\n")
-        
+
         # Generate and save transactions (CSV for Exercise 02)
         df_transactions = self.generate_transactions(transactions)
         self.save_transactions_csv(df_transactions, output_dir / 'transactions.csv')
-        
+
         # Generate and save users (Parquet)
         df_users = self.generate_users(users)
         self.save_users_parquet(df_users, output_dir / 'users.parquet')
-        
+
         # Generate and save products (Avro for format diversity)
         df_products = self.generate_products(products)
         self.save_products_avro(df_products, output_dir / 'products.avro')
-        
+
         # Generate and save logs (JSONL for semi-structured data)
         logs = self.generate_logs(logs)
         self.save_logs_json(logs, output_dir / 'logs.jsonl')
-        
+
         print("\n" + "="*80)
         print("SUMMARY")
         print("="*80)
@@ -225,12 +223,12 @@ def main():
     parser.add_argument('--products', '-p', type=int, default=5000, help='Number of products')
     parser.add_argument('--logs', '-l', type=int, default=50000, help='Number of log events')
     parser.add_argument('--seed', '-s', type=int, default=42, help='Random seed for reproducibility')
-    
+
     args = parser.parse_args()
-    
+
     generator = SampleDataGenerator(seed=args.seed)
     output_dir = Path(args.output_dir)
-    
+
     generator.generate_all(
         output_dir,
         transactions=args.transactions,
@@ -238,11 +236,11 @@ def main():
         products=args.products,
         logs=args.logs
     )
-    
+
     print("\n✅ Sample data generation completed successfully!")
-    print(f"\nNext steps:")
-    print(f"  • Run Exercise 02: python exercises/02-file-formats/solution/convert_formats.py data/transactions.csv output/")
-    print(f"  • Run Exercise 03: python exercises/03-partitioning-strategies/solution/partition_data.py data/transactions.csv output/")
+    print("\nNext steps:")
+    print("  • Run Exercise 02: python exercises/02-file-formats/solution/convert_formats.py data/transactions.csv output/")
+    print("  • Run Exercise 03: python exercises/03-partitioning-strategies/solution/partition_data.py data/transactions.csv output/")
 
 
 if __name__ == '__main__':

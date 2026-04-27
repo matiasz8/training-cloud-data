@@ -21,14 +21,14 @@ Assigns a unique sequential integer to each row (no ties).
 
 ```sql
 -- Rank products by price
-SELECT 
+SELECT
     product_name,
     price,
     ROW_NUMBER() OVER (ORDER BY price DESC) AS row_num
 FROM products;
 
 -- Rank within categories
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -44,7 +44,7 @@ FROM products;
 Assigns rank with gaps after ties (1, 2, 2, 4...).
 
 ```sql
-SELECT 
+SELECT
     product_name,
     price,
     RANK() OVER (ORDER BY price DESC) AS rank
@@ -59,7 +59,7 @@ FROM products;
 Assigns rank without gaps (1, 2, 2, 3...).
 
 ```sql
-SELECT 
+SELECT
     product_name,
     price,
     DENSE_RANK() OVER (ORDER BY price DESC) AS dense_rank
@@ -86,7 +86,7 @@ Divides rows into n groups.
 
 ```sql
 -- Divide products into 4 price quartiles
-SELECT 
+SELECT
     product_name,
     price,
     NTILE(4) OVER (ORDER BY price) AS price_quartile
@@ -110,7 +110,7 @@ LAG(<column>, <offset>, <default>) OVER ([PARTITION BY ...] ORDER BY ...)
 
 ```sql
 -- Compare each order with previous one
-SELECT 
+SELECT
     order_date,
     total_amount,
     LAG(total_amount) OVER (ORDER BY order_date) AS prev_order,
@@ -118,14 +118,14 @@ SELECT
 FROM orders;
 
 -- Compare with order 2 rows back
-SELECT 
+SELECT
     order_date,
     total_amount,
     LAG(total_amount, 2) OVER (ORDER BY order_date) AS two_orders_ago
 FROM orders;
 
 -- With default for first row
-SELECT 
+SELECT
     order_date,
     total_amount,
     LAG(total_amount, 1, 0) OVER (ORDER BY order_date) AS prev_order
@@ -140,7 +140,7 @@ FROM orders;
 Access value from next row.
 
 ```sql
-SELECT 
+SELECT
     order_date,
     total_amount,
     LEAD(total_amount) OVER (ORDER BY order_date) AS next_order,
@@ -156,12 +156,12 @@ FROM orders;
 Get first value in window.
 
 ```sql
-SELECT 
+SELECT
     product_name,
     category,
     price,
     FIRST_VALUE(product_name) OVER (
-        PARTITION BY category 
+        PARTITION BY category
         ORDER BY price DESC
     ) AS most_expensive_in_category
 FROM products;
@@ -176,12 +176,12 @@ Get last value in window.
 
 ```sql
 -- ⚠️ Need proper frame to get actual last value
-SELECT 
+SELECT
     product_name,
     category,
     price,
     LAST_VALUE(product_name) OVER (
-        PARTITION BY category 
+        PARTITION BY category
         ORDER BY price DESC
         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
     ) AS cheapest_in_category
@@ -198,7 +198,7 @@ Any aggregate (SUM, AVG, COUNT, MIN, MAX) can be used as window function.
 
 ### Running Total
 ```sql
-SELECT 
+SELECT
     order_date,
     total_amount,
     SUM(total_amount) OVER (ORDER BY order_date) AS running_total
@@ -207,7 +207,7 @@ FROM orders;
 
 ### Average per Group
 ```sql
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -218,7 +218,7 @@ FROM products;
 
 ### Percentage of Total
 ```sql
-SELECT 
+SELECT
     product_name,
     price,
     ROUND(
@@ -230,7 +230,7 @@ FROM products;
 
 ### Count
 ```sql
-SELECT 
+SELECT
     product_name,
     category,
     COUNT(*) OVER (PARTITION BY category) AS products_in_category
@@ -245,7 +245,7 @@ Divides result set into partitions. Window function applies separately to each p
 
 ```sql
 -- Global ranking (no partition)
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -253,7 +253,7 @@ SELECT
 FROM products;
 
 -- Ranking per category (with partition)
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -296,19 +296,19 @@ RANGE BETWEEN INTERVAL '7 days' PRECEDING AND CURRENT ROW
 ```sql
 -- Running total (default for ORDER BY)
 SUM(amount) OVER (
-    ORDER BY date 
+    ORDER BY date
     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
 )
 
 -- 3-row moving average (current + 2 before)
 AVG(amount) OVER (
-    ORDER BY date 
+    ORDER BY date
     ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
 )
 
 -- 5-row centered window (2 before + current + 2 after)
 AVG(amount) OVER (
-    ORDER BY date 
+    ORDER BY date
     ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
 )
 
@@ -328,7 +328,7 @@ SUM(amount) OVER (
 -- Top 3 products per category by price
 SELECT *
 FROM (
-    SELECT 
+    SELECT
         product_name,
         category,
         price,
@@ -340,11 +340,11 @@ WHERE rn <= 3;
 
 ### Moving Average (7-day)
 ```sql
-SELECT 
+SELECT
     date,
     sales,
     AVG(sales) OVER (
-        ORDER BY date 
+        ORDER BY date
         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
     ) AS moving_avg_7d
 FROM daily_sales;
@@ -352,7 +352,7 @@ FROM daily_sales;
 
 ### Year-over-Year Comparison
 ```sql
-SELECT 
+SELECT
     order_date,
     SUM(total_amount) AS daily_total,
     LAG(SUM(total_amount), 365) OVER (ORDER BY order_date) AS same_day_last_year,
@@ -363,7 +363,7 @@ GROUP BY order_date;
 
 ### Cumulative Percentage
 ```sql
-SELECT 
+SELECT
     product_name,
     sales,
     SUM(sales) OVER (ORDER BY sales DESC) AS running_total,
@@ -377,7 +377,7 @@ FROM product_sales;
 ### Gap and Island Problem (Find Consecutive Sequences)
 ```sql
 -- Find sequences of consecutive dates
-SELECT 
+SELECT
     order_date,
     order_date - INTERVAL '1 day' * ROW_NUMBER() OVER (ORDER BY order_date) AS group_id
 FROM orders
@@ -389,7 +389,7 @@ GROUP BY order_date;
 -- Best seller per category, but only categories with >10 products
 SELECT *
 FROM (
-    SELECT 
+    SELECT
         product_name,
         category,
         sales,
@@ -397,7 +397,7 @@ FROM (
         COUNT(*) OVER (PARTITION BY category) AS category_size
     FROM products
 ) ranked
-WHERE rank = 1 
+WHERE rank = 1
   AND category_size > 10;
 ```
 
@@ -408,7 +408,7 @@ WHERE rank = 1
 ### Reuse Window Definitions
 ```sql
 -- Instead of repeating OVER clause:
-SELECT 
+SELECT
     product_name,
     price,
     AVG(price) OVER (PARTITION BY category ORDER BY price) AS avg,
@@ -416,7 +416,7 @@ SELECT
 FROM products;
 
 -- Use WINDOW clause:
-SELECT 
+SELECT
     product_name,
     price,
     AVG(price) OVER w AS avg,
@@ -455,7 +455,7 @@ SELECT LAST_VALUE(price) OVER (
 ### ❌ Using window function in WHERE
 ```sql
 -- WRONG: Can't use window function in WHERE
-SELECT * 
+SELECT *
 FROM products
 WHERE ROW_NUMBER() OVER (ORDER BY price) <= 10;
 

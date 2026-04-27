@@ -101,7 +101,7 @@ PostgreSQL Memory Layout:
 
 ---
 
-## Query Execution Pipeline
+## Query Execution pipeline
 
 ### Step-by-Step Process
 
@@ -140,8 +140,8 @@ SELECT_STMT
 SELECT * FROM active_users WHERE country = 'US';
 
 -- After rewriting (if active_users is a view)
-SELECT user_id, name, email 
-FROM users 
+SELECT user_id, name, email
+FROM users
 WHERE status = 'active' AND country = 'US';
 ```
 
@@ -277,7 +277,7 @@ class Filter:
     def __init__(self, child, condition):
         self.child = child
         self.condition = condition
-    
+
     def next(self):
         while True:
             row = self.child.next()
@@ -291,7 +291,7 @@ class HashJoin:
         # Build phase: load left side into hash table
         while row := self.left.next():
             self.hash_table.insert(row)
-    
+
     def next(self):
         # Probe phase: match right side against hash table
         row = self.right.next()
@@ -326,7 +326,7 @@ class VectorizedFilter:
 
 **Benefits**: Amortize function call overhead, better CPU cache usage.
 
-### Pipeline vs Materialization
+### pipeline vs Materialization
 
 **Pipelined**: Operators pass rows directly (streaming)
 **Materialized**: Operators write intermediate results to disk
@@ -431,7 +431,7 @@ WHERE city = 'NYC'                      -- Cannot use index
 
 **Trade-offs**:
 - **Pros**: Faster queries
-- **Cons**: 
+- **Cons**:
   - Slower writes (INSERT, UPDATE, DELETE must update index)
   - Extra storage space
   - Need to be maintained (VACUUM, REINDEX)
@@ -477,7 +477,7 @@ EXPLAIN ANALYZE SELECT * FROM users WHERE email = 'john@example.com';
 
 **Output**:
 ```
-Seq Scan on users  (cost=0.00..15.50 rows=1 width=124) 
+Seq Scan on users  (cost=0.00..15.50 rows=1 width=124)
                    (actual time=0.015..0.234 rows=1 loops=1)
   Filter: (email = 'john@example.com'::text)
   Rows Removed by Filter: 999
@@ -785,7 +785,7 @@ Handle correlated columns:
 
 ```sql
 -- City and state are correlated
-CREATE STATISTICS city_state_stats (dependencies) 
+CREATE STATISTICS city_state_stats (dependencies)
 ON city, state FROM addresses;
 
 ANALYZE addresses;
@@ -845,13 +845,13 @@ SELECT * FROM products WHERE price < 10;
 
 ```sql
 -- BAD: Executes subquery for each row
-SELECT 
+SELECT
     user_id,
     (SELECT COUNT(*) FROM orders WHERE orders.user_id = users.user_id) AS order_count
 FROM users;
 
 -- GOOD: Use JOIN
-SELECT 
+SELECT
     u.user_id,
     COUNT(o.order_id) AS order_count
 FROM users u
@@ -1005,7 +1005,7 @@ Only scans relevant partition!
 ```sql
 -- Create materialized view
 CREATE MATERIALIZED VIEW daily_sales AS
-SELECT 
+SELECT
     order_date,
     COUNT(*) AS order_count,
     SUM(total_amount) AS total_sales
@@ -1062,7 +1062,7 @@ Database keeps frequently accessed pages in memory (shared_buffers).
 
 **Check cache hit rate**:
 ```sql
-SELECT 
+SELECT
     sum(heap_blks_read) as heap_read,
     sum(heap_blks_hit) as heap_hit,
     sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read)) as cache_hit_ratio
@@ -1094,7 +1094,7 @@ conn.execute("get_user", 456)
 
 ```sql
 -- SLOWER: IN with subquery
-SELECT * FROM users 
+SELECT * FROM users
 WHERE user_id IN (SELECT user_id FROM orders);
 
 -- FASTER: EXISTS (stops at first match)
@@ -1158,7 +1158,7 @@ INSERT INTO logs VALUES (2, 'msg2');
 -- ... 1000 times
 
 -- GOOD: Batch INSERT
-INSERT INTO logs VALUES 
+INSERT INTO logs VALUES
     (1, 'msg1'),
     (2, 'msg2'),
     ...
@@ -1210,7 +1210,7 @@ Finalize Aggregate  (cost=... rows=1 width=8)
 
 Understanding SQL architecture and optimization:
 
-1. **Query Pipeline**: Parse → Plan → Execute
+1. **Query pipeline**: Parse → Plan → Execute
 2. **Indexes**: Speed up lookups (B-Tree, Hash, GIN, etc.)
 3. **EXPLAIN**: Analyze query plans
 4. **Join Algorithms**: Nested Loop, Hash, Merge
@@ -1226,6 +1226,6 @@ Understanding SQL architecture and optimization:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: February 2026  
+**Document Version**: 1.0
+**Last Updated**: February 2026
 **Word Count**: ~5,000 words

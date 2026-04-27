@@ -4,7 +4,7 @@
 WITH high_value_orders AS (
     SELECT * FROM orders WHERE total_amount > 500
 )
-SELECT 
+SELECT
     u.first_name || ' ' || u.last_name AS customer,
     u.country,
     hvo.order_id,
@@ -15,9 +15,9 @@ INNER JOIN users u ON hvo.user_id = u.user_id
 ORDER BY hvo.total_amount DESC;
 
 -- Query 2: Múltiples CTEs encadenados
-WITH 
+WITH
 user_order_stats AS (
-    SELECT 
+    SELECT
         user_id,
         COUNT(*) AS num_orders,
         SUM(total_amount) AS total_spent,
@@ -26,11 +26,11 @@ user_order_stats AS (
     GROUP BY user_id
 ),
 top_customers AS (
-    SELECT * 
-    FROM user_order_stats 
+    SELECT *
+    FROM user_order_stats
     WHERE num_orders >= 3
 )
-SELECT 
+SELECT
     u.first_name || ' ' || u.last_name AS customer,
     u.email,
     tc.num_orders,
@@ -41,7 +41,7 @@ INNER JOIN top_customers tc ON u.user_id = tc.user_id
 ORDER BY tc.total_spent DESC;
 
 -- Query 3: Subquery en WHERE - Productos sobre promedio
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -52,7 +52,7 @@ WHERE price > (SELECT AVG(price) FROM products)
 ORDER BY price DESC;
 
 -- Query 4: Subquery en SELECT con comparación por categoría
-SELECT 
+SELECT
     product_name,
     category,
     price,
@@ -63,17 +63,17 @@ ORDER BY category, price DESC;
 
 -- Query 5: CTE recursivo - Ejemplo numérico (días de la semana)
 WITH RECURSIVE date_series AS (
-    SELECT 
+    SELECT
         CURRENT_DATE AS date,
         1 AS day_number
     UNION ALL
-    SELECT 
+    SELECT
         date + INTERVAL '1 day',
         day_number + 1
     FROM date_series
     WHERE day_number < 7
 )
-SELECT 
+SELECT
     date,
     TO_CHAR(date, 'Day') AS day_name,
     COUNT(o.order_id) AS num_orders

@@ -6,10 +6,10 @@ flowchart TD
     Parser --> |Syntax Check| ValidSyntax{Valid?}
     ValidSyntax --> |No| SyntaxError[Syntax Error]
     ValidSyntax --> |Yes| Rewriter[Query Rewriter]
-    
+
     Rewriter --> |Simplify & Normalize| Planner[Query Planner]
     Planner --> |Analyze Paths| CostEstimator[Cost Estimator]
-    
+
     CostEstimator --> |Evaluate Options| BestPlan{Select Best Plan}
     BestPlan --> SeqScan[Sequential Scan]
     BestPlan --> IndexScan[Index Scan]
@@ -17,17 +17,17 @@ flowchart TD
     BestPlan --> HashJoin[Hash Join]
     BestPlan --> NestedLoop[Nested Loop Join]
     BestPlan --> MergeJoin[Merge Join]
-    
+
     SeqScan --> Executor[Query Executor]
     IndexScan --> Executor
     BitmapScan --> Executor
     HashJoin --> Executor
     NestedLoop --> Executor
     MergeJoin --> Executor
-    
+
     Executor --> |Process Data| ResultSet[Result Set]
     ResultSet --> End([Return Results])
-    
+
     style Start fill:#e1f5ff
     style End fill:#e1f5ff
     style Parser fill:#fff3cd
@@ -52,7 +52,7 @@ flowchart TD
 
 ### 3. Planning
 - **Input**: Query tree
-- **Process**: 
+- **Process**:
   - Generate possible execution paths
   - Estimate cost for each path (I/O, CPU, memory)
   - Consider indexes, statistics, constraints

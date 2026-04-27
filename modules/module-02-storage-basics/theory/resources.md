@@ -1,6 +1,6 @@
 # Module 02: Storage Basics - Learning Resources
 
-Curated resources para dominar almacenamiento de datos y formatos de archivo.
+Curated resources para dominar storage de datos y formatos de archivo.
 
 ## 📚 Official Documentation
 
@@ -80,7 +80,7 @@ Curated resources para dominar almacenamiento de datos y formatos de archivo.
 **"Designing Data-Intensive Applications" by Martin Kleppmann**
 - **Rating:** ⭐⭐⭐⭐⭐ (5/5)
 - **Focus:** Storage engines, data formats, distributed systems
-- **Best Chapters:** 
+- **Best Chapters:**
   - Chapter 3: Storage and Retrieval
   - Chapter 4: Encoding and Evolution
 - **Price:** $45 (Hardcover), $30 (Kindle)
@@ -123,7 +123,7 @@ Curated resources para dominar almacenamiento de datos y formatos de archivo.
 
 **"Dremel: Interactive Analysis of Web-Scale Datasets" (Google, 2010)**
 - [PDF Link](https://research.google/pubs/pub36632/)
-- **Why Read:** Foundation of columnar formats (Parquet)
+- **Why Read:** Foundation of columnr formats (Parquet)
 - **Key Concepts:** Nested data encoding, column pruning
 
 **"The Data Lakehouse: Data Warehousing and More" (Databricks, 2021)**
@@ -309,7 +309,7 @@ cat data.json | jq '.[] | select(.amount > 100)'
 
 **Relevant Topics:**
 - Google Cloud Storage (similar to S3)
-- BigQuery (uses columnar storage)
+- BigQuery (uses columnr storage)
 - Parquet format optimization
 
 **Study Guide:**
@@ -504,7 +504,7 @@ SELECT ... FROM table WHERE ...
 
 **Good Question:**
 ```
-I'm trying to convert 10GB CSV to Parquet using PyArrow but getting 
+I'm trying to convert 10GB CSV to Parquet using PyArrow but getting
 MemoryError. I've tried:
 - Reading in chunks: Still fails
 - Increasing memory: Not available

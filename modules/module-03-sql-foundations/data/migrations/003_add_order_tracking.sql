@@ -22,7 +22,7 @@ COMMENT ON COLUMN orders.estimated_delivery IS 'Estimated delivery date';
 COMMENT ON COLUMN orders.shipped_date IS 'Actual shipment date/time';
 
 -- Example usage:
--- UPDATE orders SET tracking_number = '1Z999AA10123456784', 
+-- UPDATE orders SET tracking_number = '1Z999AA10123456784',
 --                   estimated_delivery = CURRENT_DATE + INTERVAL '5 days',
 --                   shipped_date = CURRENT_TIMESTAMP
 -- WHERE order_id = 1 AND status = 'shipped';

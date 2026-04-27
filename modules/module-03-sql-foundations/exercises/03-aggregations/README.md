@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivos
 
-- Usar funciones de agregación: COUNT, SUM, AVG, MIN, MAX
+- Use aggregation functions: COUNT, SUM, AVG, MIN, MAX
 - Agrupar resultados con GROUP BY
 - Filtrar grupos con HAVING
 - Combinar agregaciones con JOINs
@@ -10,9 +10,9 @@
 
 ## 📚 Conceptos
 
-### Funciones de Agregación
+### Aggregation Functions
 ```sql
-SELECT 
+SELECT
     COUNT(*) AS total_orders,
     SUM(total_amount) AS total_revenue,
     AVG(total_amount) AS avg_order_value,
@@ -24,7 +24,7 @@ FROM orders;
 ### GROUP BY
 ```sql
 -- Ventas por usuario
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS num_orders,
     SUM(total_amount) AS total_spent
@@ -36,7 +36,7 @@ ORDER BY total_spent DESC;
 ### HAVING
 ```sql
 -- Usuarios con más de 5 órdenes
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS num_orders
 FROM orders

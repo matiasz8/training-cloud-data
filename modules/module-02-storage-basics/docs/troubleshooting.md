@@ -319,7 +319,7 @@ LifecycleConfiguration:
   Rules:
     - Id: MoveToIA
       Status: Enabled  # NOT 'Active'
-      
+
 # 2. Check filter matches objects
       Filter:
         Prefix: data/  # Must match object keys
@@ -369,7 +369,7 @@ pq.write_table(table, 'file.parquet', compression='snappy')
 df = pd.read_parquet('file.parquet', columns=['amount', 'country'])
 
 # 2. Use filters (predicate pushdown)
-df = pd.read_parquet('file.parquet', 
+df = pd.read_parquet('file.parquet',
                       filters=[('country', '=', 'USA')])
 
 # 3. Use PyArrow dataset API for partitioned data
@@ -404,7 +404,7 @@ import pyarrow.parquet as pq
 table = pq.read_table('large.parquet', memory_map=True)
 
 # Option 4: Filter data before loading
-df = pd.read_parquet('large.parquet', 
+df = pd.read_parquet('large.parquet',
                       columns=['amount', 'country'],
                       filters=[('year', '=', 2024)])
 ```
@@ -431,7 +431,7 @@ import pyarrow.dataset as ds
 
 dataset = ds.dataset('data/', format='parquet')
 table = dataset.to_table()
-pq.write_to_dataset(table, 'compacted_data/', 
+pq.write_to_dataset(table, 'compacted_data/',
                      partition_cols=['year', 'month'],
                      max_rows_per_file=1000000)
 
@@ -536,5 +536,5 @@ If you're still stuck:
 
 ---
 
-**Last Updated**: February 2, 2026  
+**Last Updated**: February 2, 2026
 **Module**: 02 - Storage Basics

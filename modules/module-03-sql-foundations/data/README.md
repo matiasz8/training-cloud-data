@@ -1,6 +1,6 @@
 # Data Directory
 
-Este directorio contiene esquemas de base de datos, datos de muestra y scripts de migración para el módulo de SQL Foundations.
+This directory contains database schemas, sample data, and migration scripts for the SQL Foundations module.
 
 ## 📁 Estructura
 
@@ -24,38 +24,38 @@ data/
 
 ## 🗄️ Schemas
 
-Los archivos en `schemas/` contienen las definiciones DDL (Data Definition Language) de cada tabla:
+Los archivos en `schemas/` contienen las definiciones DDL (Data Definition Language) de cada table:
 
 ### 01_users.sql
-**Tabla**: `users`  
-**Descripción**: Información de cuentas de usuario  
-**Columnas clave**: user_id (PK), email (unique), country, loyalty_points  
-**Índices**: email, country, registration_date, is_active
+**table**: `users`
+**Description**: User account information
+**columns clave**: user_id (PK), email (unique), country, loyalty_points
+**indexes**: email, country, registration_date, is_active
 
 ### 02_products.sql
-**Tabla**: `products`  
-**Descripción**: Catálogo de productos con precios e inventario  
-**Columnas clave**: product_id (PK), product_name, category, price, stock_quantity  
-**Índices**: category, price, product_name (trigram para búsqueda fuzzy)
+**table**: `products`
+**Description**: Product catalog with prices and inventory
+**columns clave**: product_id (PK), product_name, category, price, stock_quantity
+**indexes**: category, price, product_name (trigram for fuzzy search)
 
 ### 03_orders.sql
-**Tabla**: `orders`  
-**Descripción**: Órdenes de clientes con estado y totales  
-**Columnas clave**: order_id (PK), user_id (FK), order_date, total_amount, status  
-**Índices**: user_id, order_date, status, composite (user_id, order_date)
+**table**: `orders`
+**Description**: Customer orders with status and totals
+**columns clave**: order_id (PK), user_id (FK), order_date, total_amount, status
+**indexes**: user_id, order_date, status, composite (user_id, order_date)
 
 ### 04_order_items.sql
-**Tabla**: `order_items`  
-**Descripción**: Líneas de productos en cada orden (tabla de unión)  
-**Columnas clave**: order_item_id (PK), order_id (FK), product_id (FK), quantity, subtotal  
-**Índices**: order_id, product_id  
-**Constraint único**: (order_id, product_id) para prevenir duplicados
+**table**: `order_items`
+**Description**: Product lines in each order (union table)
+**columns clave**: order_item_id (PK), order_id (FK), product_id (FK), quantity, subtotal
+**indexes**: order_id, product_id
+**Unique constraint**: (order_id, product_id) to prevent duplicates
 
 ### 05_user_activity.sql
-**Tabla**: `user_activity`  
-**Descripción**: Log de eventos de usuario para analytics  
-**Columnas clave**: activity_id (PK), user_id (FK), activity_type, details (JSONB)  
-**Índices**: user_id, activity_timestamp, activity_type, details (GIN)
+**table**: `user_activity`
+**Description**: User event log for analytics
+**columns clave**: activity_id (PK), user_id (FK), activity_type, details (JSONB)
+**indexes**: user_id, activity_timestamp, activity_type, details (GIN)
 
 ## 📊 Seeds (Datos de Muestra)
 
@@ -64,13 +64,13 @@ Los archivos CSV en `seeds/` contienen datos de muestra para testing y desarroll
 ### users.csv
 
 - **Registros**: 10 usuarios de muestra
-- **Uso**: Testing de consultas básicas, joins
+- **Use**: Testing of basic queries, joins
 - **Formato**: CSV con headers
 
 ### products.csv
 - **Registros**: 10 productos de muestra
-- **Categorías**: Electronics, Books, Furniture, Sports
-- **Uso**: Testing de agregaciones, filtros por categoría
+- **Categories**: Electronics, Books, Furniture, Sports
+- **Use**: Testing aggregations, filters by category
 
 ### Cargar Seeds
 
@@ -105,34 +105,34 @@ Los scripts en `migrations/` documentan cambios incrementales al esquema:
 
 ### 001_add_user_preferences.sql
 
-**Propósito**: Agregar columna JSONB para preferencias de usuario  
+**Purpose**: Add JSONB column for user preferences
 **Cambios**:
 
-- Agrega columna `preferences` (JSONB)
-- Crea índice GIN para búsquedas eficientes
+- Agrega column `preferences` (JSONB)
+- Create GIN index for efficient searches
 **Uso**: Almacenar configuraciones personalizadas (tema, notificaciones, etc.)
 
 ### 002_add_product_ratings.sql
 
-**Propósito**: Agregar sistema de calificaciones de productos  
+**Purpose**: Add product ratings system
 **Cambios**:
 
-- Agrega columna `average_rating` (DECIMAL 3,2)
-- Agrega columna `review_count` (INTEGER)
+- Agrega column `average_rating` (DECIMAL 3,2)
+- Agrega column `review_count` (INTEGER)
 - Constraints de rango (0-5.00)
-- Índice para filtrado por rating
-**Uso**: Mostrar productos mejor calificados, filtros de búsqueda
+- index para filtrado por rating
+**Use**: Show top rated products, search filters
 
 ### 003_add_order_tracking.sql
 
-**Propósito**: Agregar seguimiento de envíos  
+**Purpose**: Add shipment tracking
 **Cambios**:
 
 - Agrega `tracking_number` (VARCHAR 100)
 - Agrega `estimated_delivery` (DATE)
 - Agrega `shipped_date` (TIMESTAMP)
-- Índices para lookups de tracking
-**Uso**: Rastreo de órdenes, notificaciones de entrega
+- indexes para lookups de tracking
+**Use**: Order tracking, delivery notifications
 
 ### Aplicar Migrations
 
@@ -149,7 +149,7 @@ done
 
 ### Rollback Migrations
 
-Cada archivo de migración incluye comentarios con comandos de rollback al final:
+Cada archivo de migration incluye comentarios con comandos de rollback al final:
 
 ```bash
 # Ver comandos de rollback
@@ -159,7 +159,7 @@ tail -n 10 data/migrations/001_add_user_preferences.sql
 psql -h localhost -U dataengineer -d ecommerce -c "ALTER TABLE users DROP COLUMN IF EXISTS preferences;"
 ```
 
-## 🔧 Uso Común
+## 🔧 Common Use
 
 ### Recrear Esquema desde Cero
 
@@ -195,8 +195,8 @@ done
 \di+ users
 
 -- Ver constraints
-SELECT conname, contype, pg_get_constraintdef(oid) 
-FROM pg_constraint 
+SELECT conname, contype, pg_get_constraintdef(oid)
+FROM pg_constraint
 WHERE conrelid = 'users'::regclass;
 ```
 
@@ -210,12 +210,12 @@ psql -h localhost -U dataengineer -d ecommerce -c "\COPY users TO 'users_export.
 psql -h localhost -U dataengineer -d ecommerce -c "\COPY (SELECT * FROM users WHERE country = 'US') TO 'us_users.csv' CSV HEADER"
 ```
 
-## 📈 Métricas de Datos
+## 📈 Data Metrics
 
-### Tamaños de Tablas
+### Table sizes
 
 ```sql
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size,
@@ -228,7 +228,7 @@ ORDER BY size_bytes DESC;
 ### Conteo de Registros
 
 ```sql
-SELECT 
+SELECT
     'users' AS table_name, COUNT(*) AS row_count FROM users
 UNION ALL
 SELECT 'products', COUNT(*) FROM products
@@ -240,10 +240,10 @@ UNION ALL
 SELECT 'user_activity', COUNT(*) FROM user_activity;
 ```
 
-### Estadísticas de Índices
+### Index statistics
 
 ```sql
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
@@ -259,9 +259,9 @@ ORDER BY idx_scan DESC;
 
 ### 1. Convenciones de Nomenclatura
 
-- **Tablas**: plural, snake_case (users, order_items)
-- **Columnas**: singular, snake_case (user_id, created_at)
-- **Índices**: idx_{table}_{columns} (idx_users_email)
+- **tables**: plural, snake_case (users, order_items)
+- **columns**: singular, snake_case (user_id, created_at)
+- **indexes**: idx_{table}_{columns} (idx_users_email)
 - **Constraints**: {table}_{column}_{type} (users_email_format)
 
 ### 2. Tipos de Datos
@@ -270,35 +270,35 @@ ORDER BY idx_scan DESC;
 - **Dinero**: DECIMAL(10,2) nunca FLOAT
 - **Timestamps**: TIMESTAMP con timezone
 - **Booleans**: BOOLEAN no VARCHAR
-- **JSON**: JSONB no JSON (mejor rendimiento)
+- **JSON**: JSONB no JSON (mejor performance)
 
-### 3. Índices
+### 3. indexes
 
 - Indexar todas las foreign keys
-- Indexar columnas frecuentemente usadas en WHERE
-- Índices compuestos para queries comunes
-- GIN para JSONB y búsquedas de texto
+- Indexar columns frecuentemente usadas en WHERE
+- indexes compuestos para queries comunes
+- GIN for JSONB and text searches
 - Revisar pg_stat_user_indexes regularmente
 
 ### 4. Constraints
 
 - Siempre definir PRIMARY KEY
 - Usar FOREIGN KEY con ON DELETE apropiado
-- CHECK constraints para validación de datos
-- UNIQUE constraints para valores únicos
+- CHECK constraints for data validation
+- UNIQUE constraints for unique values
 - NOT NULL cuando corresponda
 
 ### 5. Migrations
 
-- Nunca modificar archivos de migración aplicados
-- Crear nueva migración para cambios
+- Nunca modificar archivos de migration aplicados
+- Crear nueva migration para cambios
 - Incluir Up y Down en comentarios
-- Testear en desarrollo antes de producción
-- Documentar propósito y cambios
+- Test in development before production
+- Document purpose and changes
 
 ## 🔍 Troubleshooting
 
-### Error: Tabla ya existe
+### Error: table ya existe
 
 ```sql
 -- Usar IF NOT EXISTS en schemas
@@ -328,7 +328,7 @@ file -i data/seeds/users.csv  # debe ser utf-8
 \COPY users FROM 'data/seeds/users.csv' CSV HEADER DELIMITER ',' NULL 'NULL'
 ```
 
-## 📚 Recursos Adicionales
+## 📚 resources Adicionales
 
 - **PostgreSQL COPY**: https://www.postgresql.org/docs/current/sql-copy.html
 - **Data Types**: https://www.postgresql.org/docs/current/datatype.html
@@ -338,5 +338,5 @@ file -i data/seeds/users.csv  # debe ser utf-8
 
 ---
 
-**Última Actualización**: Febrero 2026  
+**Last Update**: February 2026
 **Mantenido por**: Equipo de Training Data Engineering

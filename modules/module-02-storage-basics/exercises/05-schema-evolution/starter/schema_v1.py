@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Exercise 05: Schema Evolution - Starter Template"""
-import pandas as pd
 import pyarrow as pa
-import pyarrow.parquet as pq
 
 # TODO: Define schema V1 (transaction_id, amount, timestamp)
 schema_v1 = pa.schema([

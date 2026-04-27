@@ -102,20 +102,20 @@ check_command() {
 wait_for_postgres() {
     local max_attempts=30
     local attempt=0
-    
+
     print_info "Waiting for PostgreSQL to be ready..."
-    
+
     while [ $attempt -lt $max_attempts ]; do
         if docker exec sql-foundations-db pg_isready -U postgres -d ecommerce &> /dev/null; then
             print_success "PostgreSQL is ready!"
             return 0
         fi
-        
+
         attempt=$((attempt + 1))
         echo -n "."
         sleep 1
     done
-    
+
     print_error "PostgreSQL did not become ready in time"
     return 1
 }
@@ -171,9 +171,9 @@ fi
 # Step 3: Set up Docker containers
 if ! $SKIP_DOCKER; then
     print_header "Step 3: Setting Up Docker Containers"
-    
+
     cd "$MODULE_DIR/infrastructure"
-    
+
     # Check if containers are already running
     if docker ps | grep -q "sql-foundations-db"; then
         print_warning "Database container is already running"
@@ -186,11 +186,11 @@ if ! $SKIP_DOCKER; then
             print_info "Using existing container"
         fi
     fi
-    
+
     if ! docker ps | grep -q "sql-foundations-db"; then
         print_info "Starting Docker containers..."
         docker-compose up -d
-        
+
         # Wait for PostgreSQL to be ready
         if wait_for_postgres; then
             print_success "Database is up and running"
@@ -199,18 +199,18 @@ if ! $SKIP_DOCKER; then
             exit 1
         fi
     fi
-    
+
     # Verify database initialization
     print_info "Verifying database schema..."
     TABLES_COUNT=$(docker exec sql-foundations-db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
-    
+
     if [ "$TABLES_COUNT" -ge 5 ]; then
         print_success "Database schema initialized ($TABLES_COUNT tables created)"
     else
         print_error "Database schema incomplete (only $TABLES_COUNT tables found)"
         exit 1
     fi
-    
+
     cd "$MODULE_DIR"
 else
     print_info "Skipping Docker setup"
@@ -219,7 +219,7 @@ fi
 # Step 4: Set up Python environment
 if ! $SKIP_PYTHON; then
     print_header "Step 4: Setting Up Python Environment"
-    
+
     # Check if virtual environment exists
     if [ ! -d "$MODULE_DIR/venv" ]; then
         print_info "Creating virtual environment..."
@@ -228,11 +228,11 @@ if ! $SKIP_PYTHON; then
     else
         print_success "Virtual environment already exists"
     fi
-    
+
     # Activate virtual environment
     print_info "Activating virtual environment..."
     source "$MODULE_DIR/venv/bin/activate"
-    
+
     # Install requirements
     if [ -f "$REQUIREMENTS_FILE" ]; then
         print_info "Installing Python dependencies..."
@@ -249,25 +249,25 @@ fi
 # Step 5: Load sample data
 if ! $SKIP_DATA && ! $SKIP_DOCKER; then
     print_header "Step 5: Loading Sample Data"
-    
+
     DATA_DIR="$MODULE_DIR/data"
-    
+
     if [ -d "$DATA_DIR" ]; then
         print_info "Checking for seed data files..."
-        
+
         # Load seed data if available
         if [ -f "$DATA_DIR/seeds/users.csv" ]; then
             print_info "Loading users seed data..."
             docker exec -i sql-foundations-db psql -U postgres -d ecommerce -c "\COPY users(user_id, first_name, last_name, email, country, is_active, loyalty_points, created_at) FROM STDIN WITH (FORMAT csv, HEADER true);" < "$DATA_DIR/seeds/users.csv"
             print_success "Users data loaded"
         fi
-        
+
         if [ -f "$DATA_DIR/seeds/products.csv" ]; then
             print_info "Loading products seed data..."
             docker exec -i sql-foundations-db psql -U postgres -d ecommerce -c "\COPY products(product_id, product_name, category, price, is_available, stock_quantity, created_at) FROM STDIN WITH (FORMAT csv, HEADER true);" < "$DATA_DIR/seeds/products.csv"
             print_success "Products data loaded"
         fi
-        
+
         # Run migrations if available
         if ls "$DATA_DIR/migrations"/*.sql 1> /dev/null 2>&1; then
             print_info "Running migrations..."
@@ -277,12 +277,12 @@ if ! $SKIP_DATA && ! $SKIP_DOCKER; then
             done
             print_success "Migrations applied"
         fi
-        
+
         # Verify data
         print_info "Verifying data..."
         USER_COUNT=$(docker exec sql-foundations-db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM users;" | tr -d ' ')
         PRODUCT_COUNT=$(docker exec sql-foundations-db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM products;" | tr -d ' ')
-        
+
         print_success "Data loaded: $USER_COUNT users, $PRODUCT_COUNT products"
     else
         print_warning "Data directory not found, skipping sample data load"
@@ -302,7 +302,7 @@ if ! $SKIP_DOCKER; then
         print_error "Database connection failed"
         exit 1
     fi
-    
+
     # List available tables
     print_info "Available tables:"
     docker exec sql-foundations-db psql -U postgres -d ecommerce -c "\dt" | grep "public" | awk '{print "  - " $3}'

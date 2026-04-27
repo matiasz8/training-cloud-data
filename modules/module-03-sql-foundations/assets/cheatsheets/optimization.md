@@ -24,7 +24,7 @@ EXPLAIN ANALYZE SELECT * FROM users WHERE country = 'US';
 
 ### EXPLAIN Options (PostgreSQL)
 ```sql
-EXPLAIN (ANALYZE, BUFFERS, VERBOSE, FORMAT JSON) 
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE, FORMAT JSON)
 SELECT * FROM users WHERE country = 'US';
 ```
 
@@ -98,7 +98,7 @@ CREATE INDEX idx_users_country_city ON users(country, city);
 -- BAD for: WHERE city = 'NYC' (can't use index)
 ```
 
-**Use cases**: 
+**Use cases**:
 - Equality (=), range (<, >, BETWEEN)
 - ORDER BY, sorting
 - Most general-purpose queries
@@ -113,7 +113,7 @@ Enforces uniqueness + provides index benefits.
 ### Partial Index
 ```sql
 -- Index only active users
-CREATE INDEX idx_users_active ON users(country) 
+CREATE INDEX idx_users_active ON users(country)
 WHERE is_active = TRUE;
 ```
 
@@ -131,7 +131,7 @@ SELECT * FROM users WHERE LOWER(email) = 'test@example.com';
 ### Covering Index (Index-Only Scan)
 ```sql
 -- Include additional columns
-CREATE INDEX idx_users_country_name ON users(country) 
+CREATE INDEX idx_users_country_name ON users(country)
 INCLUDE (first_name, last_name);
 
 -- Query can be satisfied from index alone:
@@ -256,13 +256,13 @@ SELECT * FROM users WHERE email = 'test@example.com';
 ```sql
 -- For large subqueries, EXISTS is often faster
 -- ❌ SLOWER: IN with large result set
-SELECT * FROM users 
+SELECT * FROM users
 WHERE user_id IN (SELECT user_id FROM orders WHERE total_amount > 100);
 
 -- ✅ FASTER: EXISTS (stops at first match)
 SELECT * FROM users u
 WHERE EXISTS (
-    SELECT 1 FROM orders o 
+    SELECT 1 FROM orders o
     WHERE o.user_id = u.user_id AND o.total_amount > 100
 );
 ```
@@ -312,7 +312,7 @@ SELECT * FROM users WHERE city = 'London';
 SELECT * FROM users WHERE user_id NOT IN (SELECT user_id FROM blocked);
 
 -- ✅ SAFE: Use NOT EXISTS
-SELECT * FROM users u 
+SELECT * FROM users u
 WHERE NOT EXISTS (
     SELECT 1 FROM blocked b WHERE b.user_id = u.user_id
 );
@@ -347,7 +347,7 @@ log_min_duration_statement = 1000  -- Log queries > 1 second
 SELECT schemaname, tablename, seq_scan, seq_tup_read,
        idx_scan, seq_tup_read / seq_scan AS avg_seq_read
 FROM pg_stat_user_tables
-WHERE seq_scan > 0 
+WHERE seq_scan > 0
   AND seq_tup_read / seq_scan > 10000
 ORDER BY seq_tup_read DESC;
 ```

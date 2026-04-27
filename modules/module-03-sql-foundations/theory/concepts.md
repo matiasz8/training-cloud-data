@@ -1,31 +1,31 @@
-# Fundamentos de SQL: Conceptos Centrales
+# SQL Fundamentals: Core Concepts
 
-## Tabla de Contenidos
+## Table of Contents
 
-1. [Introducción a SQL](#introducción-a-sql)
-2. [Fundamentos de Bases de Datos](#fundamentos-de-bases-de-datos)
-3. [Declaración SELECT](#declaración-select)
-4. [Filtrado con WHERE](#filtrado-con-where)
-5. [Ordenamiento y Limitación](#ordenamiento-y-limitación)
-6. [Operaciones JOIN](#operaciones-join)
-7. [Agregaciones y GROUP BY](#agregaciones-y-group-by)
-8. [Funciones de Ventana](#funciones-de-ventana)
+1. [Introduction to SQL](#introduction-to-sql)
+2. [Database Fundamentals](#database-fundamentals)
+3. [SELECT Statement](#select-statement)
+4. [Filtering with WHERE](#filtering-with-where)
+5. [Sorting and Limiting](#sorting-and-limiting)
+6. [JOIN Operations](#join-operations)
+7. [Aggregations and GROUP BY](#aggregations-and-group-by)
+8. [Window Functions](#window-functions)
 9. [Common Table Expressions (CTEs)](#common-table-expressions-ctes)
-10. [Subconsultas](#subconsultas)
-11. [Tipos de Datos](#tipos-de-datos)
-12. [Manejo de NULL](#manejo-de-null)
-13. [Operaciones con Strings](#operaciones-con-strings)
-14. [Funciones de Fecha y Hora](#funciones-de-fecha-y-hora)
-15. [Expresiones CASE](#expresiones-case)
-16. [Operaciones de Conjunto](#operaciones-de-conjunto)
-17. [Modificación de Datos](#modificación-de-datos)
-18. [Transacciones](#transacciones)
-19. [Mejores Prácticas](#mejores-prácticas)
-20. [Patrones Comunes](#patrones-comunes)
+10. [Subqueries](#subqueries)
+11. [Data Types](#data-types)
+12. [NULL Handling](#null-handling)
+13. [String Operations](#string-operations)
+14. [Date and Time Functions](#date-and-time-functions)
+15. [CASE Expressions](#case-expressions)
+16. [Set Operations](#set-operations)
+17. [Data Modification](#data-modification)
+18. [Transactions](#transactions)
+19. [Best Practices](#best-practices)
+20. [Common Patterns](#common-patterns)
 
 ---
 
-## Introducción a SQL
+## Introduction to SQL
 
 ### What is SQL?
 
@@ -46,7 +46,7 @@ Data engineers use SQL extensively:
 2. **Data Transformation**: ETL/ELT processes in data warehouses
 3. **Data Quality**: Validating and cleaning data
 4. **Analytics**: Aggregating and summarizing for insights
-5. **Pipeline Orchestration**: Many tools (dbt, Airflow) use SQL heavily
+5. **pipeline Orchestration**: Many tools (dbt, Airflow) use SQL heavily
 
 ### SQL Dialects
 
@@ -65,18 +65,18 @@ Most concepts transfer between dialects, but syntax details differ.
 
 ---
 
-## Fundamentos de Bases de Datos
+## Fundamentos de databases
 
-### Modelo de Base de Datos Relacional
+### model de database Relacional
 
-Las bases de datos relacionales organizan datos en **tablas** con:
+Las databases relacionales organizan datos en **tables** con:
 
-- **Filas (registros)**: Entradas individuales de datos
-- **Columnas (campos)**: Atributos de los datos
-- **Clave Primaria**: Identificador único para cada fila
-- **Clave Foránea**: Referencia a una clave primaria en otra tabla
+- **rows (registros)**: Entradas individuales de datos
+- **columns (campos)**: Atributos de los datos
+- **Primary Key**: Unique identifier for each row
+- **Foreign Key**: Reference to a primary key in another table
 
-**Ejemplo: Base de Datos de E-commerce**
+**Ejemplo: database de E-commerce**
 
 ```
 Tabla Users:
@@ -98,32 +98,32 @@ Tabla Orders:
 
 ### Relaciones
 
-**Uno a Muchos**: Un usuario puede tener muchas órdenes
-**Muchos a Muchos**: Muchas órdenes pueden contener muchos productos (vía tabla de unión)
-**Uno a Uno**: Un usuario tiene un perfil (único)
+**One to Many**: A user can have many orders
+**Many to Many**: Many orders can contain many products (via join table)
+**One to One**: A user has a (unique) profile
 
-### Normalización
+### Standardization
 
-La **normalización** reduce la redundancia de datos:
+**Normalization** reduces data redundancy:
 
-- **1NF**: Valores atómicos, sin grupos repetidos
+- **1NF**: Atomic values, without repeating groups
 - **2NF**: Sin dependencias parciales de clave primaria
 - **3NF**: Sin dependencias transitivas
 
-Los data warehouses frecuentemente **desnormalizan** para rendimiento de consultas (esquemas estrella/copo de nieve).
+Los data warehouses frecuentemente **desnormalizan** para performance de querys (esquemas estrella/copo de nieve).
 
 ### Propiedades ACID
 
-Las transacciones garantizan:
+Las transactions garantizan:
 
 - **Atomicidad**: Todo o nada
-- **Consistencia**: Transiciones de estado válidas
-- **Aislamiento**: Transacciones concurrentes no interfieren
+- **Consistency**: Valid state transitions
+- **Aislamiento**: transactions concurrentes no interfieren
 - **Durabilidad**: Cambios confirmados persisten
 
 ---
 
-## Declaración SELECT
+## SELECT statement
 
 ### Basic SELECT
 
@@ -137,19 +137,19 @@ SELECT * FROM users;
 SELECT first_name, last_name FROM users;
 
 -- Select with expressions
-SELECT 
+SELECT
     first_name,
     last_name,
     CONCAT(first_name, ' ', last_name) AS full_name
 FROM users;
 ```
 
-### Alias de Columnas
+### Alias de columns
 
-Usa `AS` para renombrar columnas en resultados:
+Usa `AS` para renombrar columns en resultados:
 
 ```sql
-SELECT 
+SELECT
     user_id AS id,
     email AS user_email,
     created_at AS registration_date
@@ -173,7 +173,7 @@ SELECT DISTINCT country, city FROM users;
 ### Literales y Expresiones
 
 ```sql
-SELECT 
+SELECT
     'Welcome' AS greeting,
     42 AS magic_number,
     price * 0.9 AS discounted_price,
@@ -194,11 +194,11 @@ FROM products;
 SELECT * FROM products WHERE price > 100;
 
 -- Multiple conditions with AND
-SELECT * FROM products 
+SELECT * FROM products
 WHERE price > 100 AND category = 'Electronics';
 
 -- Multiple conditions with OR
-SELECT * FROM products 
+SELECT * FROM products
 WHERE category = 'Electronics' OR category = 'Books';
 ```
 
@@ -217,12 +217,12 @@ WHERE category = 'Electronics' OR category = 'Books';
 
 ```sql
 -- Match any value in list
-SELECT * FROM products 
+SELECT * FROM products
 WHERE category IN ('Electronics', 'Books', 'Clothing');
 
 -- Equivalent to multiple ORs:
-WHERE category = 'Electronics' 
-   OR category = 'Books' 
+WHERE category = 'Electronics'
+   OR category = 'Books'
    OR category = 'Clothing'
 ```
 
@@ -230,14 +230,14 @@ WHERE category = 'Electronics'
 
 ```sql
 -- Inclusive range
-SELECT * FROM products 
+SELECT * FROM products
 WHERE price BETWEEN 50 AND 100;
 
 -- Equivalent to:
 WHERE price >= 50 AND price <= 100
 
 -- Dates
-SELECT * FROM orders 
+SELECT * FROM orders
 WHERE order_date BETWEEN '2024-01-01' AND '2024-12-31';
 ```
 
@@ -268,7 +268,7 @@ SELECT * FROM users WHERE phone IS NOT NULL;
 
 ---
 
-## Ordenamiento y Limitación
+## Ordering and Limitation
 
 ### ORDER BY
 
@@ -282,11 +282,11 @@ SELECT * FROM products ORDER BY price;
 SELECT * FROM products ORDER BY price DESC;
 
 -- Multiple columns
-SELECT * FROM products 
+SELECT * FROM products
 ORDER BY category ASC, price DESC;
 
 -- With expressions
-SELECT * FROM products 
+SELECT * FROM products
 ORDER BY (price * 0.9) DESC;
 ```
 
@@ -301,19 +301,19 @@ Pagination:
 SELECT * FROM products LIMIT 10;
 
 -- Saltar primeras 20, obtener siguientes 10 (página 3)
-SELECT * FROM products 
+SELECT * FROM products
 ORDER BY product_id
 LIMIT 10 OFFSET 20;
 ```
 
 **MySQL/SQL Server**: Usa `LIMIT` (MySQL) o `TOP` (SQL Server).
-**SQL Estándar**: `FETCH FIRST n ROWS ONLY`
+**Standard SQL**:`FETCH FIRST n ROWS ONLY`
 
-### FETCH (SQL Estándar)
+### FETCH (Standard SQL)
 
 ```sql
 -- Paginación SQL estándar
-SELECT * FROM products 
+SELECT * FROM products
 ORDER BY product_id
 OFFSET 20 ROWS
 FETCH FIRST 10 ROWS ONLY;
@@ -329,7 +329,7 @@ Relational databases split data across tables to avoid redundancy. JOINs combine
 
 ```sql
 -- Get order details with user information
-SELECT 
+SELECT
     orders.order_id,
     users.first_name,
     users.last_name,
@@ -343,7 +343,7 @@ JOIN users ON orders.user_id = users.user_id;
 Returns only matching rows from both tables:
 
 ```sql
-SELECT 
+SELECT
     o.order_id,
     u.email,
     o.total_amount
@@ -370,10 +370,10 @@ Jane - 104 - 300
 
 ### LEFT JOIN (LEFT OUTER JOIN)
 
-Retorna todas las filas de la tabla izquierda, con NULLs para filas no coincidentes de la tabla derecha:
+Retorna todas las rows de la table izquierda, con NULLs para rows no coincidentes de la table derecha:
 
 ```sql
-SELECT 
+SELECT
     u.user_id,
     u.first_name,
     o.order_id,
@@ -382,9 +382,9 @@ FROM users u
 LEFT JOIN orders o ON u.user_id = o.user_id;
 ```
 
-**Caso de uso**: Encontrar todos los usuarios, incluyendo aquellos sin órdenes.
+**Use case**: Find all users, including those without orders.
 
-**Visualización**:
+**Display**:
 ```
 Users         Orders
 1  John       101  1  100
@@ -402,21 +402,21 @@ Resultado LEFT JOIN:
 Opuesto de LEFT JOIN:
 
 ```sql
-SELECT 
+SELECT
     u.first_name,
     o.order_id
 FROM users u
 RIGHT JOIN orders o ON u.user_id = o.user_id;
 ```
 
-**Caso de uso**: Raramente usado; puedes reescribir como LEFT JOIN intercambiando tablas.
+**Caso de uso**: Raramente usado; puedes reescribir como LEFT JOIN intercambiando tables.
 
 ### FULL OUTER JOIN
 
-Retorna todas las filas de ambas tablas:
+Retorna todas las rows de ambas tables:
 
 ```sql
-SELECT 
+SELECT
     u.user_id,
     u.first_name,
     o.order_id
@@ -424,14 +424,14 @@ FROM users u
 FULL OUTER JOIN orders o ON u.user_id = o.user_id;
 ```
 
-**Caso de uso**: Encontrar todos los usuarios y todas las órdenes, mostrando cuáles no coinciden.
+**Use case**: Find all users and all orders, showing which ones do not match.
 
 ### CROSS JOIN
 
-Producto cartesiano (cada combinación):
+Cartesian product (each combination):
 
 ```sql
-SELECT 
+SELECT
     colors.color_name,
     sizes.size_name
 FROM colors
@@ -440,15 +440,15 @@ CROSS JOIN sizes;
 
 **Caso de uso**: Generar todas las combinaciones (ej., variantes de producto).
 
-**Advertencia**: El resultado tiene `filas(colors) × filas(sizes)` filas. Puede explotar rápidamente.
+**Advertencia**: El resultado tiene `rows(colors) × rows(sizes)`rows. It can explode quickly.
 
 ### Self JOIN
 
-Unir tabla consigo misma:
+Unir table consigo misma:
 
 ```sql
 -- Encontrar empleados y sus gerentes
-SELECT 
+SELECT
     e.name AS employee,
     m.name AS manager
 FROM employees e
@@ -458,7 +458,7 @@ LEFT JOIN employees m ON e.manager_id = m.employee_id;
 ### Multiple JOINs
 
 ```sql
-SELECT 
+SELECT
     u.first_name,
     o.order_id,
     oi.quantity,
@@ -478,7 +478,7 @@ JOIN products p ON oi.product_id = p.product_id;
 ON orders.user_id = users.user_id
 
 -- Multiple conditions
-ON orders.user_id = users.user_id 
+ON orders.user_id = users.user_id
 AND orders.country = users.country
 
 -- Non-equality (rare)
@@ -523,7 +523,7 @@ Group rows and aggregate per group:
 
 ```sql
 -- Total sales per user
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS order_count,
     SUM(total_amount) AS total_spent
@@ -547,7 +547,7 @@ SELECT user_id, COUNT(*) FROM orders GROUP BY user_id;
 
 ```sql
 -- Sales per country and category
-SELECT 
+SELECT
     country,
     category,
     SUM(amount) AS total_sales,
@@ -562,7 +562,7 @@ Filter groups (like WHERE for aggregates):
 
 ```sql
 -- Users with more than 5 orders
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS order_count
 FROM orders
@@ -576,7 +576,7 @@ HAVING COUNT(*) > 5;
 
 ```sql
 -- Correct order: WHERE, GROUP BY, HAVING
-SELECT 
+SELECT
     category,
     AVG(price) AS avg_price
 FROM products
@@ -609,7 +609,7 @@ Window functions perform calculations across rows **related** to the current row
 
 ```sql
 -- Add row number to each user's orders
-SELECT 
+SELECT
     user_id,
     order_id,
     order_date,
@@ -633,7 +633,7 @@ Assigns unique sequential integers:
 
 ```sql
 -- Number all orders
-SELECT 
+SELECT
     order_id,
     ROW_NUMBER() OVER (ORDER BY order_date) AS seq
 FROM orders;
@@ -644,7 +644,7 @@ FROM orders;
 Handle ties differently:
 
 ```sql
-SELECT 
+SELECT
     name,
     score,
     RANK() OVER (ORDER BY score DESC) AS rank,
@@ -667,7 +667,7 @@ Restart calculation for each partition:
 
 ```sql
 -- Rank products within each category
-SELECT 
+SELECT
     category,
     product_name,
     price,
@@ -681,7 +681,7 @@ Access previous/next row values:
 
 ```sql
 -- Compare each order to the previous one
-SELECT 
+SELECT
     user_id,
     order_date,
     total_amount,
@@ -694,7 +694,7 @@ FROM orders;
 
 ```sql
 -- Cumulative sales by date
-SELECT 
+SELECT
     order_date,
     daily_sales,
     SUM(daily_sales) OVER (ORDER BY order_date) AS cumulative_sales
@@ -711,7 +711,7 @@ Control which rows are included:
 
 ```sql
 -- 7-day moving average
-SELECT 
+SELECT
     order_date,
     daily_sales,
     AVG(daily_sales) OVER (
@@ -734,7 +734,7 @@ Divide rows into buckets:
 
 ```sql
 -- Divide users into 4 quartiles by total spend
-SELECT 
+SELECT
     user_id,
     total_spent,
     NTILE(4) OVER (ORDER BY total_spent) AS quartile
@@ -745,12 +745,12 @@ FROM user_totals;
 
 ```sql
 -- Show highest price in each category
-SELECT 
+SELECT
     category,
     product_name,
     price,
     FIRST_VALUE(product_name) OVER (
-        PARTITION BY category 
+        PARTITION BY category
         ORDER BY price DESC
     ) AS top_product
 FROM products;
@@ -766,7 +766,7 @@ A **CTE** (Common Table Expression) is a named temporary result set:
 
 ```sql
 WITH category_sales AS (
-    SELECT 
+    SELECT
         category,
         SUM(amount) AS total_sales
     FROM sales
@@ -783,9 +783,9 @@ SELECT * FROM category_sales WHERE total_sales > 10000;
 ### Multiple CTEs
 
 ```sql
-WITH 
+WITH
 user_totals AS (
-    SELECT 
+    SELECT
         user_id,
         SUM(total_amount) AS total_spent
     FROM orders
@@ -794,7 +794,7 @@ user_totals AS (
 high_spenders AS (
     SELECT user_id FROM user_totals WHERE total_spent > 1000
 )
-SELECT 
+SELECT
     u.first_name,
     u.email
 FROM users u
@@ -853,7 +853,7 @@ Return single value:
 
 ```sql
 -- Compare to average
-SELECT 
+SELECT
     product_name,
     price,
     price - (SELECT AVG(price) FROM products) AS price_diff
@@ -891,7 +891,7 @@ Reference outer query:
 
 ```sql
 -- Each user's most recent order
-SELECT 
+SELECT
     user_id,
     order_id,
     order_date
@@ -911,7 +911,7 @@ WHERE order_date = (
 -- Average of daily averages
 SELECT AVG(daily_avg) AS overall_avg
 FROM (
-    SELECT 
+    SELECT
         order_date,
         AVG(total_amount) AS daily_avg
     FROM orders
@@ -1041,7 +1041,7 @@ Return first non-NULL value:
 SELECT COALESCE(phone, email, 'No contact') AS contact FROM users;
 
 -- Equivalent to nested CASE
-SELECT CASE 
+SELECT CASE
     WHEN phone IS NOT NULL THEN phone
     WHEN email IS NOT NULL THEN email
     ELSE 'No contact'
@@ -1054,7 +1054,7 @@ Return NULL if two values are equal:
 
 ```sql
 -- Avoid division by zero
-SELECT 
+SELECT
     total_sales / NULLIF(total_orders, 0) AS avg_order_value
 FROM metrics;
 ```
@@ -1063,7 +1063,7 @@ FROM metrics;
 
 ```sql
 -- Aggregates ignore NULL
-SELECT 
+SELECT
     COUNT(*) AS all_rows,
     COUNT(phone) AS rows_with_phone,
     AVG(rating) AS avg_rating  -- NULL ratings excluded
@@ -1087,7 +1087,7 @@ SELECT first_name || ' ' || last_name AS full_name FROM users;
 ### UPPER, LOWER, INITCAP
 
 ```sql
-SELECT 
+SELECT
     UPPER(name) AS uppercase,
     LOWER(name) AS lowercase,
     INITCAP(name) AS title_case
@@ -1097,7 +1097,7 @@ FROM products;
 ### TRIM
 
 ```sql
-SELECT 
+SELECT
     TRIM('  hello  ') AS trimmed,        -- 'hello'
     LTRIM('  hello  ') AS left_trimmed,  -- 'hello  '
     RTRIM('  hello  ') AS right_trimmed  -- '  hello'
@@ -1149,7 +1149,7 @@ SELECT (REGEXP_MATCH(email, '([a-z]+)@'))[1] AS username FROM users;
 ### Current Date/Time
 
 ```sql
-SELECT 
+SELECT
     CURRENT_DATE AS today,
     CURRENT_TIME AS now_time,
     CURRENT_TIMESTAMP AS now,
@@ -1159,7 +1159,7 @@ SELECT
 ### Extracting Parts
 
 ```sql
-SELECT 
+SELECT
     EXTRACT(YEAR FROM order_date) AS year,
     EXTRACT(MONTH FROM order_date) AS month,
     EXTRACT(DAY FROM order_date) AS day,
@@ -1195,7 +1195,7 @@ SELECT TO_DATE('2024-01-15', 'YYYY-MM-DD') AS parsed;
 
 ```sql
 -- Truncate to start of period
-SELECT 
+SELECT
     DATE_TRUNC('month', order_date) AS month_start,
     DATE_TRUNC('week', order_date) AS week_start
 FROM orders;
@@ -1215,7 +1215,7 @@ SELECT order_timestamp AT TIME ZONE 'America/New_York' AS ny_time FROM orders;
 ### Simple CASE
 
 ```sql
-SELECT 
+SELECT
     product_name,
     CASE category
         WHEN 'Electronics' THEN 'Tech'
@@ -1230,10 +1230,10 @@ FROM products;
 More flexible with conditions:
 
 ```sql
-SELECT 
+SELECT
     product_name,
     price,
-    CASE 
+    CASE
         WHEN price < 50 THEN 'Budget'
         WHEN price BETWEEN 50 AND 200 THEN 'Mid-range'
         ELSE 'Premium'
@@ -1245,7 +1245,7 @@ FROM products;
 
 ```sql
 -- Conditional counting
-SELECT 
+SELECT
     COUNT(*) AS total_orders,
     COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed,
     COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled
@@ -1256,7 +1256,7 @@ FROM orders;
 
 ```sql
 -- Convert rows to columns
-SELECT 
+SELECT
     order_date,
     SUM(CASE WHEN category = 'Electronics' THEN amount ELSE 0 END) AS electronics_sales,
     SUM(CASE WHEN category = 'Books' THEN amount ELSE 0 END) AS books_sales
@@ -1328,7 +1328,7 @@ VALUES ('John', 'Smith', 'john@email.com');
 
 -- Multiple rows
 INSERT INTO users (first_name, last_name, email)
-VALUES 
+VALUES
     ('Jane', 'Doe', 'jane@email.com'),
     ('Bob', 'Wilson', 'bob@email.com');
 
@@ -1344,13 +1344,13 @@ SELECT * FROM users WHERE created_at < '2023-01-01';
 UPDATE products SET price = price * 1.1;
 
 -- With condition
-UPDATE products 
+UPDATE products
 SET price = price * 1.1
 WHERE category = 'Electronics';
 
 -- Multiple columns
-UPDATE users 
-SET 
+UPDATE users
+SET
     last_login = CURRENT_TIMESTAMP,
     login_count = login_count + 1
 WHERE user_id = 123;
@@ -1378,7 +1378,7 @@ INSERT INTO users (first_name, last_name)
 VALUES ('New', 'User')
 RETURNING user_id, created_at;
 
-UPDATE products 
+UPDATE products
 SET price = price * 0.9
 WHERE category = 'Books'
 RETURNING product_id, product_name, price;
@@ -1416,14 +1416,14 @@ ROLLBACK;  -- Undo all changes
 ```sql
 BEGIN;
     INSERT INTO orders (...) VALUES (...);
-    
+
     SAVEPOINT before_items;
-    
+
     INSERT INTO order_items (...) VALUES (...);
     -- Error
-    
+
     ROLLBACK TO SAVEPOINT before_items;  -- Keep order, undo items
-    
+
 COMMIT;
 ```
 
@@ -1465,7 +1465,7 @@ WHERE o.order_date > '2024-01-01';
 -- WORSE:
 SELECT u.first_name, o.order_id
 FROM users u
-JOIN (SELECT * FROM orders WHERE order_date > '2024-01-01') o 
+JOIN (SELECT * FROM orders WHERE order_date > '2024-01-01') o
 ON u.user_id = o.user_id;
 ```
 
@@ -1545,7 +1545,7 @@ COMMIT;
 ```sql
 -- Top 3 products per category by sales
 WITH ranked AS (
-    SELECT 
+    SELECT
         category,
         product_name,
         sales,
@@ -1559,7 +1559,7 @@ SELECT * FROM ranked WHERE rank <= 3;
 
 ```sql
 -- Missing order IDs
-SELECT 
+SELECT
     expected_id
 FROM generate_series(
     (SELECT MIN(order_id) FROM orders),
@@ -1571,12 +1571,12 @@ WHERE expected_id NOT IN (SELECT order_id FROM orders);
 ### Running Totals by Group
 
 ```sql
-SELECT 
+SELECT
     user_id,
     order_date,
     amount,
     SUM(amount) OVER (
-        PARTITION BY user_id 
+        PARTITION BY user_id
         ORDER BY order_date
     ) AS cumulative_spend
 FROM orders;
@@ -1585,7 +1585,7 @@ FROM orders;
 ### Pivot Table
 
 ```sql
-SELECT 
+SELECT
     product_id,
     SUM(CASE WHEN month = 1 THEN sales END) AS jan,
     SUM(CASE WHEN month = 2 THEN sales END) AS feb,
@@ -1600,8 +1600,8 @@ GROUP BY product_id;
 -- Keep only first occurrence
 DELETE FROM users
 WHERE user_id NOT IN (
-    SELECT MIN(user_id) 
-    FROM users 
+    SELECT MIN(user_id)
+    FROM users
     GROUP BY email
 );
 ```
@@ -1610,7 +1610,7 @@ WHERE user_id NOT IN (
 
 ```sql
 -- Generate date series
-SELECT 
+SELECT
     date_series.date,
     COALESCE(sales.amount, 0) AS amount
 FROM generate_series(
@@ -1643,6 +1643,6 @@ This covers the core SQL concepts you need for data engineering:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: February 2026  
+**Document Version**: 1.0
+**Last Updated**: February 2026
 **Word Count**: ~8,500 words

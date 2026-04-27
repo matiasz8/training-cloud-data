@@ -152,7 +152,7 @@ All diagrams follow these conventions:
 
 - **Nodes**: Rectangular boxes for components
 - **Arrows**: Show data flow direction
-- **Colors**: 
+- **Colors**:
   - Blue: Input/Source
   - Green: Processing/Transformation
   - Yellow: Storage
@@ -174,5 +174,5 @@ When adding new diagrams:
 
 ---
 
-**Last Updated**: February 2, 2026  
+**Last Updated**: February 2, 2026
 **Module**: 02 - Storage Basics

@@ -6,9 +6,9 @@
 Implement schema evolution in Parquet: add columns, change types, handle backward/forward compatibility.
 
 ## Scenario
-V1: `{id, amount, timestamp}`  
-V2: Add `customer_email` (optional)  
-V3: Add `loyalty_points` (with default)  
+V1: `{id, amount, timestamp}`
+V2: Add `customer_email` (optional)
+V3: Add `loyalty_points` (with default)
 V4: Change `amount` from float to decimal
 
 ## Requirements

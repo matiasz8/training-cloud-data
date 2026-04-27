@@ -4,17 +4,17 @@
 
 - Crear Common Table Expressions (WITH clause)
 - Usar subqueries en SELECT, FROM y WHERE
-- Encadenar múltiples CTEs
-- Decidir entre CTE y subquery según el caso
+- Chain multiple CTEs
+- Decide between CTE and subquery depending on the case
 
 ## 📚 Conceptos
 
-### CTE Básico
+### Basic CTE
 ```sql
 WITH high_value_orders AS (
     SELECT * FROM orders WHERE total_amount > 500
 )
-SELECT 
+SELECT
     u.first_name,
     hvo.order_id,
     hvo.total_amount
@@ -22,9 +22,9 @@ FROM high_value_orders hvo
 INNER JOIN users u ON hvo.user_id = u.user_id;
 ```
 
-### Múltiples CTEs
+### Multiple CTEs
 ```sql
-WITH 
+WITH
 user_stats AS (
     SELECT user_id, COUNT(*) AS num_orders
     FROM orders GROUP BY user_id
@@ -46,6 +46,6 @@ WHERE price > (SELECT AVG(price) FROM products);
 
 ## 🎓 Ejercicios
 
-Ver starter/ para ejercicios con CTEs recursivos, subqueries correlacionadas, y más.
+See starter/ for exercises with recursive CTEs, correlated subqueries, and more.
 
 ## ⏱️ Tiempo Estimado: ~100 minutos

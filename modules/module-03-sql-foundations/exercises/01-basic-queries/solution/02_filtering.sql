@@ -5,7 +5,7 @@
 -- Query 1: Usuarios activos de Estados Unidos
 SELECT *
 FROM users
-WHERE country = 'US' 
+WHERE country = 'US'
   AND is_active = TRUE;
 
 -- Query 2: Productos con precio menor a $50
@@ -17,7 +17,7 @@ WHERE price < 50;
 -- Opción 1: Usando OR
 SELECT *
 FROM orders
-WHERE status = 'delivered' 
+WHERE status = 'delivered'
    OR status = 'shipped';
 
 -- Opción 2: Usando IN (preferido)

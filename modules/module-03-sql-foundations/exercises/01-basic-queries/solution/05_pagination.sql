@@ -54,7 +54,7 @@ LIMIT 15 OFFSET 45;
 -- BONUS: Función de paginación genérica (comentada)
 -- Para página N con tamaño P:
 -- LIMIT P OFFSET (N - 1) * P
--- 
+--
 -- Ejemplos:
 -- Página 1, tamaño 10: LIMIT 10 OFFSET 0
 -- Página 2, tamaño 10: LIMIT 10 OFFSET 10

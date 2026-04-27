@@ -43,7 +43,7 @@ CREATE TABLE users (
     last_login TIMESTAMP,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     loyalty_points INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Constraints
     CONSTRAINT users_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     CONSTRAINT users_loyalty_points_positive CHECK (loyalty_points >= 0)
@@ -60,7 +60,7 @@ CREATE TABLE products (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_available BOOLEAN NOT NULL DEFAULT TRUE,
-    
+
     -- Constraints
     CONSTRAINT products_price_positive CHECK (price > 0),
     CONSTRAINT products_stock_non_negative CHECK (stock_quantity >= 0)
@@ -75,7 +75,7 @@ CREATE TABLE orders (
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     shipping_address TEXT,
     payment_method VARCHAR(50),
-    
+
     -- Constraints
     CONSTRAINT orders_total_amount_positive CHECK (total_amount >= 0),
     CONSTRAINT orders_status_valid CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled'))
@@ -89,12 +89,12 @@ CREATE TABLE order_items (
     quantity INTEGER NOT NULL DEFAULT 1,
     unit_price DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
-    
+
     -- Constraints
     CONSTRAINT order_items_quantity_positive CHECK (quantity > 0),
     CONSTRAINT order_items_unit_price_positive CHECK (unit_price >= 0),
     CONSTRAINT order_items_subtotal_correct CHECK (subtotal = quantity * unit_price),
-    
+
     -- Prevent duplicate products in same order
     CONSTRAINT order_items_unique_product_per_order UNIQUE (order_id, product_id)
 );
@@ -107,7 +107,7 @@ CREATE TABLE user_activity (
     activity_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     product_id INTEGER REFERENCES products(product_id) ON DELETE SET NULL,
     details JSONB,
-    
+
     -- Constraints
     CONSTRAINT user_activity_type_valid CHECK (activity_type IN ('login', 'logout', 'view_product', 'add_to_cart', 'purchase', 'review'))
 );
@@ -204,25 +204,25 @@ VALUES
     ('External SSD 1TB', 'Electronics', 119.99, 95, 'Portable solid-state drive', TRUE),
     ('Phone Case', 'Accessories', 15.99, 300, 'Protective silicone phone case', TRUE),
     ('Screen Protector', 'Accessories', 9.99, 400, 'Tempered glass screen protector', TRUE),
-    
+
     ('Python Programming Book', 'Books', 49.99, 60, 'Comprehensive guide to Python', TRUE),
     ('SQL for Data Science', 'Books', 39.99, 75, 'Learn SQL for data analysis', TRUE),
     ('Cloud Computing Guide', 'Books', 54.99, 40, 'Introduction to AWS and Azure', TRUE),
     ('Data Engineering Handbook', 'Books', 64.99, 35, 'Complete data engineering reference', TRUE),
     ('Machine Learning Basics', 'Books', 44.99, 55, 'Introduction to ML algorithms', TRUE),
-    
+
     ('Office Chair', 'Furniture', 249.99, 25, 'Ergonomic office chair with lumbar support', TRUE),
     ('Standing Desk', 'Furniture', 399.99, 15, 'Adjustable height standing desk', TRUE),
     ('Desk Lamp', 'Furniture', 34.99, 100, 'LED desk lamp with adjustable brightness', TRUE),
     ('Bookshelf', 'Furniture', 89.99, 20, '5-tier wooden bookshelf', TRUE),
     ('Monitor Stand', 'Furniture', 29.99, 70, 'Adjustable monitor riser', TRUE),
-    
+
     ('Protein Powder', 'Sports', 39.99, 150, '2kg whey protein powder', TRUE),
     ('Yoga Mat', 'Sports', 24.99, 80, 'Non-slip exercise yoga mat', TRUE),
     ('Resistance Bands Set', 'Sports', 19.99, 120, 'Set of 5 resistance bands', TRUE),
     ('Water Bottle', 'Sports', 14.99, 200, 'Insulated stainless steel water bottle', TRUE),
     ('Gym Bag', 'Sports', 34.99, 90, 'Spacious sports duffel bag', TRUE),
-    
+
     ('Coffee Maker', 'Home', 79.99, 50, 'Programmable drip coffee maker', TRUE),
     ('Blender', 'Home', 49.99, 65, 'High-speed blender for smoothies', TRUE),
     ('Air Fryer', 'Home', 99.99, 40, '5L capacity air fryer', TRUE),
@@ -377,7 +377,7 @@ BEGIN
     SET stock_quantity = stock_quantity - NEW.quantity,
         updated_at = CURRENT_TIMESTAMP
     WHERE product_id = NEW.product_id;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

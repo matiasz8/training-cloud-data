@@ -88,20 +88,20 @@ print_warning() {
 wait_for_postgres() {
     local max_attempts=30
     local attempt=0
-    
+
     print_info "Waiting for PostgreSQL to be ready..."
-    
+
     while [ $attempt -lt $max_attempts ]; do
         if docker exec sql-foundations-db pg_isready -U postgres -d ecommerce &> /dev/null; then
             print_success "PostgreSQL is ready!"
             return 0
         fi
-        
+
         attempt=$((attempt + 1))
         echo -n "."
         sleep 1
     done
-    
+
     print_error "PostgreSQL did not become ready in time"
     return 1
 }
@@ -129,7 +129,7 @@ cd "$MODULE_DIR/infrastructure"
 # Check if container is running
 if ! docker ps | grep -q "sql-foundations-db"; then
     print_warning "Database container is not running"
-    
+
     if [ "$KEEP_CONTAINER" = true ]; then
         print_info "Starting database container..."
         docker-compose up -d
@@ -148,18 +148,18 @@ else
         wait_for_postgres || exit 1
     else
         print_info "Keeping container, resetting database only..."
-        
+
         # Drop and recreate database
         print_info "Dropping database..."
         docker exec sql-foundations-db psql -U postgres -c "DROP DATABASE IF EXISTS ecommerce;"
-        
+
         print_info "Creating fresh database..."
         docker exec sql-foundations-db psql -U postgres -c "CREATE DATABASE ecommerce;"
-        
+
         # Run init script
         print_info "Running initialization script..."
         docker exec -i sql-foundations-db psql -U postgres -d ecommerce < "$INIT_SQL"
-        
+
         print_success "Database schema recreated"
     fi
 fi
@@ -178,7 +178,7 @@ fi
 # Load sample data
 if [ "$NO_DATA" = false ]; then
     print_header "Loading Sample Data"
-    
+
     if [ -d "$DATA_DIR" ]; then
         # Load seed data
         if [ -f "$DATA_DIR/seeds/users.csv" ]; then
@@ -187,14 +187,14 @@ if [ "$NO_DATA" = false ]; then
             USER_COUNT=$(docker exec sql-foundations-db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM users;" | tr -d ' ')
             print_success "Loaded $USER_COUNT users"
         fi
-        
+
         if [ -f "$DATA_DIR/seeds/products.csv" ]; then
             print_info "Loading products..."
             docker exec -i sql-foundations-db psql -U postgres -d ecommerce -c "\COPY products(product_id, product_name, category, price, is_available, stock_quantity, created_at) FROM STDIN WITH (FORMAT csv, HEADER true);" < "$DATA_DIR/seeds/products.csv"
             PRODUCT_COUNT=$(docker exec sql-foundations-db psql -U postgres -d ecommerce -t -c "SELECT COUNT(*) FROM products;" | tr -d ' ')
             print_success "Loaded $PRODUCT_COUNT products"
         fi
-        
+
         # Run migrations
         if ls "$DATA_DIR/migrations"/*.sql 1> /dev/null 2>&1; then
             print_info "Running migrations..."
@@ -204,13 +204,13 @@ if [ "$NO_DATA" = false ]; then
             done
             print_success "Migrations applied"
         fi
-        
+
         # Show data summary
         print_header "Data Summary"
         docker exec sql-foundations-db psql -U postgres -d ecommerce -c "
-            SELECT 
-                'users' AS table_name, 
-                COUNT(*) AS row_count 
+            SELECT
+                'users' AS table_name,
+                COUNT(*) AS row_count
             FROM users
             UNION ALL
             SELECT 'products', COUNT(*) FROM products

@@ -24,7 +24,7 @@ SELECT * FROM users WHERE LOWER(email) LIKE '%gmail.com';
 -- Puedes calcular valores en el SELECT
 
 -- Calcular descuento del 10%
-SELECT 
+SELECT
     product_name,
     price AS precio_original,
     price * 0.9 AS precio_con_descuento,
@@ -33,16 +33,16 @@ FROM products
 WHERE is_available = TRUE;
 
 -- Concatenar strings
-SELECT 
+SELECT
     first_name || ' ' || last_name AS nombre_completo,
     email
 FROM users;
 
 -- Expresiones booleanas
-SELECT 
+SELECT
     product_name,
     price,
-    CASE 
+    CASE
         WHEN price < 50 THEN 'Económico'
         WHEN price BETWEEN 50 AND 200 THEN 'Moderado'
         ELSE 'Premium'
@@ -55,15 +55,15 @@ FROM products;
 -- Combinar múltiples patrones de búsqueda
 
 -- Productos que contienen "Laptop" O "Computer"
-SELECT * 
+SELECT *
 FROM products
-WHERE product_name LIKE '%Laptop%' 
+WHERE product_name LIKE '%Laptop%'
    OR product_name LIKE '%Computer%';
 
 -- Emails de Gmail O Outlook
 SELECT *
 FROM users
-WHERE email LIKE '%@gmail.com' 
+WHERE email LIKE '%@gmail.com'
    OR email LIKE '%@outlook.com';
 
 -- Nombres que empiezan con J, M o S
@@ -81,8 +81,8 @@ WHERE first_name LIKE 'J%'
 -- Sin paréntesis (puede no dar el resultado esperado)
 SELECT *
 FROM users
-WHERE country = 'US' 
-   OR country = 'GB' 
+WHERE country = 'US'
+   OR country = 'GB'
   AND loyalty_points > 100;
 -- Esto es equivalente a: country = 'US' OR (country = 'GB' AND loyalty_points > 100)
 
@@ -98,7 +98,7 @@ WHERE (country = 'US' OR country = 'GB')
 -- COALESCE retorna el primer valor no-NULL
 
 -- Mostrar "N/A" si el tracking number es NULL
-SELECT 
+SELECT
     order_id,
     order_date,
     COALESCE(tracking_number, 'N/A') AS tracking,
@@ -108,7 +108,7 @@ ORDER BY order_date DESC
 LIMIT 10;
 
 -- Usar valor por defecto para columnas opcionales
-SELECT 
+SELECT
     product_name,
     COALESCE(description, 'Sin descripción') AS description,
     price
@@ -133,7 +133,7 @@ WHERE order_date >= CURRENT_DATE - INTERVAL '30 days';
 -- Órdenes de un trimestre específico (Q3 2023)
 SELECT *
 FROM orders
-WHERE order_date >= '2023-07-01' 
+WHERE order_date >= '2023-07-01'
   AND order_date < '2023-10-01';
 
 -- =============================================================================
@@ -210,7 +210,7 @@ WHERE product_name ~ '[0-9]';
 -- Queries analíticas útiles
 
 -- Resumen de productos por categoría
-SELECT 
+SELECT
     category,
     COUNT(*) AS num_productos,
     MIN(price) AS precio_min,
@@ -222,7 +222,7 @@ GROUP BY category
 ORDER BY category;
 
 -- Distribución de usuarios por país
-SELECT 
+SELECT
     country,
     COUNT(*) AS num_usuarios,
     COUNT(*) * 100.0 / (SELECT COUNT(*) FROM users) AS porcentaje
@@ -231,7 +231,7 @@ GROUP BY country
 ORDER BY num_usuarios DESC;
 
 -- Estados de órdenes
-SELECT 
+SELECT
     status,
     COUNT(*) AS num_ordenes,
     SUM(total_amount) AS revenue_total,
@@ -246,7 +246,7 @@ ORDER BY num_ordenes DESC;
 -- Mostrar información útil para UI de paginación
 
 -- Página 1 con contador total
-SELECT 
+SELECT
     *,
     COUNT(*) OVER() AS total_registros
 FROM users
@@ -254,7 +254,7 @@ ORDER BY user_id
 LIMIT 10 OFFSET 0;
 
 -- Calcular número total de páginas
-SELECT 
+SELECT
     CEIL(COUNT(*)::DECIMAL / 10) AS total_paginas,
     COUNT(*) AS total_registros
 FROM users;

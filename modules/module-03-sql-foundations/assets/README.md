@@ -7,8 +7,8 @@ This directory contains visual diagrams and quick reference cheatsheets to suppl
 Interactive Mermaid diagrams that visualize SQL concepts.
 
 ### [Query Execution Flow](diagrams/query-execution-flow.md)
-**What**: Step-by-step visualization of how PostgreSQL processes SQL queries  
-**Covers**: Parser → Rewriter → Planner → Cost Estimator → Executor  
+**What**: Step-by-step visualization of how PostgreSQL processes SQL queries
+**Covers**: Parser → Rewriter → Planner → Cost Estimator → Executor
 **Use When**: Understanding EXPLAIN output, query optimization
 
 **Key Concepts**:
@@ -20,7 +20,7 @@ Interactive Mermaid diagrams that visualize SQL concepts.
 ---
 
 ### [JOIN Types Visual Guide](diagrams/join-types.md)
-**What**: Complete visual breakdown of all JOIN types with examples  
+**What**: Complete visual breakdown of all JOIN types with examples
 **Covers**: INNER, LEFT, RIGHT, FULL OUTER JOINs
 
 **Includes**:
@@ -37,7 +37,7 @@ Interactive Mermaid diagrams that visualize SQL concepts.
 ---
 
 ### [Window Functions Explained](diagrams/window-functions.md)
-**What**: Deep dive into window function mechanics  
+**What**: Deep dive into window function mechanics
 **Covers**: ROW_NUMBER, RANK, PARTITION BY, LAG/LEAD, Frame clauses
 
 **Key Visualizations**:
@@ -77,7 +77,7 @@ Quick reference guides with syntax, examples, and best practices.
 11. **CASE Expressions**: Conditional logic in queries
 12. **DISTINCT**: Unique values
 
-**Quick Reference Table**: Operations and syntax at a glance  
+**Quick Reference Table**: Operations and syntax at a glance
 **Execution Order**: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT
 
 **Use When**:
@@ -148,7 +148,7 @@ Quick reference guides with syntax, examples, and best practices.
 7. **Monitoring**: Finding slow queries, missing indexes, unused indexes
 8. **Maintenance**: REINDEX, ANALYZE, index bloat
 
-**Optimization Checklist**: Step-by-step workflow  
+**Optimization Checklist**: Step-by-step workflow
 **Quick Reference Table**: Techniques and when to use them
 
 **Use When**:

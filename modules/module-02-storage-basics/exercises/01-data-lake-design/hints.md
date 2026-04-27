@@ -162,7 +162,7 @@ DataEngineerRole:
       Statement:
         - Effect: Allow
           Principal:
-            Service: 
+            Service:
               - ec2.amazonaws.com
               - glue.amazonaws.com
           Action: 'sts:AssumeRole'
@@ -227,7 +227,7 @@ BronzeBucketPolicy:
           Condition:
             StringNotEquals:
               's3:x-amz-server-side-encryption': 'AES256'
-        
+
         - Sid: DenyInsecureTransport
           Effect: Deny
           Principal: '*'
@@ -251,15 +251,15 @@ BronzeBucket:
   Type: AWS::S3::Bucket
   Properties:
     BucketName: !Sub '${CompanyName}-bronze-${Environment}'
-    
+
     VersioningConfiguration:
       Status: Enabled
-    
+
     BucketEncryption:
       ServerSideEncryptionConfiguration:
         - ServerSideEncryptionByDefault:
             SSEAlgorithm: AES256
-    
+
     LifecycleConfiguration:
       Rules:
         - Id: TransitionOldData
@@ -270,17 +270,17 @@ BronzeBucket:
             - TransitionInDays: 90
               StorageClass: GLACIER
           ExpirationInDays: 730
-    
+
     LoggingConfiguration:
       DestinationBucketName: !Ref LogsBucket
       LogFilePrefix: bronze-access-logs/
-    
+
     PublicAccessBlockConfiguration:
       BlockPublicAcls: true
       BlockPublicPolicy: true
       IgnorePublicAcls: true
       RestrictPublicBuckets: true
-    
+
     Tags:
       - Key: Environment
         Value: !Ref Environment
@@ -299,15 +299,15 @@ SilverBucket:
   Type: AWS::S3::Bucket
   Properties:
     BucketName: !Sub '${CompanyName}-silver-${Environment}'
-    
+
     VersioningConfiguration:
       Status: Enabled
-    
+
     BucketEncryption:
       ServerSideEncryptionConfiguration:
         - ServerSideEncryptionByDefault:
             SSEAlgorithm: AES256
-    
+
     LifecycleConfiguration:
       Rules:
         - Id: TransitionToIA
@@ -316,17 +316,17 @@ SilverBucket:
             - TransitionInDays: 90
               StorageClass: STANDARD_IA
           ExpirationInDays: 365
-    
+
     LoggingConfiguration:
       DestinationBucketName: !Ref LogsBucket
       LogFilePrefix: silver-access-logs/
-    
+
     PublicAccessBlockConfiguration:
       BlockPublicAcls: true
       BlockPublicPolicy: true
       IgnorePublicAcls: true
       RestrictPublicBuckets: true
-    
+
     Tags:
       - Key: Environment
         Value: !Ref Environment
@@ -345,28 +345,28 @@ GoldBucket:
   Type: AWS::S3::Bucket
   Properties:
     BucketName: !Sub '${CompanyName}-gold-${Environment}'
-    
+
     VersioningConfiguration:
       Status: Enabled
-    
+
     BucketEncryption:
       ServerSideEncryptionConfiguration:
         - ServerSideEncryptionByDefault:
             SSEAlgorithm: AES256
-    
+
     # No lifecycle transitions - keep in Standard
     # Data is frequently accessed
-    
+
     LoggingConfiguration:
       DestinationBucketName: !Ref LogsBucket
       LogFilePrefix: gold-access-logs/
-    
+
     PublicAccessBlockConfiguration:
       BlockPublicAcls: true
       BlockPublicPolicy: true
       IgnorePublicAcls: true
       RestrictPublicBuckets: true
-    
+
     Tags:
       - Key: Environment
         Value: !Ref Environment
@@ -385,27 +385,27 @@ LogsBucket:
   Type: AWS::S3::Bucket
   Properties:
     BucketName: !Sub '${CompanyName}-logs-${Environment}'
-    
+
     VersioningConfiguration:
       Status: Enabled
-    
+
     BucketEncryption:
       ServerSideEncryptionConfiguration:
         - ServerSideEncryptionByDefault:
             SSEAlgorithm: AES256
-    
+
     LifecycleConfiguration:
       Rules:
         - Id: DeleteOldLogs
           Status: Enabled
           ExpirationInDays: 90  # Logs only kept 90 days
-    
+
     PublicAccessBlockConfiguration:
       BlockPublicAcls: true
       BlockPublicPolicy: true
       IgnorePublicAcls: true
       RestrictPublicBuckets: true
-    
+
     Tags:
       - Key: Environment
         Value: !Ref Environment
@@ -450,7 +450,7 @@ DataEngineerRole:
                 - !Sub '${BronzeBucket.Arn}/*'
                 - !GetAtt SilverBucket.Arn
                 - !Sub '${SilverBucket.Arn}/*'
-            
+
             # Read-only access to Gold
             - Effect: Allow
               Action:
@@ -460,13 +460,13 @@ DataEngineerRole:
               Resource:
                 - !GetAtt GoldBucket.Arn
                 - !Sub '${GoldBucket.Arn}/*'
-            
+
             # Glue permissions
             - Effect: Allow
               Action:
                 - 'glue:*'
               Resource: '*'
-    
+
     Tags:
       - Key: Environment
         Value: !Ref Environment

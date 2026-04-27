@@ -233,12 +233,12 @@ print_header "Validation Summary"
 
 if [ "$TESTS_PASSED" = true ]; then
     print_success "All tests passed!"
-    
+
     # Show coverage summary if enabled
     if [ "$COVERAGE" = true ] && [ -f "$MODULE_DIR/htmlcov/index.html" ]; then
         print_info "Coverage report generated: htmlcov/index.html"
     fi
-    
+
     # Show test statistics
     if [ -f "$MODULE_DIR/.pytest_cache/v/cache/lastfailed" ]; then
         FAILED_COUNT=$(jq '. | length' "$MODULE_DIR/.pytest_cache/v/cache/lastfailed" 2>/dev/null || echo "0")
@@ -246,7 +246,7 @@ if [ "$TESTS_PASSED" = true ]; then
             print_warning "$FAILED_COUNT test(s) failed in previous run"
         fi
     fi
-    
+
     echo ""
     echo "Validation complete! ✓"
     echo ""
@@ -255,11 +255,11 @@ if [ "$TESTS_PASSED" = true ]; then
     echo "  - Check coverage report: open htmlcov/index.html"
     echo "  - Run specific exercise: ./scripts/validate.sh --exercise 01"
     echo ""
-    
+
     exit 0
 else
     print_error "Some tests failed"
-    
+
     echo ""
     echo "Troubleshooting:"
     echo "  1. Check test output above for details"
@@ -268,6 +268,6 @@ else
     echo "  4. Run with verbose: ./scripts/validate.sh --verbose"
     echo "  5. See docs/troubleshooting.md for more help"
     echo ""
-    
+
     exit 1
 fi

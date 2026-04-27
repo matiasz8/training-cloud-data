@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS products (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_available BOOLEAN NOT NULL DEFAULT TRUE,
-    
+
     -- Constraints
     CONSTRAINT products_price_positive CHECK (price > 0),
     CONSTRAINT products_stock_non_negative CHECK (stock_quantity >= 0)

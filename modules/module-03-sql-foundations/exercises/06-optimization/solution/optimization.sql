@@ -15,22 +15,22 @@ EXPLAIN ANALYZE SELECT * FROM orders WHERE user_id = 5;
 -- =====================================================
 
 -- ANTES: Sin índice (debe hacer Seq Scan)
-EXPLAIN ANALYZE 
-SELECT * FROM orders 
-WHERE user_id = 10 
+EXPLAIN ANALYZE
+SELECT * FROM orders
+WHERE user_id = 10
 ORDER BY order_date DESC;
 
 -- Crear índice
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 
 -- DESPUÉS: Con índice (debe usar Index Scan)
-EXPLAIN ANALYZE 
-SELECT * FROM orders 
-WHERE user_id = 10 
+EXPLAIN ANALYZE
+SELECT * FROM orders
+WHERE user_id = 10
 ORDER BY order_date DESC;
 
 -- Índice compuesto para mejorar aún más
-CREATE INDEX IF NOT EXISTS idx_orders_user_date 
+CREATE INDEX IF NOT EXISTS idx_orders_user_date
 ON orders(user_id, order_date DESC);
 
 -- =====================================================
@@ -47,7 +47,7 @@ INNER JOIN products p ON oi.product_id = p.product_id;
 
 -- EFICIENTE: Solo columnas necesarias
 EXPLAIN ANALYZE
-SELECT 
+SELECT
     o.order_id,
     u.first_name,
     p.product_name,
@@ -68,8 +68,8 @@ EXPLAIN ANALYZE
 SELECT *
 FROM users u
 WHERE user_id IN (
-    SELECT DISTINCT user_id 
-    FROM orders 
+    SELECT DISTINCT user_id
+    FROM orders
     WHERE total_amount > 100
 );
 
@@ -85,9 +85,9 @@ EXPLAIN ANALYZE
 SELECT *
 FROM users u
 WHERE EXISTS (
-    SELECT 1 
-    FROM orders o 
-    WHERE o.user_id = u.user_id 
+    SELECT 1
+    FROM orders o
+    WHERE o.user_id = u.user_id
       AND o.total_amount > 100
 );
 
@@ -96,7 +96,7 @@ WHERE EXISTS (
 -- =====================================================
 
 -- INEFICIENTE: Múltiples subqueries
-SELECT 
+SELECT
     u.user_id,
     u.first_name,
     (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.user_id) AS num_orders,
@@ -106,7 +106,7 @@ FROM users u
 ORDER BY total_spent DESC;
 
 -- EFICIENTE: Un solo JOIN con agregaciones
-SELECT 
+SELECT
     u.user_id,
     u.first_name,
     COUNT(o.order_id) AS num_orders,
@@ -156,7 +156,7 @@ ORDER BY total_spent DESC;
 -- Verificar índices existentes
 -- =====================================================
 
-SELECT 
+SELECT
     tablename,
     indexname,
     indexdef
@@ -168,7 +168,7 @@ ORDER BY tablename, indexname;
 -- Estadísticas de uso de índices
 -- =====================================================
 
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,

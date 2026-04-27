@@ -1,6 +1,6 @@
 # Validation Tests
 
-Este directorio contiene tests automatizados para validar los ejercicios del módulo SQL Foundations.
+This directory contains automated tests to validate the exercises in the SQL Foundations module.
 
 ## 📋 Contenido
 
@@ -26,9 +26,9 @@ cd modules/module-03-sql-foundations
 pip install pytest pytest-postgresql psycopg2-binary python-dotenv
 ```
 
-### 2. Configurar Base de Datos
+### 2. Configurar database
 
-Los tests requieren que la base de datos esté corriendo con datos:
+The tests require that the database be running with data:
 
 ```bash
 # Desde el directorio infrastructure/
@@ -92,7 +92,7 @@ pytest validation/ -v -m exercise05
 pytest validation/ -v -m exercise06
 ```
 
-### Tests Específicos
+### Specific Tests
 
 ```bash
 # Test específico por nombre
@@ -105,7 +105,7 @@ pytest validation/test_exercise_01.py::TestProjection -v
 pytest validation/test_exercise_01.py -v
 ```
 
-### Opciones Útiles
+### Useful Options
 
 ```bash
 # Mostrar output detallado
@@ -130,18 +130,18 @@ pytest validation/ --cov=validation --cov-report=html
 
 Fixtures compartidas:
 
-- `db_connection`: Conexión a base de datos (scope: session)
+- `db_connection`: Database connection (scope: session)
 - `db_cursor`: Cursor con auto-rollback (scope: function)
 - `execute_query`: Helper para ejecutar queries
 - `execute_file`: Helper para ejecutar archivos SQL
-- `verify_db_setup`: Verifica que la BD esté configurada
+- `verify_db_setup`: Verify that the DB is configured
 
 ### helpers.py
 
 Utilidades:
 
 - `compare_results()`: Comparar resultados de queries
-- `validate_schema()`: Validar columnas esperadas
+- `validate_schema()`: Validar columns esperadas
 - `benchmark_query()`: Medir performance
 - `assert_no_nulls()`: Verificar ausencia de NULLs
 - `assert_unique()`: Verificar unicidad
@@ -151,7 +151,7 @@ Utilidades:
 
 ## 📝 Ejemplo de Uso
 
-### Test Básico
+### Basic Test
 
 ```python
 @pytest.mark.exercise01
@@ -159,7 +159,7 @@ def test_select_users(execute_query):
     """Test selecting users."""
     query = "SELECT * FROM users LIMIT 5"
     results = execute_query(query)
-    
+
     assert len(results) == 5
     assert 'first_name' in results[0]
 ```
@@ -178,9 +178,9 @@ def test_projection(execute_query):
     LIMIT 10
     """
     results = execute_query(query)
-    
+
     assert_query_returns_columns(
-        results, 
+        results,
         ['first_name', 'last_name', 'email']
     )
 ```
@@ -198,25 +198,25 @@ def test_join_performance(db_cursor):
     FROM orders o
     INNER JOIN users u ON o.user_id = u.user_id
     """
-    
+
     stats = benchmark_query(db_cursor, query, iterations=5)
-    
+
     # Verificar que promedio es razonable
     assert stats['avg'] < 1.0  # Less than 1 second
 ```
 
-## ✅ Qué Validan los Tests
+## ✅ What the Tests Validate
 
 ### Exercise 01: Basic Queries
 
-- ✓ Proyección de columnas específicas
+- ✓ Projection of specific columns
 - ✓ Uso de alias
 - ✓ Filtrado con WHERE (=, <, >, !=)
-- ✓ Operadores lógicos (AND, OR, NOT)
+- ✓ Logical operators (AND, OR, NOT)
 - ✓ Pattern matching (LIKE, IN, BETWEEN)
 - ✓ NULL handling (IS NULL, IS NOT NULL)
 - ✓ Ordenamiento (ORDER BY ASC/DESC)
-- ✓ Paginación (LIMIT, OFFSET)
+- ✓ Pagination (LIMIT, OFFSET)
 - ✓ Queries combinados
 
 ### Exercise 02: Joins
@@ -263,9 +263,9 @@ def test_join_performance(db_cursor):
 
 ### Error: "Missing required tables"
 
-**Causa**: Base de datos no inicializada.
+**Causa**: database no inicializada.
 
-**Solución**:
+**Solution**:
 ```bash
 cd infrastructure
 docker-compose down -v
@@ -276,9 +276,9 @@ psql -h localhost -U dataengineer -d ecommerce -f init.sql
 
 ### Error: "Connection refused"
 
-**Causa**: PostgreSQL no está corriendo.
+**Cause**: PostgreSQL is not running.
 
-**Solución**:
+**Solution**:
 ```bash
 cd infrastructure
 docker-compose up -d
@@ -287,9 +287,9 @@ docker-compose ps  # Verificar estado
 
 ### Error: "Table is empty"
 
-**Causa**: `init.sql` no ejecutó correctamente o no tiene datos de muestra.
+**Causa**: `init.sql`did not run correctly or does not have sample data.
 
-**Solución**:
+**Solution**:
 ```bash
 psql -h localhost -U dataengineer -d ecommerce -f infrastructure/init.sql
 ```
@@ -298,7 +298,7 @@ psql -h localhost -U dataengineer -d ecommerce -f infrastructure/init.sql
 
 **Causa**: Rollback no funciona correctamente.
 
-**Solución**: Asegúrate de que `db_connection` tiene `autocommit=False`:
+**Solution**: Make sure`db_connection` tiene `autocommit=False`:
 ```python
 conn = psycopg2.connect(**DB_CONFIG)
 conn.autocommit = False
@@ -306,7 +306,7 @@ conn.autocommit = False
 
 ### Tests Muy Lentos
 
-**Solución**:
+**Solution**:
 ```bash
 # Excluir tests marcados como slow
 pytest validation/ -m "not slow"
@@ -315,7 +315,7 @@ pytest validation/ -m "not slow"
 pytest validation/ -n auto
 ```
 
-## 📚 Recursos
+## 📚 resources
 
 - [Pytest Documentation](https://docs.pytest.org/)
 - [pytest-postgresql](https://pytest-postgresql.readthedocs.io/)
@@ -328,23 +328,23 @@ pytest validation/ -n auto
 
 1. **Un concepto por test**: Cada test debe validar una sola cosa
 2. **Nombres descriptivos**: `test_select_users_with_active_status` > `test_query1`
-3. **Assertions claras**: Usar helpers que den mensajes de error útiles
-4. **Cleanup automático**: Usar fixtures con rollback
-5. **Datos consistentes**: No asumir datos específicos, verificar condiciones
+3. **Clear assertions**: Use helpers that give useful error messages
+4. **Automatic Cleanup**: Use fixtures with rollback
+5. **Consistent data**: Do not assume specific data, verify conditions
 
 ### Performance
 
 1. **Usar markers**: Marca tests lentos con `@pytest.mark.slow`
-2. **Fixtures con scope apropiado**: `session` para conexión, `function` para cursor
+2. **Fixtures con scope apropiado**: `session`for connection,`function` para cursor
 3. **Evitar sleep**: Usar health checks en lugar de esperar tiempos fijos
 4. **Limitar datasets**: Usa LIMIT en tests cuando sea posible
 
 ### Mantenibilidad
 
-1. **Helpers reutilizables**: Centraliza lógica común en `helpers.py`
+1. **Reusable Helpers**: Centralize common logic in`helpers.py`
 2. **Fixtures compartidas**: Define en `conftest.py`
-3. **Documentación**: Docstrings claros en cada test
-4. **Markers organizados**: Usa markers para agrupar tests lógicamente
+3. **Documentation**: Clear Docstrings in each test
+4. **Organized Markers**: Use markers to group tests logically
 
 ## 🔄 CI/CD Integration
 
@@ -358,7 +358,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15-alpine
@@ -373,25 +373,25 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-      
+
       - name: Initialize database
         run: |
           psql -h localhost -U dataengineer -d ecommerce -f infrastructure/init.sql
         env:
           PGPASSWORD: training123
-      
+
       - name: Run tests
         run: |
           pytest validation/ -v --junitxml=junit/test-results.xml
@@ -401,7 +401,7 @@ jobs:
           POSTGRES_DB: ecommerce
           POSTGRES_USER: dataengineer
           POSTGRES_PASSWORD: training123
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v3
         with:
@@ -411,5 +411,5 @@ jobs:
 
 ---
 
-**Última Actualización**: Febrero 2026  
+**Last Update**: February 2026
 **Mantenido por**: Equipo de Training Data Engineering

@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Default: globalmart
     Description: Name of the Glue database
-  
+
   BucketName:
     Type: String
     Description: S3 bucket containing the data

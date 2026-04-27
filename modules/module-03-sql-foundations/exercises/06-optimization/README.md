@@ -4,7 +4,7 @@
 
 - Analizar query plans con EXPLAIN
 - Identificar problemas de performance
-- Crear y usar índices efectivamente
+- Crear y usar indexs efectivamente
 - Optimizar JOINs y subqueries
 - Entender query costs y timing
 
@@ -14,12 +14,12 @@
 ```sql
 EXPLAIN SELECT * FROM orders WHERE user_id = 1;
 
-EXPLAIN ANALYZE SELECT * FROM orders 
-WHERE user_id = 1 
+EXPLAIN ANALYZE SELECT * FROM orders
+WHERE user_id = 1
 ORDER BY order_date DESC;
 ```
 
-### Índices
+### indexes
 ```sql
 -- Crear índice
 CREATE INDEX idx_orders_user_id ON orders(user_id);
@@ -31,7 +31,7 @@ CREATE INDEX idx_orders_user_date ON orders(user_id, order_date);
 \di+ orders
 ```
 
-### Optimización
+### Optimization
 - Evitar SELECT *
 - Usar LIMIT apropiadamente
 - Filtrar antes de JOIN cuando sea posible
@@ -40,6 +40,6 @@ CREATE INDEX idx_orders_user_date ON orders(user_id, order_date);
 
 ## 🎓 Ejercicios
 
-Ver starter/ para ejercicios de análisis de performance, creación de índices, y comparación de queries.
+See starter/ for performance analysis exercises, index creation, and query comparison.
 
 ## ⏱️ Tiempo Estimado: ~90 minutos

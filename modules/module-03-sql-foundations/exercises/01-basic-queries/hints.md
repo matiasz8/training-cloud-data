@@ -1,42 +1,42 @@
 # Hints - Exercise 01: Basic Queries
 
-¿Necesitas ayuda? Aquí hay pistas sin revelar las soluciones completas.
+Do you need help? There are clues here without revealing the full solutions.
 
-## Proyección (01_projection.sql)
+## Projection (01_projection.sql)
 
 **Query 1 - Nombre y email**
 - 💡 Usa `SELECT column1, column2, column3 FROM table`
 - 💡 No necesitas WHERE si quieres todos los registros
 
-**Query 2 - Alias en español**
+**Query 2 - Aliases in Spanish**
 - 💡 Sintaxis de alias: `column_name AS alias_name`
 - 💡 Los alias pueden tener espacios si usas comillas: `AS "nombre producto"`
 
-**Query 3 - Primeras 5 órdenes**
+**Query 3 - First 5 orders**
 - 💡 `LIMIT n` va al final de la query
-- 💡 Ordena primero si necesitas las "primeras" de algún criterio específico
+- 💡 Order first if you need the "firsts" of any specific criteria
 
 **Query 5 - Todas excepto timestamps**
 - 💡 No existe `SELECT * EXCEPT` en PostgreSQL
-- 💡 Debes listar explícitamente las columnas que quieres
+- 💡 You must explicitly list the columns you want
 
 ## Filtrado (02_filtering.sql)
 
-**Query 1 - Múltiples condiciones**
+**Query 1 - Multiple conditions**
 - 💡 Usa `AND` para combinar condiciones que deben cumplirse todas
 - 💡 Sintaxis: `WHERE condition1 AND condition2`
 
 **Query 3 - OR vs IN**
 - 💡 `WHERE status = 'a' OR status = 'b'` es equivalente a `WHERE status IN ('a', 'b')`
-- 💡 `IN` es más legible con muchos valores
+- 💡 `IN`it is more readable with many values
 
-**Query 4 - Negación**
-- 💡 `NOT IN ('a', 'b', 'c')` es la forma más clara
-- 💡 También válido: `!= 'a' AND != 'b' AND != 'c'` pero más verboso
+**Query 4 - Negation**
+- 💡 `NOT IN ('a', 'b', 'c')`is the clearest way
+- 💡 Also valid:`!= 'a' AND != 'b' AND != 'c'`but more verbose
 
 **Query 8 - Booleanos**
 - 💡 En PostgreSQL: `WHERE column = TRUE` o `WHERE column = FALSE`
-- 💡 También válido: `WHERE column` o `WHERE NOT column`
+- 💡 Also valid:`WHERE column` o `WHERE NOT column`
 
 ## Pattern Matching (03_patterns.sql)
 
@@ -71,70 +71,70 @@
 - 💡 Combina `ORDER BY column DESC` con `LIMIT n`
 - 💡 El orden es: WHERE → ORDER BY → LIMIT
 
-**Query 5 - Ordenar por múltiples columnas**
+**Query 5 - Sort by multiple columns**
 - 💡 Sintaxis: `ORDER BY col1 ASC, col2 DESC, col3 ASC`
 - 💡 Se ordena primero por col1, luego por col2 (para empates), etc.
 
-**Query 7 - Últimos N**
-- 💡 "Últimos" = más recientes = orden descendente por fecha
-- 💡 No confundir con los últimos de la tabla (eso sería ORDER BY primary_key DESC)
+**Query 7 - Last N**
+- 💡 "Latest" = most recent = descending order by date
+- 💡 Do not confuse with the last ones in the table (that would be ORDER BY primary_key DESC)
 
-## Paginación (05_pagination.sql)
+## Pagination (05_pagination.sql)
 
 **Query 2-3 - OFFSET**
 - 💡 `OFFSET n` salta los primeros n registros
-- 💡 Página 1: OFFSET 0, Página 2: OFFSET 10, Página 3: OFFSET 20
+- 💡 Page 1: OFFSET 0, Page 2: OFFSET 10, Page 3: OFFSET 20
 
-**Query 8 - Fórmula de paginación**
-- 💡 Para página N con tamaño P: `OFFSET = (N - 1) * P`
+**Query 8 - Pagination Formula**
+- 💡 For page N with size P:`OFFSET = (N - 1) * P`
 - 💡 Ejemplos:
-  - Página 1: (1-1) * 10 = 0
-  - Página 2: (2-1) * 10 = 10
-  - Página 4: (4-1) * 15 = 45
+  - Page 1: (1-1) * 10 = 0
+  - Page 2: (2-1) * 10 = 10
+  - Page 4: (4-1) * 15 = 45
 
 **Importante sobre ORDER BY**
 - 💡 SIEMPRE usa ORDER BY con LIMIT/OFFSET
 - 💡 Sin ORDER BY, el orden es indeterminado y puede cambiar entre queries
 
-## Combinación (06_combined.sql)
+## Combination (06_combined.sql)
 
-**Query 1 - Múltiples condiciones**
-- 💡 Orden recomendado: WHERE → (más restricciones primero) → ORDER BY → LIMIT
-- 💡 Usa paréntesis para claridad si combinas AND/OR
+**Query 1 - Multiple conditions**
+- 💡 Recommended order: WHERE → (more restrictions first) → ORDER BY → LIMIT
+- 💡 Use parentheses for clarity if you combine AND/OR
 
 **Query 3 - Filtrar y limitar**
 - 💡 WHERE se aplica ANTES de ORDER BY y LIMIT
 - 💡 Flujo: Filtrar → Ordenar → Limitar
 
 **Query 6 - OR con LIKE**
-- 💡 Necesitas paréntesis: `WHERE is_available = TRUE AND (condicion1 OR condicion2)`
-- 💡 Sin paréntesis: `AND` tiene precedencia sobre `OR`
+- 💡 You need parentheses:`WHERE is_available = TRUE AND (condicion1 OR condicion2)`
+- 💡 Without parentheses:`AND` tiene precedencia sobre `OR`
 
 **Query BONUS - Query complejo**
 - 💡 Construye paso a paso:
-  1. Empieza con la condición más restrictiva
+  1. Start with the most restrictive condition
   2. Agrega condiciones con AND
   3. Agrega ORDER BY al final
   4. Agrega LIMIT
-- 💡 Prueba cada condición individualmente antes de combinarlas
+- 💡 Test each condition individually before combining them
 
 ## Tips Generales
 
 ### Debugging de Queries
 1. Empieza con `SELECT * FROM table` sin WHERE
-2. Agrega una condición a la vez
+2. Add one condition at a time
 3. Verifica el count: `SELECT COUNT(*) FROM table WHERE ...`
-4. Si no retorna nada, verifica que los valores existan en la tabla
+4. Si no retorna nada, verifica que los valores existan en la table
 
 ### Performance
-- `IN` vs múltiples `OR`: usa `IN` para mejor performance
+- `IN`vs multiple`OR`: usa `IN` para mejor performance
 - `BETWEEN` vs `>= AND <=`: usa `BETWEEN` para claridad
 - Siempre incluye `ORDER BY` con `LIMIT` para resultados consistentes
 
 ### Estilo SQL
-- MAYÚSCULAS para keywords: SELECT, FROM, WHERE
-- snake_case para nombres de columnas
-- Indentación consistente
+- CAPITAL LETTERS for keywords: SELECT, FROM, WHERE
+- snake_case para nombres de columns
+- Consistent indentation
 - Comentarios para queries complejos
 
 ### Testing
@@ -151,24 +151,24 @@ psql -h localhost -U dataengineer -d ecommerce -c "\x" -c "SELECT * FROM users L
 
 ### Common Pitfalls
 
-❌ **Error**: `WHERE column = NULL`  
+❌ **Error**: `WHERE column = NULL`
 ✅ **Correcto**: `WHERE column IS NULL`
 
-❌ **Error**: `LIMIT 10 ORDER BY column`  
+❌ **Error**: `LIMIT 10 ORDER BY column`
 ✅ **Correcto**: `ORDER BY column LIMIT 10`
 
-❌ **Error**: `WHERE country = 'US' OR 'GB'`  
+❌ **Error**: `WHERE country = 'US' OR 'GB'`
 ✅ **Correcto**: `WHERE country IN ('US', 'GB')`
 
-❌ **Error**: `LIKE 'gmail.com'` (busca exacto)  
+❌ **Error**: `LIKE 'gmail.com'` (busca exacto)
 ✅ **Correcto**: `LIKE '%gmail.com'` (busca que termine en)
 
-❌ **Error**: No usar ORDER BY con LIMIT  
-✅ **Correcto**: Siempre `ORDER BY` antes de `LIMIT` para resultados determinísticos
+❌ **Error**: No usar ORDER BY con LIMIT
+✅ **Correcto**: Siempre `ORDER BY` antes de `LIMIT`for deterministic results
 
 ### Need More Help?
 
-1. Consulta la documentación de PostgreSQL
+1. query PostgreSQL documentation
 2. Revisa los ejemplos en el README.md
-3. Usa `\d table_name` en psql para ver la estructura de la tabla
-4. Si aún estás atascado, mira la solución correspondiente en `solution/`
+3. Usa `\d table_name` en psql para ver la estructura de la table
+4. If you are still stuck, see the corresponding solution on`solution/`

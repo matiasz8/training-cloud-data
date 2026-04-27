@@ -1,90 +1,104 @@
-# Módulo 02: Fundamentos de Almacenamiento y Formatos de Datos
+# Module 02: Storage Fundamentals and Data Formats
 
-⏱️ **Tiempo Estimado:** 10-12 horas
+⏱️ **Estimated Time:** 10-12 hours
 
 ## Prerequisitos
 
-- Módulo 01: Fundamentos de Cloud (completado)
+- Module 01: Cloud Fundamentals (completed)
 
 ## Module Overview
 
-Domina los fundamentos de almacenamiento de datos y formatos de archivo esenciales para data engineering. Profundiza en S3 como data lake, aprende a elegir formatos óptimos (JSON, CSV, Parquet, Avro), y comprende particionamiento y compresión para performance.
+Master the fundamentals of data storage and file formats essential for data engineering. Dive deeper into S3 as a data lake, learn how to choose optimal formats (JSON, CSV, Parquet, Avro), and understand partitioning and compression for performance.
 
 ## Objetivos de Aprendizaje
 
-Al finalizar este módulo, serás capaz de:
+Upon completion of this module, you will be able to:
 
-- [x] Diseñar data lakes con arquitectura medallion (Bronze/Silver/Gold)
-- [x] Seleccionar formatos óptimos según caso de uso (analytical vs transactional)
-- [x] Implementar particionamiento Hive-style para optimizar queries
-- [x] Aplicar compresión (Snappy, Gzip, LZ4) según trade-offs
-- [x] Convertir entre formatos con PyArrow y pandas
-- [x] Calcular costos de almacenamiento y optimizar TCO
-- [x] Implementar schema evolution en Parquet
-- [x] Optimizar metadata con Glue Catalog
+- [x] Design data lakes with medallion architecture (Bronze/Silver/Gold)
+- [x] Select optimal formats according to use case (analytical vs transactional)
+- [x] Implement Hive-style partitioning to optimize queries
+- [x] Apply compression (Snappy, Gzip, LZ4) according to trade-offs
+- [x] Convert between formats with PyArrow and pandas
+- [x] Calculate storage costs and optimize TCO
+- [x] Implement schema evolution in Parquet
+- [x] Optimize metadata with Glue Catalog
 
 ## Estructura
 
-- **theory/**: Conceptos centrales y documentación de arquitectura
-- **exercises/**: Ejercicios prácticos (6 ejercicios)
-- **infrastructure/**: Configuración LocalStack/Docker para este módulo
-- **data/**: Datasets de muestra y esquemas
-- **validation/**: Tests automatizados para validar tu aprendizaje
-- **scripts/**: Scripts de ayuda
+- **theory/**: Core concepts and architectural documentation
+- **exercises/**: Practical exercises (6 exercises)
+- **infrastructure/**: LocalStack/Docker configuration for this module
+- **data/**: Sample datasets and schemas
+- **validation/**: Automated tests to validate your learning
+- **scripts/**: Help scripts
 
 ## Comenzando
 
-1. Asegurarse de que los prerequisitos estén completados
-2. Instalar dependencias: `pip install -r requirements.txt`
-3. Generar datos de muestra: `cd data/sample && bash generate_users.sh && cd ../..`
-4. Leer `theory/concepts.md` para comprensión fundamental
-5. Revisar `theory/architecture.md` para patrones de arquitectura AWS
-6. Configurar infraestructura: `bash scripts/setup.sh`
-7. Completar ejercicios en orden (01 hasta 06)
-8. Validar tu aprendizaje: `bash scripts/validate.sh`
+1. Make sure prerequisites are completed
+2. Install dependencies: `pip install -r requirements.txt`
+3. Generate sample data: `cd data/sample && bash generate_users.sh && cd ../..`
+4. Read `theory/concepts.md` for fundamental understanding
+5. Review `theory/architecture.md` for AWS architecture patterns
+6. Configure infrastructure: `bash scripts/setup.sh`
+7. Complete exercises in order (01 to 06)
+8. Validate your learning: `bash scripts/validate.sh`
 
 ## Ejercicios
 
-1. **Ejercicio 01**: Diseño de Data Lake Medallion - Diseñar arquitectura Bronze/Silver/Gold con S3, políticas de lifecycle, e IAM
-2. **Ejercicio 02**: Conversión de Formatos de Archivo - Convertir entre CSV, JSON, Parquet, Avro con benchmarking de rendimiento
-3. **Ejercicio 03**: Estrategias de Particionamiento - Implementar particionamiento estilo Hive (fecha, geografía, híbrido) para optimizar queries
-4. **Ejercicio 04**: Optimización de Compresión - Comparar algoritmos de compresión Snappy, Gzip, LZ4, Zstd para Parquet
-5. **Ejercicio 05**: Evolución de Esquema - Agregar columnas, manejar compatibilidad backward/forward en archivos Parquet
-6. **Ejercicio 06**: Integración con Glue Catalog - Registrar datasets, crear crawlers, consultar con Athena
+1. **Exercise 01**: Data Lake Medallion Design - Design Bronze/Silver/Gold architecture with S3, lifecycle policies, and IAM
+2. **Exercise 02**: File Format Conversion - Convert between CSV, JSON, Parquet, Avro with performance benchmarking
+3. **Exercise 03**: Partitioning Strategies - Implement Hive style partitioning (date, geography, hybrid) to optimize queries
+4. **Exercise 04**: Compression Optimization - Compare Snappy, Gzip, LZ4, Zstd compression algorithms for Parquet
+5. **Exercise 05**: Schema Evolution - Add columns, handle backward/forward compatibility in Parquet files
+6. **Exercise 06**: Integration with Glue Catalog - Register datasets, create crawlers, query with Athena
 
-## Recursos
+## resources
 
-Ver `theory/resources.md` para:
-- Documentación oficial de AWS
-- Tutoriales en video y workshops
-- Recursos de la comunidad
-- Mapeo de certificaciones
+See `theory/resources.md` for:
+- Official AWS Documentation
+- Video tutorials and workshops
+- community resources
+- Certification mapping
 
-## Validación
+## Validation
 
 Ejecutar todas las validaciones:
 ```bash
 bash scripts/validate.sh
 ```
 
-O usar la validación global:
+Or use global validation:
 ```bash
 make validate MODULE=module-{module_id}-{module["name"]}
 ```
 
-## Lista de Verificación de Progreso
+## Progress Checklist
 
-- [ ] Leer toda la documentación de teoría
-- [ ] Completado Ejercicio 01
-- [ ] Completado Ejercicio 02
-- [ ] Completado Ejercicio 03
-- [ ] Completado Ejercicio 04
-- [ ] Completado Ejercicio 05
-- [ ] Completado Ejercicio 06
-- [ ] Todas las validaciones pasando
-- [ ] Listo para siguiente módulo
+- [ ] Read all theory documentation
+- [ ] Completed Exercise 01
+- [ ] Completed Exercise 02
+- [ ] Completed Exercise 03
+- [ ] Completed Exercise 04
+- [ ] Completed Exercise 05
+- [ ] Completed Exercise 06
+- [ ] All validations passing
+- [ ] Ready for next module
 
 ## Siguientes Pasos
 
-Después de completar este módulo, estarás listo para:
-[Lista de módulos que dependen de este]
+After completing this module, you will be ready to:
+[List of modules that depend on it]
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

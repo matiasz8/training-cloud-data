@@ -34,17 +34,17 @@
 - **Use Case**: Data exchange, human review
 
 ### Pros
-✅ Universal compatibility  
-✅ Human-readable  
-✅ Simple to create and parse  
+✅ Universal compatibility
+✅ Human-readable
+✅ Simple to create and parse
 ✅ Works with Excel, databases, any tool
 
 ### Cons
-❌ No schema enforcement  
-❌ Poor compression (text-based)  
-❌ No data types (everything is string)  
-❌ Slow to parse for large datasets  
-❌ Ambiguous delimiters (commas in data)  
+❌ No schema enforcement
+❌ Poor compression (text-based)
+❌ No data types (everything is string)
+❌ Slow to parse for large datasets
+❌ Ambiguous delimiters (commas in data)
 ❌ No support for nested structures
 
 ### Technical Details
@@ -77,17 +77,17 @@ transaction_id,user_id,amount,timestamp,country
 - **Use Case**: APIs, configuration, event logs
 
 ### Pros
-✅ Human-readable  
-✅ Supports nested objects/arrays  
-✅ Flexible schema  
-✅ Native to web applications  
+✅ Human-readable
+✅ Supports nested objects/arrays
+✅ Flexible schema
+✅ Native to web applications
 ✅ Self-describing data
 
 ### Cons
-❌ Larger than CSV (verbose syntax)  
-❌ Slow parsing  
-❌ No compression (text-based)  
-❌ Inefficient for analytics  
+❌ Larger than CSV (verbose syntax)
+❌ Slow parsing
+❌ No compression (text-based)
+❌ Inefficient for analytics
 ❌ No schema validation (unless JSON Schema used)
 
 ### Technical Details
@@ -136,18 +136,18 @@ transaction_id,user_id,amount,timestamp,country
 - **Use Case**: Data lakes, analytics, BI tools
 
 ### Pros
-✅ Excellent compression (70-90% savings)  
-✅ Fastest read for analytics (columnar)  
-✅ Predicate pushdown (read only needed columns)  
-✅ Schema enforcement  
-✅ Schema evolution support  
-✅ Supports nested data  
-✅ Splittable (MapReduce/Spark friendly)  
+✅ Excellent compression (70-90% savings)
+✅ Fastest read for analytics (columnr)
+✅ Predicate pushdown (read only needed columns)
+✅ Schema enforcement
+✅ Schema evolution support
+✅ Supports nested data
+✅ Splittable (MapReduce/Spark friendly)
 ✅ Industry standard for data lakes
 
 ### Cons
-❌ Not human-readable (binary)  
-❌ Slower writes than CSV  
+❌ Not human-readable (binary)
+❌ Slower writes than CSV
 ❌ Requires specialized tools (PyArrow, Spark)
 
 ### Technical Details
@@ -252,16 +252,16 @@ schema_v2 = pa.schema([
 - **Use Case**: Data serialization, Kafka, streaming
 
 ### Pros
-✅ Excellent schema evolution  
-✅ Compact binary format  
-✅ Self-describing (schema in file)  
-✅ Splittable for MapReduce  
-✅ Fast serialization  
+✅ Excellent schema evolution
+✅ Compact binary format
+✅ Self-describing (schema in file)
+✅ Splittable for MapReduce
+✅ Fast serialization
 ✅ Dynamic typing support
 
 ### Cons
-❌ Larger than Parquet (row-based)  
-❌ Slower for analytics than Parquet  
+❌ Larger than Parquet (row-based)
+❌ Slower for analytics than Parquet
 ❌ Less tool support than Parquet
 
 ### Technical Details
@@ -334,15 +334,15 @@ schema_v2 = pa.schema([
 - **Use Case**: Hive, Spark
 
 ### Pros
-✅ Excellent compression  
-✅ Fast for analytics  
-✅ ACID transactions support  
-✅ Built-in indexes  
+✅ Excellent compression
+✅ Fast for analytics
+✅ ACID transactions support
+✅ Built-in indexes
 ✅ Bloom filters for fast lookups
 
 ### Cons
-❌ Less ecosystem support than Parquet  
-❌ Primarily Hive-focused  
+❌ Less ecosystem support than Parquet
+❌ Primarily Hive-focused
 ❌ Complex to work with directly
 
 ### When to Use
@@ -420,8 +420,8 @@ One-time export        → CSV
 5. **Performance**: Columnar = perfect for analytics
 
 **Golden Rule**:
-> "If you're building a data lake, use Parquet.  
-> If you're not sure, use Parquet.  
+> "If you're building a data lake, use Parquet.
+> If you're not sure, use Parquet.
 > If someone suggests CSV for big data, show them this guide."
 
 ### Quick Reference Card
@@ -437,6 +437,6 @@ One-time export        → CSV
 
 ---
 
-**Last Updated**: February 2, 2026  
-**Module**: 02 - Storage Basics  
+**Last Updated**: February 2, 2026
+**Module**: 02 - Storage Basics
 **Author**: Cloud Data Training Team

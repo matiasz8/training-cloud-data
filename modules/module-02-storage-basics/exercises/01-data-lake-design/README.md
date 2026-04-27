@@ -13,7 +13,7 @@ After completing this exercise, you will be able to:
 
 ## Scenario
 
-**Company:** GlobalMart E-commerce  
+**Company:** GlobalMart E-commerce
 **Challenge:** Currently storing 50TB of data in a single S3 bucket with no organization. Data scientists can't find what they need, costs are high, and compliance is a nightmare.
 
 **Your Task:** Design and implement a medallion data lake architecture that:
@@ -144,16 +144,16 @@ Expected: 10/10 tests passing
 
 ## Common Pitfalls
 
-❌ **Mistake:** Creating flat directory structure  
+❌ **Mistake:** Creating flat directory structure
 ✅ **Fix:** Use Hive-style partitioning (key=value/)
 
-❌ **Mistake:** Storing all data in Standard tier  
+❌ **Mistake:** Storing all data in Standard tier
 ✅ **Fix:** Use lifecycle policies to transition to cheaper tiers
 
-❌ **Mistake:** No encryption  
+❌ **Mistake:** No encryption
 ✅ **Fix:** Enable SSE-S3 or SSE-KMS for PII
 
-❌ **Mistake:** Inconsistent naming  
+❌ **Mistake:** Inconsistent naming
 ✅ **Fix:** Follow naming convention: {company}-{layer}-{env}
 
 ## Time Breakdown

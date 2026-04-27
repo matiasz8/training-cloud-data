@@ -1,39 +1,39 @@
-# Módulo 03: Fundamentos de SQL para Ingeniería de Datos
+# Module 03: SQL Fundamentals for Data Engineering
 
-Domina los fundamentos de SQL y técnicas avanzadas de consultas esenciales para flujos de trabajo modernos de ingeniería de datos.
+Master SQL fundamentals and advanced querying techniques essential for modern data engineering workflows.
 
-## Descripción General
+## General Description
 
-Este módulo enseña SQL desde la perspectiva de ingeniería de datos, enfocándose en escenarios del mundo real que encontrarás al trabajar con data lakes, warehouses y cargas de trabajo analíticas. Aprenderás a escribir consultas eficientes, optimizar rendimiento y aprovechar SQL a través de diferentes motores (PostgreSQL, Athena, Spark SQL).
+This module teaches SQL from a data engineering perspective, focusing on real-world scenarios you will encounter when working with data lakes, warehouses, and analytical workloads. You will learn to write efficient queries, optimize performance and take advantage of SQL through different engines (PostgreSQL, Athena, Spark SQL).
 
-**Duración**: 12-15 horas  
-**Dificultad**: Principiante a Intermedio  
-**Prerequisitos**: Comprensión básica de bases de datos y estructuras de datos
+**Duration**: 12-15 hours
+**Dificultad**: Principiante a Intermedio
+**Prerequisites**: Basic understanding of databases and data structures
 
 ## Objetivos de Aprendizaje
 
-Al finalizar este módulo, serás capaz de:
+Upon completion of this module, you will be able to:
 
-1. **Escribir consultas SQL complejas** usando SELECT, WHERE, JOIN, GROUP BY y funciones de agregación
-2. **Realizar operaciones multi-tabla** con joins INNER, LEFT, RIGHT, FULL y CROSS
-3. **Usar funciones de ventana** para consultas analíticas (ROW_NUMBER, RANK, LAG, LEAD, NTILE)
-4. **Dominar Common Table Expressions (CTEs)** para consultas legibles y mantenibles
-5. **Optimizar el rendimiento de consultas** usando EXPLAIN, índices y planificación de queries
-6. **Manejar transformaciones de datos** con CASE, COALESCE, conversión de tipos y funciones de strings
-7. **Trabajar con fechas y timestamps** para análisis de series temporales y particionamiento
-8. **Comprender planes de ejecución de consultas** y cómo las bases de datos procesan SQL
-9. **Aplicar mejores prácticas de SQL** para flujos de trabajo de ingeniería de datos
-10. **Usar SQL a través de diferentes motores** (PostgreSQL, Presto/Athena, Spark SQL)
-11. **Debuggear y resolver problemas** de consultas lentas y errores comunes de SQL
-12. **Escribir consultas analíticas eficientes** para transformaciones de pipelines de datos
+1. **Write complex SQL queries** using SELECT, WHERE, JOIN, GROUP BY and aggregation functions
+2. **Realizar operaciones multi-table** con joins INNER, LEFT, RIGHT, FULL y CROSS
+3. **Use window functions** for analytical queries (ROW_NUMBER, RANK, LAG, LEAD, NTILE)
+4. **Dominar Common Table Expressions (CTEs)** para querys legibles y mantenibles
+5. **Optimize query performance** using EXPLAIN, indexes and query planning
+6. **Handle data transformations** with CASE, COALESCE, type conversion and string functions
+7. **Work with dates and timestamps** for time series analysis and partitioning
+8. **Understand query execution plans** and how databases process SQL
+9. **Apply SQL best practices** for data engineering workflows
+10. **Use SQL across different engines** (PostgreSQL, Presto/Athena, Spark SQL)
+11. **Debuggear y resolver problemas** de querys lentas y errores comunes de SQL
+12. **Write efficient analytical queries** for data pipeline transformations
 
 
 ## Prerequisitos
 
 ### Conocimientos Requeridos
-- Comprensión básica de bases de datos relacionales
+- Basic understanding of relational databases
 - Familiaridad con tipos de datos (integers, strings, dates)
-- Comandos básicos de línea de comandos
+- Basic command line commands
 
 ### Software Requerido
 - Python 3.9+
@@ -42,11 +42,11 @@ Al finalizar este módulo, serás capaz de:
 - 2GB de espacio libre en disco
 
 ### Recomendado pero Opcional
-- Comprensión básica de conceptos de data warehousing
-- Familiaridad con cualquier lenguaje de programación
-- Experiencia con herramientas de análisis de datos
+- Basic understanding of data warehousing concepts
+- Familiarity with any programming language
+- Experience with data analysis tools
 
-## Estructura del Módulo
+## Module Structure
 
 ```
 module-03-sql-foundations/
@@ -93,25 +93,25 @@ cd modules/module-03-sql-foundations
 pip install -r requirements.txt
 ```
 
-### 3. Iniciar Base de Datos PostgreSQL
+### 3. Iniciar database PostgreSQL
 ```bash
 cd infrastructure
 docker-compose up -d
 cd ..
 ```
 
-### 4. Inicializar Base de Datos de Muestra
+### 4. Inicializar database de Muestra
 ```bash
 bash scripts/setup.sh
 ```
 
-### 5. Verificar Conexión a la Base de Datos
+### 5. Verify Database Connection
 ```bash
 psql -h localhost -p 5432 -U dataeng -d training
 # Password: dataeng123
 ```
 
-### 6. Leer Primero la Teoría
+### 6. Read the Theory First
 ```bash
 # Comenzar con fundamentos
 cat theory/concepts.md | less
@@ -136,35 +136,35 @@ pytest validation/ -v
 
 ## Ejercicios
 
-### Ejercicio 01: Consultas Básicas
+### Exercise 01: Basic queries
 **Objetivo**: Dominar operaciones fundamentales de SQL
 
 **Temas**:
-- SELECT de columnas y expresiones
-- Filtrado con cláusula WHERE
+- SELECT de columns y expresiones
+- Filtering with WHERE clause
 - Ordenamiento con ORDER BY
-- Paginación con LIMIT y OFFSET
-- DISTINCT para valores únicos
-- Operaciones básicas de strings y matemáticas
+- Pagination with LIMIT and OFFSET
+- DISTINCT for unique values
+- Basic string operations and mathematics
 
-**Datasets**: Transacciones de e-commerce (100k filas)
+**Datasets**: transactions de e-commerce (100k rows)
 
 **Tiempo**: 2 horas
 
 ---
 
 ### Ejercicio 02: Joins y Relaciones
-**Objetivo**: Combinar datos de múltiples tablas
+**Goal**: Combine data from multiple tables
 
 **Temas**:
 - INNER JOIN para registros coincidentes
-- LEFT/RIGHT JOIN para preservar filas
+- LEFT/RIGHT JOIN para preservar rows
 - FULL OUTER JOIN para todos los registros
 - CROSS JOIN para productos cartesianos
-- Self joins para datos jerárquicos
-- Consideraciones de rendimiento de JOIN
+- Self joins for hierarchical data
+- Consideraciones de performance de JOIN
 
-**Datasets**: Users, Orders, Products (multi-tabla)
+**Datasets**: Users, Orders, Products (multi-table)
 
 **Tiempo**: 2-3 horas
 
@@ -175,20 +175,20 @@ pytest validation/ -v
 
 **Temas**:
 - COUNT, SUM, AVG, MIN, MAX
-- GROUP BY con una o múltiples columnas
+- GROUP BY with one or multiple columns
 - HAVING para agregados filtrados
 - Agregaciones con DISTINCT
 - GROUP BY con JOINs
-- Patrones comunes de agregación
+- Common Aggregation Patterns
 
-**Datasets**: Datos de ventas con categorías
+**Datasets**: Sales data with categories
 
 **Tiempo**: 2 horas
 
 ---
 
 ### Ejercicio 04: Funciones de Ventana
-**Objetivo**: Realizar consultas analíticas avanzadas
+**Objective**: Perform advanced analytical queries
 
 **Temas**:
 - ROW_NUMBER para ranking
@@ -204,43 +204,43 @@ pytest validation/ -v
 
 ---
 
-### Ejercicio 05: CTEs y Subconsultas
-**Objetivo**: Escribir consultas complejas y mantenibles
+### Ejercicio 05: CTEs y Subquerys
+**Objetivo**: Escribir querys complejas y mantenibles
 
 **Temas**:
 - Common Table Expressions (WITH)
 - CTEs recursivos
-- Subconsultas en SELECT, WHERE, FROM
-- Subconsultas correlacionadas vs no correlacionadas
-- Mejores prácticas de legibilidad de consultas
-- Comparación de rendimiento
+- Subquerys en SELECT, WHERE, FROM
+- Subquerys correlacionadas vs no correlacionadas
+- Query readability best practices
+- Performance comparison
 
-**Datasets**: Escenarios complejos multi-tabla
+**Datasets**: Escenarios complejos multi-table
 
 **Tiempo**: 2-3 horas
 
 ---
 
-### Ejercicio 06: Optimización de Consultas
-**Objetivo**: Analizar y mejorar el rendimiento de consultas
+### Exercise 06: Query optimization
+**Objetivo**: Analizar y mejorar el performance de querys
 
 **Temas**:
 - EXPLAIN y EXPLAIN ANALYZE
-- Tipos y uso de índices
-- Planificación y ejecución de consultas
-- Optimización del orden de JOINs
+- Tipos y uso de indexs
+- Query planning and execution
+- Optimizing the order of JOINs
 - Evitar anti-patrones comunes
-- Monitorear rendimiento de consultas
+- monitor performance de querys
 
-**Datasets**: Dataset grande (1M+ filas)
+**Datasets**: Dataset grande (1M+ rows)
 
 **Tiempo**: 2-3 horas
 
 ---
 
-## Esquema de Base de Datos de Muestra
+## Esquema de database de Muestra
 
-El módulo utiliza una base de datos realista de e-commerce:
+The module uses a realistic e-commerce database:
 
 ```sql
 -- Tabla de usuarios
@@ -259,19 +259,19 @@ order_items (item_id, order_id, product_id, quantity, price)
 user_activity (activity_id, user_id, event_type, event_time, session_id)
 ```
 
-## Recursos
+## resources
 
-### Documentación Oficial
+### Official Documentation
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [AWS Athena SQL Reference](https://docs.aws.amazon.com/athena/latest/ug/ddl-sql-reference.html)
 - [Spark SQL Guide](https://spark.apache.org/docs/latest/sql-programming-guide.html)
 
 ### Aprendizaje Interactivo
 - [SQLBolt](https://sqlbolt.com/) - Lecciones interactivas de SQL
-- [Mode SQL Tutorial](https://mode.com/sql-tutorial/) - Enfocado en analítica
-- [PostgreSQL Exercises](https://pgexercises.com/) - Problemas de práctica
+- [Mode SQL Tutorial](https://mode.com/sql-tutorial/) - Focused on analytics
+- [PostgreSQL Exercises](https://pgexercises.com/) - Practice Problems
 
-### Libros y Guías
+### Books and Guides
 - "SQL for Data Analysis" by Cathy Tanimura
 - "Practical SQL" by Anthony DeBarros
 - Ver `theory/resources.md` para lista completa
@@ -280,54 +280,54 @@ user_activity (activity_id, user_id, event_type, event_time, session_id)
 - [SQL Tutorial - Full Database Course](https://www.youtube.com/watch?v=HXV3zeQKqGY)
 - [Advanced SQL for Data Engineers](https://www.youtube.com/playlist?list=PLBgogxgQVM9v0xG0QTFQ5PTbNrj8uGSS-)
 
-## Validación
+## Validation
 
 ### Ejecutar Todos los Tests
 ```bash
 bash scripts/validate.sh
 ```
 
-### Ejecutar Tests de Ejercicios Específicos
+### Run Specific Exercise Tests
 ```bash
 pytest validation/test_exercise_01.py -v
 pytest validation/test_exercise_02.py -v
 ```
 
-### Verificar Rendimiento de Consultas
+### Verificar performance de queries
 ```bash
 # Ejecutar benchmarks de optimización
 python validation/benchmark_queries.py
 ```
 
-## Lista de Verificación de Progreso
+## Progress Checklist
 
-### Teoría
+### Theory
 - [ ] Leer `theory/concepts.md` (fundamentos de SQL)
-- [ ] Leer `theory/architecture.md` (ejecución de consultas)
+- [ ] Leer `theory/architecture.md`(query execution)
 - [ ] Revisar `theory/resources.md` (materiales adicionales)
 
 ### Ejercicios
-- [ ] Ejercicio 01: Consultas Básicas ✓
+- [ ] Exercise 01: Basic queries ✓
 - [ ] Ejercicio 02: Joins y Relaciones ✓
 - [ ] Ejercicio 03: Agregaciones y Agrupamiento ✓
 - [ ] Ejercicio 04: Funciones de Ventana ✓
-- [ ] Ejercicio 05: CTEs y Subconsultas ✓
-- [ ] Ejercicio 06: Optimización de Consultas ✓
+- [ ] Ejercicio 05: CTEs y Subquerys ✓
+- [ ] Exercise 06: Query optimization ✓
 
-### Validación
+### Validation
 - [ ] Todos los tests pasando (`pytest validation/`)
-- [ ] Benchmarks de rendimiento revisados
-- [ ] Puedo explicar planes de ejecución de consultas
+- [ ] Benchmarks de performance revisados
+- [ ] I can explain query execution plans
 
-### Desafíos Opcionales
+### Optional Challenges
 - [ ] Resolver todos los problemas bonus en ejercicios
-- [ ] Escribir 5 consultas complejas desde cero
-- [ ] Optimizar una consulta lenta 10x
+- [ ] Escribir 5 querys complejas desde cero
+- [ ] Optimizar una query lenta 10x
 - [ ] Completar PostgreSQL Exercises (pgexercises.com)
 
 ## Problemas Comunes
 
-### Fallo en Conexión a Base de Datos
+### Database connection failure
 ```bash
 # Verificar que Docker está corriendo
 docker ps
@@ -337,7 +337,7 @@ cd infrastructure
 docker-compose restart
 ```
 
-### Consultas Lentas
+### queries Lentas
 ```sql
 -- Usar EXPLAIN para analizar
 EXPLAIN ANALYZE
@@ -353,38 +353,56 @@ SELECT * FROM pg_indexes WHERE tablename = 'your_table';
 bash scripts/setup.sh --reset
 ```
 
-Ver `docs/troubleshooting.md` para guía completa de resolución de problemas.
+Ver `docs/troubleshooting.md`for complete troubleshooting guide.
 
 ## Siguientes Pasos
 
-Después de completar este módulo:
+After completing this module:
 
-1. **Módulo 04: Transformación de Datos** - Aplicar SQL en pipelines ETL
-2. **Módulo 05: Data Warehousing** - Modelado dimensional con SQL
-3. **Módulo 06: Analítica Avanzada** - SQL para ingeniería de features de ML
+1. **Module 04: data transformation** - Apply SQL in ETL pipelines
+2. **Module 05: Data Warehousing** - Dimensional modeling with SQL
+3. **Module 06: Advanced Analytics** - SQL for ML feature engineering
 
-## Recursos Adicionales
+## resources Adicionales
 
-- **Cheat Sheets**: Ver `assets/cheatsheets/` para referencias rápidas
-- **Guía de Estilo SQL**: Seguir formato consistente (ver `docs/sql-guide.md`)
-- **Ejemplos del Mundo Real**: Revisar `exercises/*/examples/` para patrones de producción
+- **Cheat Sheets**: Ver `assets/cheatsheets/`for quick references
+- **SQL Style Guide**: Follow consistent format (see`docs/sql-guide.md`)
+- **Ejemplos del Mundo Real**: Revisar `exercises/*/examples/`for production patterns
 
 ## Soporte
 
 - Consultar `docs/troubleshooting.md` para problemas comunes
 - Revisar pistas de ejercicios en `exercises/*/hints.md`
-- Consultar documentación de PostgreSQL para referencias de funciones
+- See PostgreSQL documentation for function references
 
 ---
 
-**Estado del Módulo 03**: Listo para Aprendizaje  
-**Última Actualización**: Febrero 2026  
-**Versión**: 1.0.0
+**Module 03 Status**: Ready for Learning
+**Last Update**: February 2026
+**Version**: 1.0.0
 
 - [ ] Todas las validaciones pasando
-- [ ] Listo para siguiente módulo
+- [ ] Ready for next module
 
 ## Siguientes Pasos
 
-Después de completar este módulo, estarás listo para:
-[Lista de módulos que dependen de este]
+After completing this module, you will be ready to:
+[List of modules that depend on it]
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

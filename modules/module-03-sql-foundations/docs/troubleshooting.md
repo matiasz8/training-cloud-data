@@ -736,7 +736,7 @@ VACUUM ANALYZE users;
 ### Check Table Sizes
 
 ```sql
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size

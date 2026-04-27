@@ -1,16 +1,16 @@
-# Configuración de Infraestructura
+# Infrastructure Configuration
 
-Este directorio contiene la configuración de infraestructura para el módulo de Fundamentos de SQL, incluyendo una base de datos PostgreSQL corriendo en Docker.
+This directory contains the infrastructure configuration for the SQL Fundamentals module, including a PostgreSQL database running in Docker.
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-- [Prerequisitos](#prerequisitos)
-- [Inicio Rápido](#inicio-rápido)
-- [Esquema de Base de Datos](#esquema-de-base-de-datos)
-- [Configuración](#configuración)
-- [Uso](#uso)
-- [Resolución de Problemas](#resolución-de-problemas)
-- [Configuración Avanzada](#configuración-avanzada)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Database Schema](#database-schema)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [Advanced Configuration](#advanced-configuration)
 
 ---
 
@@ -21,7 +21,7 @@ Este directorio contiene la configuración de infraestructura para el módulo de
 1. **Docker Desktop** (or Docker Engine + Docker Compose)
    - Download: https://www.docker.com/products/docker-desktop
    - Version: 20.10+ recommended
-   
+
 2. **Optional: PostgreSQL Client**
    - **psql**: Command-line client (comes with PostgreSQL)
    - **pgAdmin**: GUI client (can use dockerized version)
@@ -36,7 +36,7 @@ Este directorio contiene la configuración de infraestructura para el módulo de
 
 ---
 
-## Inicio Rápido
+## Quick Start
 
 ### 1. Configurar Entorno
 
@@ -51,9 +51,9 @@ nano .env  # o tu editor preferido
 ```
 
 **Valores por defecto**:
-- Base de datos: `ecommerce`
+- database: `ecommerce`
 - Usuario: `dataengineer`
-- Contraseña: `training123`
+- Password:`training123`
 - Puerto: `5432`
 
 ### 2. Iniciar PostgreSQL
@@ -68,14 +68,14 @@ docker-compose logs -f postgres
 # Esperar por "database system is ready to accept connections"
 ```
 
-**Qué sucede**:
+**What happens**:
 1. Descarga imagen PostgreSQL 15 Alpine (~80MB)
 2. Crea contenedor llamado `sql-foundations-postgres`
 3. Crea volumen persistente para datos
 4. Ejecuta `init.sql` para crear esquema y datos de muestra
-5. Configura ajustes de rendimiento
+5. Configura ajustes de performance
 
-### 3. Verificar Conexión
+### 3. Verify Connection
 
 ```bash
 # Probar conexión con psql
@@ -102,10 +102,10 @@ docker-compose --profile gui up -d
 # Password: admin123
 ```
 
-**Agregar servidor en pgAdmin**:
+**Agregar server en pgAdmin**:
 1. Click derecho "Servers" → "Register" → "Server"
 2. Nombre: `SQL Foundations`
-3. Pestaña Connection:
+3. Connection tab:
    - Host: `postgres` (si conectas desde contenedor pgAdmin)
    - Host: `localhost` (si pgAdmin corre fuera de Docker)
    - Port: `5432`
@@ -115,7 +115,7 @@ docker-compose --profile gui up -d
 
 ---
 
-## Esquema de Base de Datos
+## Esquema de database
 
 ### Tables
 
@@ -138,72 +138,72 @@ User account information.
 **Sample size**: 50 users
 
 #### 2. **products**
-Catálogo de productos.
+Product catalog.
 
-| Columna | Tipo | Descripción |
+| columns | Type | Description |
 |--------|------|-------------|
-| product_id | SERIAL PK | Identificador único |
+| product_id | SERIAL PK | Unique identifier |
 | product_name | VARCHAR(255) | Nombre del producto |
-| category | VARCHAR(50) | Categoría del producto |
+| category | VARCHAR(50) | Product Category |
 | price | DECIMAL(10,2) | Precio del producto |
 | stock_quantity | INTEGER | Stock disponible |
-| description | TEXT | Descripción del producto |
-| created_at | TIMESTAMP | Hora de creación |
-| updated_at | TIMESTAMP | Hora de última actualización |
-| is_available | BOOLEAN | Estado de disponibilidad |
+| description | TEXT | Product Description |
+| created_at | TIMESTAMP | Creation time |
+| updated_at | TIMESTAMP | Last update time |
+| is_available | BOOLEAN | Estado de availability |
 
-**Tamaño de muestra**: 50 productos  
-**Categorías**: Electronics, Books, Furniture, Sports, Home, Accessories
+**Sample size**: 50 products
+**Categories**: Electronics, Books, Furniture, Sports, Home, Accessories
 
 #### 3. **orders**
-Órdenes de clientes.
+Customer orders.
 
-| Columna | Tipo | Descripción |
+| columns | Type | Description |
 |--------|------|-------------|
-| order_id | SERIAL PK | Identificador único |
+| order_id | SERIAL PK | Unique identifier |
 | user_id | INTEGER FK | Referencia a users |
-| order_date | TIMESTAMP | Hora de colocación de orden |
+| order_date | TIMESTAMP | Order placement time |
 | total_amount | DECIMAL(10,2) | Valor total de orden |
 | status | VARCHAR(20) | Estado de orden |
-| shipping_address | TEXT | Dirección de entrega |
+| shipping_address | TEXT | Delivery address |
 | payment_method | VARCHAR(50) | Tipo de pago |
 
-**Tamaño de muestra**: 200 órdenes  
+**Sample size**: 200 orders
 **Estados**: pending, processing, shipped, delivered, cancelled
 
 #### 4. **order_items**
-Productos en cada orden (tabla de unión).
+Products in each order (union table).
 
-| Columna | Tipo | Descripción |
+| columns | Type | Description |
 |--------|------|-------------|
-| order_item_id | SERIAL PK | Identificador único |
+| order_item_id | SERIAL PK | Unique identifier |
 | order_id | INTEGER FK | Referencia a orders |
 | product_id | INTEGER FK | Referencia a products |
 | quantity | INTEGER | Cantidad ordenada |
 | unit_price | DECIMAL(10,2) | Precio por unidad |
-| subtotal | DECIMAL(10,2) | Total de línea |
+| subtotal | DECIMAL(10,2) | Line Total |
 
-**Tamaño de muestra**: ~600 items de orden (2-5 por orden)
+**Sample size**: ~600 order items (2-5 per order)
 
 #### 5. **user_activity**
 Registro de actividad de usuarios.
 
-| Columna | Tipo | Descripción |
+| columns | Type | Description |
 |--------|------|-------------|
-| activity_id | SERIAL PK | Identificador único |
+| activity_id | SERIAL PK | Unique identifier |
 | user_id | INTEGER FK | Referencia a users |
 | activity_type | VARCHAR(50) | Tipo de actividad |
-| activity_timestamp | TIMESTAMP | Cuándo ocurrió la actividad |
+| activity_timestamp | TIMESTAMP | When the activity occurred |
 | product_id | INTEGER FK | Producto relacionado (opcional) |
 | details | JSONB | Metadatos adicionales |
 
-**Tamaño de muestra**: 1,000 actividades  
+**Sample size**: 1,000 activities
 **Tipos**: login, logout, view_product, add_to_cart, purchase, review
 
 ### Vistas
 
 #### v_order_summary
-Detalles de orden con información de usuario.
+Order details with user information.
 ```sql
 SELECT * FROM v_order_summary LIMIT 10;
 ```
@@ -220,10 +220,10 @@ Resumen de historial de compras de usuario.
 SELECT * FROM v_user_summary WHERE total_orders > 5;
 ```
 
-### Índices
+### indexes
 
 - **users**: email, country, registration_date, is_active
-- **products**: category, price, name (trigram para búsqueda difusa)
+- **products**: category, price, name (trigram for fuzzy search)
 - **orders**: user_id, order_date, status, (user_id, order_date) compuesto
 - **order_items**: order_id, product_id
 - **user_activity**: user_id, activity_timestamp, activity_type, details (GIN)
@@ -237,14 +237,14 @@ SELECT calculate_loyalty_points(150.00);  -- Retorna 15
 ```
 
 #### get_top_products_by_category(category, limit)
-Obtener productos más vendidos por categoría.
+Get best-selling products by category.
 ```sql
 SELECT * FROM get_top_products_by_category('Electronics', 5);
 ```
 
 ---
 
-## Configuración
+## Configuration
 
 ### Environment Variables
 
@@ -281,7 +281,7 @@ max_connections: 100         # Connection limit
 - **SSD**: Set `random_page_cost=1.1` (already set)
 - **HDD**: Set `random_page_cost=4.0`
 
-### Configuración Personalizada de PostgreSQL
+### Custom PostgreSQL Configuration
 
 Para usar `postgresql.conf` personalizado:
 
@@ -364,7 +364,7 @@ df = pd.read_sql("SELECT * FROM users LIMIT 10", engine)
 print(df)
 ```
 
-### Conectar desde Línea de Comandos
+### Connect from Command Line
 
 ```bash
 # psql
@@ -377,7 +377,7 @@ PGPASSWORD=training123 psql -h localhost -p 5432 -U dataengineer -d ecommerce
 psql "postgresql://dataengineer:training123@localhost:5432/ecommerce"
 ```
 
-### Comandos Útiles de psql
+### Useful psql commands
 
 ```sql
 -- Listar bases de datos
@@ -418,7 +418,7 @@ psql "postgresql://dataengineer:training123@localhost:5432/ecommerce"
 
 ---
 
-## Resolución de Problemas
+## Troubleshooting
 
 ### Port Already in Use
 
@@ -453,7 +453,7 @@ docker-compose logs postgres
 
 ### No Puede Conectar
 
-**Verificar que contenedor está corriendo**:
+**Verify which container is running**:
 ```bash
 docker-compose ps
 ```
@@ -472,11 +472,11 @@ docker exec -it sql-foundations-postgres psql -U dataengineer -d ecommerce -c "S
 - Asegurar que Docker tiene excepciones de firewall
 - En Linux, verificar `ufw` o `iptables`
 
-### Base de Datos No Inicializada
+### database No Inicializada
 
-Si faltan tablas:
+Si faltan tables:
 
-1. Verificar si `init.sql` se ejecutó:
+1. Verificar si `init.sql`was executed:
    ```bash
    docker-compose logs postgres | grep "initialization"
    ```
@@ -487,30 +487,30 @@ Si faltan tablas:
    docker-compose up -d
    ```
 
-### Consultas Lentas
+### queries Lentas
 
 **Ejecutar ANALYZE**:
 ```sql
 ANALYZE;
 ```
 
-**Verificar plan de consulta**:
+**Verificar plan de query**:
 ```sql
 EXPLAIN ANALYZE SELECT * FROM users WHERE country = 'US';
 ```
 
-**Aumentar caché**:
+**Increase cache**:
 Editar `docker-compose.yml` y aumentar `shared_buffers` y `effective_cache_size`.
 
 ---
 
-## Configuración Avanzada
+## Advanced Settings
 
-### Ubicación de Datos Persistentes
+### Location of Persistent Data
 
 Los datos se almacenan en volumen Docker: `sql-foundations-postgres-data`
 
-**Encontrar ubicación del volumen**:
+**Find volume location**:
 ```bash
 docker volume inspect sql-foundations-postgres-data
 ```
@@ -524,7 +524,7 @@ docker exec -t sql-foundations-postgres pg_dump -U dataengineer ecommerce > back
 docker exec -i sql-foundations-postgres psql -U dataengineer -d ecommerce < backup.sql
 ```
 
-### Múltiples Entornos
+### Multiple Environments
 
 Crear archivos `.env` separados:
 
@@ -538,7 +538,7 @@ docker-compose --env-file .env.prod up -d
 
 ### Connection Pooling
 
-Para producción, usar **pgBouncer**:
+For production, use **pgBouncer**:
 
 Agregar a `docker-compose.yml`:
 ```yaml
@@ -563,7 +563,7 @@ Conectar a pgBouncer en puerto 6432 en lugar de 5432.
 
 ### Conexiones SSL/TLS
 
-Para producción, habilitar SSL:
+For production, enable SSL:
 
 1. Generar certificados
 2. Montar en contenedor
@@ -576,7 +576,7 @@ Para producción, habilitar SSL:
 
 ### Monitoreo
 
-**Verificar estadísticas**:
+**Check statistics**:
 ```sql
 -- Tamaños de tablas
 SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename))
@@ -584,7 +584,7 @@ FROM pg_tables
 WHERE schemaname = 'public';
 
 -- Tasa de acierto de caché
-SELECT 
+SELECT
     sum(heap_blks_read) as heap_read,
     sum(heap_blks_hit) as heap_hit,
     sum(heap_blks_hit) / (sum(heap_blks_hit) + sum(heap_blks_read))::float as cache_hit_ratio
@@ -596,25 +596,25 @@ SELECT count(*) FROM pg_stat_activity;
 
 ---
 
-## Recursos Adicionales
+## resources Adicionales
 
-- **Documentación PostgreSQL**: https://www.postgresql.org/docs/15/
+- **PostgreSQL Documentation**: https://www.postgresql.org/docs/15/
 - **Referencia Docker Compose**: https://docs.docker.com/compose/
 - **Referencia de Comandos psql**: https://www.postgresql.org/docs/15/app-psql.html
-- **Ajuste de Rendimiento**: https://wiki.postgresql.org/wiki/Performance_Optimization
+- **Ajuste de performance**: https://wiki.postgresql.org/wiki/Performance_Optimization
 
 ---
 
-## ¿Necesitas Ayuda?
+## Do you need help?
 
-1. Verificar logs: `docker-compose logs postgres`
-2. Verificar conexión: Probar con `psql` desde dentro del contenedor
-3. Revisar sección [Resolución de Problemas](#resolución-de-problemas)
-4. Ver `theory/architecture.md` para consejos de optimización de consultas
-5. Consultar documentación de PostgreSQL para errores específicos
+1. Check logs: `docker-compose logs postgres`
+2. Verify connection: Try with `psql` from inside the container
+3. Review section [Troubleshooting](#troubleshooting)
+4. See `theory/architecture.md` for query optimization tips
+5. Consult PostgreSQL documentation for specific errors
 
 ---
 
-**Última Actualización**: 2 de Febrero, 2026  
-**Versión PostgreSQL**: 15  
-**Versión Docker Compose**: 3.8
+**Last Update**: February 2, 2026
+**PostgreSQL version**: 15
+**Docker Compose version**: 3.8

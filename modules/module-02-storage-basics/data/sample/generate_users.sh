@@ -34,7 +34,7 @@ for i in range(1, 51):
     country = random.choice(countries)
     registration_date = (base_date + timedelta(days=random.randint(0, 365))).date()
     is_active = random.choice([True, True, True, False])
-    
+
     users_data.append({
         'user_id': user_id,
         'first_name': first_name,

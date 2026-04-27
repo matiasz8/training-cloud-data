@@ -16,21 +16,21 @@
 
 ## Introduction
 
-En el mundo de Data Engineering, elegir el formato de almacenamiento correcto es una de las decisiones más críticas que impacta performance, costos y escalabilidad. Este módulo explora las opciones de almacenamiento modernas y cómo construir data lakes eficientes.
+In the world of Data Engineering, choosing the correct storage format is one of the most critical decisions that impacts performance, costs and scalability. This module explores modern storage options and how to build efficient data lakes.
 
 ### Why Storage Matters
 
 **Impact Areas:**
-- **Query Performance:** 10-100x diferencia entre formatos optimizados vs no optimizados
-- **Storage Costs:** Compresión puede reducir costos 60-90%
-- **Processing Speed:** Formatos columnares 5-10x más rápidos para analytics
-- **Schema Flexibility:** Capacidad de evolucionar sin breaking changes
+- **Query Performance:** 10-100x difference between optimized vs non-optimized formats
+- **Storage Costs:** Compression can reduce costs 60-90%
+- **Processing Speed:** 5-10x faster column formats for analytics
+- **Schema Flexibility:** Ability to evolve without breaking changes
 
 **Real-World Example:**
-Una empresa migró 50TB de datos CSV a Parquet con Snappy compression:
-- Storage: 50TB → 12TB (76% reducción)
-- Query time: 45 minutos → 3 minutos (93% mejora)
-- Monthly cost: $1,150 → $276 (76% ahorro)
+A company migrated 50TB of CSV data to Parquet with Snappy compression:
+- Storage: 50TB → 12TB (76% reduction)
+- Query time: 45 minutes → 3 minutes (93% improvement)
+- Monthly cost: $1,150 → $276 (76% savings)
 
 ## Data Lake Architecture
 
@@ -38,15 +38,15 @@ Una empresa migró 50TB de datos CSV a Parquet con Snappy compression:
 
 Un **data lake** es un repositorio centralizado que almacena datos estructurados, semi-estructurados y no estructurados a cualquier escala. A diferencia de data warehouses, acepta datos en formato raw.
 
-**Características:**
+**features:**
 - **Schema-on-read:** Aplicas estructura cuando lees, no cuando escribes
 - **Multi-format:** CSV, JSON, Parquet, Avro, ORC, binarios
-- **Cost-effective:** Almacenamiento en S3 desde $0.023/GB/mes
+- **Cost-effective:** storage en S3 desde $0.023/GB/mes
 - **Scalable:** Petabytes sin limits de capacidad
 
 ### Medallion Architecture
 
-La arquitectura **Medallion** organiza data lakes en capas (Bronze → Silver → Gold) para mejorar calidad progresivamente.
+The **Medallion** architecture organizes data lakes in layers (Bronze → Silver → Gold) to progressively improve quality.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -71,11 +71,11 @@ La arquitectura **Medallion** organiza data lakes en capas (Bronze → Silver �
 **Purpose:** Almacenar datos tal como llegan de las fuentes.
 
 **Characteristics:**
-- Formato original (CSV, JSON, logs)
-- Sin transformaciones
+- Original format (CSV, JSON, logs)
+- No transformations
 - Append-only (immutable)
-- Retención long-term (years)
-- Lifecycle → Glacier después 90 días
+- Long-term retention (years)
+- Lifecycle → Glacier after 90 days
 
 **Example Structure:**
 ```
@@ -97,9 +97,9 @@ s3://datalake-bronze/
 ```
 
 **Use Cases:**
-- Data lineage y auditoría
-- Reprocessing cuando downstream logic cambia
-- Compliance requirements (retener raw data)
+- Data lineage and audit
+- Reprocessing when downstream logic changes
+- Compliance requirements (retain raw data)
 
 #### Silver Layer (Cleaned Zone)
 
@@ -111,7 +111,7 @@ s3://datalake-bronze/
 - ✅ Deduplication
 - ✅ Null handling
 - ✅ Standardization (dates, formats)
-- ❌ Business logic (aún no)
+- ❌ Business logic (not yet)
 
 **Example Structure:**
 ```
@@ -129,7 +129,7 @@ s3://datalake-silver/
 
 **Format Changes:**
 - Bronze: CSV, JSON → Silver: Parquet, Avro
-- Compression: Gzip → Snappy (mejor para analytics)
+- Compression: Gzip → Snappy (better for analytics)
 - Partitioning: Date-based Hive partitions
 
 #### Gold Layer (Curated Zone)
@@ -138,10 +138,10 @@ s3://datalake-silver/
 
 **Transformations:**
 - ✅ Aggregations (daily, weekly, monthly)
-- ✅ Business logic aplicada
-- ✅ Joins entre datasets
-- ✅ Feature engineering para ML
-- ✅ Denormalization para performance
+- ✅ Business logic applied
+- ✅ Joins between datasets
+- ✅ Feature engineering for ML
+- ✅ Denormalization for performance
 
 **Example Structure:**
 ```
@@ -183,7 +183,7 @@ s3://datalake-gold/
 
 ## File Formats Deep Dive
 
-Elegir el formato correcto es crítico para performance y costos. Analicemos los formatos más importantes.
+Choosing the correct format is critical for performance and costs. Let's analyze the most important formats.
 
 ### CSV (Comma-Separated Values)
 
@@ -198,7 +198,7 @@ Elegir el formato correcto es crítico para performance y costos. Analicemos los
 - ❌ No compression built-in
 - ❌ Poor query performance
 - ❌ No type information
-- ❌ Large file sizes
+- ❌Large file sizes
 
 **Best Use Cases:**
 - Data exchange between systems
@@ -225,14 +225,14 @@ TXN002,USR456,149.50,EUR,2024-02-02T10:31:15Z
 - ✅ Self-describing (schema included)
 - ✅ Nested structures
 - ✅ Human-readable
-- ✅ Web APIs standard
+- ✅ Standard Web APIs
 
 **Cons:**
 - ❌ Verbose (key names repeated)
 - ❌ Slow to parse
-- ❌ Large file sizes
+- ❌Large file sizes
 - ❌ No column pruning
-- ❌ Poor compression
+- ❌Poor compression
 
 **Best Use Cases:**
 - API responses
@@ -262,7 +262,7 @@ TXN002,USR456,149.50,EUR,2024-02-02T10:31:15Z
 - Schema evolution: Flexible
 
 **JSON Lines (JSONL):**
-Mejor para big data - cada línea es un JSON completo:
+Best for big data - each line is a complete JSON:
 ```jsonl
 {"id": 1, "name": "Alice", "age": 30}
 {"id": 2, "name": "Bob", "age": 25}
@@ -279,7 +279,7 @@ Mejor para big data - cada línea es un JSON completo:
 - ✅ Industry standard
 
 **Cons:**
-- ❌ Not human-readable
+- ❌Not human-readable
 - ❌ Write latency higher
 - ❌ Requires compatible tools
 - ❌ Small files create overhead
@@ -320,7 +320,7 @@ Mejor para big data - cada línea es un JSON completo:
 
 **Key Features:**
 
-1. **Columnar Storage:** Lee solo columnas necesarias
+1. **Columnar Storage:** Lee solo columns necesarias
 ```python
 # Query: SELECT amount, timestamp FROM transactions WHERE amount > 100
 # Parquet: Solo lee 2 columnas (amount, timestamp)
@@ -333,7 +333,7 @@ Mejor para big data - cada línea es un JSON completo:
 # Parquet lee statistics en footer, skipea row groups completos
 ```
 
-3. **Compression:** Por columna
+3. **Compression:** Por column
 ```python
 # user_id: Dictionary encoding (muchos duplicados)
 # amount: Delta encoding (valores cercanos)
@@ -434,8 +434,8 @@ table = pq.read_table('data.parquet', filters=[('value', '>', 150)])
 
 ### Format Comparison Table
 
-| Format | Type | Compression | Query Speed | Write Speed | Analytics | Streaming | Schema Evolution |
-|--------|------|-------------|-------------|-------------|-----------|-----------|-----------------|
+| Format | Type | Compression | Query Speed ​​| Write Speed ​​| Analytics | Streaming | Schema Evolution |
+|--------|------|-------------|-------------|-------------|-----------|-----------|--------------|
 | CSV | Text | Poor | Slow | Fast | ❌ | ❌ | ❌ |
 | JSON | Text | Poor | Slow | Fast | ❌ | ✅ | ✅ |
 | Parquet | Columnar | Excellent | Very Fast | Slow | ✅✅✅ | ❌ | ✅ |
@@ -476,7 +476,7 @@ table = pq.read_table('data.parquet', filters=[('value', '>', 150)])
 
 ## Partitioning Strategies
 
-Partitioning divide datos en subdirectorios lógicos para mejorar query performance y reducir costos.
+Partitioning divides data into logical subdirectories to improve query performance and reduce costs.
 
 ### Why Partition?
 
@@ -604,7 +604,7 @@ country=Vatican/  # 0.001% of data
 
 1. **Partition Size:** 128MB - 1GB per partition (sweet spot)
 
-2. **Cardinality:** 
+2. **Cardinality:**
    - Minimum: 10 partitions
    - Maximum: 10,000 partitions per table
 
@@ -812,7 +812,7 @@ schema_v2 = {
     'category': str  # New optional field
 }
 ```
-✅ Old readers can still read new data (ignore new column)
+✅ Old readers can still read new data (ignore new columns)
 
 #### 2. Forward Compatible (Safe)
 
@@ -825,7 +825,7 @@ schema_v2 = {
     # 'amount' removed
 }
 ```
-✅ New data readable by old readers (missing column = null)
+✅ New data readable by old readers (missing columns = null)
 
 #### 3. Full Compatible
 
@@ -860,7 +860,7 @@ df_v1.to_parquet('data_v1.parquet')
 
 # Write v2 with new column
 df_v2 = pd.DataFrame({
-    'id': [3, 4], 
+    'id': [3, 4],
     'name': ['C', 'D'],
     'age': [30, 25]  # New column
 })
@@ -922,10 +922,10 @@ avro_producer = AvroProducer({...}, schema_registry=schema_registry)
 def test_schema_compatibility():
     # Write with old schema
     old_data = write_parquet(schema_v1, data)
-    
+
     # Read with new schema
     new_df = read_parquet_with_schema(old_data, schema_v2)
-    
+
     # Assert new columns have defaults
     assert new_df['new_column'].isna().all()
 ```
@@ -1103,20 +1103,20 @@ s3://{bucket}/
 def validate_parquet_file(path):
     """Validate Parquet file quality"""
     table = pq.read_table(path)
-    
+
     # Check schema
     expected_columns = ['id', 'amount', 'timestamp']
     assert set(expected_columns).issubset(set(table.column_names))
-    
+
     # Check null percentages
     for col in table.column_names:
         null_pct = table[col].null_count / len(table)
         assert null_pct < 0.1, f"{col} has {null_pct}% nulls"
-    
+
     # Check file size
     file_size_mb = os.path.getsize(path) / (1024**2)
     assert 10 < file_size_mb < 1000, f"File size {file_size_mb}MB out of range"
-    
+
     return True
 ```
 

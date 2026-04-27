@@ -6,11 +6,11 @@ Parameters:
     Type: String
     Default: globalmart
     Description: Name of the Glue database
-  
+
   BucketName:
     Type: String
     Description: S3 bucket containing the data
-  
+
   DataPath:
     Type: String
     Default: silver/
@@ -192,19 +192,19 @@ Outputs:
     Value: !Ref GlueDatabase
     Export:
       Name: !Sub '${AWS::StackName}-DatabaseName'
-  
+
   TransactionsTableName:
     Description: 'Transactions Table Name'
     Value: !Ref TransactionsTable
-  
+
   UsersTableName:
     Description: 'Users Table Name'
     Value: !Ref UsersTable
-  
+
   CrawlerName:
     Description: 'Glue Crawler Name'
     Value: !Ref DataCrawler
-  
+
   CrawlerRoleArn:
     Description: 'IAM Role ARN for Crawler'
     Value: !GetAtt CrawlerRole.Arn

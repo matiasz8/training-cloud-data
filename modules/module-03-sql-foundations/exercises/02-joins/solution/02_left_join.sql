@@ -1,7 +1,7 @@
 -- Exercise 02: Joins - LEFT JOIN (SOLUTION)
 
 -- Query 1: Todos los usuarios con conteo de órdenes
-SELECT 
+SELECT
     u.user_id,
     u.first_name,
     u.last_name,
@@ -13,7 +13,7 @@ GROUP BY u.user_id, u.first_name, u.last_name
 ORDER BY num_orders DESC, total_spent DESC;
 
 -- Query 2: Usuarios que NO han hecho órdenes
-SELECT 
+SELECT
     u.user_id,
     u.first_name,
     u.last_name,
@@ -25,7 +25,7 @@ WHERE o.order_id IS NULL
 ORDER BY u.registration_date DESC;
 
 -- Query 3: Todos los productos con total de ventas
-SELECT 
+SELECT
     p.product_id,
     p.product_name,
     p.category,
@@ -39,7 +39,7 @@ GROUP BY p.product_id, p.product_name, p.category, p.price
 ORDER BY total_revenue DESC;
 
 -- Query 4: Productos nunca vendidos
-SELECT 
+SELECT
     p.product_id,
     p.product_name,
     p.category,

@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     quantity INTEGER NOT NULL DEFAULT 1,
     unit_price DECIMAL(10, 2) NOT NULL,
     subtotal DECIMAL(10, 2) NOT NULL,
-    
+
     -- Constraints
     CONSTRAINT order_items_quantity_positive CHECK (quantity > 0),
     CONSTRAINT order_items_unit_price_positive CHECK (unit_price >= 0),

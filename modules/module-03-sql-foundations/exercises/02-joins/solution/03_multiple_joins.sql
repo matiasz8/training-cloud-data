@@ -1,7 +1,7 @@
 -- Exercise 02: Joins - Multiple JOINs (SOLUTION)
 
 -- Query 1: Órdenes completas (usuario + items + productos)
-SELECT 
+SELECT
     o.order_id,
     o.order_date,
     o.status,
@@ -17,7 +17,7 @@ INNER JOIN products p ON oi.product_id = p.product_id
 ORDER BY o.order_date DESC, o.order_id, oi.order_item_id;
 
 -- Query 2: Resumen de compras por usuario con productos
-SELECT 
+SELECT
     u.first_name || ' ' || u.last_name AS customer,
     u.country,
     COUNT(DISTINCT o.order_id) AS num_orders,
@@ -32,7 +32,7 @@ GROUP BY u.user_id, u.first_name, u.last_name, u.country
 ORDER BY total_spent DESC;
 
 -- Query 3: Total gastado por usuario por categoría
-SELECT 
+SELECT
     u.first_name || ' ' || u.last_name AS customer,
     p.category,
     COUNT(DISTINCT o.order_id) AS num_orders,

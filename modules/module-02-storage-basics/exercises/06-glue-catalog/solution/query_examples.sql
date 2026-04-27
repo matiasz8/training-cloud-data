@@ -7,7 +7,7 @@ FROM globalmart.transactions
 LIMIT 10;
 
 -- 2. Aggregation: Total revenue by country
-SELECT 
+SELECT
     country,
     COUNT(*) as transaction_count,
     ROUND(SUM(amount), 2) as total_revenue,
@@ -18,7 +18,7 @@ GROUP BY country
 ORDER BY total_revenue DESC;
 
 -- 3. Time-based analysis: Revenue by month
-SELECT 
+SELECT
     year,
     month,
     COUNT(*) as transactions,
@@ -29,7 +29,7 @@ GROUP BY year, month
 ORDER BY year, month;
 
 -- 4. Partition pruning: Query specific date (FAST!)
-SELECT 
+SELECT
     transaction_id,
     amount,
     timestamp,
@@ -43,7 +43,7 @@ ORDER BY amount DESC
 LIMIT 20;
 
 -- 5. JOIN: Transactions with user details
-SELECT 
+SELECT
     t.transaction_id,
     t.amount,
     t.timestamp,
@@ -58,12 +58,12 @@ WHERE t.year = 2024
 LIMIT 100;
 
 -- 6. Window functions: Running total by country
-SELECT 
+SELECT
     country,
     DATE(timestamp) as date,
     amount,
     SUM(amount) OVER (
-        PARTITION BY country 
+        PARTITION BY country
         ORDER BY timestamp
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) as running_total
@@ -73,7 +73,7 @@ ORDER BY country, timestamp
 LIMIT 50;
 
 -- 7. User cohort analysis
-SELECT 
+SELECT
     DATE_TRUNC('month', registration_date) as cohort_month,
     country,
     COUNT(*) as users,
@@ -83,7 +83,7 @@ GROUP BY DATE_TRUNC('month', registration_date), country
 ORDER BY cohort_month DESC, users DESC;
 
 -- 8. Top customers by revenue
-SELECT 
+SELECT
     u.user_id,
     u.email,
     u.country,
@@ -102,10 +102,10 @@ LIMIT 20;
 -- SELECT COUNT(*) FROM globalmart.transactions WHERE amount > 200;
 
 -- FAST (uses partition pruning):
-SELECT COUNT(*) 
-FROM globalmart.transactions 
-WHERE year = 2024 
-  AND month = 1 
+SELECT COUNT(*)
+FROM globalmart.transactions
+WHERE year = 2024
+  AND month = 1
   AND amount > 200;
 
 -- 10. CTAS: Create optimized table from query
@@ -115,7 +115,7 @@ WITH (
     parquet_compression = 'SNAPPY',
     external_location = 's3://your-bucket/gold/daily_summary/'
 ) AS
-SELECT 
+SELECT
     DATE(timestamp) as date,
     country,
     COUNT(*) as transaction_count,
@@ -130,7 +130,7 @@ GROUP BY DATE(timestamp), country;
 -- Useful maintenance queries:
 
 -- Add partitions manually (if needed)
-ALTER TABLE globalmart.transactions 
+ALTER TABLE globalmart.transactions
 ADD PARTITION (year=2024, month=1, day=1)
 LOCATION 's3://your-bucket/silver/transactions/year=2024/month=1/day=1/';
 

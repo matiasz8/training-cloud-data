@@ -19,7 +19,7 @@
 
 ### PostgreSQL Documentation
 
-**PostgreSQL Official Docs**  
+**PostgreSQL Official Docs**
 🔗 https://www.postgresql.org/docs/
 
 The most comprehensive resource for PostgreSQL. Well-written, with examples.
@@ -36,7 +36,7 @@ The most comprehensive resource for PostgreSQL. Well-written, with examples.
 
 ### SQL Standards
 
-**ISO SQL Standard**  
+**ISO SQL Standard**
 🔗 https://www.iso.org/standard/76583.html
 
 The official SQL specification (paid, but useful to understand standard SQL).
@@ -62,9 +62,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://sqlbolt.com/
 
-**Format**: Interactive lessons with exercises  
-**Level**: Beginner  
-**Cost**: Free  
+**Format**: Interactive lessons with exercises
+**Level**: Beginner
+**Cost**: Free
 **Topics**: SELECT, JOINs, aggregations, subqueries
 
 **Why it's great**: Clean interface, immediate feedback, progressive difficulty.
@@ -75,9 +75,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://mode.com/sql-tutorial/
 
-**Format**: Tutorial with real dataset  
-**Level**: Beginner to Intermediate  
-**Cost**: Free  
+**Format**: Tutorial with real dataset
+**Level**: Beginner to Intermediate
+**Cost**: Free
 **Topics**: Basic queries, JOINs, aggregations, window functions, optimization
 
 **Why it's great**: Uses real data, explains *why* not just *how*, covers advanced topics.
@@ -88,9 +88,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://sqlzoo.net/
 
-**Format**: Interactive quizzes  
-**Level**: Beginner to Advanced  
-**Cost**: Free  
+**Format**: Interactive quizzes
+**Level**: Beginner to Advanced
+**Cost**: Free
 **Topics**: All SQL concepts, with progressive challenges
 
 **Why it's great**: Large problem set, covers edge cases, multiple database engines.
@@ -101,9 +101,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://leetcode.com/problemset/database/
 
-**Format**: Coding challenges  
-**Level**: Intermediate to Advanced  
-**Cost**: Free (some premium problems)  
+**Format**: Coding challenges
+**Level**: Intermediate to Advanced
+**Cost**: Free (some premium problems)
 **Topics**: Complex queries, optimization, interview prep
 
 **Why it's great**: Real interview-style problems, discussion forums.
@@ -114,9 +114,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://www.hackerrank.com/domains/sql
 
-**Format**: Challenges with scoring  
-**Level**: Beginner to Advanced  
-**Cost**: Free  
+**Format**: Challenges with scoring
+**Level**: Beginner to Advanced
+**Cost**: Free
 **Topics**: All SQL concepts, certifications
 
 **Why it's great**: Gamified, certificates, structured tracks.
@@ -127,9 +127,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://www.kaggle.com/learn/intro-to-sql
 
-**Format**: Notebooks with exercises  
-**Level**: Beginner  
-**Cost**: Free  
+**Format**: Notebooks with exercises
+**Level**: Beginner
+**Cost**: Free
 **Topics**: SELECT, GROUP BY, JOINs, working with BigQuery
 
 **Why it's great**: Real datasets, integrated with Kaggle ecosystem.
@@ -140,9 +140,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://www.datacamp.com/courses/intro-to-sql-for-data-science
 
-**Format**: Interactive courses  
-**Level**: Beginner to Advanced  
-**Cost**: Paid (subscription), free trial  
+**Format**: Interactive courses
+**Level**: Beginner to Advanced
+**Cost**: Paid (subscription), free trial
 **Topics**: SQL for data science, PostgreSQL, advanced analytics
 
 **Why it's great**: Structured curriculum, video + exercises, certificates.
@@ -155,8 +155,8 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 ### "SQL for Data Analysis" by Cathy Tanimura
 
-**Level**: Intermediate  
-**Focus**: Analytics, reporting, data manipulation  
+**Level**: Intermediate
+**Focus**: Analytics, reporting, data manipulation
 **Why read**: Practical examples for data analysts/engineers
 
 **Topics**:
@@ -171,8 +171,8 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://sql-performance-explained.com/
 
-**Level**: Intermediate to Advanced  
-**Focus**: Indexing, optimization, EXPLAIN plans  
+**Level**: Intermediate to Advanced
+**Focus**: Indexing, optimization, EXPLAIN plans
 **Why read**: Deep dive into performance
 
 **Topics**:
@@ -185,8 +185,8 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 ### "Designing Data-Intensive Applications" by Martin Kleppmann
 
-**Level**: Advanced  
-**Focus**: Database internals, distributed systems  
+**Level**: Advanced
+**Focus**: Database internals, distributed systems
 **Why read**: Broader context for SQL databases
 
 **Topics**:
@@ -199,8 +199,8 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 ### "T-SQL Fundamentals" by Itzik Ben-Gan
 
-**Level**: Beginner to Intermediate  
-**Focus**: SQL Server (but concepts transfer)  
+**Level**: Beginner to Intermediate
+**Focus**: SQL Server (but concepts transfer)
 **Why read**: Comprehensive, well-explained fundamentals
 
 **Topics**:
@@ -213,8 +213,8 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 ### "PostgreSQL: Up and Running" by Regina Obe & Leo Hsu
 
-**Level**: Beginner to Intermediate  
-**Focus**: PostgreSQL-specific features  
+**Level**: Beginner to Intermediate
+**Focus**: PostgreSQL-specific features
 **Why read**: Quick practical guide to PostgreSQL
 
 **Topics**:
@@ -227,8 +227,8 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 ### "The Art of SQL" by Stephane Faroult
 
-**Level**: Advanced  
-**Focus**: SQL best practices, performance  
+**Level**: Advanced
+**Focus**: SQL best practices, performance
 **Why read**: Philosophy and art of writing good SQL
 
 **Topics**:
@@ -246,9 +246,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 Search "freeCodeCamp SQL" on YouTube
 
-**Format**: Long-form video tutorials (4-6 hours)  
-**Level**: Beginner  
-**Cost**: Free  
+**Format**: Long-form video tutorials (4-6 hours)
+**Level**: Beginner
+**Cost**: Free
 **Topics**: Complete SQL from scratch
 
 **Example courses**:
@@ -261,9 +261,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://www.coursera.org/learn/sql-for-data-science
 
-**Format**: Video lectures + quizzes  
-**Level**: Beginner  
-**Cost**: Audit free, certificate paid  
+**Format**: Video lectures + quizzes
+**Level**: Beginner
+**Cost**: Audit free, certificate paid
 **Topics**: SQL fundamentals for data analysis
 
 **Best for**: Academic-style structured course.
@@ -272,9 +272,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://www.linkedin.com/learning/topics/sql
 
-**Format**: Professional video courses  
-**Level**: All levels  
-**Cost**: Subscription (free trial)  
+**Format**: Professional video courses
+**Level**: All levels
+**Cost**: Subscription (free trial)
 **Topics**: SQL fundamentals to advanced optimization
 
 **Popular courses**:
@@ -288,9 +288,9 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 Search "SQL" on Udemy
 
-**Format**: Video courses with exercises  
-**Level**: All levels  
-**Cost**: Paid (frequent sales ~$10-15)  
+**Format**: Video courses with exercises
+**Level**: All levels
+**Cost**: Paid (frequent sales ~$10-15)
 **Topics**: Wide variety
 
 **Popular courses**:
@@ -309,52 +309,52 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://github.com/lerocha/chinook-database
 
-**Domain**: Music store (like iTunes)  
-**Tables**: artists, albums, tracks, customers, invoices  
-**Size**: Medium (~80K rows)  
+**Domain**: Music store (like iTunes)
+**Tables**: artists, albums, tracks, customers, invoices
+**Size**: Medium (~80K rows)
 **Best for**: Practicing JOINs, aggregations
 
 #### Northwind Database
 
 🔗 https://github.com/pthom/northwind_psql
 
-**Domain**: Sales data  
-**Tables**: customers, orders, products, suppliers  
-**Size**: Small (~3K rows)  
+**Domain**: Sales data
+**Tables**: customers, orders, products, suppliers
+**Size**: Small (~3K rows)
 **Best for**: Classic relational database patterns
 
 #### IMDb Datasets
 
 🔗 https://www.imdb.com/interfaces/
 
-**Domain**: Movies, TV shows  
-**Format**: TSV files  
-**Size**: Large (~10M+ rows)  
+**Domain**: Movies, TV shows
+**Format**: TSV files
+**Size**: Large (~10M+ rows)
 **Best for**: Real-world data, analytics
 
 #### NYC Taxi Data
 
 🔗 https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 
-**Domain**: Taxi trip records  
-**Format**: Parquet files  
-**Size**: Very large (billions of rows)  
+**Domain**: Taxi trip records
+**Format**: Parquet files
+**Size**: Very large (billions of rows)
 **Best for**: Performance testing, time-series analysis
 
 #### Stack Overflow Data
 
 🔗 https://archive.org/details/stackexchange
 
-**Domain**: Q&A data  
-**Format**: XML dumps  
-**Size**: Very large  
+**Domain**: Q&A data
+**Format**: XML dumps
+**Size**: Very large
 **Best for**: Text search, complex queries
 
 ### SQL Fiddle
 
 🔗 http://sqlfiddle.com/
 
-**What**: Online SQL editor  
+**What**: Online SQL editor
 **Use**: Quick schema/query testing without local setup
 
 **Alternative**: https://dbfiddle.uk/
@@ -363,7 +363,7 @@ Even if using PostgreSQL, other docs provide perspectives:
 
 🔗 https://db-engines.com/en/ranking
 
-**What**: Database popularity ranking  
+**What**: Database popularity ranking
 **Use**: Explore different SQL databases
 
 ---
@@ -382,7 +382,7 @@ Even if using PostgreSQL, other docs provide perspectives:
 **Example**:
 ```sql
 -- Good
-SELECT 
+SELECT
     first_name,
     last_name,
     email
@@ -398,7 +398,7 @@ SELECT first_name,last_name,email FROM users WHERE created_at>'2024-01-01' ORDER
 
 🔗 https://about.gitlab.com/handbook/business-technology/data-team/platform/sql-style-guide/
 
-**Focus**: Team collaboration, readability  
+**Focus**: Team collaboration, readability
 **Covers**:
 - Formatting
 - CTEs
@@ -409,7 +409,7 @@ SELECT first_name,last_name,email FROM users WHERE created_at>'2024-01-01' ORDER
 
 🔗 https://gist.github.com/fredbenenson/7bb92718e19138c20591
 
-**Focus**: Analytics queries  
+**Focus**: Analytics queries
 **Covers**:
 - SELECT formatting
 - JOINs
@@ -424,8 +424,8 @@ SELECT first_name,last_name,email FROM users WHERE created_at>'2024-01-01' ORDER
 
 🔗 https://use-the-index-luke.com/
 
-**What**: Guide to database indexing  
-**Author**: Markus Winand (SQL Performance Explained author)  
+**What**: Guide to database indexing
+**Author**: Markus Winand (SQL Performance Explained author)
 **Focus**: How indexes work, when to use them
 
 **Covers**:
@@ -440,7 +440,7 @@ SELECT first_name,last_name,email FROM users WHERE created_at>'2024-01-01' ORDER
 
 🔗 https://wiki.postgresql.org/wiki/Performance_Optimization
 
-**What**: Official wiki for performance  
+**What**: Official wiki for performance
 **Covers**:
 - Configuration
 - Query optimization
@@ -451,14 +451,14 @@ SELECT first_name,last_name,email FROM users WHERE created_at>'2024-01-01' ORDER
 
 🔗 https://explain.depesz.com/
 
-**What**: Visualize PostgreSQL EXPLAIN output  
+**What**: Visualize PostgreSQL EXPLAIN output
 **Use**: Paste EXPLAIN output, get formatted analysis
 
 **Alternative**: https://explain.dalibo.com/
 
 ### pg_stat_statements
 
-**What**: PostgreSQL extension for query statistics  
+**What**: PostgreSQL extension for query statistics
 **Use**: Find slow queries in production
 
 ```sql
@@ -466,7 +466,7 @@ SELECT first_name,last_name,email FROM users WHERE created_at>'2024-01-01' ORDER
 CREATE EXTENSION pg_stat_statements;
 
 -- View slow queries
-SELECT 
+SELECT
     query,
     calls,
     total_exec_time,
@@ -485,7 +485,7 @@ LIMIT 10;
 
 🔗 https://stackoverflow.com/questions/tagged/sql
 
-**What**: Q&A for SQL problems  
+**What**: Q&A for SQL problems
 **Use**: Search existing questions, ask new ones
 
 **Tips**:
@@ -536,28 +536,28 @@ LIMIT 10;
 
 🔗 https://www.pgadmin.org/
 
-**What**: PostgreSQL GUI client  
+**What**: PostgreSQL GUI client
 **Features**: Query editor, schema browser, EXPLAIN visualizer
 
 ### DBeaver
 
 🔗 https://dbeaver.io/
 
-**What**: Universal database client  
-**Supports**: PostgreSQL, MySQL, SQL Server, Oracle, etc.  
+**What**: Universal database client
+**Supports**: PostgreSQL, MySQL, SQL Server, Oracle, etc.
 **Features**: ER diagrams, data editor, SQL formatter
 
 ### DataGrip (JetBrains)
 
 🔗 https://www.jetbrains.com/datagrip/
 
-**What**: Professional SQL IDE  
-**Cost**: Paid (free for students)  
+**What**: Professional SQL IDE
+**Cost**: Paid (free for students)
 **Features**: Smart completion, refactoring, version control
 
 ### psql
 
-**What**: PostgreSQL command-line client  
+**What**: PostgreSQL command-line client
 **Features**: Fast, scriptable, powerful
 
 **Common commands**:
@@ -577,33 +577,33 @@ LIMIT 10;
 
 🔗 https://www.pgcli.com/
 
-**What**: psql alternative with autocomplete  
+**What**: psql alternative with autocomplete
 **Features**: Syntax highlighting, smart completion, pretty output
 
 ### PostGIS
 
 🔗 https://postgis.net/
 
-**What**: Spatial extension for PostgreSQL  
+**What**: Spatial extension for PostgreSQL
 **Use**: Geographic data, spatial queries
 
 ### TimescaleDB
 
 🔗 https://www.timescale.com/
 
-**What**: Time-series extension for PostgreSQL  
+**What**: Time-series extension for PostgreSQL
 **Use**: IoT data, metrics, logs
 
 ### pg_trgm
 
-**What**: Trigram matching extension  
+**What**: Trigram matching extension
 **Use**: Fuzzy text search, similarity queries
 
 ```sql
 CREATE EXTENSION pg_trgm;
 
 -- Fuzzy search
-SELECT * FROM users 
+SELECT * FROM users
 WHERE first_name % 'Jon';  -- Matches "John", "Joan"
 ```
 
@@ -613,7 +613,7 @@ WHERE first_name % 'Jon';  -- Matches "John", "Joan"
 
 ### Window Functions Deep Dive
 
-**Resource**: "Modern SQL" by Markus Winand  
+**Resource**: "Modern SQL" by Markus Winand
 🔗 https://modern-sql.com/
 
 **Topics**:
@@ -623,7 +623,7 @@ WHERE first_name % 'Jon';  -- Matches "John", "Joan"
 
 ### Recursive CTEs
 
-**Resource**: PostgreSQL docs  
+**Resource**: PostgreSQL docs
 🔗 https://www.postgresql.org/docs/current/queries-with.html
 
 **Use cases**:
@@ -645,7 +645,7 @@ SELECT n, fib_n FROM fibonacci;
 
 ### Lateral Joins
 
-**Resource**: PostgreSQL docs  
+**Resource**: PostgreSQL docs
 🔗 https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-LATERAL
 
 **What**: Subquery that can reference previous tables
@@ -665,7 +665,7 @@ CROSS JOIN LATERAL (
 
 ### JSON in PostgreSQL
 
-**Resource**: PostgreSQL JSON docs  
+**Resource**: PostgreSQL JSON docs
 🔗 https://www.postgresql.org/docs/current/datatype-json.html
 
 **Operators**:
@@ -676,7 +676,7 @@ CROSS JOIN LATERAL (
 
 **Example**:
 ```sql
-SELECT 
+SELECT
     user_id,
     metadata->>'country' AS country,
     metadata->'preferences'->>'theme' AS theme
@@ -686,7 +686,7 @@ WHERE metadata @> '{"country": "US"}';
 
 ### Full-Text Search
 
-**Resource**: PostgreSQL text search docs  
+**Resource**: PostgreSQL text search docs
 🔗 https://www.postgresql.org/docs/current/textsearch.html
 
 **Example**:
@@ -699,13 +699,13 @@ SELECT * FROM articles
 WHERE to_tsvector('english', content) @@ to_tsquery('english', 'fox & quick');
 
 -- Create index
-CREATE INDEX idx_articles_content ON articles 
+CREATE INDEX idx_articles_content ON articles
 USING GIN (to_tsvector('english', content));
 ```
 
 ### Partitioning Strategies
 
-**Resource**: PostgreSQL partitioning docs  
+**Resource**: PostgreSQL partitioning docs
 🔗 https://www.postgresql.org/docs/current/ddl-partitioning.html
 
 **Strategies**:
@@ -725,7 +725,7 @@ USING GIN (to_tsvector('english', content));
 ```sql
 -- Create materialized view
 CREATE MATERIALIZED VIEW daily_metrics AS
-SELECT 
+SELECT
     DATE(order_date) AS day,
     COUNT(*) AS order_count,
     SUM(total_amount) AS total_sales,
@@ -742,7 +742,7 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY daily_metrics;
 
 ### Connection Pooling
 
-**Resource**: pgBouncer docs  
+**Resource**: pgBouncer docs
 🔗 https://www.pgbouncer.org/
 
 **Why**: Reduce connection overhead
@@ -754,7 +754,7 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY daily_metrics;
 
 ### Replication and High Availability
 
-**Resource**: PostgreSQL replication docs  
+**Resource**: PostgreSQL replication docs
 🔗 https://www.postgresql.org/docs/current/high-availability.html
 
 **Types**:
@@ -764,7 +764,7 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY daily_metrics;
 
 ### Query Parallelization
 
-**Resource**: PostgreSQL parallel query docs  
+**Resource**: PostgreSQL parallel query docs
 🔗 https://www.postgresql.org/docs/current/parallel-query.html
 
 **Settings**:
@@ -841,6 +841,6 @@ This resource collection provides paths for all skill levels:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: February 2026  
+**Document Version**: 1.0
+**Last Updated**: February 2026
 **Word Count**: ~3,000 words

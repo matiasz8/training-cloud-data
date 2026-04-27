@@ -1,7 +1,7 @@
 -- Exercise 04: Window Functions (SOLUTION)
 
 -- Query 1: Ranking de productos por precio
-SELECT 
+SELECT
     product_id,
     product_name,
     category,
@@ -15,7 +15,7 @@ ORDER BY price DESC;
 -- Query 2: Top 3 productos más caros por categoría
 SELECT *
 FROM (
-    SELECT 
+    SELECT
         product_name,
         category,
         price,
@@ -26,7 +26,7 @@ WHERE rank_in_category <= 3
 ORDER BY category, rank_in_category;
 
 -- Query 3: Running total de órdenes por fecha
-SELECT 
+SELECT
     order_id,
     order_date,
     total_amount,
@@ -36,7 +36,7 @@ FROM orders
 ORDER BY order_date;
 
 -- Query 4: Comparar cada orden con la anterior del mismo usuario
-SELECT 
+SELECT
     u.first_name || ' ' || u.last_name AS customer,
     o.order_id,
     o.order_date,
@@ -49,11 +49,11 @@ INNER JOIN users u ON o.user_id = u.user_id
 ORDER BY u.user_id, o.order_date;
 
 -- Query 5: Percentiles de precios
-SELECT 
+SELECT
     product_name,
     price,
     NTILE(4) OVER (ORDER BY price) AS price_quartile,
-    CASE 
+    CASE
         WHEN NTILE(4) OVER (ORDER BY price) = 1 THEN 'Budget'
         WHEN NTILE(4) OVER (ORDER BY price) = 2 THEN 'Economy'
         WHEN NTILE(4) OVER (ORDER BY price) = 3 THEN 'Standard'

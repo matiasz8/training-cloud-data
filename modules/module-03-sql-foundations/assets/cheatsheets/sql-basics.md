@@ -26,7 +26,7 @@ SELECT first_name, last_name, email FROM users;
 
 ### Column Aliases
 ```sql
-SELECT 
+SELECT
     first_name AS nombre,
     last_name AS apellido,
     price * 0.9 AS discounted_price
@@ -35,7 +35,7 @@ FROM products;
 
 ### Calculated Columns
 ```sql
-SELECT 
+SELECT
     product_name,
     price,
     price * 1.21 AS price_with_tax,
@@ -201,7 +201,7 @@ SELECT AVG(price) FROM products;
 SELECT MIN(price), MAX(price) FROM products;
 
 -- Multiple aggregates
-SELECT 
+SELECT
     COUNT(*) AS total_orders,
     SUM(total_amount) AS total_revenue,
     AVG(total_amount) AS avg_order_value,
@@ -217,7 +217,7 @@ FROM orders;
 ### Basic GROUP BY
 ```sql
 -- Orders per user
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS num_orders
 FROM orders
@@ -227,7 +227,7 @@ GROUP BY user_id;
 ### Multiple Grouping Columns
 ```sql
 -- Orders per user per status
-SELECT 
+SELECT
     user_id,
     status,
     COUNT(*) AS num_orders,
@@ -240,7 +240,7 @@ ORDER BY user_id, status;
 ### HAVING - Filter Groups
 ```sql
 -- Users with more than 5 orders
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS num_orders
 FROM orders
@@ -252,7 +252,7 @@ HAVING COUNT(*) > 5;
 -- HAVING: Filters groups AFTER aggregation
 
 -- Example combining both:
-SELECT 
+SELECT
     user_id,
     COUNT(*) AS num_orders
 FROM orders
@@ -268,7 +268,7 @@ HAVING COUNT(*) > 3;  -- Then filter groups
 ### INNER JOIN
 ```sql
 -- Only matching rows
-SELECT 
+SELECT
     o.order_id,
     u.first_name,
     u.last_name
@@ -279,7 +279,7 @@ INNER JOIN users u ON o.user_id = u.user_id;
 ### LEFT JOIN
 ```sql
 -- All from left table, matching from right
-SELECT 
+SELECT
     u.first_name,
     o.order_id
 FROM users u
@@ -295,7 +295,7 @@ WHERE o.order_id IS NULL;
 ### Multiple JOINs
 ```sql
 -- 3+ tables
-SELECT 
+SELECT
     o.order_id,
     u.first_name,
     p.product_name,
@@ -313,7 +313,7 @@ INNER JOIN products p ON oi.product_id = p.product_id;
 ### Subquery in WHERE
 ```sql
 -- Products more expensive than average
-SELECT * 
+SELECT *
 FROM products
 WHERE price > (SELECT AVG(price) FROM products);
 ```
@@ -321,7 +321,7 @@ WHERE price > (SELECT AVG(price) FROM products);
 ### Subquery with IN
 ```sql
 -- Users who have placed orders
-SELECT * 
+SELECT *
 FROM users
 WHERE user_id IN (SELECT DISTINCT user_id FROM orders);
 ```
@@ -329,7 +329,7 @@ WHERE user_id IN (SELECT DISTINCT user_id FROM orders);
 ### Subquery in SELECT
 ```sql
 -- Compare each product to average
-SELECT 
+SELECT
     product_name,
     price,
     (SELECT AVG(price) FROM products) AS avg_price,
@@ -346,7 +346,7 @@ FROM products;
 WITH high_value_orders AS (
     SELECT * FROM orders WHERE total_amount > 500
 )
-SELECT 
+SELECT
     u.first_name,
     hvo.order_id,
     hvo.total_amount
@@ -356,9 +356,9 @@ INNER JOIN users u ON hvo.user_id = u.user_id;
 
 ### Multiple CTEs
 ```sql
-WITH 
+WITH
 user_stats AS (
-    SELECT 
+    SELECT
         user_id,
         COUNT(*) AS num_orders
     FROM orders
@@ -367,7 +367,7 @@ user_stats AS (
 top_users AS (
     SELECT * FROM user_stats WHERE num_orders > 5
 )
-SELECT 
+SELECT
     u.*,
     tu.num_orders
 FROM users u
@@ -442,10 +442,10 @@ SELECT NULLIF(quantity, 0) FROM order_items;  -- NULL when 0
 
 ```sql
 -- Simple CASE
-SELECT 
+SELECT
     product_name,
     price,
-    CASE 
+    CASE
         WHEN price < 50 THEN 'Budget'
         WHEN price BETWEEN 50 AND 200 THEN 'Standard'
         ELSE 'Premium'
@@ -453,7 +453,7 @@ SELECT
 FROM products;
 
 -- CASE in aggregation
-SELECT 
+SELECT
     COUNT(CASE WHEN status = 'delivered' THEN 1 END) AS delivered_orders,
     COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending_orders
 FROM orders;

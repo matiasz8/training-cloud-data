@@ -7,12 +7,12 @@ Parameters:
     Default: dev
     AllowedValues: [dev, staging, prod]
     Description: Environment name
-  
+
   CompanyName:
     Type: String
     Default: globalmart
     Description: Company name
-  
+
   CostCenter:
     Type: String
     Default: engineering

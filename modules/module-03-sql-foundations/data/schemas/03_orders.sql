@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS orders (
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     shipping_address TEXT,
     payment_method VARCHAR(50),
-    
+
     -- Constraints
     CONSTRAINT orders_total_amount_positive CHECK (total_amount >= 0),
     CONSTRAINT orders_status_valid CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled'))

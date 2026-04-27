@@ -3,7 +3,7 @@
 ## 🎯 Objetivos
 
 - Usar ROW_NUMBER(), RANK(), DENSE_RANK()
-- Aplicar funciones analíticas: LAG(), LEAD(), FIRST_VALUE(), LAST_VALUE()
+- Apply analytical functions: LAG(), LEAD(), FIRST_VALUE(), LAST_VALUE()
 - Usar agregaciones con OVER()
 - Particionar datos con PARTITION BY
 - Ordenar ventanas con ORDER BY
@@ -13,7 +13,7 @@
 ### ROW_NUMBER
 ```sql
 -- Ranking de productos por precio
-SELECT 
+SELECT
     product_name,
     price,
     ROW_NUMBER() OVER (ORDER BY price DESC) AS rank
@@ -25,7 +25,7 @@ FROM products;
 -- Top 3 productos por categoría
 SELECT *
 FROM (
-    SELECT 
+    SELECT
         product_name,
         category,
         price,
@@ -38,7 +38,7 @@ WHERE rank_in_category <= 3;
 ### LAG y LEAD
 ```sql
 -- Comparar con orden anterior
-SELECT 
+SELECT
     order_id,
     order_date,
     total_amount,
@@ -49,6 +49,6 @@ FROM orders;
 
 ## 🎓 Ejercicios
 
-Ver starter/ para ejercicios completos con ranking, análisis temporal, y más.
+See starter/ for complete exercises with ranking, temporal analysis, and more.
 
 ## ⏱️ Tiempo Estimado: ~120 minutos
