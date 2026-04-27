@@ -383,19 +383,19 @@ output "quick_start_commands" {
   description = "Quick start commands for using the infrastructure"
   value = {
     upload_data_to_raw = "aws s3 cp <local-file> s3://${aws_s3_bucket.raw.bucket}/data/"
-    
+
     trigger_raw_to_bronze = "aws glue start-job-run --job-name ${aws_glue_job.raw_to_bronze.name}"
-    
+
     trigger_bronze_to_silver = "aws glue start-job-run --job-name ${aws_glue_job.bronze_to_silver.name}"
-    
+
     trigger_silver_to_gold = "aws glue start-job-run --job-name ${aws_glue_job.silver_to_gold.name}"
-    
+
     run_data_quality = "aws glue start-job-run --job-name ${aws_glue_job.data_quality.name}"
-    
+
     start_raw_crawler = "aws glue start-crawler --name ${aws_glue_crawler.raw.name}"
-    
+
     query_catalog = "aws glue get-tables --database-name ${aws_glue_catalog_database.gold.name}"
-    
+
     submit_emr_job = "aws emr-serverless start-job-run --application-id ${aws_emrserverless_application.spark.id} --execution-role-arn ${aws_iam_role.emr_job_runtime.arn} --job-driver '{\"sparkSubmit\":{\"entryPoint\":\"s3://${aws_s3_bucket.scripts.bucket}/emr-jobs/sample.py\"}}'"
   }
 }
@@ -474,25 +474,25 @@ output "infrastructure_summary" {
     project_name = var.project_name
     environment  = var.environment
     region       = var.region
-    
+
     vpc = {
       id         = aws_vpc.lakehouse.id
       cidr_block = aws_vpc.lakehouse.cidr_block
     }
-    
+
     data_lake = {
       raw_bucket    = aws_s3_bucket.raw.bucket
       bronze_bucket = aws_s3_bucket.bronze.bucket
       silver_bucket = aws_s3_bucket.silver.bucket
       gold_bucket   = aws_s3_bucket.gold.bucket
     }
-    
+
     processing = {
       glue_jobs_count = 5
       emr_application = aws_emrserverless_application.spark.id
       crawlers_count  = 4
     }
-    
+
     security = {
       kms_keys_count        = 3
       lake_formation_admin  = aws_iam_role.lakeformation_admin.name

@@ -771,16 +771,16 @@ Your project will be evaluated on:
 
 Upon completion, you will have:
 
-✅ Built a production-ready enterprise data lakehouse  
-✅ Implemented full medallion architecture (Bronze/Silver/Gold)  
-✅ Mastered Infrastructure as Code with Terraform  
-✅ Created scalable ETL pipelines with PySpark  
-✅ Implemented data governance with Lake Formation  
-✅ Optimized queries for performance and cost  
-✅ Set up monitoring and alerting systems  
-✅ Handled both batch and streaming data  
-✅ Applied data quality best practices  
-✅ Gained hands-on AWS experience  
+✅ Built a production-ready enterprise data lakehouse
+✅ Implemented full medallion architecture (Bronze/Silver/Gold)
+✅ Mastered Infrastructure as Code with Terraform
+✅ Created scalable ETL pipelines with PySpark
+✅ Implemented data governance with Lake Formation
+✅ Optimized queries for performance and cost
+✅ Set up monitoring and alerting systems
+✅ Handled both batch and streaming data
+✅ Applied data quality best practices
+✅ Gained hands-on AWS experience
 
 **Congratulations in advance on completing this challenging checkpoint!**
 

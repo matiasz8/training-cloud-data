@@ -14,7 +14,6 @@ Features:
 
 import argparse
 import hashlib
-import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -28,18 +27,18 @@ from tqdm import tqdm
 
 class S3Uploader:
     """Handles uploading files to S3 with partitioning and verification."""
-    
+
     def __init__(self, bucket_name: str, region: str = 'us-east-1'):
         """
         Initialize S3 uploader.
-        
+
         Args:
             bucket_name: Name of the S3 bucket
             region: AWS region (default: us-east-1)
         """
         self.bucket_name = bucket_name
         self.region = region
-        
+
         try:
             self.s3_client = boto3.client('s3', region_name=region)
             self.s3_resource = boto3.resource('s3', region_name=region)
@@ -52,11 +51,11 @@ class S3Uploader:
             print("  AWS_ACCESS_KEY_ID")
             print("  AWS_SECRET_ACCESS_KEY")
             sys.exit(1)
-    
+
     def verify_bucket_exists(self) -> bool:
         """
         Verify that the S3 bucket exists.
-        
+
         Returns:
             True if bucket exists, False otherwise
         """
@@ -72,11 +71,11 @@ class S3Uploader:
             else:
                 print(f"ERROR: {e}")
             return False
-    
+
     def create_bucket_if_not_exists(self) -> bool:
         """
         Create the S3 bucket if it doesn't exist.
-        
+
         Returns:
             True if successful, False otherwise
         """
@@ -84,9 +83,9 @@ class S3Uploader:
             if self.verify_bucket_exists():
                 print(f"✓ Bucket '{self.bucket_name}' exists")
                 return True
-            
+
             print(f"Creating bucket '{self.bucket_name}'...")
-            
+
             if self.region == 'us-east-1':
                 self.s3_client.create_bucket(Bucket=self.bucket_name)
             else:
@@ -94,21 +93,21 @@ class S3Uploader:
                     Bucket=self.bucket_name,
                     CreateBucketConfiguration={'LocationConstraint': self.region}
                 )
-            
+
             print(f"✓ Created bucket '{self.bucket_name}'")
             return True
-            
+
         except ClientError as e:
             print(f"ERROR creating bucket: {e}")
             return False
-    
+
     def calculate_file_hash(self, file_path: Path) -> str:
         """
         Calculate MD5 hash of a file.
-        
+
         Args:
             file_path: Path to the file
-            
+
         Returns:
             MD5 hash as hexadecimal string
         """
@@ -117,7 +116,7 @@ class S3Uploader:
             for chunk in iter(lambda: f.read(4096), b''):
                 md5_hash.update(chunk)
         return md5_hash.hexdigest()
-    
+
     def get_partition_path(
         self,
         data_type: str,
@@ -125,24 +124,24 @@ class S3Uploader:
     ) -> str:
         """
         Generate partition path for data.
-        
+
         Args:
             data_type: Type of data (customers, orders, products, events)
             partition_date: Date for partitioning (default: today)
-            
+
         Returns:
             S3 key prefix with partitioning
         """
         if partition_date is None:
             partition_date = datetime.now()
-        
+
         year = partition_date.year
         month = partition_date.month
         day = partition_date.day
-        
+
         # Bronze zone structure
         return f"bronze/{data_type}/year={year}/month={month:02d}/day={day:02d}/"
-    
+
     def upload_file(
         self,
         local_path: Path,
@@ -151,12 +150,12 @@ class S3Uploader:
     ) -> Tuple[bool, str]:
         """
         Upload a single file to S3.
-        
+
         Args:
             local_path: Local file path
             s3_key: S3 key (path in bucket)
             verify: Whether to verify upload with checksum
-            
+
         Returns:
             Tuple of (success, message)
         """
@@ -164,14 +163,14 @@ class S3Uploader:
             # Calculate local file hash
             if verify:
                 local_hash = self.calculate_file_hash(local_path)
-            
+
             # Upload file
             self.s3_client.upload_file(
                 str(local_path),
                 self.bucket_name,
                 s3_key
             )
-            
+
             # Verify upload
             if verify:
                 try:
@@ -181,20 +180,20 @@ class S3Uploader:
                     )
                     # S3 ETag is MD5 for non-multipart uploads
                     s3_etag = response['ETag'].strip('"')
-                    
+
                     if local_hash != s3_etag:
                         return False, f"Checksum mismatch: {local_hash} != {s3_etag}"
                 except ClientError as e:
                     return False, f"Verification failed: {e}"
-            
+
             file_size = local_path.stat().st_size / (1024 * 1024)  # MB
             return True, f"Uploaded {file_size:.2f} MB"
-            
+
         except ClientError as e:
             return False, f"Upload failed: {e}"
         except Exception as e:
             return False, f"Unexpected error: {e}"
-    
+
     def upload_files_concurrent(
         self,
         file_mappings: List[Tuple[Path, str]],
@@ -203,24 +202,24 @@ class S3Uploader:
     ) -> Tuple[int, int]:
         """
         Upload multiple files concurrently.
-        
+
         Args:
             file_mappings: List of (local_path, s3_key) tuples
             max_workers: Maximum number of concurrent uploads
             verify: Whether to verify uploads with checksums
-            
+
         Returns:
             Tuple of (successful_uploads, failed_uploads)
         """
         successful = 0
         failed = 0
-        
+
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
                 executor.submit(self.upload_file, local_path, s3_key, verify): (local_path, s3_key)
                 for local_path, s3_key in file_mappings
             }
-            
+
             with tqdm(total=len(file_mappings), desc="Uploading files") as pbar:
                 for future in as_completed(futures):
                     local_path, s3_key = futures[future]
@@ -235,18 +234,18 @@ class S3Uploader:
                     except Exception as e:
                         failed += 1
                         print(f"\n✗ {local_path.name}: Unexpected error: {e}")
-                    
+
                     pbar.update(1)
-        
+
         return successful, failed
-    
+
     def list_uploaded_files(self, prefix: str = '') -> List[str]:
         """
         List files in S3 bucket with given prefix.
-        
+
         Args:
             prefix: S3 key prefix to filter
-            
+
         Returns:
             List of S3 keys
         """
@@ -255,10 +254,10 @@ class S3Uploader:
                 Bucket=self.bucket_name,
                 Prefix=prefix
             )
-            
+
             if 'Contents' not in response:
                 return []
-            
+
             return [obj['Key'] for obj in response['Contents']]
         except ClientError as e:
             print(f"ERROR listing files: {e}")
@@ -268,29 +267,29 @@ class S3Uploader:
 def discover_data_files(input_dir: Path) -> dict:
     """
     Discover data files in input directory.
-    
+
     Args:
         input_dir: Directory containing data files
-        
+
     Returns:
         Dictionary mapping data types to file paths
     """
     data_files = {}
-    
+
     patterns = {
         'customers': ['customers.csv', 'customers.json', 'customers.parquet'],
         'products': ['products.csv', 'products.json', 'products.parquet'],
         'orders': ['orders.csv', 'orders.json', 'orders.parquet'],
         'events': ['events.csv', 'events.json', 'events.parquet']
     }
-    
+
     for data_type, file_patterns in patterns.items():
         for pattern in file_patterns:
             file_path = input_dir / pattern
             if file_path.exists():
                 data_files[data_type] = file_path
                 break
-    
+
     return data_files
 
 
@@ -305,7 +304,7 @@ def upload_files_to_s3(
 ) -> bool:
     """
     Upload data files to S3 with partitioning.
-    
+
     Args:
         input_dir: Directory containing data files
         bucket_name: S3 bucket name
@@ -314,7 +313,7 @@ def upload_files_to_s3(
         verify: Whether to verify uploads
         create_bucket: Whether to create bucket if it doesn't exist
         max_workers: Maximum concurrent uploads
-        
+
     Returns:
         True if all uploads successful, False otherwise
     """
@@ -327,10 +326,10 @@ def upload_files_to_s3(
     print(f"Verification: {'Enabled' if verify else 'Disabled'}")
     print("=" * 70)
     print()
-    
+
     # Initialize uploader
     uploader = S3Uploader(bucket_name, region)
-    
+
     # Verify or create bucket
     if create_bucket:
         if not uploader.create_bucket_if_not_exists():
@@ -338,38 +337,38 @@ def upload_files_to_s3(
     else:
         if not uploader.verify_bucket_exists():
             return False
-    
+
     # Discover data files
     print("Discovering data files...")
     data_files = discover_data_files(input_dir)
-    
+
     if not data_files:
         print("ERROR: No data files found in input directory")
         return False
-    
+
     print(f"Found {len(data_files)} data file(s):")
     for data_type, file_path in data_files.items():
         file_size = file_path.stat().st_size / (1024 * 1024)
         print(f"  • {data_type}: {file_path.name} ({file_size:.2f} MB)")
     print()
-    
+
     # Prepare file mappings with partitioning
     file_mappings = []
     for data_type, file_path in data_files.items():
         partition_path = uploader.get_partition_path(data_type, partition_date)
         s3_key = partition_path + file_path.name
         file_mappings.append((file_path, s3_key))
-    
+
     print(f"Uploading {len(file_mappings)} file(s) to S3...")
     print()
-    
+
     # Upload files
     successful, failed = uploader.upload_files_concurrent(
         file_mappings,
         max_workers=max_workers,
         verify=verify
     )
-    
+
     print()
     print("=" * 70)
     print("Upload Summary")
@@ -377,7 +376,7 @@ def upload_files_to_s3(
     print(f"Successful: {successful}")
     print(f"Failed:     {failed}")
     print()
-    
+
     if failed == 0:
         print("✓ All files uploaded successfully!")
         print()
@@ -399,21 +398,21 @@ def main():
 Examples:
   # Upload files from default directory
   python upload_to_s3.py --bucket my-cloudmart-data-lake
-  
+
   # Upload with specific input directory
   python upload_to_s3.py --bucket my-bucket --input-dir ./generated-data
-  
+
   # Upload to specific region and create bucket if needed
   python upload_to_s3.py --bucket my-bucket --region us-west-2 --create-bucket
-  
+
   # Upload with custom partition date
   python upload_to_s3.py --bucket my-bucket --partition-date 2024-01-15
-  
+
   # Upload without verification (faster but less safe)
   python upload_to_s3.py --bucket my-bucket --no-verify
         """
     )
-    
+
     parser.add_argument(
         '--bucket',
         type=str,
@@ -453,9 +452,9 @@ Examples:
         default=5,
         help='Maximum concurrent uploads (default: 5)'
     )
-    
+
     args = parser.parse_args()
-    
+
     # Parse partition date if provided
     partition_date = None
     if args.partition_date:
@@ -464,12 +463,12 @@ Examples:
         except ValueError:
             print(f"ERROR: Invalid date format '{args.partition_date}'. Use YYYY-MM-DD")
             sys.exit(1)
-    
+
     # Validate input directory
     if not args.input_dir.exists():
         print(f"ERROR: Input directory does not exist: {args.input_dir}")
         sys.exit(1)
-    
+
     # Upload files
     try:
         success = upload_files_to_s3(
@@ -481,9 +480,9 @@ Examples:
             create_bucket=args.create_bucket,
             max_workers=args.max_workers
         )
-        
+
         sys.exit(0 if success else 1)
-        
+
     except KeyboardInterrupt:
         print("\n\nUpload interrupted by user")
         sys.exit(1)

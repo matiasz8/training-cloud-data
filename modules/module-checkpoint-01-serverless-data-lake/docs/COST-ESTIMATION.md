@@ -499,7 +499,7 @@ def lambda_handler(event, context):
 
 #### Strategy: Reduce DPUs
 
-**Current:** 2 DPUs (G.1X workers)  
+**Current:** 2 DPUs (G.1X workers)
 **Optimization:** Monitor job metrics, reduce to 1 DPU if possible
 
 **Calculation:**
@@ -536,7 +536,7 @@ job.commit()  # Track processed data
 
 #### Strategy: Schedule Jobs Efficiently
 
-**Current:** Daily at 3 AM UTC  
+**Current:** Daily at 3 AM UTC
 **Optimization:** Combine jobs if possible
 
 **Example:**
@@ -594,7 +594,7 @@ SELECT order_id, total_amount FROM orders;
 **Implementation:**
 ```sql
 CREATE VIEW daily_revenue AS
-SELECT 
+SELECT
     year, month, day,
     SUM(total_amount) AS revenue
 FROM orders
@@ -613,7 +613,7 @@ WHERE year = '2026' AND month = '03';
 
 #### Strategy: Adjust Log Retention
 
-**Current:** 30 days (default)  
+**Current:** 30 days (default)
 **Optimization:** Reduce to 7 days for verbose logs
 
 **Implementation:**
@@ -627,7 +627,7 @@ aws logs put-retention-policy \
 
 #### Strategy: Disable Verbose Logging in Production
 
-**Development:** `logging.DEBUG`  
+**Development:** `logging.DEBUG`
 **Production:** `logging.INFO` or `logging.WARNING`
 
 **Savings:** 50-80% less log volume
@@ -971,6 +971,6 @@ aws lambda delete-function --function-name test-function
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** March 9, 2026  
+**Document Version:** 1.0
+**Last Updated:** March 9, 2026
 **Next Review:** Monthly during first 3 months of implementation

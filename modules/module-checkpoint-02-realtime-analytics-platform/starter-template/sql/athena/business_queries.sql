@@ -26,45 +26,45 @@
 SELECT
     -- TODO: Extract date from timestamp
     -- DATE(from_iso8601_timestamp(timestamp)) as ride_date,
-    
+
     -- TODO: Add status column
     -- status,
-    
+
     -- TODO: Count total rides
     -- COUNT(*) as total_rides,
-    
+
     -- TODO: Sum total revenue
     -- SUM(fare) as total_revenue,
-    
+
     -- TODO: Average fare
     -- AVG(fare) as avg_fare,
-    
+
     -- TODO: Average distance
     -- AVG(distance_km) as avg_distance_km,
-    
+
     -- TODO: Average duration
     -- AVG(duration_minutes) as avg_duration_minutes,
-    
+
     -- TODO: Max fare
     -- MAX(fare) as max_fare,
-    
+
     -- TODO: Min fare
     -- MIN(fare) as min_fare
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Filter for last 30 days
     -- DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
-    
+
     -- TODO: Only include completed and cancelled rides
     -- AND status IN ('completed', 'cancelled')
-    
--- GROUP BY 
+
+-- GROUP BY
     -- TODO: Group by date and status
     -- DATE(from_iso8601_timestamp(timestamp)),
     -- status
-    
--- ORDER BY 
+
+-- ORDER BY
     -- TODO: Order by date descending
     -- ride_date DESC,
     -- status;
@@ -89,35 +89,35 @@ SELECT
 SELECT
     -- TODO: Extract hour from timestamp
     -- HOUR(from_iso8601_timestamp(timestamp)) as hour_of_day,
-    
+
     -- TODO: Count rides
     -- COUNT(*) as ride_count,
-    
+
     -- TODO: Total revenue
     -- SUM(fare) as hourly_revenue,
-    
+
     -- TODO: Average fare
     -- ROUND(AVG(fare), 2) as avg_fare,
-    
+
     -- TODO: Average rating
     -- ROUND(AVG(rating), 2) as avg_rating,
-    
+
     -- TODO: Average duration
     -- ROUND(AVG(duration_minutes), 1) as avg_duration_minutes
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Only completed rides
     -- status = 'completed'
-    
+
     -- TODO: Last 7 days of data
     -- AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '7' day
-    
--- GROUP BY 
+
+-- GROUP BY
     -- TODO: Group by hour
     -- HOUR(from_iso8601_timestamp(timestamp))
-    
--- ORDER BY 
+
+-- ORDER BY
     -- TODO: Order by ride count descending
     -- ride_count DESC;
 */
@@ -142,51 +142,51 @@ SELECT
 SELECT
     -- TODO: Add ranking
     -- RANK() OVER (ORDER BY COUNT(*) DESC) as driver_rank,
-    
+
     -- TODO: Driver ID
     -- driver_id,
-    
+
     -- TODO: Count completed rides
     -- COUNT(*) as completed_rides,
-    
+
     -- TODO: Total earnings
     -- ROUND(SUM(fare + COALESCE(tip, 0)), 2) as total_earnings,
-    
+
     -- TODO: Average fare
     -- ROUND(AVG(fare), 2) as avg_fare,
-    
+
     -- TODO: Average rating
     -- ROUND(AVG(rating), 2) as avg_rating,
-    
+
     -- TODO: Total distance driven
     -- ROUND(SUM(distance_km), 1) as total_distance_km,
-    
+
     -- TODO: Average ride duration
     -- ROUND(AVG(duration_minutes), 1) as avg_duration_minutes,
-    
+
     -- TODO: Calculate earnings per hour
     -- ROUND(SUM(fare + COALESCE(tip, 0)) / (SUM(duration_minutes) / 60.0), 2) as earnings_per_hour
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Only completed rides
     -- status = 'completed'
-    
+
     -- TODO: Last 30 days
     -- AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
-    
--- GROUP BY 
+
+-- GROUP BY
     -- TODO: Group by driver
     -- driver_id
-    
--- HAVING 
+
+-- HAVING
     -- TODO: Only drivers with at least 10 rides
     -- COUNT(*) >= 10
-    
--- ORDER BY 
+
+-- ORDER BY
     -- TODO: Order by completed rides descending
     -- completed_rides DESC
-    
+
 -- LIMIT 20;
 */
 
@@ -209,19 +209,19 @@ SELECT
 SELECT
     -- TODO: Total rides (started)
     -- COUNT(*) as total_rides,
-    
+
     -- TODO: Cancelled rides
     -- SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_rides,
-    
+
     -- TODO: Completed rides
     -- SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_rides,
-    
+
     -- TODO: Cancellation rate as percentage
     -- ROUND(
     --     100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*),
     --     2
     -- ) as cancellation_rate_pct,
-    
+
     -- TODO: Completion rate as percentage
     -- ROUND(
     --     100.0 * SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) / COUNT(*),
@@ -229,10 +229,10 @@ SELECT
     -- ) as completion_rate_pct
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Last 30 days
     -- DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
-    
+
     -- TODO: Only terminal statuses
     -- AND status IN ('completed', 'cancelled');
 
@@ -241,35 +241,35 @@ SELECT
 SELECT
     -- TODO: Cancellation reason
     -- cancellation_reason,
-    
+
     -- TODO: Count
     -- COUNT(*) as cancellation_count,
-    
+
     -- TODO: Percentage of total cancellations
     -- ROUND(
     --     100.0 * COUNT(*) / SUM(COUNT(*)) OVER(),
     --     2
     -- ) as percentage_of_cancellations,
-    
+
     -- TODO: Average cancellation fee
     -- ROUND(AVG(cancellation_fee), 2) as avg_cancellation_fee,
-    
+
     -- TODO: Total fees collected
     -- ROUND(SUM(cancellation_fee), 2) as total_fees_collected
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Only cancelled rides
     -- status = 'cancelled'
-    
+
     -- TODO: Last 30 days
     -- AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
-    
--- GROUP BY 
+
+-- GROUP BY
     -- TODO: Group by reason
     -- cancellation_reason
-    
--- ORDER BY 
+
+-- ORDER BY
     -- TODO: Order by count descending
     -- cancellation_count DESC;
 
@@ -278,13 +278,13 @@ SELECT
 SELECT
     -- TODO: Date
     -- DATE(from_iso8601_timestamp(timestamp)) as date,
-    
+
     -- TODO: Total rides
     -- COUNT(*) as total_rides,
-    
+
     -- TODO: Cancelled rides
     -- SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_rides,
-    
+
     -- TODO: Cancellation rate
     -- ROUND(
     --     100.0 * SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) / COUNT(*),
@@ -292,15 +292,15 @@ SELECT
     -- ) as cancellation_rate_pct
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Last 30 days
     -- DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
     -- AND status IN ('completed', 'cancelled')
-    
--- GROUP BY 
+
+-- GROUP BY
     -- DATE(from_iso8601_timestamp(timestamp))
-    
--- ORDER BY 
+
+-- ORDER BY
     -- date DESC;
 */
 
@@ -322,50 +322,50 @@ SELECT
 SELECT
     -- TODO: Ride ID
     -- ride_id,
-    
+
     -- TODO: Driver and passenger
     -- driver_id,
     -- passenger_id,
-    
+
     -- TODO: Start time
     -- start_time,
-    
+
     -- TODO: Calculate current duration
     -- ROUND(
-    --     date_diff('minute', 
-    --         from_iso8601_timestamp(start_time), 
+    --     date_diff('minute',
+    --         from_iso8601_timestamp(start_time),
     --         current_timestamp
     --     ),
     --     0
     -- ) as current_duration_minutes,
-    
+
     -- TODO: Pickup location (formatted)
     -- CONCAT(
     --     'Lat: ', CAST(pickup_location.lat AS VARCHAR),
     --     ', Lon: ', CAST(pickup_location.lon AS VARCHAR)
     -- ) as pickup_location,
-    
+
     -- TODO: Destination location (formatted)
     -- CONCAT(
     --     'Lat: ', CAST(destination_location.lat AS VARCHAR),
     --     ', Lon: ', CAST(destination_location.lon AS VARCHAR)
     -- ) as destination_location,
-    
+
     -- TODO: Vehicle type
     -- vehicle_type,
-    
+
     -- TODO: Payment method
     -- payment_method,
-    
+
     -- TODO: Status
     -- status
 
 -- FROM ride_analytics_db.ride_events
--- WHERE 
+-- WHERE
     -- TODO: Only active rides
     -- status = 'active'
-    
--- ORDER BY 
+
+-- ORDER BY
     -- TODO: Order by start time (oldest first)
     -- start_time ASC;
 */
@@ -387,7 +387,7 @@ SELECT
     ROUND(AVG(distance_km), 1) as avg_distance,
     ROUND(AVG(rating), 2) as avg_rating
 FROM ride_analytics_db.ride_events
-WHERE 
+WHERE
     status = 'completed'
     AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
 GROUP BY vehicle_type
@@ -405,10 +405,10 @@ SELECT
     COUNT(*) as pickup_count,
     ROUND(AVG(fare), 2) as avg_fare_from_location
 FROM ride_analytics_db.ride_events
-WHERE 
+WHERE
     status = 'completed'
     AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '7' day
-GROUP BY 
+GROUP BY
     ROUND(pickup_location.lat, 2),
     ROUND(pickup_location.lon, 2)
 HAVING COUNT(*) >= 10
@@ -429,7 +429,7 @@ SELECT
     ROUND(AVG(fare), 2) as avg_fare,
     ROUND(AVG(tip), 2) as avg_tip
 FROM ride_analytics_db.ride_events
-WHERE 
+WHERE
     status = 'completed'
     AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
 GROUP BY payment_method
@@ -446,7 +446,7 @@ SELECT
     COUNT(*) as count,
     ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
 FROM ride_analytics_db.ride_events
-WHERE 
+WHERE
     status = 'completed'
     AND rating IS NOT NULL
     AND DATE(from_iso8601_timestamp(timestamp)) >= current_date - interval '30' day
@@ -460,7 +460,7 @@ ORDER BY rating DESC;
 
 /*
 WITH driver_first_ride AS (
-    SELECT 
+    SELECT
         driver_id,
         MIN(from_iso8601_timestamp(start_time)) as first_ride_time
     FROM ride_analytics_db.ride_events
@@ -489,7 +489,7 @@ ORDER BY d.first_ride_time DESC;
 -- ============================================================================
 
 -- HOW TO RUN THESE QUERIES:
--- 
+--
 -- Method 1: AWS Console
 -- 1. Go to Amazon Athena in AWS Console
 -- 2. Select your workgroup
@@ -505,7 +505,7 @@ ORDER BY d.first_ride_time DESC;
 --
 -- Method 3: Python (boto3)
 -- import boto3
--- 
+--
 -- client = boto3.client('athena')
 -- response = client.start_query_execution(
 --     QueryString='YOUR_QUERY',
@@ -514,7 +514,7 @@ ORDER BY d.first_ride_time DESC;
 -- )
 --
 -- QUERY OPTIMIZATION TIPS:
--- 
+--
 -- 1. Use partitioning:
 --    - Partition S3 data by date (year/month/day)
 --    - Always filter on partition columns
@@ -538,7 +538,7 @@ ORDER BY d.first_ride_time DESC;
 --    - approx_percentile() for percentile calculations
 --
 -- COST CONSIDERATIONS:
--- 
+--
 -- Athena charges $5 per TB of data scanned
 -- - Partition your data to reduce scans
 -- - Use columnar formats (Parquet)
@@ -551,14 +551,14 @@ ORDER BY d.first_ride_time DESC;
 -- - 1 TB scanned = $5.00
 --
 -- TESTING QUERIES:
--- 
+--
 -- 1. Start with LIMIT 10 to test syntax
 -- 2. Add EXPLAIN or EXPLAIN ANALYZE to see query plan
 -- 3. Check bytes scanned in query results
 -- 4. Optimize before running on full dataset
 --
 -- COMMON ATHENA FUNCTIONS:
--- 
+--
 -- Date/Time:
 -- - from_iso8601_timestamp() - Parse ISO8601 string to timestamp
 -- - date() - Extract date from timestamp
@@ -581,7 +581,7 @@ ORDER BY d.first_ride_time DESC;
 -- - REGEXP_EXTRACT(), REGEXP_REPLACE()
 --
 -- ATHENA LIMITATIONS:
--- 
+--
 -- - Query timeout: 30 minutes
 -- - Result set size: 1 GB (can use CTAS for larger results)
 -- - DML statements are limited
@@ -589,11 +589,11 @@ ORDER BY d.first_ride_time DESC;
 -- - No indexes (use partitioning instead)
 --
 -- CREATING VIEWS:
--- 
+--
 -- You can create views for frequently used queries:
--- 
+--
 -- CREATE OR REPLACE VIEW daily_summary AS
--- SELECT 
+-- SELECT
 --     DATE(from_iso8601_timestamp(timestamp)) as date,
 --     COUNT(*) as rides,
 --     SUM(fare) as revenue

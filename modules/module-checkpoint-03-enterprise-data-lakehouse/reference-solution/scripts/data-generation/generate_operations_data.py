@@ -28,56 +28,56 @@ logger = logging.getLogger(__name__)
 
 class OperationsDataGenerator:
     """Generator for synthetic operations and IoT data."""
-    
+
     SENSOR_TYPES = [
         'TEMPERATURE', 'PRESSURE', 'VIBRATION', 'HUMIDITY',
         'FLOW_RATE', 'VOLTAGE', 'CURRENT', 'SPEED', 'LEVEL'
     ]
-    
+
     EQUIPMENT_TYPES = [
         'Pump', 'Motor', 'Compressor', 'Generator', 'Conveyor',
         'Valve', 'Heat Exchanger', 'Boiler', 'Turbine', 'Robot Arm'
     ]
-    
+
     EQUIPMENT_STATUS = ['RUNNING', 'IDLE', 'MAINTENANCE', 'FAULT', 'OFFLINE']
-    
+
     MAINTENANCE_TYPES = ['PREVENTIVE', 'CORRECTIVE', 'PREDICTIVE', 'EMERGENCY']
-    
+
     FACILITY_LOCATIONS = [
         'Plant A - Texas', 'Plant B - Ohio', 'Plant C - California',
         'Warehouse 1 - Illinois', 'Warehouse 2 - New York',
         'Distribution Center - Georgia', 'Manufacturing Hub - Michigan'
     ]
-    
+
     INVENTORY_TRANSACTION_TYPES = [
         'RECEIPT', 'SHIPMENT', 'TRANSFER', 'ADJUSTMENT',
         'RETURN', 'SCRAP', 'CYCLE_COUNT'
     ]
-    
+
     def __init__(self, seed: Optional[int] = 42):
         """Initialize the generator with optional seed for reproducibility."""
         self.fake = Faker()
         if seed:
             Faker.seed(seed)
             random.seed(seed)
-        
+
         self.sensors = []
         self.sensor_events = []
         self.equipment = []
         self.equipment_logs = []
         self.maintenance_records = []
         self.inventory_movements = []
-    
+
     def generate_sensors(self, num_sensors: int = 500) -> List[Dict]:
         """Generate sensor metadata."""
         logger.info(f"Generating {num_sensors} sensors...")
-        
+
         sensors = []
-        
+
         for i in range(num_sensors):
             sensor_type = random.choice(self.SENSOR_TYPES)
             location = random.choice(self.FACILITY_LOCATIONS)
-            
+
             sensor = {
                 'sensor_id': f'SNS{i+1:06d}',
                 'sensor_type': sensor_type,
@@ -98,11 +98,11 @@ class OperationsDataGenerator:
                 'created_at': datetime.now().isoformat()
             }
             sensors.append(sensor)
-        
+
         self.sensors = sensors
         logger.info(f"Generated {len(sensors)} sensors")
         return sensors
-    
+
     def generate_sensor_events(
         self,
         num_events: int = 1000000,
@@ -111,26 +111,26 @@ class OperationsDataGenerator:
     ) -> List[Dict]:
         """Generate IoT sensor event data."""
         logger.info(f"Generating {num_events} sensor events...")
-        
+
         if not self.sensors:
             logger.warning("No sensors generated. Generating sensors first.")
             self.generate_sensors()
-        
+
         if not start_date:
             start_date = datetime.now() - timedelta(days=30)
         if not end_date:
             end_date = datetime.now()
-        
+
         events = []
-        
+
         for i in range(num_events):
             sensor = random.choice(self.sensors)
-            
+
             # Generate timestamp
             time_delta = end_date - start_date
             random_seconds = random.randint(0, int(time_delta.total_seconds()))
             event_time = start_date + timedelta(seconds=random_seconds)
-            
+
             # Generate sensor readings based on type
             if sensor['sensor_type'] == 'TEMPERATURE':
                 value = round(random.gauss(75, 15), 2)  # °F
@@ -168,15 +168,15 @@ class OperationsDataGenerator:
                 value = round(random.gauss(70, 15), 2)  # %
                 unit = '%'
                 threshold_min, threshold_max = 20, 95
-            
+
             # Determine if value is within normal range
             is_anomaly = value < threshold_min or value > threshold_max
-            
+
             # Add noise occasionally
             if random.random() < 0.02:
                 value = value * random.uniform(1.5, 3.0)
                 is_anomaly = True
-            
+
             event = {
                 'event_id': f'EVT{i+1:012d}',
                 'sensor_id': sensor['sensor_id'],
@@ -201,25 +201,25 @@ class OperationsDataGenerator:
                 }
             }
             events.append(event)
-        
+
         self.sensor_events = events
         logger.info(f"Generated {len(events)} sensor events")
         return events
-    
+
     def generate_equipment(self, num_equipment: int = 200) -> List[Dict]:
         """Generate equipment master data."""
         logger.info(f"Generating {num_equipment} equipment records...")
-        
+
         equipment_list = []
-        
+
         for i in range(num_equipment):
             equipment_type = random.choice(self.EQUIPMENT_TYPES)
             install_date = self.fake.date_between(start_date='-15y', end_date='-1y')
-            
+
             # Calculate age and condition
             age_years = (datetime.now().date() - install_date).days / 365
             condition_score = max(0, 100 - age_years * random.uniform(3, 8))
-            
+
             equipment = {
                 'equipment_id': f'EQP{i+1:05d}',
                 'equipment_name': f"{equipment_type} {i+1}",
@@ -249,40 +249,40 @@ class OperationsDataGenerator:
                 'updated_at': datetime.now().isoformat()
             }
             equipment_list.append(equipment)
-        
+
         self.equipment = equipment_list
         logger.info(f"Generated {len(equipment_list)} equipment records")
         return equipment_list
-    
+
     def generate_equipment_logs(self, days_back: int = 90) -> List[Dict]:
         """Generate equipment operational logs."""
         logger.info(f"Generating equipment logs for {days_back} days...")
-        
+
         if not self.equipment:
             logger.warning("No equipment generated. Generating equipment first.")
             self.generate_equipment()
-        
+
         logs = []
         end_date = datetime.now()
-        
+
         for day_offset in range(days_back):
             log_date = end_date - timedelta(days=day_offset)
-            
+
             for equip in self.equipment:
                 # Generate 1-4 log entries per equipment per day
                 num_logs = random.randint(1, 4)
-                
+
                 for _ in range(num_logs):
                     log_time = log_date.replace(
                         hour=random.randint(0, 23),
                         minute=random.randint(0, 59),
                         second=random.randint(0, 59)
                     )
-                    
+
                     # Generate operational metrics
                     runtime_hours = round(random.uniform(0, 24), 2)
                     downtime_hours = round(24 - runtime_hours, 2)
-                    
+
                     log = {
                         'log_id': f"LOG{len(logs)+1:012d}",
                         'equipment_id': equip['equipment_id'],
@@ -305,30 +305,30 @@ class OperationsDataGenerator:
                         'created_at': datetime.now().isoformat()
                     }
                     logs.append(log)
-        
+
         self.equipment_logs = logs
         logger.info(f"Generated {len(logs)} equipment logs")
         return logs
-    
+
     def generate_maintenance_records(self, num_records: int = 5000) -> List[Dict]:
         """Generate maintenance records."""
         logger.info(f"Generating {num_records} maintenance records...")
-        
+
         if not self.equipment:
             logger.warning("No equipment generated. Generating equipment first.")
             self.generate_equipment()
-        
+
         records = []
-        
+
         for i in range(num_records):
             equip = random.choice(self.equipment)
             maintenance_type = random.choice(self.MAINTENANCE_TYPES)
-            
+
             scheduled_date = self.fake.date_between(start_date='-1y', end_date='+30d')
-            
+
             # Determine if maintenance is completed
             is_completed = scheduled_date < datetime.now().date()
-            
+
             if is_completed:
                 actual_start = datetime.combine(
                     scheduled_date,
@@ -336,7 +336,7 @@ class OperationsDataGenerator:
                 ) + timedelta(hours=random.randint(0, 8))
                 duration_hours = round(random.uniform(0.5, 24), 2)
                 actual_end = actual_start + timedelta(hours=duration_hours)
-                
+
                 cost = round(random.uniform(500, 25000), 2)
                 status = random.choices(
                     ['COMPLETED', 'PARTIALLY_COMPLETED', 'CANCELLED'],
@@ -348,7 +348,7 @@ class OperationsDataGenerator:
                 duration_hours = 0.0
                 cost = 0.0
                 status = 'SCHEDULED'
-            
+
             record = {
                 'maintenance_id': f'MNT{i+1:08d}',
                 'equipment_id': equip['equipment_id'],
@@ -381,24 +381,24 @@ class OperationsDataGenerator:
                 'updated_at': datetime.now().isoformat()
             }
             records.append(record)
-        
+
         self.maintenance_records = records
         logger.info(f"Generated {len(records)} maintenance records")
         return records
-    
+
     def generate_inventory_movements(self, num_movements: int = 50000) -> List[Dict]:
         """Generate inventory movement transactions."""
         logger.info(f"Generating {num_movements} inventory movements...")
-        
+
         # Generate some product SKUs
         products = [f'SKU-{random.randint(10000, 99999)}' for _ in range(500)]
-        
+
         movements = []
-        
+
         for i in range(num_movements):
             transaction_type = random.choice(self.INVENTORY_TRANSACTION_TYPES)
             transaction_date = self.fake.date_time_between(start_date='-6m', end_date='now')
-            
+
             # Generate quantity based on transaction type
             if transaction_type in ['RECEIPT', 'RETURN']:
                 quantity = random.randint(10, 1000)
@@ -410,7 +410,7 @@ class OperationsDataGenerator:
                 quantity = random.randint(-100, 100)
             else:  # TRANSFER, CYCLE_COUNT
                 quantity = random.randint(-200, 200)
-            
+
             movement = {
                 'movement_id': f'INV{i+1:010d}',
                 'transaction_type': transaction_type,
@@ -432,17 +432,17 @@ class OperationsDataGenerator:
                 'created_at': transaction_date.isoformat()
             }
             movements.append(movement)
-        
+
         self.inventory_movements = movements
         logger.info(f"Generated {len(movements)} inventory movements")
         return movements
-    
+
     def write_to_local(self, output_dir: str):
         """Write generated data to local JSON files."""
         logger.info(f"Writing operations data to local directory: {output_dir}")
-        
+
         output_path = Path(output_dir)
-        
+
         # Write sensor events with date partitioning
         if self.sensor_events:
             events_by_date = {}
@@ -452,14 +452,14 @@ class OperationsDataGenerator:
                 if date_key not in events_by_date:
                     events_by_date[date_key] = []
                 events_by_date[date_key].append(event)
-            
+
             for date_key, events in events_by_date.items():
                 date_path = output_path / 'sensor_events' / f'date={date_key}'
                 date_path.mkdir(parents=True, exist_ok=True)
                 with open(date_path / f'events_{date_key}.json', 'w') as f:
                     json.dump(events, f, indent=2)
             logger.info(f"Wrote {len(self.sensor_events)} sensor events")
-        
+
         # Write other datasets
         for dataset_name, data in [
             ('sensors', self.sensors),
@@ -474,14 +474,14 @@ class OperationsDataGenerator:
                 with open(dataset_path / f'{dataset_name}.json', 'w') as f:
                     json.dump(data, f, indent=2)
                 logger.info(f"Wrote {len(data)} {dataset_name}")
-    
+
     def write_to_s3(self, s3_bucket: str, s3_prefix: str = 'raw/operations'):
         """Write generated data to S3 as JSON."""
         logger.info(f"Writing operations data to S3: s3://{s3_bucket}/{s3_prefix}")
-        
+
         try:
             s3_client = boto3.client('s3')
-            
+
             # Write sensor events with date partitioning
             if self.sensor_events:
                 events_by_date = {}
@@ -491,7 +491,7 @@ class OperationsDataGenerator:
                     if date_key not in events_by_date:
                         events_by_date[date_key] = []
                     events_by_date[date_key].append(event)
-                
+
                 for date_key, events in events_by_date.items():
                     key = f"{s3_prefix}/sensor_events/date={date_key}/events_{date_key}.json"
                     s3_client.put_object(
@@ -501,7 +501,7 @@ class OperationsDataGenerator:
                         ContentType='application/json'
                     )
                 logger.info(f"Wrote {len(self.sensor_events)} sensor events to S3")
-            
+
             # Write other datasets
             for dataset_name, data in [
                 ('sensors', self.sensors),
@@ -519,7 +519,7 @@ class OperationsDataGenerator:
                         ContentType='application/json'
                     )
                     logger.info(f"Wrote {len(data)} {dataset_name} to S3")
-            
+
         except ClientError as e:
             logger.error(f"Error writing to S3: {e}")
             raise
@@ -530,117 +530,117 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate synthetic operations data for Enterprise Data Lakehouse'
     )
-    
+
     parser.add_argument(
         '--sensor-events',
         type=int,
         default=1000000,
         help='Number of sensor event records to generate (default: 1000000)'
     )
-    
+
     parser.add_argument(
         '--sensors',
         type=int,
         default=500,
         help='Number of sensor devices (default: 500)'
     )
-    
+
     parser.add_argument(
         '--equipment',
         type=int,
         default=200,
         help='Number of equipment items (default: 200)'
     )
-    
+
     parser.add_argument(
         '--maintenance-records',
         type=int,
         default=5000,
         help='Number of maintenance records (default: 5000)'
     )
-    
+
     parser.add_argument(
         '--inventory-movements',
         type=int,
         default=50000,
         help='Number of inventory movements (default: 50000)'
     )
-    
+
     parser.add_argument(
         '--equipment-log-days',
         type=int,
         default=90,
         help='Number of days of equipment logs (default: 90)'
     )
-    
+
     parser.add_argument(
         '--start-date',
         type=str,
         help='Start date for sensor events (YYYY-MM-DD)'
     )
-    
+
     parser.add_argument(
         '--end-date',
         type=str,
         help='End date for sensor events (YYYY-MM-DD)'
     )
-    
+
     parser.add_argument(
         '--output-path',
         type=str,
         default='./data/operations',
         help='Local output path for generated data'
     )
-    
+
     parser.add_argument(
         '--s3-bucket',
         type=str,
         help='S3 bucket name for output (if not specified, writes to local only)'
     )
-    
+
     parser.add_argument(
         '--s3-prefix',
         type=str,
         default='raw/operations',
         help='S3 key prefix (default: raw/operations)'
     )
-    
+
     parser.add_argument(
         '--seed',
         type=int,
         default=42,
         help='Random seed for reproducibility (default: 42)'
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """Main execution function."""
     args = parse_args()
-    
+
     # Parse dates if provided
     start_date = None
     end_date = None
-    
+
     if args.start_date:
         try:
             start_date = datetime.strptime(args.start_date, '%Y-%m-%d')
         except ValueError:
             logger.error(f"Invalid start date format: {args.start_date}. Use YYYY-MM-DD")
             sys.exit(1)
-    
+
     if args.end_date:
         try:
             end_date = datetime.strptime(args.end_date, '%Y-%m-%d')
         except ValueError:
             logger.error(f"Invalid end date format: {args.end_date}. Use YYYY-MM-DD")
             sys.exit(1)
-    
+
     # Initialize generator
     logger.info("Initializing Operations Data Generator...")
     generator = OperationsDataGenerator(seed=args.seed)
-    
+
     # Generate data
     generator.generate_sensors(num_sensors=args.sensors)
     generator.generate_sensor_events(
@@ -652,14 +652,14 @@ def main():
     generator.generate_equipment_logs(days_back=args.equipment_log_days)
     generator.generate_maintenance_records(num_records=args.maintenance_records)
     generator.generate_inventory_movements(num_movements=args.inventory_movements)
-    
+
     # Write to local
     generator.write_to_local(args.output_path)
-    
+
     # Write to S3 if bucket specified
     if args.s3_bucket:
         generator.write_to_s3(args.s3_bucket, args.s3_prefix)
-    
+
     logger.info("Operations data generation completed successfully!")
     logger.info(f"Generated: {len(generator.sensors)} sensors, "
                 f"{len(generator.sensor_events)} sensor events, "

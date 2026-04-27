@@ -10,15 +10,8 @@ TODO SECTIONS:
 5. Write to Silver
 """
 
-import sys
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import (
-    col, current_timestamp, trim, lower, when, lit
-)
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
 from awsglue.context import GlueContext
-from awsglue.job import Job
 
 
 def read_bronze_products(glue_context: GlueContext, database: str, table: str) -> DataFrame:
@@ -30,7 +23,7 @@ def read_bronze_products(glue_context: GlueContext, database: str, table: str) -
 def standardize_categories(df: DataFrame) -> DataFrame:
     """
     Standardize product categories
-    
+
     TODO: Map inconsistent category names to standard values
     - Electronics, electronics, ELECTRONICS -> electronics
     - Clothing, clothes, apparel -> clothing

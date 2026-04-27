@@ -23,10 +23,8 @@ import boto3
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from decimal import Decimal
-from typing import Dict, List, Any, Generator
+from typing import Dict, List, Any
 from pathlib import Path
-import json
 import os
 import tempfile
 import shutil
@@ -49,8 +47,8 @@ def aws_credentials():
     os.environ['AWS_SECURITY_TOKEN'] = 'testing'
     os.environ['AWS_SESSION_TOKEN'] = 'testing'
     os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
-    
-    
+
+
 @pytest.fixture(scope="session")
 def aws_region():
     """AWS region for testing."""
@@ -167,16 +165,16 @@ def test_buckets(s3_client, project_config):
         project_config['gold_bucket'],
         project_config['logs_bucket'],
     ]
-    
+
     for bucket in buckets:
         s3_client.create_bucket(Bucket=bucket)
-        
+
         # Enable versioning
         s3_client.put_bucket_versioning(
             Bucket=bucket,
             VersioningConfiguration={'Status': 'Enabled'}
         )
-        
+
         # Enable encryption
         s3_client.put_bucket_encryption(
             Bucket=bucket,
@@ -188,7 +186,7 @@ def test_buckets(s3_client, project_config):
                 }]
             }
         )
-    
+
     return buckets
 
 
@@ -200,7 +198,7 @@ def test_buckets(s3_client, project_config):
 def sample_customers_data():
     """Generate sample customer data with PII."""
     np.random.seed(42)
-    
+
     data = {
         'customer_id': range(1, 101),
         'first_name': [f'FirstName{i}' for i in range(1, 101)],
@@ -215,7 +213,7 @@ def sample_customers_data():
         'zip_code': [f'{10000+i:05d}' for i in range(1, 101)],
         'created_at': [datetime.now() - timedelta(days=i) for i in range(100)],
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -223,7 +221,7 @@ def sample_customers_data():
 def sample_orders_data():
     """Generate sample order data."""
     np.random.seed(42)
-    
+
     data = {
         'order_id': range(1, 501),
         'customer_id': np.random.randint(1, 101, 500),
@@ -233,7 +231,7 @@ def sample_orders_data():
         'status': np.random.choice(['pending', 'shipped', 'delivered', 'cancelled'], 500, p=[0.1, 0.3, 0.5, 0.1]),
         'shipping_address': [f'{100+i} Main St' for i in range(500)],
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -241,7 +239,7 @@ def sample_orders_data():
 def sample_products_data():
     """Generate sample product data."""
     np.random.seed(42)
-    
+
     data = {
         'product_id': range(1, 201),
         'product_name': [f'Product {i}' for i in range(1, 201)],
@@ -252,7 +250,7 @@ def sample_products_data():
         'created_at': [datetime.now() - timedelta(days=i) for i in range(200)],
         'updated_at': [datetime.now() - timedelta(days=int(i/2)) for i in range(200)],
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -267,7 +265,7 @@ def sample_data_quality_issues():
         'amount': [100.50, 200.75, None, 400.25, 500.00],  # Missing value
         'date': ['2024-01-01', '2024-13-32', '2024-03-15', '2024-04-20', None],  # Invalid date
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -289,7 +287,7 @@ def upload_sample_data(s3_client, test_buckets, sample_customers_data, sample_or
     def _upload(bucket_name: str, prefix: str, dataframe: pd.DataFrame, format: str = 'parquet'):
         """Upload dataframe to S3."""
         key = f"{prefix}/data.{format}"
-        
+
         if format == 'parquet':
             buffer = dataframe.to_parquet(index=False)
             s3_client.put_object(Bucket=bucket_name, Key=key, Body=buffer)
@@ -299,9 +297,9 @@ def upload_sample_data(s3_client, test_buckets, sample_customers_data, sample_or
         elif format == 'json':
             json_buffer = dataframe.to_json(orient='records')
             s3_client.put_object(Bucket=bucket_name, Key=key, Body=json_buffer)
-        
+
         return f"s3://{bucket_name}/{key}"
-    
+
     return _upload
 
 
@@ -359,7 +357,7 @@ def generate_mock_crawler(crawler_name: str, database: str, s3_path: str, role_a
 
 class DataQualityValidator:
     """Helper class for data quality validations."""
-    
+
     @staticmethod
     def check_completeness(df: pd.DataFrame, required_columns: List[str]) -> Dict[str, Any]:
         """Check data completeness."""
@@ -374,7 +372,7 @@ class DataQualityValidator:
                     'complete': null_pct == 0
                 }
         return results
-    
+
     @staticmethod
     def check_uniqueness(df: pd.DataFrame, columns: List[str]) -> Dict[str, Any]:
         """Check uniqueness of columns."""
@@ -391,13 +389,13 @@ class DataQualityValidator:
                     'is_unique': duplicate_count == 0
                 }
         return results
-    
+
     @staticmethod
     def check_range(df: pd.DataFrame, column: str, min_val: float, max_val: float) -> Dict[str, Any]:
         """Check if values are within expected range."""
         if column not in df.columns:
             return {'error': f'Column {column} not found'}
-        
+
         out_of_range = df[(df[column] < min_val) | (df[column] > max_val)]
         return {
             'total_rows': len(df),
@@ -405,7 +403,7 @@ class DataQualityValidator:
             'out_of_range_percentage': (len(out_of_range) / len(df)) * 100,
             'in_range': len(out_of_range) == 0
         }
-    
+
     @staticmethod
     def detect_pii(df: pd.DataFrame) -> List[Dict[str, Any]]:
         """Detect potential PII columns."""
@@ -415,7 +413,7 @@ class DataQualityValidator:
             'phone': r'\d{3}-\d{3,4}-\d{4}',
             'credit_card': r'\d{4}-\d{4}-\d{4}-\d{4}',
         }
-        
+
         detected_pii = []
         for col in df.columns:
             if df[col].dtype == 'object':
@@ -428,7 +426,7 @@ class DataQualityValidator:
                             'matches': int(matches),
                             'percentage': (matches / len(df)) * 100
                         })
-        
+
         return detected_pii
 
 
@@ -446,12 +444,12 @@ def dq_validator():
 def cleanup_s3_resources(s3_client):
     """Cleanup S3 resources after tests."""
     created_buckets = []
-    
+
     def _register_bucket(bucket_name: str):
         created_buckets.append(bucket_name)
-    
+
     yield _register_bucket
-    
+
     # Cleanup
     for bucket in created_buckets:
         try:
@@ -463,10 +461,10 @@ def cleanup_s3_resources(s3_client):
                     objects.extend([{'Key': v['Key'], 'VersionId': v['VersionId']} for v in page['Versions']])
                 if 'DeleteMarkers' in page:
                     objects.extend([{'Key': m['Key'], 'VersionId': m['VersionId']} for m in page['DeleteMarkers']])
-                
+
                 if objects:
                     s3_client.delete_objects(Bucket=bucket, Delete={'Objects': objects})
-            
+
             # Delete bucket
             s3_client.delete_bucket(Bucket=bucket)
         except Exception as e:

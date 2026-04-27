@@ -306,9 +306,9 @@ output "deployment_instructions" {
   description = "Instructions for using the deployed infrastructure"
   value = <<-EOT
     CloudMart Serverless Data Lake has been successfully deployed!
-    
+
     === NEXT STEPS ===
-    
+
     1. UPLOAD GLUE ETL SCRIPTS:
        - Upload your Glue job scripts to: s3://${aws_s3_bucket.logs.id}/glue-scripts/
        - Required scripts:
@@ -317,31 +317,31 @@ output "deployment_instructions" {
          * bronze_to_silver_products.py
          * silver_to_gold_sales.py
          * silver_to_gold_customers.py
-    
+
     2. UPDATE LAMBDA FUNCTIONS:
        - Replace the placeholder Lambda code with your actual ingestion logic
        - Lambda functions: ${aws_lambda_function.ingest_orders.function_name}, etc.
-    
+
     3. VERIFY SNS SUBSCRIPTION:
        - Check your email (${var.alert_email}) for SNS subscription confirmation
        - Click the confirmation link to receive alerts
-    
+
     4. START INGESTING DATA:
        - Upload raw data to: s3://${aws_s3_bucket.raw_data.id}/
        - Lambda functions will automatically process new data
-    
+
     5. RUN GLUE CRAWLERS:
        - Crawlers will run on schedule, or run manually:
          * aws glue start-crawler --name ${aws_glue_crawler.raw_data.name}
          * aws glue start-crawler --name ${aws_glue_crawler.processed_data.name}
          * aws glue start-crawler --name ${aws_glue_crawler.curated_data.name}
-    
+
     6. QUERY DATA WITH ATHENA:
        - Open Athena console
        - Select workgroup: ${aws_athena_workgroup.cloudmart_analytics.name}
        - Query database: ${aws_glue_catalog_database.cloudmart.name}
        - Results saved to: s3://${aws_s3_bucket.athena_results.id}/query-results/
-    
+
     === DATA FLOW ===
     Raw Data (Bronze) → Glue ETL → Processed Data (Silver) → Glue ETL → Curated Data (Gold) → Athena Analytics
   EOT

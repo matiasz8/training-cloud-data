@@ -10,18 +10,9 @@ TODO SECTIONS:
 5. Write to Silver without time partitions (slowly changing dimension)
 """
 
-import sys
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import (
-    col, current_timestamp, trim, lower, upper, regexp_extract,
-    when, concat_ws, to_date
-)
 from awsglue.transforms import *
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
 from awsglue.context import GlueContext
-from awsglue.job import Job
-from awsglue.dynamicframe import DynamicFrame
 
 
 def read_bronze_customers(glue_context: GlueContext, database: str, table: str) -> DataFrame:
@@ -35,7 +26,7 @@ def read_bronze_customers(glue_context: GlueContext, database: str, table: str) 
 def flatten_nested_fields(df: DataFrame) -> DataFrame:
     """
     Flatten nested JSON structures like address
-    
+
     TODO: If address is a struct with city, country, postal_code:
     - Extract nested fields: col('address.city').alias('city')
     - Or use pyspark.sql.functions.struct operations
@@ -53,16 +44,16 @@ def apply_customer_quality_checks(df: DataFrame) -> DataFrame:
     # 1. customer_id not null
     # 2. email matches pattern (contains @ and .)
     # 3. Remove duplicates by customer_id (keep most recent)
-    
+
     # TODO: Email validation
     # df = df.filter(col('email').contains('@'))
     # df = df.filter(col('email').contains('.'))
-    
+
     # TODO: Deduplicate
     # window = Window.partitionBy('customer_id').orderBy(col('registration_date').desc())
     # df = df.withColumn('row_num', row_number().over(window))
     # df = df.filter(col('row_num') == 1).drop('row_num')
-    
+
     return df  # TODO: Implement
 
 
@@ -73,18 +64,18 @@ def standardize_customer_data(df: DataFrame) -> DataFrame:
     # - Email to lowercase
     # - Phone number formatting
     # - Country codes standardization
-    
+
     # df = df.withColumn('first_name', initcap(trim(col('first_name'))))
     # df = df.withColumn('last_name', initcap(trim(col('last_name'))))
     # df = df.withColumn('email', lower(trim(col('email'))))
-    
+
     return df  # TODO: Implement
 
 
 def write_to_silver(glue_context: GlueContext, df: DataFrame, target_s3_path: str):
     """
     Write to Silver without time partitions (dimension table)
-    
+
     TODO: Customers are a dimension table, consider:
     - No time partitioning (or partition by country/region)
     - Overwrite mode or merge/upsert strategy

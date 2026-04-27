@@ -10,7 +10,7 @@ import logging
 import os
 import sys
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import boto3
 from botocore.exceptions import ClientError
@@ -52,10 +52,10 @@ class QuickSightDashboardManager:
         self.dynamodb_tables = dynamodb_tables
         self.athena_database = athena_database
         self.athena_workgroup = athena_workgroup
-        
+
         self.quicksight_client = boto3.client('quicksight', region_name=region)
         self.sts_client = boto3.client('sts', region_name=region)
-        
+
         # Verify account ID
         if not account_id:
             response = self.sts_client.get_caller_identity()
@@ -70,12 +70,12 @@ class QuickSightDashboardManager:
             Dictionary mapping data source names to their ARNs
         """
         data_source_arns = {}
-        
+
         # Create DynamoDB data sources
         for dataset_name, table_name in self.dynamodb_tables.items():
             source_id = f"{dataset_name}-dynamodb"
             source_name = f"{dataset_name.replace('_', ' ').title()} DynamoDB"
-            
+
             try:
                 logger.info(f"Creating DynamoDB data source: {source_name}")
                 response = self.quicksight_client.create_data_source(
@@ -108,7 +108,7 @@ class QuickSightDashboardManager:
                 )
                 data_source_arns[source_id] = response['Arn']
                 logger.info(f"Created data source: {response['Arn']}")
-                
+
             except ClientError as e:
                 if e.response['Error']['Code'] == 'ResourceExistsException':
                     logger.warning(f"Data source {source_id} already exists")
@@ -125,7 +125,7 @@ class QuickSightDashboardManager:
         # Create Athena data source
         athena_source_id = "sales-analytics-athena"
         athena_source_name = "Sales Analytics Athena"
-        
+
         try:
             logger.info(f"Creating Athena data source: {athena_source_name}")
             response = self.quicksight_client.create_data_source(
@@ -157,7 +157,7 @@ class QuickSightDashboardManager:
             )
             data_source_arns[athena_source_id] = response['Arn']
             logger.info(f"Created Athena data source: {response['Arn']}")
-            
+
         except ClientError as e:
             if e.response['Error']['Code'] == 'ResourceExistsException':
                 logger.warning(f"Data source {athena_source_id} already exists")
@@ -212,14 +212,14 @@ class QuickSightDashboardManager:
         for dataset_config in datasets:
             dataset_id = dataset_config['dataset_id']
             data_source_id = dataset_config['data_source_id']
-            
+
             if data_source_id not in data_source_arns:
                 logger.warning(f"Data source {data_source_id} not found, skipping dataset {dataset_id}")
                 continue
 
             try:
                 logger.info(f"Creating dataset: {dataset_config['name']}")
-                
+
                 physical_table_map = {
                     'physical-table-1': {
                         'CustomSql': {
@@ -287,10 +287,10 @@ class QuickSightDashboardManager:
             interval_minutes: Refresh interval in minutes
         """
         schedule_id = f"{dataset_id}-auto-refresh"
-        
+
         try:
             logger.info(f"Creating refresh schedule for dataset {dataset_id} (every {interval_minutes} minutes)")
-            
+
             self.quicksight_client.create_refresh_schedule(
                 AwsAccountId=self.account_id,
                 DataSetId=dataset_id,
@@ -308,7 +308,7 @@ class QuickSightDashboardManager:
                 }
             )
             logger.info(f"Refresh schedule created: {schedule_id}")
-            
+
         except ClientError as e:
             if e.response['Error']['Code'] == 'ResourceExistsException':
                 logger.warning(f"Refresh schedule {schedule_id} already exists")
@@ -336,7 +336,7 @@ class QuickSightDashboardManager:
         """
         try:
             logger.info(f"Creating dashboard: {dashboard_name}")
-            
+
             # Load template
             with open(template_path, 'r') as f:
                 template = json.load(f)
@@ -375,10 +375,10 @@ class QuickSightDashboardManager:
                     }
                 }
             )
-            
+
             logger.info(f"Dashboard created: {response['Arn']}")
             return response['Arn']
-            
+
         except ClientError as e:
             if e.response['Error']['Code'] == 'ResourceExistsException':
                 logger.warning(f"Dashboard {dashboard_id} already exists")
@@ -407,17 +407,17 @@ class QuickSightDashboardManager:
             List of dataset references
         """
         references = []
-        
+
         for dataset_ref in template.get('DataSetReferences', []):
             placeholder = dataset_ref.get('DataSetPlaceholder')
             dataset_id = dataset_ref.get('DataSetArn', '').split('/')[-1]
-            
+
             if dataset_id in dataset_arns:
                 references.append({
                     'DataSetPlaceholder': placeholder,
                     'DataSetArn': dataset_arns[dataset_id]
                 })
-        
+
         return references
 
 
@@ -476,7 +476,7 @@ def main():
         action='store_true',
         help='Skip dataset creation'
     )
-    
+
     args = parser.parse_args()
 
     try:
@@ -485,7 +485,7 @@ def main():
             'rides_state': args.dynamodb_rides_table,
             'aggregated_metrics': args.dynamodb_metrics_table
         }
-        
+
         manager = QuickSightDashboardManager(
             region=args.region,
             account_id=args.account_id,
@@ -513,7 +513,7 @@ def main():
 
         # Create dashboards
         logger.info("Creating dashboards...")
-        
+
         dashboards = [
             {
                 'id': 'operational-dashboard',
@@ -526,7 +526,7 @@ def main():
                 'template': os.path.join(args.template_dir, 'executive_dashboard.json')
             }
         ]
-        
+
         created_dashboards = []
         for dashboard in dashboards:
             if os.path.exists(dashboard['template']):
@@ -544,7 +544,7 @@ def main():
         logger.info("Dashboard setup complete!")
         logger.info(f"Created {len(created_dashboards)} dashboards")
         logger.info(f"{'='*80}\n")
-        
+
         return 0
 
     except Exception as e:

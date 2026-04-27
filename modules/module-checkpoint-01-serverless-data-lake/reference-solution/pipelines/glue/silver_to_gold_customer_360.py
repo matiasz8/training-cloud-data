@@ -5,17 +5,15 @@ to calculate lifetime value, RFM scores, and customer segmentation.
 """
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 import boto3
 from pyspark.sql import DataFrame, Window
 from pyspark.sql.functions import (
     col, current_timestamp, lit, count, sum as spark_sum, avg, min as spark_min,
-    max as spark_max, countDistinct, when, datediff, coalesce, 
-    round as spark_round, ceil, ntile, percent_rank, concat_ws
+    max as spark_max, countDistinct, when, datediff, round as spark_round, ntile, concat_ws
 )
 from pyspark.sql.types import (
-    StructType, StructField, StringType, IntegerType,
-    DoubleType, TimestampType, DateType
+    StructType, StructField, StringType, TimestampType
 )
 
 from awsglue.transforms import *
@@ -28,8 +26,7 @@ from awsglue.dynamicframe import DynamicFrame
 # Import shared utilities
 sys.path.append('/home/hadoop/common')
 from common.glue_utils import (
-    GlueLogger, log_job_metrics, validate_dataframe_schema,
-    partition_dataframe
+    GlueLogger, log_job_metrics, partition_dataframe
 )
 
 
@@ -61,20 +58,20 @@ def read_silver_customers(
 ) -> DataFrame:
     """Read processed customers from Silver layer."""
     logger.info(f"Reading Silver customers: {database}.{table}")
-    
+
     try:
         dynamic_frame = glue_context.create_dynamic_frame.from_catalog(
             database=database,
             table_name=table,
             transformation_ctx="read_silver_customers"
         )
-        
+
         df = dynamic_frame.toDF()
-        logger.info(f"Successfully read Silver customers", row_count=df.count())
+        logger.info("Successfully read Silver customers", row_count=df.count())
         return df
-        
+
     except Exception as e:
-        logger.error(f"Failed to read Silver customers", exception=e)
+        logger.error("Failed to read Silver customers", exception=e)
         raise
 
 
@@ -86,20 +83,20 @@ def read_silver_orders(
 ) -> DataFrame:
     """Read processed orders from Silver layer."""
     logger.info(f"Reading Silver orders: {database}.{table}")
-    
+
     try:
         dynamic_frame = glue_context.create_dynamic_frame.from_catalog(
             database=database,
             table_name=table,
             transformation_ctx="read_silver_orders"
         )
-        
+
         df = dynamic_frame.toDF()
-        logger.info(f"Successfully read Silver orders", row_count=df.count())
+        logger.info("Successfully read Silver orders", row_count=df.count())
         return df
-        
+
     except Exception as e:
-        logger.error(f"Failed to read Silver orders", exception=e)
+        logger.error("Failed to read Silver orders", exception=e)
         raise
 
 
@@ -111,20 +108,20 @@ def read_silver_events(
 ) -> DataFrame:
     """Read processed events from Silver layer."""
     logger.info(f"Reading Silver events: {database}.{table}")
-    
+
     try:
         dynamic_frame = glue_context.create_dynamic_frame.from_catalog(
             database=database,
             table_name=table,
             transformation_ctx="read_silver_events"
         )
-        
+
         df = dynamic_frame.toDF()
-        logger.info(f"Successfully read Silver events", row_count=df.count())
+        logger.info("Successfully read Silver events", row_count=df.count())
         return df
-        
-    except Exception as e:
-        logger.warning(f"Events table not available, continuing without event data")
+
+    except Exception:
+        logger.warning("Events table not available, continuing without event data")
         # Return empty DataFrame with expected schema
         schema = StructType([
             StructField("customer_id", StringType(), True),
@@ -137,16 +134,16 @@ def read_silver_events(
 def aggregate_order_metrics(df_orders: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Aggregate order metrics per customer.
-    
+
     Args:
         df_orders: Orders DataFrame
         logger: Logger instance
-        
+
     Returns:
         Aggregated order metrics by customer
     """
     logger.info("Aggregating order metrics per customer")
-    
+
     df_order_agg = df_orders.groupBy('customer_id').agg(
         count('order_id').alias('total_orders'),
         spark_sum('total_amount').alias('total_spent'),
@@ -156,33 +153,33 @@ def aggregate_order_metrics(df_orders: DataFrame, logger: GlueLogger) -> DataFra
         spark_sum('quantity').alias('total_items_purchased'),
         countDistinct('product_id').alias('unique_products_purchased')
     )
-    
+
     # Round decimal values
     df_order_agg = df_order_agg \
         .withColumn('total_spent', spark_round(col('total_spent'), 2)) \
         .withColumn('avg_order_value', spark_round(col('avg_order_value'), 2))
-    
+
     logger.info(
         "Order metrics aggregated",
         customers_with_orders=df_order_agg.count()
     )
-    
+
     return df_order_agg
 
 
 def aggregate_event_metrics(df_events: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Aggregate event metrics per customer.
-    
+
     Args:
         df_events: Events DataFrame
         logger: Logger instance
-        
+
     Returns:
         Aggregated event metrics by customer
     """
     logger.info("Aggregating event metrics per customer")
-    
+
     if df_events.count() == 0:
         logger.warning("No event data available, returning empty metrics")
         # Return empty aggregation with schema
@@ -192,18 +189,18 @@ def aggregate_event_metrics(df_events: DataFrame, logger: GlueLogger) -> DataFra
             lit(0).alias('total_clicks'),
             lit(None).cast(TimestampType()).alias('last_activity_date')
         ).limit(0)
-    
+
     df_event_agg = df_events.groupBy('customer_id').agg(
         count(when(col('event_type') == 'page_view', 1)).alias('total_page_views'),
         count(when(col('event_type') == 'click', 1)).alias('total_clicks'),
         spark_max('event_timestamp').alias('last_activity_date')
     )
-    
+
     logger.info(
         "Event metrics aggregated",
         customers_with_events=df_event_agg.count()
     )
-    
+
     return df_event_agg
 
 
@@ -215,18 +212,18 @@ def join_customer_with_metrics(
 ) -> DataFrame:
     """
     Join customer base table with aggregated metrics.
-    
+
     Args:
         df_customers: Base customer DataFrame
         df_order_metrics: Aggregated order metrics
         df_event_metrics: Aggregated event metrics
         logger: Logger instance
-        
+
     Returns:
         Joined customer DataFrame with all metrics
     """
     logger.info("Joining customer data with order and event metrics")
-    
+
     # Start with customers
     df_joined = df_customers.select(
         'customer_id',
@@ -240,14 +237,14 @@ def join_customer_with_metrics(
         'account_status',
         'processing_timestamp'
     )
-    
+
     # Left join with order metrics
     df_joined = df_joined.join(
         df_order_metrics,
         'customer_id',
         'left'
     )
-    
+
     # Left join with event metrics (if available)
     if df_event_metrics.count() > 0:
         df_joined = df_joined.join(
@@ -261,65 +258,65 @@ def join_customer_with_metrics(
             .withColumn('total_page_views', lit(0)) \
             .withColumn('total_clicks', lit(0)) \
             .withColumn('last_activity_date', lit(None).cast(TimestampType()))
-    
+
     # Fill nulls for customers without orders
     df_joined = df_joined \
-        .fillna(0, ['total_orders', 'total_spent', 'avg_order_value', 
+        .fillna(0, ['total_orders', 'total_spent', 'avg_order_value',
                    'total_items_purchased', 'unique_products_purchased',
                    'total_page_views', 'total_clicks'])
-    
+
     logger.info(
         "Customer data joined",
         total_customers=df_joined.count()
     )
-    
+
     return df_joined
 
 
 def calculate_customer_lifetime_value(df: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Calculate customer lifetime value based on historical spending.
-    
+
     Args:
         df: Customer DataFrame with order metrics
         logger: Logger instance
-        
+
     Returns:
         DataFrame with CLV calculated
     """
     logger.info("Calculating customer lifetime value")
-    
+
     # Simple CLV = total_spent + (avg_order_value * expected_future_orders)
     # For this example, we estimate 2 future orders per active customer
     df_with_clv = df.withColumn(
         'customer_lifetime_value',
         spark_round(
-            col('total_spent') + 
+            col('total_spent') +
             when(col('total_orders') > 0, col('avg_order_value') * 2).otherwise(0),
             2
         )
     )
-    
+
     logger.info("Customer lifetime value calculated")
-    
+
     return df_with_clv
 
 
 def calculate_recency_days(df: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Calculate days since last order (recency).
-    
+
     Args:
         df: Customer DataFrame
         logger: Logger instance
-        
+
     Returns:
         DataFrame with recency calculated
     """
     logger.info("Calculating recency (days since last order)")
-    
+
     current_date = current_timestamp().cast('date')
-    
+
     df_with_recency = df.withColumn(
         'days_since_last_order',
         when(
@@ -327,7 +324,7 @@ def calculate_recency_days(df: DataFrame, logger: GlueLogger) -> DataFrame:
             datediff(current_date, col('last_order_date'))
         ).otherwise(lit(None))
     )
-    
+
     # Also calculate days since last activity
     df_with_recency = df_with_recency.withColumn(
         'days_since_last_activity',
@@ -336,28 +333,28 @@ def calculate_recency_days(df: DataFrame, logger: GlueLogger) -> DataFrame:
             datediff(current_date, col('last_activity_date').cast('date'))
         ).otherwise(col('days_since_last_order'))
     )
-    
+
     logger.info("Recency calculations completed")
-    
+
     return df_with_recency
 
 
 def calculate_rfm_score(df: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Calculate RFM (Recency, Frequency, Monetary) score for customer segmentation.
-    
+
     Args:
         df: Customer DataFrame
         logger: Logger instance
-        
+
     Returns:
         DataFrame with RFM scores
     """
     logger.info("Calculating RFM scores")
-    
+
     # Define windows for percentile calculations
     window_spec = Window.orderBy(col('customer_id'))
-    
+
     # Recency score (lower days is better, so we invert)
     # Divide customers into 5 quintiles
     df_rfm = df.withColumn(
@@ -369,7 +366,7 @@ def calculate_rfm_score(df: DataFrame, logger: GlueLogger) -> DataFrame:
             6 - ntile(5).over(Window.orderBy(col('days_since_last_order').asc()))
         )
     )
-    
+
     # Frequency score (more orders is better)
     df_rfm = df_rfm.withColumn(
         'frequency_score',
@@ -380,7 +377,7 @@ def calculate_rfm_score(df: DataFrame, logger: GlueLogger) -> DataFrame:
             ntile(5).over(Window.orderBy(col('total_orders').asc()))
         )
     )
-    
+
     # Monetary score (more spending is better)
     df_rfm = df_rfm.withColumn(
         'monetary_score',
@@ -391,13 +388,13 @@ def calculate_rfm_score(df: DataFrame, logger: GlueLogger) -> DataFrame:
             ntile(5).over(Window.orderBy(col('total_spent').asc()))
         )
     )
-    
+
     # Combined RFM score (1-15, where 15 is best)
     df_rfm = df_rfm.withColumn(
         'rfm_score',
         col('recency_score') + col('frequency_score') + col('monetary_score')
     )
-    
+
     # RFM segment (concatenated scores for detailed segmentation)
     df_rfm = df_rfm.withColumn(
         'rfm_segment',
@@ -408,25 +405,25 @@ def calculate_rfm_score(df: DataFrame, logger: GlueLogger) -> DataFrame:
             col('monetary_score').cast(StringType())
         )
     )
-    
+
     logger.info("RFM scores calculated")
-    
+
     return df_rfm
 
 
 def apply_customer_segmentation(df: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Apply business-driven customer segmentation.
-    
+
     Args:
         df: Customer DataFrame with RFM scores
         logger: Logger instance
-        
+
     Returns:
         DataFrame with customer segments
     """
     logger.info("Applying customer segmentation")
-    
+
     # Define segment logic
     df_segmented = df.withColumn(
         'customer_segment',
@@ -455,10 +452,10 @@ def apply_customer_segmentation(df: DataFrame, logger: GlueLogger) -> DataFrame:
             lit('OCCASIONAL')
         )
     )
-    
+
     # Add boolean flags for easier filtering
     df_segmented = df_segmented \
-        .withColumn('is_high_value', 
+        .withColumn('is_high_value',
                    when(col('customer_segment') == 'HIGH_VALUE', True).otherwise(False)) \
         .withColumn('is_at_risk',
                    when(col('customer_segment') == 'AT_RISK', True).otherwise(False)) \
@@ -466,27 +463,27 @@ def apply_customer_segmentation(df: DataFrame, logger: GlueLogger) -> DataFrame:
                    when(col('customer_segment') == 'NEW_CUSTOMER', True).otherwise(False)) \
         .withColumn('is_active',
                    when(col('customer_segment') == 'ACTIVE', True).otherwise(False))
-    
+
     # Log segment distribution
     segment_counts = df_segmented.groupBy('customer_segment').count().collect()
     logger.info("Customer segmentation completed", segment_distribution=str(segment_counts))
-    
+
     return df_segmented
 
 
 def enrich_with_metadata(df: DataFrame, logger: GlueLogger) -> DataFrame:
     """
     Add processing metadata and additional derived fields.
-    
+
     Args:
         df: Customer 360 DataFrame
         logger: Logger instance
-        
+
     Returns:
         Enriched DataFrame
     """
     logger.info("Enriching with metadata and derived fields")
-    
+
     enriched_df = df \
         .withColumn('customer_360_timestamp', current_timestamp()) \
         .withColumn('customer_360_date', current_timestamp().cast('date')) \
@@ -501,12 +498,12 @@ def enrich_with_metadata(df: DataFrame, logger: GlueLogger) -> DataFrame:
                    ).otherwise(lit(0.0))) \
         .withColumn('engagement_score',
                    spark_round(
-                       (col('total_page_views') * 0.1) + 
-                       (col('total_clicks') * 0.3) + 
+                       (col('total_page_views') * 0.1) +
+                       (col('total_clicks') * 0.3) +
                        (col('total_orders') * 10.0),
                        2
                    ))
-    
+
     # Customer value tier
     enriched_df = enriched_df.withColumn(
         'value_tier',
@@ -515,9 +512,9 @@ def enrich_with_metadata(df: DataFrame, logger: GlueLogger) -> DataFrame:
         .when(col('customer_lifetime_value').between(500, 2000), lit('GOLD'))
         .otherwise(lit('PLATINUM'))
     )
-    
+
     logger.info("Metadata enrichment completed")
-    
+
     return enriched_df
 
 
@@ -531,7 +528,7 @@ def write_gold_customer_360(
 ) -> None:
     """
     Write Customer 360 to Gold layer with partitioning by country.
-    
+
     Args:
         glue_context: AWS Glue context
         df: DataFrame to write
@@ -541,19 +538,19 @@ def write_gold_customer_360(
         logger: Logger instance
     """
     logger.info(f"Writing to Gold layer: {target_s3_path}")
-    
+
     try:
         # Validate partition columns
         partition_columns = ['country']
         df_partitioned = partition_dataframe(df, partition_columns, logger)
-        
+
         # Convert to DynamicFrame
         dynamic_frame = DynamicFrame.fromDF(
             df_partitioned,
             glue_context,
             "gold_customer_360_dynamic_frame"
         )
-        
+
         # Write to S3 with partitioning
         glue_context.write_dynamic_frame.from_options(
             frame=dynamic_frame,
@@ -568,15 +565,15 @@ def write_gold_customer_360(
             },
             transformation_ctx="write_gold_customer_360"
         )
-        
+
         logger.info(
             "Successfully wrote Gold Customer 360 data",
             row_count=df.count(),
             target_path=target_s3_path
         )
-        
+
     except Exception as e:
-        logger.error(f"Failed to write Gold Customer 360 data", exception=e)
+        logger.error("Failed to write Gold Customer 360 data", exception=e)
         raise
 
 
@@ -588,43 +585,43 @@ def publish_cloudwatch_metrics(
     """Publish job metrics to CloudWatch."""
     try:
         cloudwatch = boto3.client('cloudwatch', region_name='us-east-1')
-        
+
         log_job_metrics(
             cloudwatch_client=cloudwatch,
             job_name=job_name,
             namespace='DataLake/Glue/Customer360',
             metrics=metrics
         )
-        
+
         logger.info("CloudWatch metrics published", metric_count=len(metrics))
-        
+
     except Exception as e:
-        logger.warning(f"Failed to publish CloudWatch metrics", exception=e)
+        logger.warning("Failed to publish CloudWatch metrics", exception=e)
 
 
 def main():
     """Main ETL job execution."""
-    
+
     # Initialize Glue context
     sc = SparkContext()
     glue_context = GlueContext(sc)
     spark = glue_context.spark_session
-    
+
     # Get job parameters
     args = get_job_parameters()
     job_name = args['JOB_NAME']
-    
+
     # Initialize job
     job = Job(glue_context)
     job.init(job_name, args)
-    
+
     # Initialize logger
     run_id = args.get('JOB_RUN_ID', datetime.now().strftime('%Y%m%d%H%M%S'))
     logger = GlueLogger(job_name, run_id)
-    
+
     logger.info(f"Starting ETL job: {job_name}")
     job_start_time = datetime.now()
-    
+
     try:
         # Read Silver layer data
         df_customers = read_silver_customers(
@@ -633,25 +630,25 @@ def main():
             args['customers_table'],
             logger
         )
-        
+
         df_orders = read_silver_orders(
             glue_context,
             args['orders_database'],
             args['orders_table'],
             logger
         )
-        
+
         df_events = read_silver_events(
             glue_context,
             args['events_database'],
             args['events_table'],
             logger
         )
-        
+
         # Aggregate metrics
         df_order_metrics = aggregate_order_metrics(df_orders, logger)
         df_event_metrics = aggregate_event_metrics(df_events, logger)
-        
+
         # Join customer with metrics
         df_joined = join_customer_with_metrics(
             df_customers,
@@ -659,20 +656,20 @@ def main():
             df_event_metrics,
             logger
         )
-        
+
         # Calculate CLV and recency
         df_with_clv = calculate_customer_lifetime_value(df_joined, logger)
         df_with_recency = calculate_recency_days(df_with_clv, logger)
-        
+
         # Calculate RFM scores
         df_with_rfm = calculate_rfm_score(df_with_recency, logger)
-        
+
         # Apply segmentation
         df_segmented = apply_customer_segmentation(df_with_rfm, logger)
-        
+
         # Enrich with metadata
         df_enriched = enrich_with_metadata(df_segmented, logger)
-        
+
         # Write to Gold layer
         write_gold_customer_360(
             glue_context,
@@ -682,11 +679,11 @@ def main():
             args['target_table'],
             logger
         )
-        
+
         # Calculate job metrics
         job_end_time = datetime.now()
         processing_duration = (job_end_time - job_start_time).total_seconds()
-        
+
         metrics = {
             'customers_processed': float(df_customers.count()),
             'customer_360_records_created': float(df_enriched.count()),
@@ -694,23 +691,23 @@ def main():
             'high_value_customers': float(df_enriched.filter(col('is_high_value') == True).count()),
             'at_risk_customers': float(df_enriched.filter(col('is_at_risk') == True).count())
         }
-        
+
         # Publish metrics
         publish_cloudwatch_metrics(job_name, metrics, logger)
-        
+
         logger.info(
-            f"ETL job completed successfully",
+            "ETL job completed successfully",
             duration_seconds=processing_duration,
             records_created=metrics['customer_360_records_created']
         )
-        
+
         # Commit job
         job.commit()
-        
+
     except Exception as e:
-        logger.error(f"ETL job failed", exception=e)
+        logger.error("ETL job failed", exception=e)
         raise
-    
+
     finally:
         spark.stop()
 

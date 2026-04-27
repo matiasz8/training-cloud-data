@@ -10,27 +10,23 @@ window functions, optimized Delta Lake with partitioning.
 
 import sys
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Dict, List
 
 from awsglue.utils import getResolvedOptions
 from pyspark.sql import SparkSession, DataFrame, Window
 from pyspark.sql.functions import (
     col, current_timestamp, lit, sum as spark_sum, count,
     avg, max as spark_max, min as spark_min, stddev,
-    first, last, row_number, rank, dense_rank, lag, lead,
-    date_trunc, to_date, year, month, dayofmonth, weekofyear,
+    lag, to_date, year, month, dayofmonth, weekofyear,
     quarter, dayofweek, last_day, date_add, datediff,
-    concat_ws, md5, monotonically_increasing_id,
-    countDistinct, approx_count_distinct, when, coalesce,
-    round as spark_round, explode, array, struct, collect_list
+    monotonically_increasing_id,
+    countDistinct, when
 )
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, DateType, TimestampType
-from delta.tables import DeltaTable
+from pyspark.sql.types import TimestampType
 
 from common.spark_utils import (
     create_spark_session, write_to_delta, optimize_table,
-    collect_stats, send_notification, write_metadata_to_dynamodb,
+    send_notification, write_metadata_to_dynamodb,
     error_handler
 )
 
@@ -44,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 class AggregationBuilder:
     """Builds various types of aggregations."""
-    
+
     @staticmethod
     def create_daily_metrics(
         df: DataFrame,
@@ -54,27 +50,27 @@ class AggregationBuilder:
     ) -> DataFrame:
         """
         Create daily aggregated metrics.
-        
+
         Args:
             df: Source DataFrame
             date_column: Column containing dates
             group_columns: Columns to group by
             metric_columns: Dict of {metric_type: [columns]} where metric_type is
                           'sum', 'avg', 'count', 'min', 'max', 'stddev'
-        
+
         Returns:
             DataFrame with daily metrics
         """
         logger.info("Creating daily metrics")
-        
+
         # Extract date components
         df = df.withColumn("metric_date", to_date(col(date_column)))
-        
+
         group_cols = ["metric_date"] + group_columns
-        
+
         # Build aggregation expressions
         agg_exprs = []
-        
+
         for metric_type, columns in metric_columns.items():
             for col_name in columns:
                 if metric_type == 'sum':
@@ -91,13 +87,13 @@ class AggregationBuilder:
                     agg_exprs.append(stddev(col(col_name)).alias(f"{col_name}_stddev"))
                 elif metric_type == 'distinct':
                     agg_exprs.append(countDistinct(col(col_name)).alias(f"{col_name}_distinct"))
-        
+
         # Perform aggregation
         df_daily = df.groupBy(*group_cols).agg(*agg_exprs)
-        
+
         logger.info(f"Created daily metrics with {df_daily.count():,} rows")
         return df_daily
-    
+
     @staticmethod
     def calculate_running_totals(
         df: DataFrame,
@@ -107,33 +103,33 @@ class AggregationBuilder:
     ) -> DataFrame:
         """
         Calculate running totals using window functions.
-        
+
         Args:
             df: Source DataFrame
             partition_columns: Columns to partition by
             order_column: Column to order by
             value_columns: Columns to calculate running totals for
-        
+
         Returns:
             DataFrame with running total columns
         """
         logger.info("Calculating running totals")
-        
+
         window_spec = Window.partitionBy(*partition_columns).orderBy(col(order_column))
-        
+
         for col_name in value_columns:
             df = df.withColumn(
                 f"{col_name}_running_total",
                 spark_sum(col(col_name)).over(window_spec)
             )
-            
+
             df = df.withColumn(
                 f"{col_name}_running_avg",
                 avg(col(col_name)).over(window_spec)
             )
-        
+
         return df
-    
+
     @staticmethod
     def calculate_period_over_period(
         df: DataFrame,
@@ -144,45 +140,45 @@ class AggregationBuilder:
     ) -> DataFrame:
         """
         Calculate period-over-period changes.
-        
+
         Args:
             df: Source DataFrame
             partition_columns: Columns to partition by
             order_column: Column to order by (usually date)
             value_columns: Columns to calculate changes for
             periods: Number of periods to look back
-        
+
         Returns:
             DataFrame with period-over-period columns
         """
         logger.info(f"Calculating period-over-period metrics ({periods} periods)")
-        
+
         window_spec = Window.partitionBy(*partition_columns).orderBy(col(order_column))
-        
+
         for col_name in value_columns:
             # Get previous period value
             df = df.withColumn(
                 f"{col_name}_prev_{periods}",
                 lag(col(col_name), periods).over(window_spec)
             )
-            
+
             # Calculate absolute change
             df = df.withColumn(
                 f"{col_name}_change",
                 col(col_name) - col(f"{col_name}_prev_{periods}")
             )
-            
+
             # Calculate percentage change
             df = df.withColumn(
                 f"{col_name}_pct_change",
                 when(col(f"{col_name}_prev_{periods}") != 0,
-                     ((col(col_name) - col(f"{col_name}_prev_{periods}")) / 
+                     ((col(col_name) - col(f"{col_name}_prev_{periods}")) /
                       col(f"{col_name}_prev_{periods}") * 100)
                 ).otherwise(None)
             )
-        
+
         return df
-    
+
     @staticmethod
     def calculate_moving_averages(
         df: DataFrame,
@@ -193,39 +189,39 @@ class AggregationBuilder:
     ) -> DataFrame:
         """
         Calculate moving averages for different window sizes.
-        
+
         Args:
             df: Source DataFrame
             partition_columns: Columns to partition by
             order_column: Column to order by
             value_columns: Columns to calculate moving averages for
             window_sizes: List of window sizes (e.g., [7, 30, 90] for 7-day, 30-day, 90-day)
-        
+
         Returns:
             DataFrame with moving average columns
         """
         logger.info(f"Calculating moving averages for windows: {window_sizes}")
-        
+
         for window_size in window_sizes:
             window_spec = Window.partitionBy(*partition_columns).orderBy(
                 col(order_column)
             ).rowsBetween(-window_size + 1, 0)
-            
+
             for col_name in value_columns:
                 df = df.withColumn(
                     f"{col_name}_ma_{window_size}",
                     avg(col(col_name)).over(window_spec)
                 )
-        
+
         return df
 
 
 class StarSchemaBuilder:
     """Builds star schema with fact and dimension tables."""
-    
+
     def __init__(self, spark: SparkSession):
         self.spark = spark
-    
+
     def create_dimension_customer(
         self,
         df: DataFrame,
@@ -233,16 +229,16 @@ class StarSchemaBuilder:
     ) -> DataFrame:
         """
         Create customer dimension table.
-        
+
         Args:
             df: Source DataFrame with customer data
             key_column: Business key column
-        
+
         Returns:
             Customer dimension DataFrame
         """
         logger.info("Creating customer dimension")
-        
+
         # Select distinct customers with their attributes
         dim_cols = [
             key_column,
@@ -258,30 +254,30 @@ class StarSchemaBuilder:
             "registration_date",
             "status"
         ]
-        
+
         # Filter to columns that exist
         available_cols = [c for c in dim_cols if c in df.columns]
-        
+
         dim_customer = df.select(*available_cols).distinct()
-        
+
         # Add surrogate key
         dim_customer = dim_customer.withColumn(
             "customer_sk",
             monotonically_increasing_id()
         )
-        
+
         # Add SCD Type 2 columns
         dim_customer = dim_customer.withColumn("effective_date", current_timestamp())
         dim_customer = dim_customer.withColumn("end_date", lit(None).cast(TimestampType()))
         dim_customer = dim_customer.withColumn("is_current", lit(True))
-        
+
         # Add metadata
         dim_customer = dim_customer.withColumn("created_timestamp", current_timestamp())
         dim_customer = dim_customer.withColumn("updated_timestamp", current_timestamp())
-        
+
         logger.info(f"Created customer dimension with {dim_customer.count():,} rows")
         return dim_customer
-    
+
     def create_dimension_product(
         self,
         df: DataFrame,
@@ -289,16 +285,16 @@ class StarSchemaBuilder:
     ) -> DataFrame:
         """
         Create product dimension table.
-        
+
         Args:
             df: Source DataFrame with product data
             key_column: Business key column
-        
+
         Returns:
             Product dimension DataFrame
         """
         logger.info("Creating product dimension")
-        
+
         dim_cols = [
             key_column,
             "product_name",
@@ -310,31 +306,31 @@ class StarSchemaBuilder:
             "cost",
             "status"
         ]
-        
+
         available_cols = [c for c in dim_cols if c in df.columns]
-        
+
         dim_product = df.select(*available_cols).distinct()
-        
+
         # Add surrogate key
         dim_product = dim_product.withColumn(
             "product_sk",
             monotonically_increasing_id()
         )
-        
+
         # Calculate margin
         if 'unit_price' in dim_product.columns and 'cost' in dim_product.columns:
             dim_product = dim_product.withColumn(
                 "margin",
                 (col("unit_price") - col("cost")) / col("unit_price") * 100
             )
-        
+
         # Add metadata
         dim_product = dim_product.withColumn("created_timestamp", current_timestamp())
         dim_product = dim_product.withColumn("updated_timestamp", current_timestamp())
-        
+
         logger.info(f"Created product dimension with {dim_product.count():,} rows")
         return dim_product
-    
+
     def create_dimension_date(
         self,
         start_date: str,
@@ -342,27 +338,27 @@ class StarSchemaBuilder:
     ) -> DataFrame:
         """
         Create date dimension table.
-        
+
         Args:
             start_date: Start date in 'YYYY-MM-DD' format
             end_date: End date in 'YYYY-MM-DD' format
-        
+
         Returns:
             Date dimension DataFrame
         """
         logger.info(f"Creating date dimension from {start_date} to {end_date}")
-        
+
         # Calculate number of days
         from datetime import datetime as dt
         start = dt.strptime(start_date, '%Y-%m-%d')
         end = dt.strptime(end_date, '%Y-%m-%d')
         num_days = (end - start).days + 1
-        
+
         # Create date range
         dates_df = self.spark.range(num_days).select(
             date_add(lit(start_date), col("id")).alias("date")
         )
-        
+
         # Add date components
         dim_date = dates_df.select(
             col("date"),
@@ -375,22 +371,22 @@ class StarSchemaBuilder:
             when(col("day_of_week").isin([1, 7]), "Weekend").otherwise("Weekday").alias("day_type"),
             last_day(col("date")).alias("last_day_of_month")
         )
-        
+
         # Add fiscal year (assuming fiscal year starts in April)
         dim_date = dim_date.withColumn(
             "fiscal_year",
             when(col("month") >= 4, col("year")).otherwise(col("year") - 1)
         )
-        
+
         # Add surrogate key
         dim_date = dim_date.withColumn(
             "date_sk",
             monotonically_increasing_id()
         )
-        
+
         logger.info(f"Created date dimension with {dim_date.count():,} rows")
         return dim_date
-    
+
     def create_fact_transactions(
         self,
         df: DataFrame,
@@ -400,43 +396,43 @@ class StarSchemaBuilder:
     ) -> DataFrame:
         """
         Create transaction fact table.
-        
+
         Args:
             df: Source transaction data
             dim_customer: Customer dimension
             dim_product: Product dimension
             dim_date: Date dimension
-        
+
         Returns:
             Transaction fact DataFrame
         """
         logger.info("Creating transaction fact table")
-        
+
         # Convert transaction_date to date if needed
         if "transaction_date" in df.columns:
             df = df.withColumn("transaction_date", to_date(col("transaction_date")))
-        
+
         # Join with customer dimension to get surrogate key
         fact = df.join(
             dim_customer.select("customer_id", "customer_sk"),
             "customer_id",
             "left"
         )
-        
+
         # Join with product dimension
         fact = fact.join(
             dim_product.select("product_id", "product_sk"),
             "product_id",
             "left"
         )
-        
+
         # Join with date dimension
         fact = fact.join(
             dim_date.select("date", "date_sk"),
             fact["transaction_date"] == dim_date["date"],
             "left"
         ).drop("date")
-        
+
         # Select fact columns
         fact_cols = [
             "customer_sk",
@@ -452,10 +448,10 @@ class StarSchemaBuilder:
             "transaction_date",
             "transaction_timestamp"
         ]
-        
+
         available_cols = [c for c in fact_cols if c in fact.columns]
         fact = fact.select(*available_cols)
-        
+
         # Calculate derived metrics
         if "net_amount" in fact.columns and "cost" in fact.columns:
             fact = fact.withColumn(
@@ -466,23 +462,23 @@ class StarSchemaBuilder:
                 "profit_margin",
                 (col("profit") / col("net_amount")) * 100
             )
-        
+
         # Add fact surrogate key
         fact = fact.withColumn(
             "transaction_sk",
             monotonically_increasing_id()
         )
-        
+
         # Add metadata
         fact = fact.withColumn("created_timestamp", current_timestamp())
-        
+
         logger.info(f"Created transaction fact table with {fact.count():,} rows")
         return fact
 
 
 class MetricsCalculator:
     """Calculates business metrics and KPIs."""
-    
+
     @staticmethod
     def calculate_customer_lifetime_value(
         transactions_df: DataFrame,
@@ -492,18 +488,18 @@ class MetricsCalculator:
     ) -> DataFrame:
         """
         Calculate customer lifetime value (CLV).
-        
+
         Args:
             transactions_df: Transaction data
             customer_column: Customer identifier column
             amount_column: Transaction amount column
             date_column: Transaction date column
-        
+
         Returns:
             DataFrame with CLV metrics per customer
         """
         logger.info("Calculating customer lifetime value")
-        
+
         clv_df = transactions_df.groupBy(customer_column).agg(
             spark_sum(amount_column).alias("total_revenue"),
             count("*").alias("transaction_count"),
@@ -511,13 +507,13 @@ class MetricsCalculator:
             spark_min(date_column).alias("first_transaction_date"),
             spark_max(date_column).alias("last_transaction_date")
         )
-        
+
         # Calculate customer tenure in days
         clv_df = clv_df.withColumn(
             "customer_tenure_days",
             datediff(col("last_transaction_date"), col("first_transaction_date"))
         )
-        
+
         # Calculate average order frequency
         clv_df = clv_df.withColumn(
             "avg_order_frequency",
@@ -525,15 +521,15 @@ class MetricsCalculator:
                  col("transaction_count") / (col("customer_tenure_days") / 365.0)
             ).otherwise(col("transaction_count"))
         )
-        
+
         # Simple CLV calculation
         clv_df = clv_df.withColumn(
             "customer_lifetime_value",
             col("avg_transaction_value") * col("avg_order_frequency") * 3  # 3 year projection
         )
-        
+
         return clv_df
-    
+
     @staticmethod
     def calculate_product_performance(
         transactions_df: DataFrame,
@@ -541,7 +537,7 @@ class MetricsCalculator:
     ) -> DataFrame:
         """Calculate product performance metrics."""
         logger.info("Calculating product performance metrics")
-        
+
         performance_df = transactions_df.groupBy(product_column).agg(
             spark_sum("quantity").alias("total_quantity_sold"),
             spark_sum("net_amount").alias("total_revenue"),
@@ -550,25 +546,25 @@ class MetricsCalculator:
             avg("net_amount").alias("avg_transaction_value"),
             countDistinct("customer_id").alias("unique_customers")
         )
-        
+
         # Calculate metrics
         performance_df = performance_df.withColumn(
             "avg_profit_per_unit",
             col("total_profit") / col("total_quantity_sold")
         )
-        
+
         performance_df = performance_df.withColumn(
             "revenue_per_customer",
             col("total_revenue") / col("unique_customers")
         )
-        
+
         return performance_df
 
 
 @error_handler(notify_on_error=True)
 def main():
     """Main ETL job for silver to gold layer."""
-    
+
     # Parse arguments
     args = getResolvedOptions(sys.argv, [
         'JOB_NAME',
@@ -578,16 +574,16 @@ def main():
         'metadata_table',
         'sns_topic_arn'
     ])
-    
+
     job_name = args['JOB_NAME']
     silver_bucket = args['silver_bucket']
     gold_bucket = args['gold_bucket']
     source_table = args['source_table']
     metadata_table = args['metadata_table']
     sns_topic_arn = args['sns_topic_arn']
-    
+
     logger.info(f"Starting {job_name}")
-    
+
     # Create Spark session
     spark = create_spark_session(
         app_name=job_name,
@@ -596,26 +592,26 @@ def main():
             "spark.sql.adaptive.coalescePartitions.enabled": "true"
         }
     )
-    
+
     try:
         # Read data from silver layer
         silver_path = f"s3://{silver_bucket}/silver/{source_table}"
         df_silver = spark.read.format("delta").load(silver_path)
-        
+
         # Filter only current records
         df_silver = df_silver.filter(col("is_current") == True)
-        
+
         logger.info(f"Read {df_silver.count():,} records from silver layer")
-        
+
         # Initialize builders
         agg_builder = AggregationBuilder()
         star_schema_builder = StarSchemaBuilder(spark)
         metrics_calculator = MetricsCalculator()
-        
+
         # Create dimension tables
         dim_customer = star_schema_builder.create_dimension_customer(df_silver)
         dim_product = star_schema_builder.create_dimension_product(df_silver)
-        
+
         # Create date dimension for last 5 years
         from datetime import datetime, timedelta
         end_date = datetime.now().date()
@@ -624,24 +620,24 @@ def main():
             start_date.strftime('%Y-%m-%d'),
             end_date.strftime('%Y-%m-%d')
         )
-        
+
         # Write dimension tables
         gold_path_base = f"s3://{gold_bucket}/gold"
-        
+
         write_to_delta(
             dim_customer,
             f"{gold_path_base}/dim_customer",
             mode="overwrite",
             optimize_write=True
         )
-        
+
         write_to_delta(
             dim_product,
             f"{gold_path_base}/dim_product",
             mode="overwrite",
             optimize_write=True
         )
-        
+
         write_to_delta(
             dim_date,
             f"{gold_path_base}/dim_date",
@@ -649,7 +645,7 @@ def main():
             partition_cols=["year", "month"],
             optimize_write=True
         )
-        
+
         # Create fact table
         fact_transactions = star_schema_builder.create_fact_transactions(
             df_silver,
@@ -657,7 +653,7 @@ def main():
             dim_product,
             dim_date
         )
-        
+
         write_to_delta(
             fact_transactions,
             f"{gold_path_base}/fact_transactions",
@@ -665,7 +661,7 @@ def main():
             partition_cols=["transaction_date"],
             optimize_write=True
         )
-        
+
         # Create aggregated metrics tables
         if "transaction_date" in df_silver.columns:
             daily_metrics = agg_builder.create_daily_metrics(
@@ -679,7 +675,7 @@ def main():
                     'distinct': ['customer_id']
                 }
             )
-            
+
             write_to_delta(
                 daily_metrics,
                 f"{gold_path_base}/daily_metrics",
@@ -687,7 +683,7 @@ def main():
                 partition_cols=["metric_date"],
                 optimize_write=True
             )
-        
+
         # Optimize all gold tables
         for table in ['dim_customer', 'dim_product', 'dim_date', 'fact_transactions', 'daily_metrics']:
             table_path = f"{gold_path_base}/{table}"
@@ -695,7 +691,7 @@ def main():
                 optimize_table(spark, table_path, vacuum_hours=168)
             except Exception as e:
                 logger.warning(f"Could not optimize {table}: {str(e)}")
-        
+
         # Collect statistics
         stats = {
             'dim_customer_count': dim_customer.count(),
@@ -703,7 +699,7 @@ def main():
             'dim_date_count': dim_date.count(),
             'fact_transactions_count': fact_transactions.count()
         }
-        
+
         # Write metadata
         metadata = {
             'job_id': f"{job_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
@@ -714,9 +710,9 @@ def main():
             'status': 'SUCCESS',
             'timestamp': datetime.now().isoformat()
         }
-        
+
         write_metadata_to_dynamodb(metadata_table, metadata)
-        
+
         # Send success notification
         send_notification(
             topic_arn=sns_topic_arn,
@@ -724,13 +720,13 @@ def main():
             message=f"Successfully created star schema and metrics\nStatistics: {stats}",
             attributes={'status': 'SUCCESS', 'job': job_name}
         )
-        
+
         logger.info(f"Job {job_name} completed successfully")
-    
+
     except Exception as e:
         logger.error(f"Job failed: {str(e)}")
         raise
-    
+
     finally:
         spark.stop()
 

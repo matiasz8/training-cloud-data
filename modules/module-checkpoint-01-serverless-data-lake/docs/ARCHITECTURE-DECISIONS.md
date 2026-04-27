@@ -95,9 +95,9 @@ We follow a lightweight ADR template:
 
 ## ADR-001: Why Serverless Architecture?
 
-**Status:** Accepted  
-**Date:** 2026-03-01  
-**Decision Makers:** Data Engineering Team, CDO, VP Engineering  
+**Status:** Accepted
+**Date:** 2026-03-01
+**Decision Makers:** Data Engineering Team, CDO, VP Engineering
 **Tags:** #architecture #serverless #cost-optimization #scalability
 
 ### Context
@@ -251,9 +251,9 @@ CloudMart needs a data lake solution that:
 
 ## ADR-002: Why Amazon S3 for Data Lake Storage?
 
-**Status:** Accepted  
-**Date:** 2026-03-01  
-**Decision Makers:** Data Engineering Team  
+**Status:** Accepted
+**Date:** 2026-03-01
+**Decision Makers:** Data Engineering Team
 **Tags:** #storage #s3 #data-lake #cost
 
 ### Context
@@ -416,9 +416,9 @@ We need a storage solution for our data lake that:
 
 ## ADR-003: Why AWS Glue for ETL?
 
-**Status:** Accepted  
-**Date:** 2026-03-02  
-**Decision Makers:** Data Engineering Team  
+**Status:** Accepted
+**Date:** 2026-03-02
+**Decision Makers:** Data Engineering Team
 **Tags:** #etl #glue #spark #serverless
 
 ### Context
@@ -581,9 +581,9 @@ We need an ETL solution to transform data through Bronze → Silver → Gold lay
 
 ## ADR-004: Why Amazon Athena for Analytics?
 
-**Status:** Accepted  
-**Date:** 2026-03-02  
-**Decision Makers:** Data Engineering Team, Head of BI  
+**Status:** Accepted
+**Date:** 2026-03-02
+**Decision Makers:** Data Engineering Team, Head of BI
 **Tags:** #analytics #athena #sql #query-engine
 
 ### Context
@@ -752,9 +752,9 @@ Business users need to query data using SQL. Requirements:
 
 ## ADR-005: Data Partitioning Strategy
 
-**Status:** Accepted  
-**Date:** 2026-03-03  
-**Decision Makers:** Data Engineering Team  
+**Status:** Accepted
+**Date:** 2026-03-03
+**Decision Makers:** Data Engineering Team
 **Tags:** #partitioning #performance #s3 #athena
 
 ### Context
@@ -906,7 +906,7 @@ Data partitioning significantly impacts query performance and cost. We need a pa
 
 3. **Query Example (with partition pruning):**
    ```sql
-   SELECT 
+   SELECT
        order_date,
        SUM(total_amount) AS daily_revenue
    FROM cloudmart_processed.orders
@@ -935,9 +935,9 @@ Data partitioning significantly impacts query performance and cost. We need a pa
 
 ## ADR-006: File Format Selection (Parquet vs JSON/CSV)
 
-**Status:** Accepted  
-**Date:** 2026-03-03  
-**Decision Makers:** Data Engineering Team  
+**Status:** Accepted
+**Date:** 2026-03-03
+**Decision Makers:** Data Engineering Team
 **Tags:** #file-formats #parquet #performance #cost
 
 ### Context
@@ -1103,7 +1103,7 @@ File format choice impacts storage cost, query performance, and compatibility. W
    ```python
    # Read JSON from Bronze
    df = spark.read.json("s3://cloudmart-raw/orders/year=2026/month=03/day=09/")
-   
+
    # Write Parquet to Silver
    df.write.mode("overwrite") \
        .partitionBy("year", "month", "day") \
@@ -1114,7 +1114,7 @@ File format choice impacts storage cost, query performance, and compatibility. W
    ```python
    # Compression: Snappy (fast) or GZIP (smaller)
    spark.conf.set("spark.sql.parquet.compression.codec", "snappy")
-   
+
    # Row group size (default 128MB is good)
    spark.conf.set("parquet.block.size", 134217728)
    ```
@@ -1123,10 +1123,10 @@ File format choice impacts storage cost, query performance, and compatibility. W
    ```bash
    # Install parquet-tools
    pip install parquet-tools
-   
+
    # View schema
    parquet-tools schema myfile.parquet
-   
+
    # View data
    parquet-tools head myfile.parquet
    ```
@@ -1145,9 +1145,9 @@ File format choice impacts storage cost, query performance, and compatibility. W
 
 ## ADR-007: Lambda vs Step Functions for Orchestration
 
-**Status:** Accepted  
-**Date:** 2026-03-04  
-**Decision Makers:** Data Engineering Team  
+**Status:** Accepted
+**Date:** 2026-03-04
+**Decision Makers:** Data Engineering Team
 **Tags:** #orchestration #lambda #step-functions #workflow
 
 ### Context
@@ -1298,7 +1298,7 @@ We need orchestration for multi-step workflows, particularly:
    ```python
    import boto3
    from botocore.exceptions import ClientError
-   
+
    def lambda_handler(event, context):
        max_retries = 3
        for attempt in range(max_retries):
@@ -1349,9 +1349,9 @@ Consider Step Functions when:
 
 ## ADR-008: Error Handling and Retry Strategy
 
-**Status:** Accepted  
-**Date:** 2026-03-04  
-**Decision Makers:** Data Engineering Team  
+**Status:** Accepted
+**Date:** 2026-03-04
+**Decision Makers:** Data Engineering Team
 **Tags:** #error-handling #reliability #monitoring
 
 ### Context
@@ -1432,12 +1432,12 @@ def lambda_handler(event, context):
         validate_data(event)
         transform_data(event)
         store_data(event)
-        
+
         return {
             'statusCode': 200,
             'body': 'Success'
         }
-    
+
     except ValidationError as e:
         # Data quality issue - quarantine
         logger.error(f"Validation failed: {e}")
@@ -1446,7 +1446,7 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': 'Validation failed'
         }
-    
+
     except Exception as e:
         # Unexpected error - let Lambda retry
         logger.error(f"Unexpected error: {e}")
@@ -1475,14 +1475,14 @@ s3://cloudmart-quarantine/
 ```python
 def validate_order(order):
     required_fields = ['order_id', 'customer_id', 'total_amount', 'order_date']
-    
+
     for field in required_fields:
         if field not in order:
             raise ValidationError(f"Missing required field: {field}")
-    
+
     if order['total_amount'] <= 0:
         raise ValidationError("Invalid amount: must be positive")
-    
+
     # ... more validations
 ```
 
@@ -1633,9 +1633,9 @@ AlertSNSTopic:
 
 ## ADR-009: Medallion Architecture (Bronze/Silver/Gold)
 
-**Status:** Accepted  
-**Date:** 2026-03-05  
-**Decision Makers:** Data Engineering Team, CDO  
+**Status:** Accepted
+**Date:** 2026-03-05
+**Decision Makers:** Data Engineering Team, CDO
 **Tags:** #architecture #data-quality #lakehouse
 
 ### Context
@@ -1856,11 +1856,11 @@ s3://cloudmart-curated/
    Bronze:
      Read: DataEngineers
      Write: IngestionLambda
-   
+
    Silver:
      Read: DataEngineers, Analysts
      Write: GlueETLJobs
-   
+
    Gold:
      Read: All_BusinessUsers
      Write: GlueETLJobs
@@ -1887,9 +1887,9 @@ s3://cloudmart-curated/
 
 ## ADR-010: CloudFormation vs Terraform
 
-**Status:** Accepted  
-**Date:** 2026-03-06  
-**Decision Makers:** Data Engineering Team, VP Engineering  
+**Status:** Accepted
+**Date:** 2026-03-06
+**Decision Makers:** Data Engineering Team, VP Engineering
 **Tags:** #iac #cloudformation #terraform #infrastructure
 
 ### Context
@@ -2143,6 +2143,6 @@ terraform apply -var="environment=dev"
 
 ---
 
-**Document Version:** 1.0  
-**Last Reviewed:** March 9, 2026  
+**Document Version:** 1.0
+**Last Reviewed:** March 9, 2026
 **Next Review:** After 10 student submissions

@@ -391,18 +391,18 @@ resource "aws_sns_topic" "data_pipeline_alerts" {
 # resource "aws_lambda_function" "orders_ingestion" {
 #   function_name = "${var.project_name}-orders-ingestion-${var.environment}"
 #   role          = aws_iam_role.lambda_ingestion.arn
-#   
+#
 #   # TODO: Configure the deployment package
 #   filename      = data.archive_file.orders_ingestion_lambda.output_path
-#   
+#
 #   # TODO: Set runtime and handler
 #   runtime = "python3.11"
 #   handler = "handler.lambda_handler"
-#   
+#
 #   # TODO: Configure timeout and memory
 #   timeout     = 300
 #   memory_size = 512
-#   
+#
 #   # TODO: Set environment variables
 #   environment {
 #     variables = {
@@ -411,7 +411,7 @@ resource "aws_sns_topic" "data_pipeline_alerts" {
 #       # Add more as needed
 #     }
 #   }
-#   
+#
 #   tags = {
 #     Name = "Orders Ingestion Lambda"
 #   }
@@ -475,15 +475,15 @@ resource "aws_glue_catalog_database" "gold" {
 #   name          = "${var.project_name}-bronze-orders-${var.environment}"
 #   role          = aws_iam_role.glue_etl.arn
 #   database_name = aws_glue_catalog_database.bronze.name
-#   
+#
 #   # TODO: Configure S3 target
 #   s3_target {
 #     path = "s3://${aws_s3_bucket.raw_data.id}/orders/"
 #   }
-#   
+#
 #   # TODO: Set schedule (optional, can run on-demand)
 #   # schedule = "cron(0 */6 * * ? *)"
-#   
+#
 #   tags = {
 #     Name  = "Bronze Orders Crawler"
 #     Layer = "Bronze"
@@ -521,14 +521,14 @@ resource "aws_glue_catalog_database" "gold" {
 # resource "aws_glue_job" "bronze_to_silver_orders" {
 #   name     = "${var.project_name}-bronze-to-silver-orders-${var.environment}"
 #   role_arn = aws_iam_role.glue_etl.arn
-#   
+#
 #   # TODO: Configure command
 #   command {
 #     name            = "glueetl"
 #     script_location = "s3://${aws_s3_bucket.logs.id}/glue-scripts/bronze_to_silver_orders.py"
 #     python_version  = "3"
 #   }
-#   
+#
 #   # TODO: Configure default arguments
 #   default_arguments = {
 #     "--job-language"        = "python"
@@ -539,13 +539,13 @@ resource "aws_glue_catalog_database" "gold" {
 #     "--target_database"     = aws_glue_catalog_database.silver.name
 #     "--target_table"        = "orders"
 #   }
-#   
+#
 #   # TODO: Configure Glue version and workers
 #   glue_version       = "4.0"
 #   worker_type        = "G.1X"
 #   number_of_workers  = 2
 #   timeout            = 60
-#   
+#
 #   tags = {
 #     Name = "Bronze to Silver - Orders"
 #   }
@@ -604,15 +604,15 @@ resource "aws_athena_workgroup" "primary" {
 #   statistic           = "Sum"
 #   threshold           = "5"
 #   alarm_description   = "Alert when Lambda functions have more than 5 errors in 5 minutes"
-#   
+#
 #   # TODO: Configure dimensions to monitor specific Lambda functions
 #   dimensions = {
 #     FunctionName = aws_lambda_function.orders_ingestion.function_name
 #   }
-#   
+#
 #   # TODO: Link to SNS topic for notifications
 #   alarm_actions = [aws_sns_topic.data_pipeline_alerts.arn]
-#   
+#
 #   tags = {
 #     Name = "Lambda Errors Alarm"
 #   }

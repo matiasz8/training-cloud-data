@@ -58,7 +58,7 @@ def signal_handler(signum, frame):
 
 class RatingEventGenerator:
     """Generate realistic rating events with proper distribution."""
-    
+
     # Realistic rating distribution (weighted towards positive)
     # Average rating: ~4.2 stars
     RATING_WEIGHTS = {
@@ -68,7 +68,7 @@ class RatingEventGenerator:
         4: 0.35,   # 35% - good experience
         5: 0.50,   # 50% - excellent experience
     }
-    
+
     # Comments by rating level (templates)
     COMMENTS_BY_RATING = {
         5: [
@@ -118,7 +118,7 @@ class RatingEventGenerator:
             "Car smelled bad, very uncomfortable.",
         ],
     }
-    
+
     # Rating categories (additional feedback)
     RATING_CATEGORIES = {
         'cleanliness': [1, 2, 3, 4, 5],
@@ -127,11 +127,11 @@ class RatingEventGenerator:
         'route_efficiency': [1, 2, 3, 4, 5],
         'professionalism': [1, 2, 3, 4, 5],
     }
-    
+
     def __init__(self, seed: int = None):
         """
         Initialize the rating event generator.
-        
+
         Args:
             seed: Random seed for reproducibility
         """
@@ -140,17 +140,17 @@ class RatingEventGenerator:
             Faker.seed(seed)
             random.seed(seed)
             np.random.seed(seed)
-        
+
         # Pool of IDs
         self.customer_pool = [str(uuid.uuid4()) for _ in range(10000)]
         self.driver_pool = [str(uuid.uuid4()) for _ in range(5000)]
-        
+
     def _select_rating(self) -> int:
         """Select a rating based on realistic distribution."""
         ratings = list(self.RATING_WEIGHTS.keys())
         weights = list(self.RATING_WEIGHTS.values())
         return np.random.choice(ratings, p=weights)
-    
+
     def _generate_comment(self, rating: int) -> Optional[str]:
         """Generate a comment based on rating level."""
         # Lower ratings more likely to have comments (people complain more)
@@ -161,43 +161,43 @@ class RatingEventGenerator:
             4: 0.30,  # 30% of 4-star ratings
             5: 0.40,  # 40% of 5-star ratings (positive feedback)
         }
-        
+
         if random.random() < comment_probability[rating]:
             comments = self.COMMENTS_BY_RATING[rating]
             comment = random.choice(comments)
             if comment:
                 return comment
-        
+
         return None
-    
+
     def _generate_category_ratings(self, overall_rating: int) -> Dict[str, int]:
         """
         Generate detailed category ratings based on overall rating.
-        
+
         Category ratings tend to be close to overall rating (±1 star).
         """
         category_ratings = {}
-        
+
         for category in self.RATING_CATEGORIES.keys():
             # Category rating is usually within ±1 of overall
             variation = random.choice([-1, 0, 0, 0, 1])  # More likely to be same
             category_rating = overall_rating + variation
-            
+
             # Clamp to 1-5 range
             category_rating = max(1, min(5, category_rating))
-            
+
             category_ratings[category] = category_rating
-        
+
         return category_ratings
-    
+
     def _calculate_time_since_ride(self) -> int:
         """
         Calculate realistic time between ride completion and rating.
-        
+
         Most ratings happen within minutes, but some take hours or days.
         """
         rand = random.random()
-        
+
         if rand < 0.60:
             # 60% within 5 minutes
             return random.randint(60, 300)
@@ -210,27 +210,27 @@ class RatingEventGenerator:
         else:
             # 5% after 1 day (late ratings)
             return random.randint(86400, 604800)  # Up to 1 week
-    
+
     def generate_rating_event(self) -> Dict[str, Any]:
         """Generate a single rating event."""
         rating_id = str(uuid.uuid4())
         ride_id = str(uuid.uuid4())
         customer_id = random.choice(self.customer_pool)
         driver_id = random.choice(self.driver_pool)
-        
+
         # Select rating
         rating = self._select_rating()
-        
+
         # Generate comment
         comment = self._generate_comment(rating)
-        
+
         # Generate category ratings
         category_ratings = self._generate_category_ratings(rating)
-        
+
         # Calculate timestamp (rating given some time after ride)
         time_since_ride = self._calculate_time_since_ride()
         rated_at = datetime.utcnow() - timedelta(seconds=time_since_ride)
-        
+
         # Base event
         event = {
             'rating_id': rating_id,
@@ -241,24 +241,24 @@ class RatingEventGenerator:
             'timestamp': rated_at.isoformat() + 'Z',
             'time_since_ride_seconds': time_since_ride,
         }
-        
+
         # Add comment if exists
         if comment:
             event['comment'] = comment
             event['comment_length'] = len(comment)
-        
+
         # Add category ratings
         event['category_ratings'] = category_ratings
-        
+
         # Calculate average category rating
         event['avg_category_rating'] = round(
             sum(category_ratings.values()) / len(category_ratings), 2
         )
-        
+
         # Add feedback flags
         event['is_positive'] = rating >= 4
         event['needs_review'] = rating <= 2  # Low ratings flagged for review
-        
+
         # Add tips given (correlates with rating)
         if rating == 5:
             tip_probability = 0.60
@@ -266,9 +266,9 @@ class RatingEventGenerator:
             tip_probability = 0.30
         else:
             tip_probability = 0.05
-        
+
         event['tip_given'] = random.random() < tip_probability
-        
+
         if event['tip_given']:
             # Tip amount based on rating
             if rating == 5:
@@ -277,15 +277,15 @@ class RatingEventGenerator:
                 tip_amount = random.uniform(2.0, 5.0)
             else:
                 tip_amount = random.uniform(1.0, 3.0)
-            
+
             event['tip_amount'] = round(tip_amount, 2)
-        
+
         return event
 
 
 class RatingProducer:
     """Produce rating events to Kinesis stream."""
-    
+
     def __init__(
         self,
         stream_name: str,
@@ -295,7 +295,7 @@ class RatingProducer:
     ):
         """
         Initialize the producer.
-        
+
         Args:
             stream_name: Kinesis stream name
             region: AWS region
@@ -306,18 +306,18 @@ class RatingProducer:
         self.region = region
         self.rate = rate
         self.namespace = namespace
-        
+
         # Initialize clients
         self.kinesis_client = get_kinesis_client(region)
         self.cloudwatch_client = get_cloudwatch_client(region)
-        
+
         # Validate stream exists
         if not validate_stream_exists(self.kinesis_client, stream_name):
             raise KinesisProducerError(f"Stream {stream_name} is not available")
-        
+
         # Initialize generator
         self.generator = RatingEventGenerator()
-        
+
         # Metrics
         self.total_sent = 0
         self.total_failed = 0
@@ -325,39 +325,39 @@ class RatingProducer:
         self.total_rating_sum = 0
         self.ratings_with_comments = 0
         self.ratings_with_tips = 0
-        
+
     def produce(self, duration_seconds: int = None):
         """
         Produce events to Kinesis.
-        
+
         Args:
             duration_seconds: How long to produce events (None = indefinite)
         """
         logger.info(f"Starting producer: stream={self.stream_name}, "
                    f"rate={self.rate} events/sec, duration={duration_seconds}s")
-        
+
         start_time = time.time()
         batch = []
         batch_size = 500  # Kinesis limit
-        
+
         # Calculate delay between batches
         events_per_batch = min(batch_size, self.rate)
         batch_delay = events_per_batch / self.rate if self.rate > 0 else 1
-        
+
         try:
             while not shutdown_flag:
                 # Check duration
                 if duration_seconds and (time.time() - start_time) >= duration_seconds:
                     logger.info("Duration reached, stopping producer")
                     break
-                
+
                 batch_start = time.time()
-                
+
                 # Generate batch of events
                 for _ in range(events_per_batch):
                     event = self.generator.generate_rating_event()
                     batch.append(event)
-                    
+
                     # Update metrics
                     self.ratings_by_star[event['rating']] += 1
                     self.total_rating_sum += event['rating']
@@ -365,7 +365,7 @@ class RatingProducer:
                         self.ratings_with_comments += 1
                     if event.get('tip_given', False):
                         self.ratings_with_tips += 1
-                
+
                 # Send batch
                 if batch:
                     result = batch_put_records(
@@ -374,25 +374,25 @@ class RatingProducer:
                         batch,
                         partition_key_field='rating_id'
                     )
-                    
+
                     self.total_sent += result['success']
                     self.total_failed += result['failed']
-                    
+
                     # Publish metrics
                     self._publish_metrics(len(batch), result)
-                    
+
                     logger.info(f"Sent batch: {result['success']} succeeded, "
                               f"{result['failed']} failed. "
                               f"Total: {self.total_sent} sent, {self.total_failed} failed")
-                    
+
                     batch = []
-                
+
                 # Rate limiting
                 batch_duration = time.time() - batch_start
                 sleep_time = max(0, batch_delay - batch_duration)
                 if sleep_time > 0:
                     time.sleep(sleep_time)
-                    
+
         except KeyboardInterrupt:
             logger.info("Interrupted by user")
         except Exception as e:
@@ -410,16 +410,16 @@ class RatingProducer:
                 )
                 self.total_sent += result['success']
                 self.total_failed += result['failed']
-            
+
             self._log_summary()
-    
+
     def _publish_metrics(self, batch_size: int, result: Dict[str, int]):
         """Publish metrics to CloudWatch."""
         dimensions = [
             {'Name': 'StreamName', 'Value': self.stream_name},
             {'Name': 'Producer', 'Value': 'RatingProducer'}
         ]
-        
+
         publish_cloudwatch_metric(
             self.cloudwatch_client,
             self.namespace,
@@ -428,7 +428,7 @@ class RatingProducer:
             'Count',
             dimensions
         )
-        
+
         if result['failed'] > 0:
             publish_cloudwatch_metric(
                 self.cloudwatch_client,
@@ -438,12 +438,12 @@ class RatingProducer:
                 'Count',
                 dimensions
             )
-    
+
     def _log_summary(self):
         """Log final summary."""
         total_ratings = sum(self.ratings_by_star.values())
         avg_rating = self.total_rating_sum / total_ratings if total_ratings > 0 else 0
-        
+
         logger.info("=" * 60)
         logger.info("PRODUCER SUMMARY")
         logger.info("=" * 60)
@@ -502,16 +502,16 @@ def main():
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         help='Logging level (default: INFO)'
     )
-    
+
     args = parser.parse_args()
-    
+
     # Set logging level
     logging.getLogger().setLevel(getattr(logging, args.log_level))
-    
+
     # Register signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
+
     try:
         producer = RatingProducer(
             stream_name=args.stream_name,
@@ -519,9 +519,9 @@ def main():
             rate=args.rate,
             namespace=args.namespace
         )
-        
+
         producer.produce(duration_seconds=args.duration)
-        
+
     except Exception as e:
         logger.error(f"Fatal error: {e}", exc_info=True)
         sys.exit(1)

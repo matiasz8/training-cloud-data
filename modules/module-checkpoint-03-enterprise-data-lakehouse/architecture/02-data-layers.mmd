@@ -2,7 +2,7 @@
 graph TB
     %% Enterprise Data Lakehouse - Data Layers Architecture
     %% Detailed 4-layer architecture with data flow and policies
-    
+
     subgraph "Raw Zone - Landing Layer"
         subgraph "Raw Zone Configuration"
             RawConfig[Configuration:
@@ -13,7 +13,7 @@ graph TB
             - Validation: Basic file integrity
             - Immutable: Yes append-only]
         end
-        
+
         subgraph "Raw Database Sources"
             RawRDS[/raw/rds/
             PostgreSQL Data
@@ -22,7 +22,7 @@ graph TB
             - Frequency: Daily full
             - Size: 50-100 GB/day
             - Retention: 7 days]
-            
+
             RawOracle[/raw/oracle/
             ERP System Data
             - Format: Avro
@@ -30,7 +30,7 @@ graph TB
             - Frequency: Incremental
             - Size: 20-40 GB/day
             - Retention: 7 days]
-            
+
             RawMongo[/raw/mongodb/
             Document Store
             - Format: JSON
@@ -39,7 +39,7 @@ graph TB
             - Size: 10-30 GB/day
             - Retention: 7 days]
         end
-        
+
         subgraph "Raw Event Streams"
             RawClickstream[/raw/events/clickstream/
             Web Analytics
@@ -49,7 +49,7 @@ graph TB
             - Size: 200-500 GB/day
             - Retention: 7 days
             - Partitioning: year/month/day/hour]
-            
+
             RawIoT[/raw/events/iot/
             Sensor Data
             - Format: JSON
@@ -58,7 +58,7 @@ graph TB
             - Size: 1-2 TB/day
             - Retention: 3 days
             - Partitioning: year/month/day/hour/device_id]
-            
+
             RawTransactions[/raw/events/transactions/
             Payment Events
             - Format: JSON
@@ -68,7 +68,7 @@ graph TB
             - Retention: 30 days
             - Compliance: PCI-DSS]
         end
-        
+
         subgraph "Raw File Uploads"
             RawCSV[/raw/files/csv/
             External CSV Files
@@ -78,7 +78,7 @@ graph TB
             - Size: 5-20 GB/day
             - Retention: 30 days
             - Source validation: MD5 checksum]
-            
+
             RawExcel[/raw/files/excel/
             Business Reports
             - Format: XLSX/XLS
@@ -87,7 +87,7 @@ graph TB
             - Size: 1-5 GB/week
             - Retention: 90 days
             - Manual uploads]
-            
+
             RawXML[/raw/files/xml/
             Partner Data Files
             - Format: XML
@@ -97,7 +97,7 @@ graph TB
             - Retention: 30 days
             - Schema validation optional]
         end
-        
+
         subgraph "Raw API Data"
             RawSalesforce[/raw/api/salesforce/
             CRM Data
@@ -107,7 +107,7 @@ graph TB
             - Size: 5-10 GB/day
             - Retention: 7 days
             - API version tracking]
-            
+
             RawWeather[/raw/api/weather/
             Weather APIs
             - Format: JSON
@@ -117,7 +117,7 @@ graph TB
             - Retention: 7 days
             - Geospatial data]
         end
-        
+
         RawMetadata[Raw Zone Metadata:
         - Ingestion timestamp
         - Source system
@@ -126,7 +126,7 @@ graph TB
         - Source checksum
         - Ingestion job ID]
     end
-    
+
     subgraph "Bronze Zone - Raw Standardized Layer"
         subgraph "Bronze Zone Configuration"
             BronzeConfig[Configuration:
@@ -138,7 +138,7 @@ graph TB
             - ACID: Not required
             - Deduplication: Basic]
         end
-        
+
         subgraph "Bronze Database Tables"
             BronzeCustomers[/bronze/rds/customers/
             Customer Master
@@ -150,7 +150,7 @@ graph TB
             - Updates: Daily full refresh
             - Columns: 45 fields
             - Quality: 95% completeness]
-            
+
             BronzeOrders[/bronze/rds/orders/
             Order Transactions
             - Format: Parquet
@@ -161,7 +161,7 @@ graph TB
             - Updates: Daily incremental
             - Columns: 32 fields
             - Quality: 98% completeness]
-            
+
             BronzeProducts[/bronze/oracle/products/
             Product Catalog
             - Format: Parquet
@@ -172,7 +172,7 @@ graph TB
             - Updates: Daily
             - Columns: 60 fields
             - Quality: 99% completeness]
-            
+
             BronzeInventory[/bronze/oracle/inventory/
             Inventory Levels
             - Format: Parquet
@@ -184,7 +184,7 @@ graph TB
             - Columns: 25 fields
             - Quality: 97% completeness]
         end
-        
+
         subgraph "Bronze Event Tables"
             BronzeWebEvents[/bronze/events/web/
             Web Clickstream
@@ -196,7 +196,7 @@ graph TB
             - Updates: Micro-batches 5min
             - Columns: 80 fields
             - Quality: 90% valid sessions]
-            
+
             BronzeSensorData[/bronze/events/sensors/
             IoT Sensor Readings
             - Format: Parquet
@@ -207,7 +207,7 @@ graph TB
             - Updates: Micro-batches 15min
             - Columns: 35 fields
             - Quality: 92% valid readings]
-            
+
             BronzePayments[/bronze/events/payments/
             Payment Transactions
             - Format: Parquet encrypted
@@ -219,7 +219,7 @@ graph TB
             - Columns: 42 fields
             - Quality: 99.9% completeness]
         end
-        
+
         subgraph "Bronze Files Standardized"
             BronzePartnerData[/bronze/files/partners/
             Partner Data Files
@@ -231,7 +231,7 @@ graph TB
             - Updates: Daily
             - Columns: Varies 50-100
             - Quality: 85% completeness]
-            
+
             BronzeReports[/bronze/files/reports/
             Business Reports
             - Format: Parquet
@@ -243,7 +243,7 @@ graph TB
             - Columns: Varies
             - Quality: Manual validation]
         end
-        
+
         BronzeQuality[Bronze Quality Checks:
         - Row count validation
         - Null percentage thresholds
@@ -252,7 +252,7 @@ graph TB
         - Partition completeness
         - Schema drift detection
         - File size anomalies]
-        
+
         BronzeMetadata[Bronze Metadata:
         - Processing timestamp
         - Source raw location
@@ -262,7 +262,7 @@ graph TB
         - Glue job ID
         - Transformation rules applied]
     end
-    
+
     subgraph "Silver Zone - Curated Business Layer"
         subgraph "Silver Zone Configuration"
             SilverConfig[Configuration:
@@ -276,7 +276,7 @@ graph TB
             - SCD: Type 2 for dimensions
             - Time Travel: 30 days]
         end
-        
+
         subgraph "Silver Dimension Tables"
             SilverDimCustomer[/silver/dimensions/customers/
             Customer Dimension SCD Type 2
@@ -292,7 +292,7 @@ graph TB
             - Quality: 99.5% complete
             - Indexes: customer_id
             - Constraints: Primary key]
-            
+
             SilverDimProduct[/silver/dimensions/products/
             Product Dimension SCD Type 2
             - Format: Delta Lake
@@ -307,7 +307,7 @@ graph TB
             - Quality: 99.8% complete
             - Indexes: product_id sku
             - Constraints: Primary key]
-            
+
             SilverDimDate[/silver/dimensions/date/
             Date Dimension
             - Format: Delta Lake
@@ -320,7 +320,7 @@ graph TB
               quarters holidays etc
             - Quality: 100% complete
             - Indexes: date_key]
-            
+
             SilverDimLocation[/silver/dimensions/locations/
             Location Dimension
             - Format: Delta Lake
@@ -333,7 +333,7 @@ graph TB
             - Quality: 98% complete
             - Indexes: location_id]
         end
-        
+
         subgraph "Silver Fact Tables"
             SilverFactSales[/silver/facts/sales/
             Sales Fact Table
@@ -349,7 +349,7 @@ graph TB
             - Retention: 3 years online
             - Archive: S3 Glacier
             - Optimization: Z-order by customer_id date]
-            
+
             SilverFactInventory[/silver/facts/inventory/
             Inventory Fact Table
             - Format: Delta Lake
@@ -362,7 +362,7 @@ graph TB
             - Quality: 99.5% complete
             - Retention: 2 years
             - Optimization: Z-order product_id]
-            
+
             SilverFactWebEvents[/silver/facts/web_sessions/
             Web Session Fact
             - Format: Delta Lake
@@ -376,7 +376,7 @@ graph TB
             - Retention: 13 months
             - Optimization: Z-order user_id]
         end
-        
+
         subgraph "Silver Transactional Tables"
             SilverTransactions[/silver/transactions/payments/
             Payment Transactions cleaned
@@ -391,7 +391,7 @@ graph TB
             - Encryption: Column-level PII
             - Compliance: PCI-DSS SOC2
             - Retention: 7 years]
-            
+
             SilverCDC[/silver/cdc/order_changes/
             Order CDC Log
             - Format: Delta Lake
@@ -403,7 +403,7 @@ graph TB
             - Quality: 100% capture
             - Retention: 1 year]
         end
-        
+
         SilverDQRules[Silver Data Quality Rules:
         - Referential integrity checks
         - Business rule validation
@@ -414,7 +414,7 @@ graph TB
         - Uniqueness constraint validation
         - Format standardization
         - Outlier detection ML-based]
-        
+
         SilverMetadata[Silver Metadata:
         - Processing timestamp
         - Source bronze tables
@@ -427,7 +427,7 @@ graph TB
         - Data steward
         - PII classification]
     end
-    
+
     subgraph "Gold Zone - Business Aggregates Layer"
         subgraph "Gold Zone Configuration"
             GoldConfig[Configuration:
@@ -441,7 +441,7 @@ graph TB
             - Refresh: Scheduled patterns
             - Performance: Query optimized]
         end
-        
+
         subgraph "Gold Analytics Marts"
             GoldSalesMart[/gold/marts/sales_analytics/
             Sales Analytics Mart
@@ -457,7 +457,7 @@ graph TB
             - Queries: <2 sec avg
             - Users: Sales analysts
             - Refresh: 6 AM daily]
-            
+
             GoldCustomer360[/gold/marts/customer_360/
             Customer 360 View
             - Format: Delta Lake
@@ -472,7 +472,7 @@ graph TB
             - Queries: <1 sec avg
             - Users: Marketing CRM
             - Refresh: 7 AM daily]
-            
+
             GoldFinancialMart[/gold/marts/financial/
             Financial Analytics Mart
             - Format: Delta Lake
@@ -487,7 +487,7 @@ graph TB
             - Queries: <3 sec avg
             - Users: Finance executives
             - Refresh: 8 AM daily]
-            
+
             GoldMarketingMart[/gold/marts/marketing/
             Marketing Performance Mart
             - Format: Delta Lake
@@ -503,7 +503,7 @@ graph TB
             - Users: Marketing analysts
             - Refresh: 9 AM daily]
         end
-        
+
         subgraph "Gold Executive Dashboards"
             GoldExecutiveKPI[/gold/dashboards/executive_kpi/
             Executive KPI Dashboard
@@ -519,9 +519,9 @@ graph TB
             - Queries: Sub-second
             - Users: C-level executives
             - Refresh: Every hour]
-            
+
             GoldOperationalDash[/gold/dashboards/operations/
-            Operational Dashboard  
+            Operational Dashboard
             - Format: Delta Lake
             - Aggregation: Real-time metrics
             - Partitions: date
@@ -534,7 +534,7 @@ graph TB
             - Users: Operations managers
             - Refresh: Every 15 min]
         end
-        
+
         subgraph "Gold Data Products"
             GoldMLFeatures[/gold/ml/feature_store/
             ML Feature Store
@@ -549,7 +549,7 @@ graph TB
             - Versioning: Full tracking
             - Users: Data scientists
             - SLA: <100ms online]
-            
+
             GoldAPIData[/gold/api/data_products/
             Data Product APIs
             - Format: Delta Lake
@@ -564,7 +564,7 @@ graph TB
             - Users: Applications APIs
             - Caching: API Gateway]
         end
-        
+
         GoldBusinessRules[Gold Business Rules:
         - Revenue recognition standards
         - Customer segmentation logic
@@ -574,7 +574,7 @@ graph TB
         - Goal tracking thresholds
         - Trend calculation methods
         - Forecasting algorithms]
-        
+
         GoldMetadata[Gold Metadata:
         - Business definition
         - Calculation formula
@@ -587,29 +587,29 @@ graph TB
         - Usage statistics
         - Query performance metrics]
     end
-    
+
     subgraph "Access Patterns & Performance"
         AccessPatterns[Access Pattern Optimization:
-        
+
         Raw Zone:
         - Access: Rare replay scenarios only
         - Pattern: Sequential scan
         - Users: Data engineers only
         - Performance: Not optimized
-        
+
         Bronze Zone:
         - Access: ETL pipeline reads
         - Pattern: Partition pruning
         - Users: Data engineers
         - Performance: Parquet columnar
-        
+
         Silver Zone:
         - Access: Frequent analytical
         - Pattern: Predicate pushdown
         - Users: Data engineers analysts
         - Performance: Delta optimized
           Z-order compaction
-        
+
         Gold Zone:
         - Access: Very frequent BI
         - Pattern: Small targeted queries
@@ -617,31 +617,31 @@ graph TB
         - Performance: Highly optimized
           Cached query results]
     end
-    
+
     subgraph "Retention & Lifecycle Policies"
         RetentionPolicies[Data Retention Policies:
-        
+
         Raw Zone:
         - Hot: 7 days S3 Standard
         - Warm: N/A
         - Cold: N/A
         - Archive: N/A
         - Delete: 7 days
-        
+
         Bronze Zone:
         - Hot: 30 days S3 Standard
         - Warm: 60 days S3 IA
         - Cold: N/A
         - Archive: N/A
         - Delete: 90 days
-        
+
         Silver Zone:
         - Hot: 90 days S3 Standard
         - Warm: 275 days S3 IA
         - Cold: 1 year S3 Glacier
         - Archive: 3 years Deep Archive
         - Delete: After legal hold
-        
+
         Gold Zone:
         - Hot: 13 months S3 Standard
         - Warm: 2 years S3 IA
@@ -649,39 +649,39 @@ graph TB
         - Archive: As required
         - Delete: Per compliance]
     end
-    
+
     %% Data Flow between layers
     RawRDS -->|Glue ETL Validation| BronzeCustomers
     RawRDS -->|Glue ETL Validation| BronzeOrders
     RawOracle -->|Glue ETL Validation| BronzeProducts
     RawOracle -->|Glue ETL Validation| BronzeInventory
-    
+
     RawClickstream -->|EMR Spark Transformation| BronzeWebEvents
     RawIoT -->|EMR Spark Filtering| BronzeSensorData
     RawTransactions -->|EMR Spark Encryption| BronzePayments
-    
+
     RawCSV -->|Glue ETL Schema| BronzePartnerData
     RawXML -->|Glue ETL Parse| BronzePartnerData
-    
+
     BronzeCustomers -->|Spark SCD Type 2| SilverDimCustomer
     BronzeProducts -->|Spark Enrichment| SilverDimProduct
     BronzeOrders -->|Spark Join Dedupe| SilverFactSales
     BronzeInventory -->|Spark Snapshot| SilverFactInventory
     BronzeWebEvents -->|Spark Sessionization| SilverFactWebEvents
     BronzePayments -->|Spark Validation| SilverTransactions
-    
+
     SilverFactSales -->|Athena CTAS Aggregation| GoldSalesMart
     SilverDimCustomer -->|Spark Wide Table| GoldCustomer360
     SilverFactSales -->|Spark Financial Calcs| GoldFinancialMart
     SilverFactWebEvents -->|Spark Attribution| GoldMarketingMart
-    
+
     GoldSalesMart -->|Rollup| GoldExecutiveKPI
     GoldFinancialMart -->|Rollup| GoldExecutiveKPI
     GoldMarketingMart -->|Rollup| GoldExecutiveKPI
-    
+
     SilverDimCustomer -->|Feature Engineering| GoldMLFeatures
     SilverFactSales -->|Feature Engineering| GoldMLFeatures
-    
+
     %% Styling
     classDef rawStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef bronzeStyle fill:#cd7f32,stroke:#8b4513,stroke-width:2px,color:#fff
@@ -689,7 +689,7 @@ graph TB
     classDef goldStyle fill:#ffd700,stroke:#b8860b,stroke-width:2px
     classDef configStyle fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
     classDef metaStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    
+
     class RawConfig,RawRDS,RawOracle,RawMongo,RawClickstream,RawIoT,RawTransactions,RawCSV,RawExcel,RawXML,RawSalesforce,RawWeather rawStyle
     class BronzeConfig,BronzeCustomers,BronzeOrders,BronzeProducts,BronzeInventory,BronzeWebEvents,BronzeSensorData,BronzePayments,BronzePartnerData,BronzeReports bronzeStyle
     class SilverConfig,SilverDimCustomer,SilverDimProduct,SilverDimDate,SilverDimLocation,SilverFactSales,SilverFactInventory,SilverFactWebEvents,SilverTransactions,SilverCDC silverStyle

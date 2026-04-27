@@ -14,7 +14,7 @@ USE cloudmart_data_lake;
 
 -- Query 1: Daily order metrics
 -- Purpose: Track daily order volume and revenue
-SELECT 
+SELECT
     order_date,
     COUNT(*) as total_orders,
     COUNT(DISTINCT customer_id) as unique_customers,
@@ -30,7 +30,7 @@ ORDER BY order_date DESC;
 
 -- Query 2: Weekly order trends
 -- Purpose: Analyze weekly performance patterns
-SELECT 
+SELECT
     DATE_TRUNC('week', order_date) as week_start,
     COUNT(*) as total_orders,
     SUM(total_amount) as total_revenue,
@@ -44,7 +44,7 @@ ORDER BY week_start DESC;
 
 -- Query 3: Monthly revenue and growth trends
 -- Purpose: Track monthly performance and growth
-SELECT 
+SELECT
     year,
     month,
     COUNT(*) as total_orders,
@@ -53,7 +53,7 @@ SELECT
     COUNT(DISTINCT customer_id) as unique_customers,
     LAG(SUM(total_amount)) OVER (ORDER BY year, month) as prev_month_revenue,
     ROUND(
-        (SUM(total_amount) - LAG(SUM(total_amount)) OVER (ORDER BY year, month)) * 100.0 / 
+        (SUM(total_amount) - LAG(SUM(total_amount)) OVER (ORDER BY year, month)) * 100.0 /
         NULLIF(LAG(SUM(total_amount)) OVER (ORDER BY year, month), 0),
         2
     ) as revenue_growth_pct
@@ -63,7 +63,7 @@ ORDER BY year DESC, month DESC;
 
 -- Query 4: Order status breakdown
 -- Purpose: Analyze order fulfillment metrics
-SELECT 
+SELECT
     status,
     COUNT(*) as order_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage,
@@ -81,7 +81,7 @@ ORDER BY order_count DESC;
 
 -- Query 5: Customer segment performance
 -- Purpose: Compare metrics across customer segments
-SELECT 
+SELECT
     c.segment,
     COUNT(DISTINCT c.customer_id) as customer_count,
     COUNT(o.order_id) as total_orders,
@@ -97,7 +97,7 @@ ORDER BY total_revenue DESC;
 
 -- Query 6: Customer cohort analysis by signup month
 -- Purpose: Analyze customer behavior by acquisition cohort
-SELECT 
+SELECT
     DATE_TRUNC('month', c.signup_date) as cohort_month,
     COUNT(DISTINCT c.customer_id) as cohort_size,
     COUNT(o.order_id) as total_orders,
@@ -113,7 +113,7 @@ ORDER BY cohort_month DESC;
 
 -- Query 7: Top customers by revenue
 -- Purpose: Identify highest value customers
-SELECT 
+SELECT
     c.customer_id,
     c.name,
     c.email,
@@ -134,14 +134,14 @@ LIMIT 100;
 
 -- Query 8: Customer purchase frequency distribution
 -- Purpose: Understand customer engagement levels
-SELECT 
+SELECT
     order_frequency_bucket,
     COUNT(*) as customer_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
 FROM (
-    SELECT 
+    SELECT
         customer_id,
-        CASE 
+        CASE
             WHEN order_count = 1 THEN '1 order'
             WHEN order_count BETWEEN 2 AND 5 THEN '2-5 orders'
             WHEN order_count BETWEEN 6 AND 10 THEN '6-10 orders'
@@ -149,7 +149,7 @@ FROM (
             ELSE '20+ orders'
         END as order_frequency_bucket
     FROM (
-        SELECT 
+        SELECT
             customer_id,
             COUNT(*) as order_count
         FROM processed_orders
@@ -158,7 +158,7 @@ FROM (
     )
 )
 GROUP BY order_frequency_bucket
-ORDER BY 
+ORDER BY
     CASE order_frequency_bucket
         WHEN '1 order' THEN 1
         WHEN '2-5 orders' THEN 2
@@ -169,7 +169,7 @@ ORDER BY
 
 -- Query 9: Customer geographic distribution
 -- Purpose: Analyze customer base by geography
-SELECT 
+SELECT
     c.country,
     COUNT(DISTINCT c.customer_id) as customer_count,
     COUNT(o.order_id) as total_orders,
@@ -185,25 +185,25 @@ ORDER BY total_revenue DESC;
 
 -- Query 10: New vs returning customer analysis
 -- Purpose: Track customer acquisition and retention
-SELECT 
+SELECT
     o.order_date,
     COUNT(DISTINCT o.customer_id) as total_customers,
-    COUNT(DISTINCT CASE 
-        WHEN first_order.first_order_date = o.order_date 
-        THEN o.customer_id 
+    COUNT(DISTINCT CASE
+        WHEN first_order.first_order_date = o.order_date
+        THEN o.customer_id
     END) as new_customers,
-    COUNT(DISTINCT CASE 
-        WHEN first_order.first_order_date < o.order_date 
-        THEN o.customer_id 
+    COUNT(DISTINCT CASE
+        WHEN first_order.first_order_date < o.order_date
+        THEN o.customer_id
     END) as returning_customers,
     ROUND(
-        COUNT(DISTINCT CASE WHEN first_order.first_order_date = o.order_date THEN o.customer_id END) * 100.0 / 
-        COUNT(DISTINCT o.customer_id), 
+        COUNT(DISTINCT CASE WHEN first_order.first_order_date = o.order_date THEN o.customer_id END) * 100.0 /
+        COUNT(DISTINCT o.customer_id),
         2
     ) as new_customer_pct
 FROM processed_orders o
 INNER JOIN (
-    SELECT 
+    SELECT
         customer_id,
         MIN(order_date) as first_order_date
     FROM processed_orders
@@ -219,7 +219,7 @@ ORDER BY o.order_date DESC;
 
 -- Query 11: Product category performance
 -- Purpose: Analyze sales by product category
-SELECT 
+SELECT
     p.category,
     COUNT(DISTINCT p.product_id) as product_count,
     COUNT(o.order_id) as total_orders,
@@ -234,7 +234,7 @@ ORDER BY total_revenue DESC;
 -- Query 12: Top selling products
 -- Purpose: Identify best performing products
 -- Note: This assumes product_id can be extracted from order data
-SELECT 
+SELECT
     p.product_id,
     p.name,
     p.category,
@@ -250,19 +250,19 @@ LIMIT 50;
 
 -- Query 13: Product price range analysis
 -- Purpose: Analyze sales distribution by price points
-SELECT 
+SELECT
     price_range,
     COUNT(DISTINCT product_id) as product_count,
     ROUND(AVG(price), 2) as avg_price,
     SUM(stock_quantity) as total_stock
 FROM (
-    SELECT 
+    SELECT
         product_id,
         name,
         category,
         price,
         stock_quantity,
-        CASE 
+        CASE
             WHEN price < 50 THEN '$0-49'
             WHEN price BETWEEN 50 AND 99 THEN '$50-99'
             WHEN price BETWEEN 100 AND 199 THEN '$100-199'
@@ -273,7 +273,7 @@ FROM (
     WHERE year = 2024
 )
 GROUP BY price_range
-ORDER BY 
+ORDER BY
     CASE price_range
         WHEN '$0-49' THEN 1
         WHEN '$50-99' THEN 2
@@ -284,7 +284,7 @@ ORDER BY
 
 -- Query 14: Inventory analysis
 -- Purpose: Identify stock levels and potential issues
-SELECT 
+SELECT
     category,
     COUNT(*) as total_products,
     SUM(stock_quantity) as total_stock,
@@ -303,7 +303,7 @@ ORDER BY out_of_stock_pct DESC;
 
 -- Query 15: Day of week analysis
 -- Purpose: Identify weekly patterns in order behavior
-SELECT 
+SELECT
     CASE EXTRACT(DOW FROM order_date)
         WHEN 0 THEN 'Sunday'
         WHEN 1 THEN 'Monday'
@@ -325,7 +325,7 @@ ORDER BY dow_number;
 
 -- Query 16: Hour of day analysis (from timestamp)
 -- Purpose: Identify peak ordering times
-SELECT 
+SELECT
     EXTRACT(HOUR FROM order_timestamp) as hour_of_day,
     COUNT(*) as total_orders,
     SUM(total_amount) as total_revenue,
@@ -338,8 +338,8 @@ ORDER BY hour_of_day;
 
 -- Query 17: Seasonal trends analysis
 -- Purpose: Identify seasonal patterns in sales
-SELECT 
-    CASE 
+SELECT
+    CASE
         WHEN month IN (12, 1, 2) THEN 'Winter'
         WHEN month IN (3, 4, 5) THEN 'Spring'
         WHEN month IN (6, 7, 8) THEN 'Summer'
@@ -351,8 +351,8 @@ SELECT
     COUNT(DISTINCT customer_id) as unique_customers
 FROM processed_orders
 WHERE year = 2024
-GROUP BY 
-    CASE 
+GROUP BY
+    CASE
         WHEN month IN (12, 1, 2) THEN 'Winter'
         WHEN month IN (3, 4, 5) THEN 'Spring'
         WHEN month IN (6, 7, 8) THEN 'Summer'
@@ -366,7 +366,7 @@ ORDER BY total_revenue DESC;
 
 -- Query 18: Customer-Order-Product combined analysis
 -- Purpose: Comprehensive customer purchasing behavior
-SELECT 
+SELECT
     c.customer_id,
     c.name,
     c.segment,
@@ -388,7 +388,7 @@ LIMIT 100;
 
 -- Query 19: Geographic revenue distribution
 -- Purpose: Analyze revenue by geographic segments
-SELECT 
+SELECT
     c.country,
     c.segment,
     COUNT(DISTINCT c.customer_id) as customer_count,
@@ -404,7 +404,7 @@ ORDER BY total_revenue DESC;
 
 -- Query 20: Customer lifetime value estimation
 -- Purpose: Calculate customer value metrics
-SELECT 
+SELECT
     c.customer_id,
     c.name,
     c.segment,
@@ -415,8 +415,8 @@ SELECT
     MIN(o.order_date) as first_order_date,
     MAX(o.order_date) as last_order_date,
     DATE_DIFF('day', MIN(o.order_date), MAX(o.order_date)) as active_days,
-    CASE 
-        WHEN DATE_DIFF('day', MIN(o.order_date), MAX(o.order_date)) > 0 
+    CASE
+        WHEN DATE_DIFF('day', MIN(o.order_date), MAX(o.order_date)) > 0
         THEN ROUND(SUM(o.total_amount) / DATE_DIFF('day', MIN(o.order_date), MAX(o.order_date)) * 30, 2)
         ELSE 0
     END as estimated_monthly_value

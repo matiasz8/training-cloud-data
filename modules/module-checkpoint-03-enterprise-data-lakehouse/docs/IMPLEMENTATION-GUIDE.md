@@ -4,7 +4,7 @@
 
 This comprehensive implementation guide provides step-by-step instructions for building the Enterprise Data Lakehouse from the ground up. Each phase includes detailed tasks, code samples, validation checkpoints, and troubleshooting tips.
 
-**Total Estimated Time**: 30-35 hours  
+**Total Estimated Time**: 30-35 hours
 **Prerequisites**: Completion of Modules 1-18, AWS account with admin access, Python 3.9+, Terraform 1.3+
 
 ---
@@ -205,7 +205,7 @@ cd infrastructure/
 cat > main.tf << 'EOF'
 terraform {
   required_version = ">= 1.3"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -223,7 +223,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = "Enterprise-Data-Lakehouse"
@@ -607,7 +607,7 @@ random.seed(42)
 def generate_finance_data(num_records=100000):
     """Generate synthetic finance transactions."""
     print(f"Generating {num_records} finance records...")
-    
+
     data = {
         'transaction_id': [f'TXN-{i:08d}' for i in range(num_records)],
         'transaction_date': [fake.date_between(start_date='-2y', end_date='today') for _ in range(num_records)],
@@ -617,7 +617,7 @@ def generate_finance_data(num_records=100000):
         'description': [fake.sentence() for _ in range(num_records)],
         'cost_center': [f'CC-{random.randint(1, 500):04d}' for _ in range(num_records)]
     }
-    
+
     df = pd.DataFrame(data)
     output_path = '../data/raw/finance/transactions.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -628,7 +628,7 @@ def generate_finance_data(num_records=100000):
 def generate_hr_data(num_records=50000):
     """Generate synthetic HR employee data."""
     print(f"Generating {num_records} HR records...")
-    
+
     data = {
         'employee_id': [f'EMP-{i:06d}' for i in range(num_records)],
         'first_name': [fake.first_name() for _ in range(num_records)],
@@ -641,7 +641,7 @@ def generate_hr_data(num_records=50000):
         'salary': [random.randint(50000, 200000) for _ in range(num_records)],
         'ssn': [fake.ssn() for _ in range(num_records)]
     }
-    
+
     df = pd.DataFrame(data)
     output_path = '../data/raw/hr/employees.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -652,7 +652,7 @@ def generate_hr_data(num_records=50000):
 def generate_sales_data(num_records=200000):
     """Generate synthetic sales orders."""
     print(f"Generating {num_records} sales records...")
-    
+
     data = {
         'order_id': [f'ORD-{i:08d}' for i in range(num_records)],
         'order_date': [fake.date_time_between(start_date='-1y', end_date='now') for _ in range(num_records)],
@@ -663,11 +663,11 @@ def generate_sales_data(num_records=200000):
         'discount_percent': [round(random.uniform(0, 30), 2) if random.random() > 0.7 else 0 for _ in range(num_records)],
         'status': [random.choice(['pending', 'shipped', 'delivered', 'cancelled']) for _ in range(num_records)]
     }
-    
+
     df = pd.DataFrame(data)
     df['total_amount'] = df['quantity'] * df['unit_price'] * (1 - df['discount_percent'] / 100)
     df['total_amount'] = df['total_amount'].round(2)
-    
+
     output_path = '../data/raw/sales/orders.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df.to_csv(output_path, index=False)
@@ -677,9 +677,9 @@ def generate_sales_data(num_records=200000):
 def generate_operations_data(num_records=500000):
     """Generate synthetic IoT sensor data."""
     print(f"Generating {num_records} operations records...")
-    
+
     base_time = datetime.now() - timedelta(days=30)
-    
+
     data = {
         'sensor_id': [f'SENSOR-{random.randint(1, 1000):05d}' for _ in range(num_records)],
         'timestamp': [base_time + timedelta(seconds=random.randint(0, 30*24*3600)) for _ in range(num_records)],
@@ -689,7 +689,7 @@ def generate_operations_data(num_records=500000):
         'vibration': [round(random.uniform(0, 10), 3) for _ in range(num_records)],
         'status': [random.choice(['normal', 'warning', 'critical']) for _ in range(num_records)]
     }
-    
+
     df = pd.DataFrame(data)
     output_path = '../data/raw/operations/sensor_readings.csv'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -699,13 +699,13 @@ def generate_operations_data(num_records=500000):
 
 if __name__ == '__main__':
     print("=== Generating Synthetic Data ===\n")
-    
+
     # Generate data for all domains
     finance_df = generate_finance_data(100000)
     hr_df = generate_hr_data(50000)
     sales_df = generate_sales_data(200000)
     operations_df = generate_operations_data(500000)
-    
+
     print(f"\n=== Summary ===")
     print(f"Finance: {len(finance_df):,} records")
     print(f"HR: {len(hr_df):,} records")
@@ -879,103 +879,103 @@ def create_spark_session():
 def process_finance_to_bronze(spark, bucket_name):
     """Process Finance raw data to Bronze layer."""
     print("Processing Finance: Raw → Bronze")
-    
+
     # Read raw CSV
     df_raw = spark.read.csv(
         f"s3://{bucket_name}/raw/finance/transactions.csv",
         header=True,
         inferSchema=True
     )
-    
+
     # Add audit columns
     df_bronze = df_raw \
         .withColumn("ingestion_timestamp", current_timestamp()) \
         .withColumn("source_system", lit("Oracle-ERP")) \
         .withColumn("file_name", lit("transactions.csv")) \
         .withColumn("partition_date", to_date(col("transaction_date")))
-    
+
     # Write to Bronze in Parquet format with partitioning
     output_path = f"s3://{bucket_name}/bronze/finance/transactions/"
     df_bronze.write \
         .mode("overwrite") \
         .partitionBy("partition_date") \
         .parquet(output_path)
-    
+
     print(f"✓ Wrote {df_bronze.count()} records to {output_path}")
     return df_bronze.count()
 
 def process_hr_to_bronze(spark, bucket_name):
     """Process HR raw data to Bronze layer."""
     print("Processing HR: Raw → Bronze")
-    
+
     df_raw = spark.read.csv(
         f"s3://{bucket_name}/raw/hr/employees.csv",
         header=True,
         inferSchema=True
     )
-    
+
     df_bronze = df_raw \
         .withColumn("ingestion_timestamp", current_timestamp()) \
         .withColumn("source_system", lit("Workday-HCM")) \
         .withColumn("file_name", lit("employees.csv")) \
         .withColumn("partition_date", to_date(col("hire_date")))
-    
+
     output_path = f"s3://{bucket_name}/bronze/hr/employees/"
     df_bronze.write \
         .mode("overwrite") \
         .partitionBy("partition_date") \
         .parquet(output_path)
-    
+
     print(f"✓ Wrote {df_bronze.count()} records to {output_path}")
     return df_bronze.count()
 
 def process_sales_to_bronze(spark, bucket_name):
     """Process Sales raw data to Bronze layer."""
     print("Processing Sales: Raw → Bronze")
-    
+
     df_raw = spark.read.csv(
         f"s3://{bucket_name}/raw/sales/orders.csv",
         header=True,
         inferSchema=True
     )
-    
+
     df_bronze = df_raw \
         .withColumn("ingestion_timestamp", current_timestamp()) \
         .withColumn("source_system", lit("Salesforce-CRM")) \
         .withColumn("file_name", lit("orders.csv")) \
         .withColumn("partition_date", to_date(col("order_date")))
-    
+
     output_path = f"s3://{bucket_name}/bronze/sales/orders/"
     df_bronze.write \
         .mode("overwrite") \
         .partitionBy("partition_date") \
         .parquet(output_path)
-    
+
     print(f"✓ Wrote {df_bronze.count()} records to {output_path}")
     return df_bronze.count()
 
 def process_operations_to_bronze(spark, bucket_name):
     """Process Operations raw data to Bronze layer."""
     print("Processing Operations: Raw → Bronze")
-    
+
     df_raw = spark.read.csv(
         f"s3://{bucket_name}/raw/operations/sensor_readings.csv",
         header=True,
         inferSchema=True
     )
-    
+
     df_bronze = df_raw \
         .withColumn("ingestion_timestamp", current_timestamp()) \
         .withColumn("source_system", lit("IoT-Platform")) \
         .withColumn("file_name", lit("sensor_readings.csv")) \
         .withColumn("partition_date", to_date(col("timestamp")))
-    
+
     output_path = f"s3://{bucket_name}/bronze/operations/sensor_readings/"
     df_bronze.write \
         .mode("overwrite") \
         .partitionBy("partition_date") \
         .parquet(output_path)
-    
+
     print(f"✓ Wrote {df_bronze.count()} records to {output_path}")
     return df_bronze.count()
 
@@ -983,22 +983,22 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: bronze_etl.py <bucket_name>")
         sys.exit(1)
-    
+
     bucket_name = sys.argv[1]
-    
+
     spark = create_spark_session()
-    
+
     print("=== Bronze Layer ETL ===\n")
-    
+
     total_records = 0
     total_records += process_finance_to_bronze(spark, bucket_name)
     total_records += process_hr_to_bronze(spark, bucket_name)
     total_records += process_sales_to_bronze(spark, bucket_name)
     total_records += process_operations_to_bronze(spark, bucket_name)
-    
+
     print(f"\n=== Summary ===")
     print(f"Total records processed: {total_records:,}")
-    
+
     spark.stop()
 EOF
 
@@ -1127,6 +1127,6 @@ aws ce get-cost-and-usage \
 
 ---
 
-**Implementation Guide Version**: 1.0  
-**Last Updated**: March 10, 2026  
+**Implementation Guide Version**: 1.0
+**Last Updated**: March 10, 2026
 **Next**: Proceed to ARCHITECTURE-DECISIONS.md for technical decision rationale

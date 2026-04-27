@@ -244,8 +244,8 @@ Your implementation will be evaluated against these production-grade metrics:
 - Stripe API (online payments)
 - QuickBooks (small business units)
 
-**Data Volume:** 2.5TB  
-**Critical Tables:** 
+**Data Volume:** 2.5TB
+**Critical Tables:**
 - `fact_transactions` (50M rows)
 - `fact_invoices` (20M rows)
 - `dim_accounts` (10K rows)
@@ -267,7 +267,7 @@ Your implementation will be evaluated against these production-grade metrics:
 - Greenhouse (recruiting, applications)
 - Culture Amp (employee engagement surveys)
 
-**Data Volume:** 500GB  
+**Data Volume:** 500GB
 **Critical Tables:**
 - `fact_payroll` (5M rows)
 - `dim_employees` (50K rows, SCD Type 2)
@@ -290,7 +290,7 @@ Your implementation will be evaluated against these production-grade metrics:
 - Shopify (e-commerce transactions)
 - Zendesk (customer support tickets)
 
-**Data Volume:** 4TB  
+**Data Volume:** 4TB
 **Critical Tables:**
 - `fact_opportunities` (10M rows)
 - `fact_orders` (80M rows)
@@ -313,7 +313,7 @@ Your implementation will be evaluated against these production-grade metrics:
 - Logistics APIs (shipment tracking)
 - Quality control databases
 
-**Data Volume:** 3TB  
+**Data Volume:** 3TB
 **Critical Tables:**
 - `fact_sensor_readings` (500M rows, time-series)
 - `fact_shipments` (30M rows)
@@ -838,28 +838,28 @@ Follow the detailed steps in `IMPLEMENTATION-GUIDE.md` starting with Phase 0.
 
 ## ❓ FAQ
 
-**Q: How long will this capstone take?**  
+**Q: How long will this capstone take?**
 A: Plan for 30-35 hours total. Spread over 2-3 weeks at 10-15 hours/week.
 
-**Q: What if I exceed the $150 monthly budget?**  
+**Q: What if I exceed the $150 monthly budget?**
 A: Review `COST-ESTIMATION.md` for optimization strategies. Ensure you stop/delete resources when not in use.
 
-**Q: Can I use Databricks instead of AWS?**  
+**Q: Can I use Databricks instead of AWS?**
 A: This capstone is AWS-focused. A Databricks version is available in Module Bonus-01.
 
-**Q: Do I need production AWS account?**  
+**Q: Do I need production AWS account?**
 A: No, use a personal/learning AWS account. Enable billing alerts at $100.
 
-**Q: How do I handle PII if using fake data?**  
+**Q: How do I handle PII if using fake data?**
 A: Still implement all PII protection mechanisms. Use `Faker` library to generate realistic test data.
 
-**Q: Is this capstone graded?**  
+**Q: Is this capstone graded?**
 A: Use the self-evaluation rubric. For formal certification, submit for instructor review.
 
-**Q: What if I get stuck?**  
+**Q: What if I get stuck?**
 A: Check `reference-solution/` for hints (without looking at full implementation). Review related training modules.
 
-**Q: Can I skip phases?**  
+**Q: Can I skip phases?**
 A: No. Each phase builds on previous work. Complete sequentially.
 
 ---

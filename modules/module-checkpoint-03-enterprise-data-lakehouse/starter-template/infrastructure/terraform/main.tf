@@ -7,7 +7,7 @@
 
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -46,9 +46,9 @@ provider "aws" {
 locals {
   # TODO: Define local variables for resource naming
   # Example: bucket_prefix = "${var.project_name}-${var.environment}"
-  
+
   bucket_prefix = "${var.project_name}-${var.environment}"
-  
+
   # Common tags to be applied to all resources
   common_tags = {
     Project     = var.project_name
@@ -284,17 +284,17 @@ locals {
 # resource "aws_glue_job" "raw_to_bronze" {
 #   name     = "${var.project_name}-raw-to-bronze"
 #   role_arn = aws_iam_role.glue_service_role.arn
-#   
+#
 #   command {
 #     name            = "glueetl"
 #     script_location = "s3://${aws_s3_bucket.scripts.id}/glue-jobs/raw_to_bronze.py"
 #     python_version  = "3"
 #   }
-#   
+#
 #   glue_version = "4.0"
 #   max_capacity = 2.0  # TODO: Adjust based on workload
 #   timeout      = 60   # TODO: Adjust timeout in minutes
-#   
+#
 #   default_arguments = {
 #     "--job-language"        = "python"
 #     "--enable-job-insights" = "true"
@@ -334,7 +334,7 @@ locals {
 # resource "aws_lakeformation_permissions" "data_engineer_bronze" {
 #   principal   = aws_iam_role.data_engineer_role.arn
 #   permissions = ["ALL"]
-#   
+#
 #   database {
 #     name = aws_glue_catalog_database.bronze.name
 #   }
@@ -349,14 +349,14 @@ locals {
 #   name             = "${var.project_name}-transactions-stream"
 #   shard_count      = 1  # TODO: Adjust based on throughput requirements
 #   retention_period = 24  # Hours
-#   
+#
 #   shard_level_metrics = [
 #     "IncomingBytes",
 #     "IncomingRecords",
 #     "OutgoingBytes",
 #     "OutgoingRecords",
 #   ]
-#   
+#
 #   stream_mode_details {
 #     stream_mode = "PROVISIONED"  # Or "ON_DEMAND"
 #   }
@@ -366,17 +366,17 @@ locals {
 # resource "aws_kinesis_firehose_delivery_stream" "transactions_firehose" {
 #   name        = "${var.project_name}-transactions-firehose"
 #   destination = "extended_s3"
-#   
+#
 #   kinesis_source_configuration {
 #     kinesis_stream_arn = aws_kinesis_stream.transactions.arn
 #     role_arn          = aws_iam_role.firehose_role.arn
 #   }
-#   
+#
 #   extended_s3_configuration {
 #     role_arn   = aws_iam_role.firehose_role.arn
 #     bucket_arn = aws_s3_bucket.raw_data.arn
 #     prefix     = "streaming/transactions/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
-#     
+#
 #     buffering_size     = 5   # MB
 #     buffering_interval = 60  # Seconds
 #   }
@@ -390,14 +390,14 @@ locals {
 # resource "aws_athena_workgroup" "analytics" {
 #   name        = "${var.project_name}-analytics"
 #   description = "Workgroup for analytics queries on gold layer"
-#   
+#
 #   configuration {
 #     enforce_workgroup_configuration    = true
 #     publish_cloudwatch_metrics_enabled = true
-#     
+#
 #     result_configuration {
 #       output_location = "s3://${aws_s3_bucket.temp.id}/athena-results/"
-#       
+#
 #       encryption_configuration {
 #         encryption_option = "SSE_S3"
 #       }
@@ -477,7 +477,7 @@ locals {
 #   include_global_service_events = true
 #   is_multi_region_trail         = true
 #   enable_log_file_validation    = true
-#   
+#
 #   event_selector {
 #     read_write_type           = "All"
 #     include_management_events = true
@@ -492,7 +492,7 @@ locals {
 # resource "aws_sfn_state_machine" "lakehouse_pipeline" {
 #   name     = "${var.project_name}-pipeline"
 #   role_arn = aws_iam_role.step_functions_role.arn
-#   
+#
 #   definition = jsonencode({
 #     Comment = "Enterprise Lakehouse ETL Pipeline"
 #     StartAt = "RawToBronze"

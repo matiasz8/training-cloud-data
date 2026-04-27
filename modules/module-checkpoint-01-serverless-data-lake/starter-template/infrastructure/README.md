@@ -13,7 +13,7 @@ You will create a complete serverless data lake on AWS implementing the **Medall
 
 The infrastructure includes:
 - **S3 Buckets**: Storage for each medallion layer + logs and Athena results
-- **AWS Lambda**: Serverless functions for data ingestion  
+- **AWS Lambda**: Serverless functions for data ingestion
 - **AWS Glue**: Crawlers for schema discovery, ETL jobs for transformations
 - **Amazon Athena**: SQL query engine for analytics
 - **IAM Roles & Policies**: Security and access control
@@ -71,17 +71,17 @@ Work through each TODO comment in `main.tf`. Recommended order:
 rule {
   id     = "archive-old-raw-data"
   status = "Enabled"
-  
+
   transition {
     days          = 90
     storage_class = "STANDARD_IA"
   }
-  
+
   transition {
     days          = 180
     storage_class = "GLACIER"
   }
-  
+
   expiration {
     days = 365
   }
@@ -90,7 +90,7 @@ rule {
 rule {
   id     = "delete-incomplete-multipart-uploads"
   status = "Enabled"
-  
+
   abort_incomplete_multipart_upload {
     days_after_initiation = 7
   }
@@ -194,16 +194,16 @@ data "archive_file" "orders_ingestion_lambda" {
 resource "aws_lambda_function" "orders_ingestion" {
   function_name = "${var.project_name}-orders-ingestion-${var.environment}"
   role          = aws_iam_role.lambda_ingestion.arn
-  
+
   filename         = data.archive_file.orders_ingestion_lambda.output_path
   source_code_hash = data.archive_file.orders_ingestion_lambda.output_base64sha256
-  
+
   runtime = var.lambda_runtime
   handler = "handler.lambda_handler"
-  
+
   timeout     = var.lambda_timeout_seconds
   memory_size = var.lambda_memory_mb
-  
+
   environment {
     variables = {
       PROCESSED_BUCKET = aws_s3_bucket.processed_data.id
@@ -251,13 +251,13 @@ resource "aws_glue_crawler" "bronze_orders" {
   name          = "${var.project_name}-bronze-orders-${var.environment}"
   role          = aws_iam_role.glue_etl.arn
   database_name = aws_glue_catalog_database.bronze.name
-  
+
   s3_target {
     path = "s3://${aws_s3_bucket.raw_data.id}/orders/"
   }
-  
+
   schedule = var.enable_crawler_schedules ? var.raw_crawler_schedule : null
-  
+
   schema_change_policy {
     delete_behavior = "LOG"
     update_behavior = "UPDATE_IN_DATABASE"
@@ -292,13 +292,13 @@ resource "aws_s3_object" "glue_script_bronze_to_silver_orders" {
 resource "aws_glue_job" "bronze_to_silver_orders" {
   name     = "${var.project_name}-bronze-to-silver-orders-${var.environment}"
   role_arn = aws_iam_role.glue_etl.arn
-  
+
   command {
     name            = "glueetl"
     script_location = "s3://${aws_s3_bucket.logs.id}/glue-scripts/bronze_to_silver_orders.py"
     python_version  = "3"
   }
-  
+
   default_arguments = {
     "--job-language"        = "python"
     "--job-bookmark-option" = var.enable_glue_job_bookmarks ? "job-bookmark-enable" : "job-bookmark-disable"
@@ -310,7 +310,7 @@ resource "aws_glue_job" "bronze_to_silver_orders" {
     "--target_database"     = aws_glue_catalog_database.silver.name
     "--target_table"        = "orders"
   }
-  
+
   glue_version      = var.glue_version
   worker_type       = var.glue_worker_type
   number_of_workers = var.glue_number_of_workers
@@ -340,11 +340,11 @@ resource "aws_cloudwatch_metric_alarm" "lambda_orders_errors" {
   statistic           = "Sum"
   threshold           = var.lambda_error_threshold
   alarm_description   = "Alert on Lambda orders ingestion errors"
-  
+
   dimensions = {
     FunctionName = aws_lambda_function.orders_ingestion.function_name
   }
-  
+
   alarm_actions = [aws_sns_topic.data_pipeline_alerts.arn]
 }
 ```

@@ -1168,7 +1168,7 @@ deduped_df = df.withColumn("row_num", row_number().over(window)) \
 ### Books and Articles
 
 - "Data Engineering on AWS" by Amazon Press
-- "Building Data Lakes on AWS" 
+- "Building Data Lakes on AWS"
 - AWS Architecture Blog posts
 
 ---
@@ -1191,11 +1191,11 @@ deduped_df = df.withColumn("row_num", row_number().over(window)) \
    ```bash
    # Delete CloudFormation stack
    aws cloudformation delete-stack --stack-name cloudmart-data-lake
-   
+
    # Empty and delete S3 buckets
    aws s3 rm s3://cloudmart-raw --recursive
    aws s3 rb s3://cloudmart-raw
-   
+
    # Verify all resources deleted
    aws s3 ls | grep cloudmart
    aws lambda list-functions | grep cloudmart

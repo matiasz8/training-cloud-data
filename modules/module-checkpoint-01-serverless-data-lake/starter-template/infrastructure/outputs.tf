@@ -122,14 +122,14 @@ output "next_steps" {
   description = "Instructions for next steps after deployment"
   value = <<-EOT
     ✓ Infrastructure deployed successfully!
-    
+
     NEXT STEPS:
     1. Complete TODOs in main.tf to enable Lambda functions and Glue jobs
     2. Upload sample data to: s3://${aws_s3_bucket.raw_data.id}/
     3. Test Lambda ingestion by uploading files
     4. Run Glue crawlers to catalog data
     5. Query data using Athena workgroup: ${aws_athena_workgroup.primary.name}
-    
+
     USEFUL COMMANDS:
     - Test deployment: terraform plan
     - Upload data: aws s3 cp local-file s3://${aws_s3_bucket.raw_data.id}/orders/

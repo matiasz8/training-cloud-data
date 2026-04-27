@@ -1,8 +1,8 @@
 -- =============================================================================
 -- CREATE VIEWS - Enterprise Data Lakehouse Gold Layer Views
 -- =============================================================================
--- Purpose: Create business-ready views on top of gold layer tables using 
---          Athena/Presto SQL. Views implement complex business logic with 
+-- Purpose: Create business-ready views on top of gold layer tables using
+--          Athena/Presto SQL. Views implement complex business logic with
 --          extensive JOINs, window functions, and aggregations.
 -- Database: lakehouse_gold
 -- Compatible: Amazon Athena, Presto, Trino
@@ -17,7 +17,7 @@
 
 CREATE OR REPLACE VIEW lakehouse_gold.customer_360 AS
 WITH customer_base AS (
-    SELECT 
+    SELECT
         c.customer_sk,
         c.customer_id,
         c.customer_name,
@@ -47,7 +47,7 @@ WITH customer_base AS (
 ),
 
 transaction_summary AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         COUNT(DISTINCT f.transaction_id) AS total_transactions,
         COUNT(DISTINCT f.product_sk) AS unique_products_purchased,
@@ -70,7 +70,7 @@ transaction_summary AS (
 ),
 
 recent_activity AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         COUNT(DISTINCT CASE WHEN d.date >= DATE_ADD('day', -30, CURRENT_DATE) THEN f.transaction_id END) AS transactions_last_30d,
         COUNT(DISTINCT CASE WHEN d.date >= DATE_ADD('day', -90, CURRENT_DATE) THEN f.transaction_id END) AS transactions_last_90d,
@@ -84,10 +84,10 @@ recent_activity AS (
 ),
 
 rfm_scores AS (
-    SELECT 
+    SELECT
         ts.customer_sk,
         -- Recency Score (1-5, 5 being most recent)
-        CASE 
+        CASE
             WHEN ts.days_since_last_purchase <= 30 THEN 5
             WHEN ts.days_since_last_purchase <= 60 THEN 4
             WHEN ts.days_since_last_purchase <= 90 THEN 3
@@ -95,7 +95,7 @@ rfm_scores AS (
             ELSE 1
         END AS recency_score,
         -- Frequency Score (1-5, 5 being most frequent)
-        CASE 
+        CASE
             WHEN ts.total_transactions >= 50 THEN 5
             WHEN ts.total_transactions >= 20 THEN 4
             WHEN ts.total_transactions >= 10 THEN 3
@@ -108,10 +108,10 @@ rfm_scores AS (
 ),
 
 customer_segments AS (
-    SELECT 
+    SELECT
         rfm.customer_sk,
         rfm.recency_score * 100 + rfm.frequency_score * 10 + rfm.monetary_score AS rfm_combined_score,
-        CASE 
+        CASE
             WHEN rfm.recency_score >= 4 AND rfm.frequency_score >= 4 AND rfm.monetary_score >= 4 THEN 'Champions'
             WHEN rfm.recency_score >= 3 AND rfm.frequency_score >= 3 AND rfm.monetary_score >= 3 THEN 'Loyal Customers'
             WHEN rfm.recency_score >= 4 AND rfm.frequency_score <= 2 THEN 'New Customers'
@@ -126,7 +126,7 @@ customer_segments AS (
 ),
 
 product_preferences AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         ARRAY_AGG(DISTINCT p.category) AS preferred_categories,
         ARRAY_AGG(DISTINCT p.brand) AS preferred_brands,
@@ -138,7 +138,7 @@ product_preferences AS (
 ),
 
 seasonal_behavior AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         AVG(CASE WHEN d.quarter = 1 THEN f.net_amount ELSE 0 END) AS avg_spend_q1,
         AVG(CASE WHEN d.quarter = 2 THEN f.net_amount ELSE 0 END) AS avg_spend_q2,
@@ -152,20 +152,20 @@ seasonal_behavior AS (
 ),
 
 lifetime_value AS (
-    SELECT 
+    SELECT
         ts.customer_sk,
         -- CLV = Avg Transaction Value * Purchase Frequency * Customer Lifetime (estimated 3 years)
-        CASE 
-            WHEN ts.customer_lifetime_days > 0 
-            THEN ts.avg_transaction_value * 
+        CASE
+            WHEN ts.customer_lifetime_days > 0
+            THEN ts.avg_transaction_value *
                  (ts.total_transactions * 1.0 / (ts.customer_lifetime_days / 365.0)) * 3
             ELSE ts.avg_transaction_value * ts.total_transactions
         END AS customer_lifetime_value,
         -- Predicted next purchase date (based on average days between purchases)
-        CASE 
-            WHEN ts.total_transactions > 1 
-            THEN DATE_ADD('day', 
-                 CAST(ts.customer_lifetime_days * 1.0 / (ts.total_transactions - 1) AS INTEGER), 
+        CASE
+            WHEN ts.total_transactions > 1
+            THEN DATE_ADD('day',
+                 CAST(ts.customer_lifetime_days * 1.0 / (ts.total_transactions - 1) AS INTEGER),
                  ts.last_transaction_date)
             ELSE NULL
         END AS predicted_next_purchase_date
@@ -173,21 +173,21 @@ lifetime_value AS (
 ),
 
 churn_indicators AS (
-    SELECT 
+    SELECT
         ts.customer_sk,
-        CASE 
+        CASE
             WHEN ts.days_since_last_purchase > 180 THEN 'High Risk'
             WHEN ts.days_since_last_purchase > 90 THEN 'Medium Risk'
             WHEN ts.days_since_last_purchase > 60 THEN 'Low Risk'
             ELSE 'Active'
         END AS churn_risk,
-        CASE 
+        CASE
             WHEN ts.days_since_last_purchase > ts.customer_lifetime_days * 0.5 THEN true
             ELSE false
         END AS is_churned,
         -- Engagement score (0-100)
-        LEAST(100, 
-            (ra.transactions_last_90d * 10) + 
+        LEAST(100,
+            (ra.transactions_last_90d * 10) +
             (LEAST(ra.spent_last_90d / NULLIF(ts.avg_transaction_value, 0), 10) * 10) +
             (CASE WHEN ts.days_since_last_purchase <= 30 THEN 30 ELSE 0 END)
         ) AS engagement_score
@@ -196,14 +196,14 @@ churn_indicators AS (
 )
 
 -- Final SELECT combining all CTEs
-SELECT 
+SELECT
     -- Customer Identifiers
     cb.customer_sk,
     cb.customer_id,
     cb.customer_name,
     cb.email,
     cb.phone,
-    
+
     -- Demographic Information
     cb.customer_age,
     cb.birth_date,
@@ -214,7 +214,7 @@ SELECT
     cb.postal_code,
     cb.registration_date,
     cb.days_since_registration,
-    
+
     -- Customer Status & Attributes
     cb.account_status,
     cb.customer_segment,
@@ -223,7 +223,7 @@ SELECT
     cb.communication_preference,
     cb.credit_limit,
     cb.risk_score,
-    
+
     -- Transaction Summary
     COALESCE(ts.total_transactions, 0) AS total_transactions,
     COALESCE(ts.unique_products_purchased, 0) AS unique_products_purchased,
@@ -240,7 +240,7 @@ SELECT
     ts.last_transaction_date,
     ts.customer_lifetime_days,
     ts.days_since_last_purchase,
-    
+
     -- Recent Activity
     COALESCE(ra.transactions_last_30d, 0) AS transactions_last_30d,
     COALESCE(ra.transactions_last_90d, 0) AS transactions_last_90d,
@@ -248,20 +248,20 @@ SELECT
     COALESCE(ra.spent_last_30d, 0.0) AS spent_last_30d,
     COALESCE(ra.spent_last_90d, 0.0) AS spent_last_90d,
     COALESCE(ra.spent_last_year, 0.0) AS spent_last_year,
-    
+
     -- RFM Analysis
     rfm.recency_score,
     rfm.frequency_score,
     rfm.monetary_score,
     cs.rfm_combined_score,
     cs.rfm_segment,
-    
+
     -- Product Preferences
     pp.preferred_categories,
     pp.preferred_brands,
     pp.most_frequent_category,
     pp.most_frequent_brand,
-    
+
     -- Seasonal Behavior
     sb.avg_spend_q1,
     sb.avg_spend_q2,
@@ -269,22 +269,22 @@ SELECT
     sb.avg_spend_q4,
     sb.weekend_transactions,
     sb.weekday_transactions,
-    CASE 
-        WHEN sb.weekday_transactions > 0 
-        THEN CAST(sb.weekend_transactions AS DOUBLE) / sb.weekday_transactions 
-        ELSE 0.0 
+    CASE
+        WHEN sb.weekday_transactions > 0
+        THEN CAST(sb.weekend_transactions AS DOUBLE) / sb.weekday_transactions
+        ELSE 0.0
     END AS weekend_to_weekday_ratio,
-    
+
     -- Lifetime Value & Predictions
     COALESCE(ltv.customer_lifetime_value, 0.0) AS customer_lifetime_value,
     ltv.predicted_next_purchase_date,
     DATE_DIFF('day', CURRENT_DATE, ltv.predicted_next_purchase_date) AS days_until_predicted_purchase,
-    
+
     -- Churn Analysis
     ci.churn_risk,
     ci.is_churned,
     ci.engagement_score,
-    
+
     -- Metadata
     cb.effective_date,
     cb.end_date,
@@ -310,7 +310,7 @@ LEFT JOIN churn_indicators ci ON cb.customer_sk = ci.customer_sk;
 
 CREATE OR REPLACE VIEW lakehouse_gold.product_performance AS
 WITH product_base AS (
-    SELECT 
+    SELECT
         p.product_sk,
         p.product_id,
         p.product_name,
@@ -328,7 +328,7 @@ WITH product_base AS (
 ),
 
 sales_metrics AS (
-    SELECT 
+    SELECT
         f.product_sk,
         COUNT(DISTINCT f.transaction_id) AS total_transactions,
         COUNT(DISTINCT f.customer_sk) AS unique_customers,
@@ -349,7 +349,7 @@ sales_metrics AS (
 ),
 
 recent_trends AS (
-    SELECT 
+    SELECT
         f.product_sk,
         -- Last 30 days
         SUM(CASE WHEN d.date >= DATE_ADD('day', -30, CURRENT_DATE) THEN f.quantity ELSE 0 END) AS quantity_last_30d,
@@ -369,7 +369,7 @@ recent_trends AS (
 ),
 
 rankings AS (
-    SELECT 
+    SELECT
         sm.product_sk,
         -- Overall rankings
         ROW_NUMBER() OVER (ORDER BY sm.net_revenue DESC) AS revenue_rank,
@@ -386,23 +386,23 @@ rankings AS (
 ),
 
 growth_metrics AS (
-    SELECT 
+    SELECT
         f.product_sk,
         -- Month-over-month growth
-        SUM(CASE WHEN d.year_month = FORMAT_DATETIME(DATE_ADD('month', -1, CURRENT_DATE), 'yyyy-MM') 
+        SUM(CASE WHEN d.year_month = FORMAT_DATETIME(DATE_ADD('month', -1, CURRENT_DATE), 'yyyy-MM')
             THEN f.net_amount ELSE 0 END) AS revenue_prev_month,
-        SUM(CASE WHEN d.year_month = FORMAT_DATETIME(CURRENT_DATE, 'yyyy-MM') 
+        SUM(CASE WHEN d.year_month = FORMAT_DATETIME(CURRENT_DATE, 'yyyy-MM')
             THEN f.net_amount ELSE 0 END) AS revenue_current_month,
         -- Quarter-over-quarter growth
-        SUM(CASE WHEN d.year = YEAR(DATE_ADD('month', -3, CURRENT_DATE)) 
-            AND d.quarter = QUARTER(DATE_ADD('month', -3, CURRENT_DATE)) 
+        SUM(CASE WHEN d.year = YEAR(DATE_ADD('month', -3, CURRENT_DATE))
+            AND d.quarter = QUARTER(DATE_ADD('month', -3, CURRENT_DATE))
             THEN f.net_amount ELSE 0 END) AS revenue_prev_quarter,
-        SUM(CASE WHEN d.year = YEAR(CURRENT_DATE) AND d.quarter = QUARTER(CURRENT_DATE) 
+        SUM(CASE WHEN d.year = YEAR(CURRENT_DATE) AND d.quarter = QUARTER(CURRENT_DATE)
             THEN f.net_amount ELSE 0 END) AS revenue_current_quarter,
         -- Year-over-year growth
-        SUM(CASE WHEN d.year = YEAR(DATE_ADD('year', -1, CURRENT_DATE)) 
+        SUM(CASE WHEN d.year = YEAR(DATE_ADD('year', -1, CURRENT_DATE))
             THEN f.net_amount ELSE 0 END) AS revenue_prev_year,
-        SUM(CASE WHEN d.year = YEAR(CURRENT_DATE) 
+        SUM(CASE WHEN d.year = YEAR(CURRENT_DATE)
             THEN f.net_amount ELSE 0 END) AS revenue_current_year
     FROM lakehouse_gold.fact_transactions f
     INNER JOIN lakehouse_gold.dim_date d ON f.date_sk = d.date_sk
@@ -410,7 +410,7 @@ growth_metrics AS (
 ),
 
 seasonal_patterns AS (
-    SELECT 
+    SELECT
         f.product_sk,
         AVG(CASE WHEN d.quarter = 1 THEN f.net_amount ELSE NULL END) AS avg_revenue_q1,
         AVG(CASE WHEN d.quarter = 2 THEN f.net_amount ELSE NULL END) AS avg_revenue_q2,
@@ -424,7 +424,7 @@ seasonal_patterns AS (
 )
 
 -- Final SELECT
-SELECT 
+SELECT
     -- Product Identifiers & Attributes
     pb.product_sk,
     pb.product_id,
@@ -436,12 +436,12 @@ SELECT
     pb.launch_date,
     pb.discontinue_date,
     pb.days_since_launch,
-    
+
     -- Pricing & Margin
     pb.unit_price,
     pb.cost,
     pb.product_margin,
-    
+
     -- Sales Metrics
     COALESCE(sm.total_transactions, 0) AS total_transactions,
     COALESCE(sm.unique_customers, 0) AS unique_customers,
@@ -457,14 +457,14 @@ SELECT
     sm.last_sale_date,
     sm.sales_lifetime_days,
     sm.days_since_last_sale,
-    
+
     -- Velocity Metrics
-    CASE 
-        WHEN sm.sales_lifetime_days > 0 
+    CASE
+        WHEN sm.sales_lifetime_days > 0
         THEN CAST(sm.total_quantity_sold AS DOUBLE) / (sm.sales_lifetime_days / 30.0)
-        ELSE 0.0 
+        ELSE 0.0
     END AS avg_monthly_velocity,
-    
+
     -- Recent Trends
     rt.quantity_last_30d,
     rt.revenue_last_30d,
@@ -475,7 +475,7 @@ SELECT
     rt.quantity_last_year,
     rt.revenue_last_year,
     rt.customers_last_year,
-    
+
     -- Rankings
     r.revenue_rank,
     r.volume_rank,
@@ -484,24 +484,24 @@ SELECT
     r.category_revenue_rank,
     r.category_volume_rank,
     r.brand_revenue_rank,
-    
+
     -- Growth Rates
-    CASE 
-        WHEN gm.revenue_prev_month > 0 
+    CASE
+        WHEN gm.revenue_prev_month > 0
         THEN ((gm.revenue_current_month - gm.revenue_prev_month) / gm.revenue_prev_month) * 100
-        ELSE 0.0 
+        ELSE 0.0
     END AS mom_growth_rate,
-    CASE 
-        WHEN gm.revenue_prev_quarter > 0 
+    CASE
+        WHEN gm.revenue_prev_quarter > 0
         THEN ((gm.revenue_current_quarter - gm.revenue_prev_quarter) / gm.revenue_prev_quarter) * 100
-        ELSE 0.0 
+        ELSE 0.0
     END AS qoq_growth_rate,
-    CASE 
-        WHEN gm.revenue_prev_year > 0 
+    CASE
+        WHEN gm.revenue_prev_year > 0
         THEN ((gm.revenue_current_year - gm.revenue_prev_year) / gm.revenue_prev_year) * 100
-        ELSE 0.0 
+        ELSE 0.0
     END AS yoy_growth_rate,
-    
+
     -- Seasonal Patterns
     sp.avg_revenue_q1,
     sp.avg_revenue_q2,
@@ -509,22 +509,22 @@ SELECT
     sp.avg_revenue_q4,
     sp.revenue_volatility,
     sp.revenue_range,
-    
+
     -- Performance Indicators
-    CASE 
+    CASE
         WHEN sm.days_since_last_sale > 90 THEN 'Slow Moving'
         WHEN rt.quantity_last_30d >= 100 THEN 'Fast Moving'
         WHEN rt.quantity_last_30d >= 50 THEN 'Moderate Moving'
         ELSE 'Slow Moving'
     END AS inventory_classification,
-    
-    CASE 
+
+    CASE
         WHEN r.revenue_rank <= 100 THEN 'Top Performer'
         WHEN r.revenue_rank <= 500 THEN 'Good Performer'
         WHEN sm.days_since_last_sale > 180 THEN 'Underperformer'
         ELSE 'Average Performer'
     END AS performance_category,
-    
+
     -- Metadata
     CURRENT_TIMESTAMP AS view_generated_at
 
@@ -544,7 +544,7 @@ LEFT JOIN seasonal_patterns sp ON pb.product_sk = sp.product_sk;
 
 CREATE OR REPLACE VIEW lakehouse_gold.financial_summary AS
 WITH daily_financials AS (
-    SELECT 
+    SELECT
         d.date,
         d.year,
         d.quarter,
@@ -578,7 +578,7 @@ WITH daily_financials AS (
     INNER JOIN lakehouse_gold.dim_date d ON f.date_sk = d.date_sk
     INNER JOIN lakehouse_gold.dim_product p ON f.product_sk = p.product_sk
     INNER JOIN lakehouse_gold.dim_customer c ON f.customer_sk = c.customer_sk
-    GROUP BY 
+    GROUP BY
         d.date, d.year, d.quarter, d.month, d.week_of_year, d.day_of_week,
         d.year_month, d.is_weekend, d.is_holiday,
         p.category, p.subcategory, p.brand,
@@ -586,36 +586,36 @@ WITH daily_financials AS (
 ),
 
 running_totals AS (
-    SELECT 
+    SELECT
         df.*,
         -- Running totals by date
         SUM(df.net_revenue) OVER (
-            PARTITION BY df.year 
-            ORDER BY df.date 
+            PARTITION BY df.year
+            ORDER BY df.date
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
         ) AS ytd_revenue,
         SUM(df.gross_profit) OVER (
-            PARTITION BY df.year 
-            ORDER BY df.date 
+            PARTITION BY df.year
+            ORDER BY df.date
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
         ) AS ytd_profit,
         -- Moving averages
         AVG(df.net_revenue) OVER (
-            ORDER BY df.date 
+            ORDER BY df.date
             ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
         ) AS ma_7day_revenue,
         AVG(df.net_revenue) OVER (
-            ORDER BY df.date 
+            ORDER BY df.date
             ROWS BETWEEN 29 PRECEDING AND CURRENT ROW
         ) AS ma_30day_revenue,
         AVG(df.net_revenue) OVER (
-            ORDER BY df.date 
+            ORDER BY df.date
             ROWS BETWEEN 89 PRECEDING AND CURRENT ROW
         ) AS ma_90day_revenue
     FROM daily_financials df
 )
 
-SELECT 
+SELECT
     -- Time Dimensions
     rt.date,
     rt.year,
@@ -626,49 +626,49 @@ SELECT
     rt.year_month,
     rt.is_weekend,
     rt.is_holiday,
-    
+
     -- Product Dimensions
     rt.category,
     rt.subcategory,
     rt.brand,
-    
+
     -- Customer Dimensions
     rt.customer_segment,
     rt.state,
     rt.country,
-    
+
     -- Volume Metrics
     rt.transaction_count,
     rt.unique_customers,
     rt.unique_products,
     rt.total_quantity,
-    
+
     -- Revenue Metrics
     rt.gross_revenue,
     rt.total_discounts,
     rt.net_revenue,
     rt.total_cost,
-    
+
     -- Profitability Metrics
     rt.gross_profit,
     (rt.gross_profit / NULLIF(rt.net_revenue, 0)) * 100 AS gross_profit_margin_pct,
     rt.avg_profit_margin,
-    
+
     -- Average Metrics
     rt.avg_transaction_value,
     rt.net_revenue / NULLIF(rt.transaction_count, 0) AS revenue_per_transaction,
     rt.net_revenue / NULLIF(rt.unique_customers, 0) AS revenue_per_customer,
-    
+
     -- Discount Analysis
     (rt.total_discounts / NULLIF(rt.gross_revenue, 0)) * 100 AS discount_rate_pct,
-    
+
     -- Running Totals & Trends
     rt.ytd_revenue,
     rt.ytd_profit,
     rt.ma_7day_revenue,
     rt.ma_30day_revenue,
     rt.ma_90day_revenue,
-    
+
     -- Metadata
     CURRENT_TIMESTAMP AS view_generated_at
 
@@ -683,26 +683,26 @@ FROM running_totals rt;
 
 CREATE OR REPLACE VIEW lakehouse_gold.operational_metrics AS
 WITH table_freshness AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         MAX(updated_timestamp) AS last_updated,
         DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) AS hours_since_update,
         COUNT(*) AS record_count
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_product' AS table_name,
         MAX(updated_timestamp) AS last_updated,
         DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) AS hours_since_update,
         COUNT(*) AS record_count
     FROM lakehouse_gold.dim_product
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'fact_transactions' AS table_name,
         MAX(created_timestamp) AS last_updated,
         DATE_DIFF('hour', MAX(created_timestamp), CURRENT_TIMESTAMP) AS hours_since_update,
@@ -711,7 +711,7 @@ WITH table_freshness AS (
 ),
 
 processing_stats AS (
-    SELECT 
+    SELECT
         DATE_TRUNC('hour', f.created_timestamp) AS processing_hour,
         COUNT(*) AS records_processed,
         MIN(f.created_timestamp) AS batch_start_time,
@@ -723,7 +723,7 @@ processing_stats AS (
 ),
 
 data_quality_summary AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         COUNT(*) AS total_records,
         COUNT(DISTINCT customer_sk) AS unique_customers,
@@ -735,27 +735,27 @@ data_quality_summary AS (
     FROM lakehouse_gold.fact_transactions
 )
 
-SELECT 
+SELECT
     -- Table Information
     tf.table_name,
     tf.record_count,
     tf.last_updated,
     tf.hours_since_update,
-    
+
     -- Freshness Status
-    CASE 
+    CASE
         WHEN tf.hours_since_update <= 1 THEN 'Fresh'
         WHEN tf.hours_since_update <= 6 THEN 'Acceptable'
         WHEN tf.hours_since_update <= 24 THEN 'Stale'
         ELSE 'Critical'
     END AS freshness_status,
-    
+
     -- Processing Metrics (from recent processing stats)
     ps.processing_hour,
     ps.records_processed,
     ps.processing_duration_seconds,
     ps.records_processed / NULLIF(ps.processing_duration_seconds, 0) AS records_per_second,
-    
+
     -- Data Quality
     dq.unique_customers,
     dq.unique_products,
@@ -763,7 +763,7 @@ SELECT
     dq.negative_revenue_count,
     dq.invalid_quantity_count,
     dq.quality_score,
-    
+
     -- Metadata
     CURRENT_TIMESTAMP AS view_generated_at
 
@@ -780,7 +780,7 @@ LEFT JOIN data_quality_summary dq ON tf.table_name = dq.table_name;
 
 CREATE OR REPLACE VIEW lakehouse_gold.compliance_report AS
 WITH pii_columns_inventory AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         'email' AS column_name,
         'PII' AS data_classification,
@@ -789,10 +789,10 @@ WITH pii_columns_inventory AS (
         SUM(CASE WHEN email IS NOT NULL THEN 1 ELSE 0 END) AS non_null_count
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_customer' AS table_name,
         'phone' AS column_name,
         'PII' AS data_classification,
@@ -804,7 +804,7 @@ WITH pii_columns_inventory AS (
 ),
 
 customer_data_retention AS (
-    SELECT 
+    SELECT
         c.customer_id,
         c.customer_name,
         c.registration_date,
@@ -812,7 +812,7 @@ customer_data_retention AS (
         MAX(f.transaction_date) AS last_transaction_date,
         DATE_DIFF('day', MAX(f.transaction_date), CURRENT_DATE) AS days_since_last_activity,
         COUNT(f.transaction_id) AS transaction_count,
-        CASE 
+        CASE
             WHEN DATE_DIFF('day', MAX(f.transaction_date), CURRENT_DATE) > 1095 THEN 'Eligible for Deletion'
             WHEN DATE_DIFF('day', MAX(f.transaction_date), CURRENT_DATE) > 730 THEN 'Review Required'
             ELSE 'Active Retention'
@@ -823,7 +823,7 @@ customer_data_retention AS (
     GROUP BY c.customer_id, c.customer_name, c.registration_date
 )
 
-SELECT 
+SELECT
     -- PII Inventory
     pii.table_name,
     pii.column_name,
@@ -831,7 +831,7 @@ SELECT
     pii.pii_type,
     pii.unique_values,
     pii.non_null_count,
-    
+
     -- Data Retention
     cdr.customer_id,
     cdr.registration_date,
@@ -840,13 +840,13 @@ SELECT
     cdr.days_since_last_activity,
     cdr.transaction_count,
     cdr.retention_status,
-    
+
     -- Compliance Indicators
-    CASE 
-        WHEN cdr.days_since_last_activity > 1095 THEN true 
-        ELSE false 
+    CASE
+        WHEN cdr.days_since_last_activity > 1095 THEN true
+        ELSE false
     END AS gdpr_right_to_deletion,
-    
+
     -- Metadata
     CURRENT_TIMESTAMP AS report_generated_at
 

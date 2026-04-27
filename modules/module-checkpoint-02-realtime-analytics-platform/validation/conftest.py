@@ -10,10 +10,8 @@ import json
 import os
 import random
 import uuid
-from datetime import datetime, timedelta
-from decimal import Decimal
+from datetime import datetime
 from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, MagicMock
 
 import boto3
 import pytest
@@ -137,7 +135,7 @@ def real_lambda_client(aws_region):
 @pytest.fixture
 def generate_ride_event():
     """Factory fixture to generate mock ride events."""
-    
+
     def _generate(
         event_type: str = "ride_requested",
         ride_id: Optional[str] = None,
@@ -147,7 +145,7 @@ def generate_ride_event():
     ) -> Dict[str, Any]:
         cities = ["San Francisco", "New York", "Seattle", "Austin", "Boston"]
         city = kwargs.get("city", random.choice(cities))
-        
+
         # Base coordinates for major cities
         city_coords = {
             "San Francisco": (37.7749, -122.4194),
@@ -156,9 +154,9 @@ def generate_ride_event():
             "Austin": (30.2672, -97.7431),
             "Boston": (42.3601, -71.0589),
         }
-        
+
         base_lat, base_lon = city_coords.get(city, (37.7749, -122.4194))
-        
+
         event = {
             "event_type": event_type,
             "event_id": str(uuid.uuid4()),
@@ -167,7 +165,7 @@ def generate_ride_event():
             "timestamp": kwargs.get("timestamp", datetime.utcnow().isoformat()),
             "city": city,
         }
-        
+
         if event_type == "ride_requested":
             event.update({
                 "pickup_location": {
@@ -183,7 +181,7 @@ def generate_ride_event():
                 "ride_type": kwargs.get("ride_type", random.choice(["standard", "premium", "xl"])),
                 "estimated_fare": round(random.uniform(10, 50), 2),
             })
-        
+
         elif event_type == "ride_accepted":
             event.update({
                 "driver_id": driver_id or f"driver_{random.randint(1000, 9999)}",
@@ -193,7 +191,7 @@ def generate_ride_event():
                 },
                 "estimated_pickup_time": random.randint(3, 15),
             })
-        
+
         elif event_type == "ride_started":
             event.update({
                 "driver_id": driver_id or f"driver_{random.randint(1000, 9999)}",
@@ -202,7 +200,7 @@ def generate_ride_event():
                     "longitude": base_lon + random.uniform(-0.1, 0.1),
                 },
             })
-        
+
         elif event_type == "ride_completed":
             event.update({
                 "driver_id": driver_id or f"driver_{random.randint(1000, 9999)}",
@@ -214,17 +212,17 @@ def generate_ride_event():
                 "duration_minutes": random.randint(10, 60),
                 "fare": round(random.uniform(15, 80), 2),
             })
-        
+
         event.update(kwargs)
         return event
-    
+
     return _generate
 
 
 @pytest.fixture
 def generate_payment_event():
     """Factory fixture to generate mock payment events."""
-    
+
     def _generate(
         event_type: str = "payment_processed",
         payment_id: Optional[str] = None,
@@ -244,37 +242,37 @@ def generate_payment_event():
             "payment_method": random.choice(["credit_card", "debit_card", "wallet"]),
             "status": kwargs.get("status", "success"),
         }
-        
+
         if event_type == "payment_processed":
             event.update({
                 "transaction_id": str(uuid.uuid4()),
                 "processor": "stripe",
                 "processing_time_ms": random.randint(100, 500),
             })
-        
+
         elif event_type == "payment_failed":
             event.update({
                 "error_code": kwargs.get("error_code", "insufficient_funds"),
                 "error_message": kwargs.get("error_message", "Payment declined"),
             })
-        
+
         event.update(kwargs)
         return event
-    
+
     return _generate
 
 
 @pytest.fixture
 def generate_location_event():
     """Factory fixture to generate mock driver location events."""
-    
+
     def _generate(
         driver_id: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
         cities = ["San Francisco", "New York", "Seattle", "Austin", "Boston"]
         city = kwargs.get("city", random.choice(cities))
-        
+
         city_coords = {
             "San Francisco": (37.7749, -122.4194),
             "New York": (40.7128, -74.0060),
@@ -282,9 +280,9 @@ def generate_location_event():
             "Austin": (30.2672, -97.7431),
             "Boston": (42.3601, -71.0589),
         }
-        
+
         base_lat, base_lon = city_coords.get(city, (37.7749, -122.4194))
-        
+
         event = {
             "event_type": "location_update",
             "event_id": str(uuid.uuid4()),
@@ -297,17 +295,17 @@ def generate_location_event():
             "heading": random.randint(0, 359),
             "accuracy_meters": random.randint(5, 50),
         }
-        
+
         event.update(kwargs)
         return event
-    
+
     return _generate
 
 
 @pytest.fixture
 def generate_rating_event():
     """Factory fixture to generate mock rating events."""
-    
+
     def _generate(
         rating_id: Optional[str] = None,
         ride_id: Optional[str] = None,
@@ -325,10 +323,10 @@ def generate_rating_event():
             "comment": kwargs.get("comment", "Great ride!"),
             "tags": kwargs.get("tags", random.sample(["clean", "safe", "friendly", "fast"], k=2)),
         }
-        
+
         event.update(kwargs)
         return event
-    
+
     return _generate
 
 
@@ -345,15 +343,15 @@ def setup_kinesis_streams(kinesis_client, project_name, environment):
         "payments": f"{project_name}-payments-stream-{environment}",
         "ratings": f"{project_name}-ratings-stream-{environment}",
     }
-    
+
     for stream_type, stream_name in stream_names.items():
         kinesis_client.create_stream(
             StreamName=stream_name,
             ShardCount=2 if stream_type in ["rides", "locations"] else 1
         )
-    
+
     yield stream_names
-    
+
     # Cleanup
     for stream_name in stream_names.values():
         try:
@@ -366,7 +364,7 @@ def setup_kinesis_streams(kinesis_client, project_name, environment):
 def setup_dynamodb_tables(dynamodb_resource, project_name):
     """Setup DynamoDB tables for testing."""
     tables = {}
-    
+
     # Rides State Table
     rides_table = dynamodb_resource.create_table(
         TableName=f"{project_name}-rides-state",
@@ -399,7 +397,7 @@ def setup_dynamodb_tables(dynamodb_resource, project_name):
         },
     )
     tables["rides_state"] = rides_table
-    
+
     # Driver Availability Table
     drivers_table = dynamodb_resource.create_table(
         TableName=f"{project_name}-driver-availability",
@@ -430,7 +428,7 @@ def setup_dynamodb_tables(dynamodb_resource, project_name):
         },
     )
     tables["driver_availability"] = drivers_table
-    
+
     # Aggregated Metrics Table
     metrics_table = dynamodb_resource.create_table(
         TableName=f"{project_name}-aggregated-metrics",
@@ -449,9 +447,9 @@ def setup_dynamodb_tables(dynamodb_resource, project_name):
         },
     )
     tables["aggregated_metrics"] = metrics_table
-    
+
     yield tables
-    
+
     # Cleanup
     for table in tables.values():
         try:
@@ -468,12 +466,12 @@ def setup_s3_buckets(s3_client, project_name):
         "analytics_output": f"{project_name}-analytics-output",
         "kinesis_analytics": f"{project_name}-kinesis-analytics",
     }
-    
+
     for bucket_name in bucket_names.values():
         s3_client.create_bucket(Bucket=bucket_name)
-    
+
     yield bucket_names
-    
+
     # Cleanup
     for bucket_name in bucket_names.values():
         try:
@@ -494,7 +492,7 @@ def setup_s3_buckets(s3_client, project_name):
 @pytest.fixture
 def wait_for_stream_active(kinesis_client):
     """Helper to wait for Kinesis stream to become active."""
-    
+
     def _wait(stream_name: str, timeout: int = 30):
         import time
         start = time.time()
@@ -507,14 +505,14 @@ def wait_for_stream_active(kinesis_client):
                 pass
             time.sleep(1)
         return False
-    
+
     return _wait
 
 
 @pytest.fixture
 def put_kinesis_records(kinesis_client):
     """Helper to put records to Kinesis stream."""
-    
+
     def _put(stream_name: str, records: List[Dict[str, Any]]):
         kinesis_records = [
             {
@@ -523,26 +521,26 @@ def put_kinesis_records(kinesis_client):
             }
             for record in records
         ]
-        
+
         response = kinesis_client.put_records(
             StreamName=stream_name,
             Records=kinesis_records
         )
-        
+
         return response
-    
+
     return _put
 
 
 @pytest.fixture
 def seed_dynamodb_data(dynamodb_resource):
     """Helper to seed DynamoDB tables with test data."""
-    
+
     def _seed(table_name: str, items: List[Dict[str, Any]]):
         table = dynamodb_resource.Table(table_name)
-        
+
         with table.batch_writer() as batch:
             for item in items:
                 batch.put_item(Item=item)
-    
+
     return _seed

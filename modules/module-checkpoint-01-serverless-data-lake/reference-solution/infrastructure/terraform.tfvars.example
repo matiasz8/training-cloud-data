@@ -3,7 +3,7 @@
 # ==================================================================================
 # This file provides example values for all variables defined in variables.tf.
 # Copy this file to terraform.tfvars and customize the values for your environment.
-# 
+#
 # USAGE:
 #   cp terraform.tfvars.example terraform.tfvars
 #   # Edit terraform.tfvars with your values

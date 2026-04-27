@@ -14,20 +14,20 @@ USE cloudmart_data_lake;
 
 -- Query 1: Daily revenue with week-over-week comparison
 -- Purpose: Track revenue trends with previous week comparison
-SELECT 
+SELECT
     order_date,
     total_revenue,
     total_orders,
     avg_order_value,
     LAG(total_revenue, 7) OVER (ORDER BY order_date) as revenue_7_days_ago,
     ROUND(
-        (total_revenue - LAG(total_revenue, 7) OVER (ORDER BY order_date)) * 100.0 / 
+        (total_revenue - LAG(total_revenue, 7) OVER (ORDER BY order_date)) * 100.0 /
         NULLIF(LAG(total_revenue, 7) OVER (ORDER BY order_date), 0),
         2
     ) as wow_revenue_growth_pct,
     LAG(total_orders, 7) OVER (ORDER BY order_date) as orders_7_days_ago,
     ROUND(
-        (total_orders - LAG(total_orders, 7) OVER (ORDER BY order_date)) * 100.0 / 
+        (total_orders - LAG(total_orders, 7) OVER (ORDER BY order_date)) * 100.0 /
         NULLIF(LAG(total_orders, 7) OVER (ORDER BY order_date), 0),
         2
     ) as wow_orders_growth_pct
@@ -38,7 +38,7 @@ LIMIT 90;
 
 -- Query 2: Monthly revenue with month-over-month growth
 -- Purpose: Track monthly performance trends
-SELECT 
+SELECT
     year,
     month,
     SUM(total_revenue) as monthly_revenue,
@@ -47,7 +47,7 @@ SELECT
     SUM(unique_customers) as total_unique_customers,
     LAG(SUM(total_revenue)) OVER (ORDER BY year, month) as prev_month_revenue,
     ROUND(
-        (SUM(total_revenue) - LAG(SUM(total_revenue)) OVER (ORDER BY year, month)) * 100.0 / 
+        (SUM(total_revenue) - LAG(SUM(total_revenue)) OVER (ORDER BY year, month)) * 100.0 /
         NULLIF(LAG(SUM(total_revenue)) OVER (ORDER BY year, month), 0),
         2
     ) as mom_growth_pct,
@@ -61,26 +61,26 @@ ORDER BY year DESC, month DESC;
 
 -- Query 3: Rolling 7-day and 30-day revenue averages
 -- Purpose: Smooth out daily volatility for trend analysis
-SELECT 
+SELECT
     order_date,
     total_revenue,
     ROUND(
         AVG(total_revenue) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
         ),
         2
     ) as rolling_7day_avg_revenue,
     ROUND(
         AVG(total_revenue) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 29 PRECEDING AND CURRENT ROW
         ),
         2
     ) as rolling_30day_avg_revenue,
     ROUND(
         AVG(total_orders) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
         ),
         2
@@ -92,7 +92,7 @@ LIMIT 90;
 
 -- Query 4: Year-over-year revenue comparison
 -- Purpose: Compare performance across years
-SELECT 
+SELECT
     EXTRACT(MONTH FROM order_date) as month_number,
     EXTRACT(YEAR FROM order_date) as year,
     SUM(total_revenue) as monthly_revenue,
@@ -104,18 +104,18 @@ ORDER BY month_number, year;
 
 -- Query 5: Cumulative revenue tracking
 -- Purpose: Track year-to-date revenue progress
-SELECT 
+SELECT
     order_date,
     year,
     month,
     total_revenue,
     SUM(total_revenue) OVER (
-        PARTITION BY year 
+        PARTITION BY year
         ORDER BY order_date
     ) as ytd_revenue,
     ROUND(
         SUM(total_revenue) OVER (
-            PARTITION BY year 
+            PARTITION BY year
             ORDER BY order_date
         ) / NULLIF(SUM(SUM(total_revenue)) OVER (PARTITION BY year), 0) * 100,
         2
@@ -131,7 +131,7 @@ LIMIT 100;
 
 -- Query 6: Customer retention by cohort
 -- Purpose: Track customer retention rates over time
-SELECT 
+SELECT
     customer_id,
     name,
     segment,
@@ -140,7 +140,7 @@ SELECT
     first_order_date,
     last_order_date,
     days_since_last_order,
-    CASE 
+    CASE
         WHEN days_since_last_order <= 30 THEN 'Active'
         WHEN days_since_last_order <= 90 THEN 'At Risk'
         ELSE 'Churned'
@@ -152,7 +152,7 @@ ORDER BY total_spent DESC;
 
 -- Query 7: Customer churn analysis
 -- Purpose: Identify and quantify customer churn
-SELECT 
+SELECT
     churn_risk,
     COUNT(*) as customer_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage,
@@ -161,7 +161,7 @@ SELECT
     ROUND(AVG(days_since_last_order), 1) as avg_days_since_last_order
 FROM customer_360
 GROUP BY churn_risk
-ORDER BY 
+ORDER BY
     CASE churn_risk
         WHEN 'Low' THEN 1
         WHEN 'Medium' THEN 2
@@ -171,7 +171,7 @@ ORDER BY
 
 -- Query 8: Active vs inactive customer comparison
 -- Purpose: Compare behavior of active and inactive customers
-SELECT 
+SELECT
     is_active,
     COUNT(*) as customer_count,
     SUM(total_orders) as total_orders,
@@ -186,7 +186,7 @@ ORDER BY is_active DESC;
 
 -- Query 9: Customer reactivation opportunities
 -- Purpose: Identify customers for win-back campaigns
-SELECT 
+SELECT
     customer_id,
     name,
     email,
@@ -212,7 +212,7 @@ LIMIT 100;
 
 -- Query 10: RFM (Recency, Frequency, Monetary) segmentation
 -- Purpose: Segment customers based on RFM scores
-SELECT 
+SELECT
     customer_id,
     name,
     segment,
@@ -232,7 +232,7 @@ LIMIT 100;
 
 -- Query 11: Customer lifetime value by segment
 -- Purpose: Compare CLV across customer segments
-SELECT 
+SELECT
     segment,
     COUNT(*) as customer_count,
     SUM(total_spent) as total_revenue,
@@ -249,7 +249,7 @@ ORDER BY avg_lifetime_value DESC;
 -- Query 12: Top 20% customers by revenue (Pareto analysis)
 -- Purpose: Identify highest value customer segment
 WITH ranked_customers AS (
-    SELECT 
+    SELECT
         customer_id,
         name,
         segment,
@@ -261,7 +261,7 @@ WITH ranked_customers AS (
         COUNT(*) OVER () as total_customers
     FROM customer_360
 )
-SELECT 
+SELECT
     customer_id,
     name,
     segment,
@@ -276,7 +276,7 @@ ORDER BY customer_rank;
 
 -- Query 13: Customer value quartiles
 -- Purpose: Segment customers into value quartiles
-SELECT 
+SELECT
     value_quartile,
     COUNT(*) as customer_count,
     SUM(total_spent) as total_revenue,
@@ -286,7 +286,7 @@ SELECT
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as customer_pct,
     ROUND(SUM(total_spent) * 100.0 / SUM(SUM(total_spent)) OVER(), 2) as revenue_pct
 FROM (
-    SELECT 
+    SELECT
         customer_id,
         total_spent,
         total_orders,
@@ -303,7 +303,7 @@ ORDER BY value_quartile DESC;
 
 -- Query 14: Daily top performing categories
 -- Purpose: Track which categories drive the most revenue each day
-SELECT 
+SELECT
     order_date,
     top_category,
     total_revenue,
@@ -317,23 +317,23 @@ LIMIT 100;
 
 -- Query 15: Category revenue trends
 -- Purpose: Analyze category performance over time
-SELECT 
+SELECT
     DATE_TRUNC('week', order_date) as week_start,
     top_category,
     SUM(total_revenue) as weekly_revenue,
     SUM(total_orders) as weekly_orders,
     ROUND(AVG(avg_order_value), 2) as avg_order_value,
     LAG(SUM(total_revenue)) OVER (
-        PARTITION BY top_category 
+        PARTITION BY top_category
         ORDER BY DATE_TRUNC('week', order_date)
     ) as prev_week_revenue,
     ROUND(
         (SUM(total_revenue) - LAG(SUM(total_revenue)) OVER (
-            PARTITION BY top_category 
+            PARTITION BY top_category
             ORDER BY DATE_TRUNC('week', order_date)
-        )) * 100.0 / 
+        )) * 100.0 /
         NULLIF(LAG(SUM(total_revenue)) OVER (
-            PARTITION BY top_category 
+            PARTITION BY top_category
             ORDER BY DATE_TRUNC('week', order_date)
         ), 0),
         2
@@ -345,7 +345,7 @@ ORDER BY week_start DESC, weekly_revenue DESC;
 
 -- Query 16: Customer favorite categories
 -- Purpose: Analyze customer preferences by segment
-SELECT 
+SELECT
     segment,
     favorite_category,
     COUNT(*) as customer_count,
@@ -362,7 +362,7 @@ ORDER BY segment, customer_count DESC;
 
 -- Query 17: Order completion rate trends
 -- Purpose: Track order fulfillment efficiency
-SELECT 
+SELECT
     order_date,
     total_orders,
     completed_orders,
@@ -380,7 +380,7 @@ LIMIT 90;
 
 -- Query 18: Weekly operational performance
 -- Purpose: Aggregate weekly operational metrics
-SELECT 
+SELECT
     DATE_TRUNC('week', order_date) as week_start,
     SUM(total_orders) as weekly_orders,
     SUM(completed_orders) as weekly_completed,
@@ -400,7 +400,7 @@ ORDER BY week_start DESC;
 
 -- Query 19: Customer distribution and performance by country
 -- Purpose: Analyze geographic market performance
-SELECT 
+SELECT
     country,
     COUNT(*) as customer_count,
     SUM(total_spent) as total_revenue,
@@ -417,7 +417,7 @@ ORDER BY total_revenue DESC;
 
 -- Query 20: Geographic expansion opportunities
 -- Purpose: Identify markets with growth potential
-SELECT 
+SELECT
     country,
     segment,
     COUNT(*) as customer_count,
@@ -437,12 +437,12 @@ LIMIT 50;
 
 -- Query 21: Monthly cohort retention matrix
 -- Purpose: Track customer retention by signup cohort
-SELECT 
+SELECT
     DATE_TRUNC('month', signup_date) as cohort_month,
     COUNT(DISTINCT customer_id) as cohort_size,
     COUNT(DISTINCT CASE WHEN is_active THEN customer_id END) as still_active,
     ROUND(
-        COUNT(DISTINCT CASE WHEN is_active THEN customer_id END) * 100.0 / 
+        COUNT(DISTINCT CASE WHEN is_active THEN customer_id END) * 100.0 /
         NULLIF(COUNT(DISTINCT customer_id), 0),
         2
     ) as retention_rate,
@@ -456,7 +456,7 @@ ORDER BY cohort_month DESC;
 
 -- Query 22: Customer journey milestones
 -- Purpose: Analyze customer progression through order milestones
-SELECT 
+SELECT
     order_milestone,
     COUNT(*) as customer_count,
     ROUND(AVG(total_spent), 2) as avg_lifetime_value,
@@ -465,9 +465,9 @@ SELECT
     COUNT(CASE WHEN is_active THEN 1 END) as active_customers,
     ROUND(COUNT(CASE WHEN is_active THEN 1 END) * 100.0 / COUNT(*), 2) as active_pct
 FROM (
-    SELECT 
+    SELECT
         *,
-        CASE 
+        CASE
             WHEN total_orders = 1 THEN '1. First Purchase'
             WHEN total_orders BETWEEN 2 AND 3 THEN '2. Repeat (2-3)'
             WHEN total_orders BETWEEN 4 AND 9 THEN '3. Regular (4-9)'
@@ -484,33 +484,33 @@ ORDER BY order_milestone;
 
 -- Query 23: Revenue anomaly detection
 -- Purpose: Identify unusual revenue patterns
-SELECT 
+SELECT
     order_date,
     total_revenue,
     ROUND(AVG(total_revenue) OVER (
-        ORDER BY order_date 
+        ORDER BY order_date
         ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING
     ), 2) as avg_revenue_30d,
     ROUND(STDDEV(total_revenue) OVER (
-        ORDER BY order_date 
+        ORDER BY order_date
         ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING
     ), 2) as stddev_revenue_30d,
     ROUND(
         (total_revenue - AVG(total_revenue) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING
         )) / NULLIF(STDDEV(total_revenue) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING
         ), 0),
         2
     ) as z_score,
-    CASE 
+    CASE
         WHEN ABS((total_revenue - AVG(total_revenue) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING
         )) / NULLIF(STDDEV(total_revenue) OVER (
-            ORDER BY order_date 
+            ORDER BY order_date
             ROWS BETWEEN 30 PRECEDING AND 1 PRECEDING
         ), 0)) > 2 THEN 'Anomaly'
         ELSE 'Normal'
@@ -522,7 +522,7 @@ LIMIT 90;
 
 -- Query 24: High-value customer risk assessment
 -- Purpose: Identify at-risk high-value customers
-SELECT 
+SELECT
     customer_id,
     name,
     email,
@@ -533,7 +533,7 @@ SELECT
     last_order_date,
     days_since_last_order,
     churn_risk,
-    CASE 
+    CASE
         WHEN total_spent >= 10000 AND days_since_last_order > 60 THEN 'Critical'
         WHEN total_spent >= 5000 AND days_since_last_order > 90 THEN 'High'
         WHEN total_spent >= 2000 AND days_since_last_order > 120 THEN 'Medium'
@@ -548,7 +548,7 @@ LIMIT 100;
 
 -- Query 25: Executive dashboard summary
 -- Purpose: Key metrics for executive reporting
-SELECT 
+SELECT
     'Executive Summary - Last 30 Days' as report_title,
     SUM(total_revenue) as total_revenue_30d,
     SUM(total_orders) as total_orders_30d,

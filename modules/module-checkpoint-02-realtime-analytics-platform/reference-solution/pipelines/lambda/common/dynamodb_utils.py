@@ -5,12 +5,10 @@ Provides shared functions for interacting with DynamoDB tables.
 """
 
 import logging
-import time
 from typing import Dict, Any, List, Optional
 from decimal import Decimal
 
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
@@ -19,10 +17,10 @@ logger = logging.getLogger(__name__)
 def get_dynamodb_client(region_name: str = 'us-east-1'):
     """
     Create and return a DynamoDB client.
-    
+
     Args:
         region_name: AWS region name
-        
+
     Returns:
         boto3 DynamoDB client
     """
@@ -32,10 +30,10 @@ def get_dynamodb_client(region_name: str = 'us-east-1'):
 def get_dynamodb_resource(region_name: str = 'us-east-1'):
     """
     Create and return a DynamoDB resource.
-    
+
     Args:
         region_name: AWS region name
-        
+
     Returns:
         boto3 DynamoDB resource
     """
@@ -45,7 +43,7 @@ def get_dynamodb_resource(region_name: str = 'us-east-1'):
 def python_obj_to_dynamo_obj(python_obj: Any) -> Any:
     """
     Convert Python objects to DynamoDB compatible objects.
-    
+
     Handles conversion of floats to Decimal for DynamoDB compatibility.
     """
     if isinstance(python_obj, float):
@@ -60,7 +58,7 @@ def python_obj_to_dynamo_obj(python_obj: Any) -> Any:
 def dynamo_obj_to_python_obj(dynamo_obj: Any) -> Any:
     """
     Convert DynamoDB objects to Python objects.
-    
+
     Handles conversion of Decimal to float.
     """
     if isinstance(dynamo_obj, Decimal):
@@ -80,31 +78,31 @@ def put_item(
 ) -> bool:
     """
     Put an item into DynamoDB table.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         item: Item to put
         region_name: AWS region
         condition_expression: Optional condition expression
-        
+
     Returns:
         True if successful, False otherwise
     """
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         # Convert floats to Decimal
         item = python_obj_to_dynamo_obj(item)
-        
+
         kwargs = {'Item': item}
         if condition_expression:
             kwargs['ConditionExpression'] = condition_expression
-        
+
         table.put_item(**kwargs)
         logger.debug(f"Put item to {table_name}: {item.get('id', 'unknown')}")
         return True
-        
+
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
             logger.warning(f"Conditional check failed for item: {item}")
@@ -128,7 +126,7 @@ def update_item(
 ) -> bool:
     """
     Update an item in DynamoDB table.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         key: Primary key of item to update
@@ -137,34 +135,34 @@ def update_item(
         expression_attribute_names: Expression attribute names (optional)
         region_name: AWS region
         condition_expression: Optional condition expression
-        
+
     Returns:
         True if successful, False otherwise
     """
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         # Convert floats to Decimal
         key = python_obj_to_dynamo_obj(key)
         expression_attribute_values = python_obj_to_dynamo_obj(expression_attribute_values)
-        
+
         kwargs = {
             'Key': key,
             'UpdateExpression': update_expression,
             'ExpressionAttributeValues': expression_attribute_values,
         }
-        
+
         if expression_attribute_names:
             kwargs['ExpressionAttributeNames'] = expression_attribute_names
-        
+
         if condition_expression:
             kwargs['ConditionExpression'] = condition_expression
-        
+
         table.update_item(**kwargs)
         logger.debug(f"Updated item in {table_name}: {key}")
         return True
-        
+
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
             logger.warning(f"Conditional check failed for key: {key}")
@@ -184,24 +182,24 @@ def get_item(
 ) -> Optional[Dict[str, Any]]:
     """
     Get an item from DynamoDB table.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         key: Primary key of item to get
         region_name: AWS region
-        
+
     Returns:
         Item if found, None otherwise
     """
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         # Convert floats to Decimal
         key = python_obj_to_dynamo_obj(key)
-        
+
         response = table.get_item(Key=key)
-        
+
         if 'Item' in response:
             item = dynamo_obj_to_python_obj(response['Item'])
             logger.debug(f"Got item from {table_name}: {key}")
@@ -209,7 +207,7 @@ def get_item(
         else:
             logger.debug(f"Item not found in {table_name}: {key}")
             return None
-            
+
     except Exception as e:
         logger.error(f"Error getting item from {table_name}: {e}")
         raise
@@ -225,7 +223,7 @@ def query_table(
 ) -> List[Dict[str, Any]]:
     """
     Query a DynamoDB table.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         key_condition_expression: Key condition expression
@@ -233,34 +231,34 @@ def query_table(
         index_name: Optional index name for GSI/LSI
         region_name: AWS region
         limit: Maximum number of items to return
-        
+
     Returns:
         List of items matching the query
     """
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         kwargs = {
             'KeyConditionExpression': key_condition_expression,
         }
-        
+
         if filter_expression:
             kwargs['FilterExpression'] = filter_expression
-        
+
         if index_name:
             kwargs['IndexName'] = index_name
-        
+
         if limit:
             kwargs['Limit'] = limit
-        
+
         response = table.query(**kwargs)
-        
+
         items = [dynamo_obj_to_python_obj(item) for item in response.get('Items', [])]
         logger.debug(f"Queried {table_name}, found {len(items)} items")
-        
+
         return items
-        
+
     except Exception as e:
         logger.error(f"Error querying {table_name}: {e}")
         raise
@@ -273,34 +271,34 @@ def batch_write(
 ) -> Dict[str, int]:
     """
     Batch write items to DynamoDB table.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         items: List of items to write
         region_name: AWS region
-        
+
     Returns:
         Dictionary with success/failure counts
     """
     if not items:
         return {'success': 0, 'failed': 0}
-    
+
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         # Convert floats to Decimal
         items = [python_obj_to_dynamo_obj(item) for item in items]
-        
+
         success_count = 0
         failed_count = 0
-        
+
         # DynamoDB batch write limit is 25 items
         batch_size = 25
-        
+
         for i in range(0, len(items), batch_size):
             batch = items[i:i + batch_size]
-            
+
             with table.batch_writer() as writer:
                 for item in batch:
                     try:
@@ -309,10 +307,10 @@ def batch_write(
                     except Exception as e:
                         logger.error(f"Error writing item: {e}")
                         failed_count += 1
-        
+
         logger.info(f"Batch write to {table_name}: {success_count} succeeded, {failed_count} failed")
         return {'success': success_count, 'failed': failed_count}
-        
+
     except Exception as e:
         logger.error(f"Error in batch write to {table_name}: {e}")
         raise
@@ -326,31 +324,31 @@ def delete_item(
 ) -> bool:
     """
     Delete an item from DynamoDB table.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         key: Primary key of item to delete
         region_name: AWS region
         condition_expression: Optional condition expression
-        
+
     Returns:
         True if successful, False otherwise
     """
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         # Convert floats to Decimal
         key = python_obj_to_dynamo_obj(key)
-        
+
         kwargs = {'Key': key}
         if condition_expression:
             kwargs['ConditionExpression'] = condition_expression
-        
+
         table.delete_item(**kwargs)
         logger.debug(f"Deleted item from {table_name}: {key}")
         return True
-        
+
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
             logger.warning(f"Conditional check failed for delete: {key}")
@@ -372,36 +370,36 @@ def atomic_counter_increment(
 ) -> int:
     """
     Atomically increment a counter in DynamoDB.
-    
+
     Args:
         table_name: Name of the DynamoDB table
         key: Primary key of item
         counter_attribute: Name of counter attribute
         increment_value: Value to increment by
         region_name: AWS region
-        
+
     Returns:
         New counter value
     """
     try:
         dynamodb = get_dynamodb_resource(region_name)
         table = dynamodb.Table(table_name)
-        
+
         # Convert floats to Decimal
         key = python_obj_to_dynamo_obj(key)
         increment_value = Decimal(str(increment_value))
-        
+
         response = table.update_item(
             Key=key,
             UpdateExpression=f'ADD {counter_attribute} :val',
             ExpressionAttributeValues={':val': increment_value},
             ReturnValues='UPDATED_NEW'
         )
-        
+
         new_value = response['Attributes'][counter_attribute]
         logger.debug(f"Incremented {counter_attribute} in {table_name}: {new_value}")
         return int(new_value)
-        
+
     except Exception as e:
         logger.error(f"Error incrementing counter in {table_name}: {e}")
         raise

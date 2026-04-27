@@ -108,14 +108,14 @@ touch step-functions.tf eventbridge.tf cloudwatch.tf sns.tf
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
-  
+
   backend "s3" {
     bucket         = "rideshare-terraform-state-ACCOUNT_ID"  # Replace with your account ID
     key            = "realtime-analytics/terraform.tfstate"
@@ -127,7 +127,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = "RideShare"
@@ -216,18 +216,18 @@ resource "aws_kinesis_stream" "ride_events" {
   name             = "${var.project_name}-ride-events-${var.environment}"
   shard_count      = var.kinesis_shard_count["ride_events"]
   retention_period = var.kinesis_retention_hours
-  
+
   shard_level_metrics = [
     "IncomingBytes",
     "IncomingRecords",
     "OutgoingBytes",
     "OutgoingRecords",
   ]
-  
+
   stream_mode_details {
     stream_mode = "PROVISIONED"  # or "ON_DEMAND" for auto-scaling
   }
-  
+
   encryption_type = "KMS"
   kms_key_id     = aws_kms_key.kinesis.id
 }
@@ -236,18 +236,18 @@ resource "aws_kinesis_stream" "driver_locations" {
   name             = "${var.project_name}-driver-locations-${var.environment}"
   shard_count      = var.kinesis_shard_count["driver_locations"]
   retention_period = var.kinesis_retention_hours
-  
+
   shard_level_metrics = [
     "IncomingBytes",
     "IncomingRecords",
     "OutgoingBytes",
     "OutgoingRecords",
   ]
-  
+
   stream_mode_details {
     stream_mode = "PROVISIONED"
   }
-  
+
   encryption_type = "KMS"
   kms_key_id     = aws_kms_key.kinesis.id
 }
@@ -256,18 +256,18 @@ resource "aws_kinesis_stream" "payment_events" {
   name             = "${var.project_name}-payment-events-${var.environment}"
   shard_count      = var.kinesis_shard_count["payment_events"]
   retention_period = var.kinesis_retention_hours
-  
+
   shard_level_metrics = [
     "IncomingBytes",
     "IncomingRecords",
     "OutgoingBytes",
     "OutgoingRecords",
   ]
-  
+
   stream_mode_details {
     stream_mode = "PROVISIONED"
   }
-  
+
   encryption_type = "KMS"
   kms_key_id     = aws_kms_key.kinesis.id
 }
@@ -276,18 +276,18 @@ resource "aws_kinesis_stream" "rating_events" {
   name             = "${var.project_name}-rating-events-${var.environment}"
   shard_count      = var.kinesis_shard_count["rating_events"]
   retention_period = var.kinesis_retention_hours
-  
+
   shard_level_metrics = [
     "IncomingBytes",
     "IncomingRecords",
     "OutgoingBytes",
     "OutgoingRecords",
   ]
-  
+
   stream_mode_details {
     stream_mode = "PROVISIONED"
   }
-  
+
   encryption_type = "KMS"
   kms_key_id     = aws_kms_key.kinesis.id
 }
@@ -315,22 +315,22 @@ resource "aws_dynamodb_table" "rides_state" {
   name           = "${var.project_name}-rides-state-${var.environment}"
   billing_mode   = var.dynamodb_billing_mode
   hash_key       = "ride_id"
-  
+
   attribute {
     name = "ride_id"
     type = "S"
   }
-  
+
   attribute {
     name = "status"
     type = "S"
   }
-  
+
   attribute {
     name = "request_timestamp"
     type = "N"
   }
-  
+
   # GSI for querying by status
   global_secondary_index {
     name            = "StatusIndex"
@@ -338,20 +338,20 @@ resource "aws_dynamodb_table" "rides_state" {
     range_key       = "request_timestamp"
     projection_type = "ALL"
   }
-  
+
   ttl {
     attribute_name = "ttl_timestamp"
     enabled        = true
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   server_side_encryption {
     enabled = true
   }
-  
+
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 }
@@ -361,22 +361,22 @@ resource "aws_dynamodb_table" "driver_availability" {
   name           = "${var.project_name}-driver-availability-${var.environment}"
   billing_mode   = var.dynamodb_billing_mode
   hash_key       = "driver_id"
-  
+
   attribute {
     name = "driver_id"
     type = "S"
   }
-  
+
   attribute {
     name = "city"
     type = "S"
   }
-  
+
   attribute {
     name = "available"
     type = "N"
   }
-  
+
   # GSI for querying available drivers by city
   global_secondary_index {
     name            = "CityAvailableIndex"
@@ -384,16 +384,16 @@ resource "aws_dynamodb_table" "driver_availability" {
     range_key       = "available"
     projection_type = "ALL"
   }
-  
+
   ttl {
     attribute_name = "ttl_timestamp"
     enabled        = true
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   server_side_encryption {
     enabled = true
   }
@@ -405,26 +405,26 @@ resource "aws_dynamodb_table" "aggregated_metrics" {
   billing_mode   = var.dynamodb_billing_mode
   hash_key       = "metric_name"
   range_key      = "timestamp"
-  
+
   attribute {
     name = "metric_name"
     type = "S"
   }
-  
+
   attribute {
     name = "timestamp"
     type = "N"
   }
-  
+
   ttl {
     attribute_name = "ttl_timestamp"
     enabled        = true
   }
-  
+
   point_in_time_recovery {
     enabled = true
   }
-  
+
   server_side_encryption {
     enabled = true
   }
@@ -443,7 +443,7 @@ resource "aws_s3_bucket" "event_archive" {
 
 resource "aws_s3_bucket_versioning" "event_archive" {
   bucket = aws_s3_bucket.event_archive.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -451,7 +451,7 @@ resource "aws_s3_bucket_versioning" "event_archive" {
 
 resource "aws_s3_bucket_encryption" "event_archive" {
   bucket = aws_s3_bucket.event_archive.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -461,21 +461,21 @@ resource "aws_s3_bucket_encryption" "event_archive" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "event_archive" {
   bucket = aws_s3_bucket.event_archive.id
-  
+
   rule {
     id     = "archive-old-data"
     status = "Enabled"
-    
+
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
     }
-    
+
     transition {
       days          = 90
       storage_class = "GLACIER"
     }
-    
+
     expiration {
       days = 2555  # 7 years
     }
@@ -489,7 +489,7 @@ resource "aws_s3_bucket" "lambda_artifacts" {
 
 resource "aws_s3_bucket_encryption" "lambda_artifacts" {
   bucket = aws_s3_bucket.lambda_artifacts.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -509,7 +509,7 @@ data "aws_caller_identity" "current" {}
 # Lambda execution role for ride processor
 resource "aws_iam_role" "lambda_ride_processor" {
   name = "${var.project_name}-lambda-ride-processor-${var.environment}"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -527,7 +527,7 @@ resource "aws_iam_role" "lambda_ride_processor" {
 resource "aws_iam_role_policy" "lambda_ride_processor" {
   name = "lambda-ride-processor-policy"
   role = aws_iam_role.lambda_ride_processor.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -671,32 +671,32 @@ logger = logging.getLogger(__name__)
 
 class BaseProducer:
     """Base class for Kinesis event producers."""
-    
+
     def __init__(self, stream_name: str, region: str = 'us-east-1'):
         self.stream_name = stream_name
         self.kinesis_client = boto3.client('kinesis', region_name=region)
         self.batch_size = 500  # Kinesis PutRecords limit
         self.max_retries = 3
         self.retry_base_delay = 1  # seconds
-    
+
     def put_records(self, records: List[Dict[str, Any]]) -> Dict[str, int]:
         """
         Put records to Kinesis stream with batching and retry logic.
-        
+
         Args:
             records: List of record dictionaries with 'data' and 'partition_key'
-        
+
         Returns:
             Dictionary with success and failure counts
         """
         total_records = len(records)
         success_count = 0
         failure_count = 0
-        
+
         # Batch records
         for i in range(0, total_records, self.batch_size):
             batch = records[i:i + self.batch_size]
-            
+
             # Format records for Kinesis
             kinesis_records = [
                 {
@@ -705,32 +705,32 @@ class BaseProducer:
                 }
                 for record in batch
             ]
-            
+
             # Put records with retry logic
             success, failed = self._put_records_with_retry(kinesis_records)
             success_count += success
             failure_count += failed
-        
+
         logger.info(f"Put {success_count} records successfully, {failure_count} failed")
-        
+
         return {
             'success': success_count,
             'failed': failure_count
         }
-    
+
     def _put_records_with_retry(self, records: List[Dict[str, str]]) -> tuple:
         """Put records with exponential backoff retry."""
         retry_count = 0
         remaining_records = records
         success_count = 0
-        
+
         while retry_count < self.max_retries and remaining_records:
             try:
                 response = self.kinesis_client.put_records(
                     Records=remaining_records,
                     StreamName=self.stream_name
                 )
-                
+
                 # Check for failed records
                 failed_records = []
                 for idx, record_result in enumerate(response['Records']):
@@ -739,29 +739,29 @@ class BaseProducer:
                         logger.warning(f"Failed to put record: {record_result['ErrorCode']}")
                     else:
                         success_count += 1
-                
+
                 # If all successful, break
                 if not failed_records:
                     break
-                
+
                 # Retry failed records
                 remaining_records = failed_records
                 retry_count += 1
-                
+
                 if retry_count < self.max_retries:
                     delay = self.retry_base_delay * (2 ** retry_count)
                     logger.info(f"Retrying {len(failed_records)} failed records after {delay}s...")
                     time.sleep(delay)
-            
+
             except ClientError as e:
                 logger.error(f"Error putting records: {e}")
                 retry_count += 1
-                
+
                 if retry_count < self.max_retries:
                     delay = self.retry_base_delay * (2 ** retry_count)
                     logger.info(f"Retrying after {delay}s...")
                     time.sleep(delay)
-        
+
         failure_count = len(remaining_records)
         return success_count, failure_count
 ```
@@ -780,10 +780,10 @@ from base_producer import BaseProducer
 
 class RideEventProducer(BaseProducer):
     """Producer for ride events."""
-    
+
     def __init__(self, stream_name: str):
         super().__init__(stream_name)
-        
+
         # NYC coordinates for demo
         self.cities = {
             'new_york': {
@@ -799,31 +799,31 @@ class RideEventProducer(BaseProducer):
                 'lon_range': (-87.70, -87.60)
             }
         }
-        
+
         self.ride_types = ['standard', 'premium', 'shared']
         self.statuses = ['requested', 'started', 'completed', 'cancelled']
-    
+
     def generate_ride_requested_events(self, count: int) -> List[Dict[str, Any]]:
         """Generate ride_requested events."""
         events = []
-        
+
         for _ in range(count):
             city_name = random.choice(list(self.cities.keys()))
             city = self.cities[city_name]
-            
+
             # Random pickup and dropoff locations within city
             pickup_lat = random.uniform(*city['lat_range'])
             pickup_lon = random.uniform(*city['lon_range'])
             dropoff_lat = random.uniform(*city['lat_range'])
             dropoff_lon = random.uniform(*city['lon_range'])
-            
+
             # Calculate estimated values
             distance_km = self._calculate_distance(
                 pickup_lat, pickup_lon, dropoff_lat, dropoff_lon
             )
             estimated_fare = 2.50 + (distance_km * 1.50)  # Base + per km
             estimated_duration = int(distance_km * 4)  # Rough estimate
-            
+
             event = {
                 'data': {
                     'event_type': 'ride_requested',
@@ -847,56 +847,56 @@ class RideEventProducer(BaseProducer):
                 },
                 'partition_key': city_name  # Partition by city for even distribution
             }
-            
+
             events.append(event)
-        
+
         return events
-    
-    def _calculate_distance(self, lat1: float, lon1: float, 
+
+    def _calculate_distance(self, lat1: float, lon1: float,
                            lat2: float, lon2: float) -> float:
         """Calculate distance between two points (simplified)."""
         # Simple Euclidean distance for demo (not accurate for real geospatial)
         return ((lat2 - lat1) ** 2 + (lon2 - lon1) ** 2) ** 0.5 * 111  # Convert to km
-    
+
     def run(self, events_per_second: int, duration_seconds: int):
         """Run producer continuously."""
         total_events = events_per_second * duration_seconds
-        
+
         print(f"Generating {total_events} ride events over {duration_seconds} seconds...")
         print(f"Rate: {events_per_second} events/second")
-        
+
         start_time = datetime.now()
-        
+
         for second in range(duration_seconds):
             # Generate events for this second
             events = self.generate_ride_requested_events(events_per_second)
-            
+
             # Put to Kinesis
             result = self.put_records(events)
-            
+
             print(f"Second {second + 1}/{duration_seconds}: "
                   f"Success={result['success']}, Failed={result['failed']}")
-            
+
             # Sleep until next second
             elapsed = (datetime.now() - start_time).total_seconds()
             sleep_time = (second + 1) - elapsed
             if sleep_time > 0:
                 import time
                 time.sleep(sleep_time)
-        
+
         print("Producer finished!")
 
 
 if __name__ == '__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Ride Event Producer')
     parser.add_argument('--stream-name', required=True, help='Kinesis stream name')
     parser.add_argument('--rate', type=int, default=10, help='Events per second')
     parser.add_argument('--duration', type=int, default=60, help='Duration in seconds')
-    
+
     args = parser.parse_args()
-    
+
     producer = RideEventProducer(args.stream_name)
     producer.run(args.rate, args.duration)
 ```
@@ -952,23 +952,23 @@ import os
 
 class Config:
     """Configuration management."""
-    
+
     # AWS settings
     AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
     ENVIRONMENT = os.environ.get('ENVIRONMENT', 'dev')
-    
+
     # DynamoDB tables
-    RIDES_STATE_TABLE = os.environ.get('RIDES_STATE_TABLE', 
+    RIDES_STATE_TABLE = os.environ.get('RIDES_STATE_TABLE',
                                       f'rideshare-rides-state-{ENVIRONMENT}')
     DRIVER_AVAILABILITY_TABLE = os.environ.get('DRIVER_AVAILABILITY_TABLE',
                                                f'rideshare-driver-availability-{ENVIRONMENT}')
     AGGREGATED_METRICS_TABLE = os.environ.get('AGGREGATED_METRICS_TABLE',
                                               f'rideshare-aggregated-metrics-{ENVIRONMENT}')
-    
+
     # S3 buckets
     EVENT_ARCHIVE_BUCKET = os.environ.get('EVENT_ARCHIVE_BUCKET',
                                           f'rideshare-event-archive-{ENVIRONMENT}')
-    
+
     # Processing settings
     BATCH_SIZE = int(os.environ.get('BATCH_SIZE', '100'))
     MAX_RETRIES = int(os.environ.get('MAX_RETRIES', '3'))
@@ -985,7 +985,7 @@ from pythonjsonlogger import jsonlogger
 def get_logger(name: str) -> logging.Logger:
     """Get structured JSON logger."""
     logger = logging.getLogger(name)
-    
+
     if not logger.handlers:
         handler = logging.StreamHandler()
         formatter = jsonlogger.JsonFormatter(
@@ -994,7 +994,7 @@ def get_logger(name: str) -> logging.Logger:
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
-    
+
     return logger
 ```
 
@@ -1028,7 +1028,7 @@ s3_client = boto3.client('s3', region_name=Config.AWS_REGION)
 def lambda_handler(event, context):
     """
     Process ride events from Kinesis.
-    
+
     Event structure:
     {
         'Records': [
@@ -1044,20 +1044,20 @@ def lambda_handler(event, context):
     }
     """
     logger.info(f"Processing {len(event['Records'])} records")
-    
+
     success_count = 0
     error_count = 0
-    
+
     for record in event['Records']:
         try:
             # Decode Kinesis record
             import base64
             payload = base64.b64decode(record['kinesis']['data']).decode('utf-8')
             ride_event = json.loads(payload)
-            
+
             # Process based on event type
             event_type = ride_event.get('event_type')
-            
+
             if event_type == 'ride_requested':
                 process_ride_requested(ride_event)
             elif event_type == 'ride_started':
@@ -1068,15 +1068,15 @@ def lambda_handler(event, context):
                 process_ride_cancelled(ride_event)
             else:
                 logger.warning(f"Unknown event type: {event_type}")
-            
+
             success_count += 1
-            
+
         except Exception as e:
             logger.error(f"Error processing record: {e}", exc_info=True)
             error_count += 1
-    
+
     logger.info(f"Processed {success_count} successfully, {error_count} errors")
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps({
@@ -1089,7 +1089,7 @@ def lambda_handler(event, context):
 def process_ride_requested(event: dict):
     """Process ride_requested event."""
     ride_id = event['ride_id']
-    
+
     # Write to DynamoDB
     rides_table.put_item(
         Item={
@@ -1108,18 +1108,18 @@ def process_ride_requested(event: dict):
             'ttl_timestamp': int(datetime.utcnow().timestamp()) + (7 * 24 * 3600)
         }
     )
-    
+
     # Update metrics
     update_metric('active_rides_total', 1, 'increment')
     update_metric(f"active_rides_{event['pickup_location']['city']}", 1, 'increment')
-    
+
     logger.info(f"Processed ride_requested: {ride_id}")
 
 
 def process_ride_started(event: dict):
     """Process ride_started event."""
     ride_id = event['ride_id']
-    
+
     # Update ride in DynamoDB
     rides_table.update_item(
         Key={'ride_id': ride_id},
@@ -1135,14 +1135,14 @@ def process_ride_started(event: dict):
             ':updated_at': event['event_timestamp']
         }
     )
-    
+
     logger.info(f"Processed ride_started: {ride_id}")
 
 
 def process_ride_completed(event: dict):
     """Process ride_completed event."""
     ride_id = event['ride_id']
-    
+
     # Update ride in DynamoDB
     rides_table.update_item(
         Key={'ride_id': ride_id},
@@ -1161,19 +1161,19 @@ def process_ride_completed(event: dict):
             ':updated_at': event['event_timestamp']
         }
     )
-    
+
     # Update metrics
     update_metric('active_rides_total', -1, 'increment')
     update_metric('completed_rides_total', 1, 'increment')
     update_metric('revenue_total', float(event['final_fare']), 'increment')
-    
+
     logger.info(f"Processed ride_completed: {ride_id}")
 
 
 def process_ride_cancelled(event: dict):
     """Process ride_cancelled event."""
     ride_id = event['ride_id']
-    
+
     # Update ride in DynamoDB
     rides_table.update_item(
         Key={'ride_id': ride_id},
@@ -1184,18 +1184,18 @@ def process_ride_cancelled(event: dict):
             ':updated_at': event['event_timestamp']
         }
     )
-    
+
     # Update metrics
     update_metric('active_rides_total', -1, 'increment')
     update_metric('cancelled_rides_total', 1, 'increment')
-    
+
     logger.info(f"Processed ride_cancelled: {ride_id}")
 
 
 def update_metric(metric_name: str, value: float, operation: str = 'set'):
     """Update aggregated metric in DynamoDB."""
     timestamp = int(datetime.utcnow().timestamp() // 60) * 60  # Round to minute
-    
+
     try:
         if operation == 'increment':
             metrics_table.update_item(
@@ -1293,7 +1293,7 @@ def test_process_ride_requested():
             }
         ]
     }
-    
+
     with patch('handler.rides_table') as mock_table:
         result = handler.lambda_handler(event, None)
         assert result['statusCode'] == 200
@@ -1312,7 +1312,7 @@ def test_end_to_end_flow():
     """Test complete flow from Kinesis to DynamoDB."""
     kinesis = boto3.client('kinesis')
     dynamodb = boto3.resource('dynamodb')
-    
+
     # Put test event to Kinesis
     ride_id = f"ride_test_{int(time.time())}"
     kinesis.put_record(
@@ -1324,14 +1324,14 @@ def test_end_to_end_flow():
         }),
         PartitionKey=ride_id
     )
-    
+
     # Wait for processing
     time.sleep(10)
-    
+
     # Verify in DynamoDB
     table = dynamodb.Table('rideshare-rides-state-dev')
     response = table.get_item(Key={'ride_id': ride_id})
-    
+
     assert 'Item' in response
     assert response['Item']['status'] == 'requested'
 ```
@@ -1346,10 +1346,10 @@ from src.producers.ride_event_producer import RideEventProducer
 def test_1000_events_per_second():
     """Test system handles 1000 events/second."""
     producer = RideEventProducer('rideshare-ride-events-dev')
-    
+
     # Run for 5 minutes at 1000 events/second
     producer.run(events_per_second=1000, duration_seconds=300)
-    
+
     # Verify metrics
     # Check CloudWatch for:
     # - No throttling errors

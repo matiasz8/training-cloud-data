@@ -156,10 +156,10 @@ By completing this project, you will:
    ```bash
    # Upload sample data
    aws s3 cp sample-orders.csv s3://your-bucket-raw/orders/
-   
+
    # Check Lambda logs
    aws logs tail /aws/lambda/cloudmart-orders-ingestion-dev --follow
-   
+
    # Verify Parquet files created in processed bucket
    aws s3 ls s3://your-bucket-processed/orders/
    ```
@@ -239,7 +239,7 @@ spark-submit bronze_to_silver_orders.py --local-test
 ```sql
 -- Run in Athena
 -- Check record counts match across layers
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM bronze.orders) as bronze_count,
   (SELECT COUNT(*) FROM silver.orders) as silver_count,
   (SELECT COUNT(*) FROM gold.sales_summary) as gold_count;

@@ -19,26 +19,26 @@ terraform {
     # S3 bucket for storing Terraform state
     # IMPORTANT: Replace with your actual bucket name
     bucket = "my-terraform-state-bucket-ACCOUNT_ID"
-    
+
     # Key path within the bucket (unique per environment)
     key = "checkpoint-02/real-time-analytics/terraform.tfstate"
-    
+
     # AWS region where the S3 bucket is located
     region = "us-east-1"
-    
+
     # DynamoDB table for state locking (prevents concurrent operations)
     # IMPORTANT: Replace with your actual table name
     dynamodb_table = "terraform-state-lock"
-    
+
     # Enable server-side encryption for state file
     encrypt = true
-    
+
     # KMS key ID for encryption (optional - uses AWS managed key if not specified)
     # kms_key_id = "arn:aws:kms:us-east-1:ACCOUNT_ID:key/KEY_ID"
-    
+
     # Enable versioning for state file history
     # Note: Versioning must be enabled on the S3 bucket itself
-    
+
     # Workspace prefix for multi-workspace setups (optional)
     # workspace_key_prefix = "workspaces"
   }

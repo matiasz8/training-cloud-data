@@ -6,7 +6,6 @@ operations for the Real-Time Analytics Platform.
 """
 
 import os
-import json
 import time
 import pytest
 import boto3
@@ -113,17 +112,17 @@ def sqs_client(aws_config: Dict[str, str]):
 def test_data_generator():
     """Factory for generating test events."""
     fake = Faker()
-    
+
     class TestDataGenerator:
         def __init__(self):
             self.fake = fake
             self.cities = ["New York", "San Francisco", "Chicago", "Los Angeles", "Seattle"]
-            
+
         def generate_ride_request(self, ride_id: str = None) -> Dict[str, Any]:
             """Generate ride request event."""
             if ride_id is None:
                 ride_id = f"ride-{self.fake.uuid4()}"
-                
+
             return {
                 "event_type": "ride_requested",
                 "ride_id": ride_id,
@@ -144,7 +143,7 @@ def test_data_generator():
                 "ride_type": random.choice(["economy", "premium", "shared"]),
                 "requested_at": datetime.utcnow().isoformat()
             }
-            
+
         def generate_ride_started(self, ride_id: str) -> Dict[str, Any]:
             """Generate ride started event."""
             return {
@@ -158,13 +157,13 @@ def test_data_generator():
                 },
                 "started_at": datetime.utcnow().isoformat()
             }
-            
+
         def generate_ride_completed(self, ride_id: str) -> Dict[str, Any]:
             """Generate ride completed event."""
             distance_miles = round(random.uniform(1.0, 30.0), 2)
             duration_minutes = int(distance_miles * random.uniform(2, 4))
             base_fare = distance_miles * 2.5 + duration_minutes * 0.3
-            
+
             return {
                 "event_type": "ride_completed",
                 "ride_id": ride_id,
@@ -179,12 +178,12 @@ def test_data_generator():
                 "surge_multiplier": round(random.uniform(1.0, 2.5), 1),
                 "completed_at": datetime.utcnow().isoformat()
             }
-            
+
         def generate_location_update(self, driver_id: str = None) -> Dict[str, Any]:
             """Generate driver location update event."""
             if driver_id is None:
                 driver_id = f"driver-{self.fake.random_int(1000, 9999)}"
-                
+
             return {
                 "event_type": "location_update",
                 "driver_id": driver_id,
@@ -197,11 +196,11 @@ def test_data_generator():
                 "status": random.choice(["available", "on_ride", "offline"]),
                 "city": random.choice(self.cities)
             }
-            
+
         def generate_payment(self, ride_id: str) -> Dict[str, Any]:
             """Generate payment event."""
             amount = round(random.uniform(10.0, 100.0), 2)
-            
+
             return {
                 "event_type": "payment_processed",
                 "payment_id": f"pay-{self.fake.uuid4()}",
@@ -214,7 +213,7 @@ def test_data_generator():
                 "status": random.choice(["success", "pending"]),
                 "processed_at": datetime.utcnow().isoformat()
             }
-            
+
         def generate_suspicious_payment(self, ride_id: str) -> Dict[str, Any]:
             """Generate payment event with fraud indicators."""
             return {
@@ -234,12 +233,12 @@ def test_data_generator():
                 },
                 "processed_at": datetime.utcnow().isoformat()
             }
-            
+
         def generate_rating(self, ride_id: str, rating: int = None) -> Dict[str, Any]:
             """Generate rating event."""
             if rating is None:
                 rating = random.randint(1, 5)
-                
+
             return {
                 "event_type": "rating_submitted",
                 "rating_id": f"rating-{self.fake.uuid4()}",
@@ -251,7 +250,7 @@ def test_data_generator():
                 "feedback": self.fake.sentence() if rating < 4 else "",
                 "submitted_at": datetime.utcnow().isoformat()
             }
-            
+
     return TestDataGenerator()
 
 
@@ -263,9 +262,9 @@ def test_data_generator():
 def cleanup_kinesis_records():
     """Fixture to track and cleanup test records."""
     test_records = []
-    
+
     yield test_records
-    
+
     # Cleanup logic would go here if needed
     # For Kinesis, records expire automatically after retention period
 
@@ -274,9 +273,9 @@ def cleanup_kinesis_records():
 def cleanup_dynamodb_records(dynamodb_resource):
     """Fixture to cleanup DynamoDB test records after tests."""
     test_records = {"rides": [], "locations": [], "payments": []}
-    
+
     yield test_records
-    
+
     # Cleanup test records
     # Note: In practice, use test-specific partition keys for easy cleanup
 
@@ -288,7 +287,7 @@ def cleanup_dynamodb_records(dynamodb_resource):
 def wait_for_lambda_execution(logs_client, log_group_name: str, timeout: int = 30) -> bool:
     """Wait for Lambda function to execute and log."""
     start_time = time.time()
-    
+
     while time.time() - start_time < timeout:
         try:
             streams = logs_client.describe_log_streams(
@@ -297,24 +296,24 @@ def wait_for_lambda_execution(logs_client, log_group_name: str, timeout: int = 3
                 descending=True,
                 limit=1
             )
-            
+
             if streams.get("logStreams"):
                 return True
-                
+
         except Exception:
             pass
-            
+
         time.sleep(2)
-        
+
     return False
 
 
-def get_cloudwatch_metric(cloudwatch_client, namespace: str, metric_name: str, 
+def get_cloudwatch_metric(cloudwatch_client, namespace: str, metric_name: str,
                           dimensions: List[Dict], minutes: int = 5) -> List[float]:
     """Retrieve CloudWatch metric datapoints."""
     end_time = datetime.utcnow()
     start_time = end_time - timedelta(minutes=minutes)
-    
+
     response = cloudwatch_client.get_metric_statistics(
         Namespace=namespace,
         MetricName=metric_name,
@@ -324,5 +323,5 @@ def get_cloudwatch_metric(cloudwatch_client, namespace: str, metric_name: str,
         Period=60,
         Statistics=["Average", "Sum"]
     )
-    
+
     return response.get("Datapoints", [])

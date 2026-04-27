@@ -29,9 +29,9 @@ flowchart TB
 
     subgraph LandingZone["📦 S3 LANDING ZONE"]
         direction TB
-        
+
         LandingBucket["s3://cloudmart-landing/<br/>═══════════════════<br/>Structure:<br/>├─ sales/<br/>├─ customers/<br/>├─ products/<br/>└─ web-events/<br/><br/>Lifecycle: Auto-delete 7 days"]
-        
+
         S3EventConfig["⚙️ S3 Event Configuration<br/>───────────────────<br/>Event Type: s3:ObjectCreated:*<br/>Prefix Filter: Enabled<br/>Suffix Filter: .csv, .json, .parquet<br/>Destination: Lambda Function<br/>Batch Size: 1 (single file)"]
     end
 
@@ -47,13 +47,13 @@ flowchart TB
 
     subgraph LambdaFunction["⚡ LAMBDA INGESTION FUNCTION"]
         direction TB
-        
+
         LambdaConfig["Configuration<br/>───────────────<br/>Runtime: Python 3.9<br/>Memory: 1024 MB<br/>Timeout: 300s<br/>Concurrency: 100<br/>Environment Variables:<br/>├─ BRONZE_BUCKET<br/>├─ ERROR_BUCKET<br/>└─ LOG_LEVEL"]
-        
+
         InitLambda["🔧 Initialize<br/>────────────<br/>• Load environment vars<br/>• Initialize S3 client<br/>• Setup logging<br/>• Start execution timer"]
-        
+
         ParseEvent["📋 Parse S3 Event<br/>─────────────────<br/>Extract:<br/>• Bucket name<br/>• Object key<br/>• File size<br/>• Event time<br/>• Request ID"]
-        
+
         ExtractMetadata["🔍 Extract File Metadata<br/>───────────────────────<br/>Parse from key:<br/>• Data source (sales/customers/etc)<br/>• Upload date<br/>• File format (.csv/.json/.parquet)<br/><br/>Validate key structure:<br/>  {source}/{year}/{month}/{day}/{filename}"]
     end
 
@@ -63,15 +63,15 @@ flowchart TB
 
     subgraph ValidationStage["✅ VALIDATION STAGE"]
         direction TB
-        
+
         ValidateFormat["🎯 Validate File Format<br/>══════════════════════<br/>Check file extension:<br/>• CSV: .csv<br/>• JSON: .json<br/>• Parquet: .parquet<br/><br/>Verify MIME type:<br/>• text/csv<br/>• application/json<br/>• application/octet-stream"]
-        
+
         ValidateSize["📏 Validate File Size<br/>════════════════════<br/>Checks:<br/>• Min size: 1 KB<br/>• Max size: 100 MB<br/>• Empty file detection<br/><br/>Lambda memory check:<br/>• Available memory > file size * 3"]
-        
+
         ValidateSchema["📐 Validate Schema<br/>═══════════════════<br/>Read first 1000 rows<br/><br/>CSV:<br/>• Check header row<br/>• Verify required columns<br/>• Validate data types<br/><br/>JSON:<br/>• Parse structure<br/>• Check required fields<br/>• Validate nested objects<br/><br/>Parquet:<br/>• Read metadata<br/>• Check schema version"]
-        
+
         ValidateContent["🔎 Validate Content<br/>════════════════════<br/>Data Quality Checks:<br/>• No completely null rows<br/>• Key fields not empty<br/>• Date formats valid<br/>• Numeric ranges OK<br/>• No malicious content"]
-        
+
         CheckDuplicate["🔁 Check for Duplicates<br/>═══════════════════════<br/>Generate file hash (MD5)<br/><br/>Query DynamoDB:<br/>• Table: file-registry<br/>• Key: hash + source<br/>• Check last 24 hours<br/><br/>If duplicate:<br/>  Log and skip processing"]
     end
 
@@ -91,15 +91,15 @@ flowchart TB
 
     subgraph ProcessingStage["🔄 PROCESSING STAGE"]
         direction TB
-        
+
         ReadFile["📖 Read Source File<br/>═════════════════════<br/>Download from Landing S3<br/><br/>Stream for large files:<br/>• Chunk size: 10 MB<br/>• Memory efficient<br/><br/>Parse data:<br/>• CSV → DataFrame<br/>• JSON → Dict/List<br/>• Parquet → DataFrame"]
-        
+
         EnrichMetadata["➕ Enrich Metadata<br/>═════════════════════<br/>Add audit columns:<br/>• ingestion_timestamp<br/>• source_system<br/>• file_name<br/>• file_size<br/>• processing_id (UUID)<br/>• data_lake_zone (bronze)<br/>• record_count<br/>• data_quality_score"]
-        
+
         DeterminePartition["📅 Determine Partition Path<br/>════════════════════════════<br/>Extract event date from:<br/>1. Event timestamp (preferred)<br/>2. File modification time<br/>3. Filename parsing<br/><br/>Generate partition:<br/>  year={YYYY}/month={MM}/day={DD}<br/><br/>Example:<br/>  year=2026/month=03/day=09/"]
-        
+
         ConvertFormat["🔄 Format Conversion<br/>════════════════════<br/>Standardize to Parquet:<br/>• CSV → Parquet<br/>• JSON → Parquet<br/>• Parquet → Keep as-is<br/><br/>Compression: Snappy<br/>Options:<br/>• schema consistency<br/>• preserve nulls<br/>• date/time normalization"]
-        
+
         GenerateFileName["📝 Generate Target Filename<br/>═══════════════════════════════<br/>Format:<br/>  {source}_{timestamp}_{uuid}.parquet<br/><br/>Example:<br/>  sales_20260309_103000_a4b2c.parquet<br/><br/>Ensures uniqueness<br/>Sortable by time<br/>Traceable to source"]
     end
 
@@ -109,11 +109,11 @@ flowchart TB
 
     subgraph BronzeStorage["🥉 BRONZE ZONE STORAGE"]
         direction TB
-        
+
         WriteBronze["💾 Write to Bronze S3<br/>══════════════════════<br/>Target bucket:<br/>  s3://cloudmart-bronze/<br/><br/>Full path:<br/>  {source}/year={Y}/month={M}/day={D}/<br/>    {filename}.parquet<br/><br/>Options:<br/>• Server-side encryption (SSE-KMS)<br/>• Storage class: Standard<br/>• Metadata tags<br/>• Object ACL: Private"]
-        
+
         UpdateRegistry["📝 Update File Registry<br/>═══════════════════════════<br/>DynamoDB Table: file-registry<br/><br/>Record:<br/>  {<br/>    'file_hash': 'md5...',<br/>    'source_key': 's3://...',<br/>    'target_key': 's3://bronze/...',<br/>    'status': 'success',<br/>    'ingestion_time': '2026-03-09...',<br/>    'record_count': 15000,<br/>    'file_size': 15728640<br/>  }"]
-        
+
         BronzeSuccess["✅ Bronze Ingestion Complete<br/>═══════════════════════════════<br/>• File stored in Bronze<br/>• Registry updated<br/>• Metrics published<br/>• Ready for ETL processing"]
     end
 
@@ -123,17 +123,17 @@ flowchart TB
 
     subgraph ErrorHandling["🚨 ERROR HANDLING"]
         direction TB
-        
+
         CategorizeError["🏷️ Categorize Error<br/>════════════════════<br/>Categories:<br/>• INVALID_FORMAT<br/>• SIZE_VIOLATION<br/>• SCHEMA_MISMATCH<br/>• CONTENT_ERROR<br/>• DUPLICATE_FILE<br/>• PROCESSING_FAILURE<br/>• NETWORK_ERROR<br/>• PERMISSION_ERROR"]
-        
+
         LogError["📋 Log Error Details<br/>═══════════════════════<br/>CloudWatch Logs:<br/>• Error category<br/>• Full stack trace<br/>• File metadata<br/>• Validation results<br/>• Timestamp<br/>• Request ID<br/><br/>Log Level: ERROR"]
-        
+
         MoveToError["🗂️ Move to Error Bucket<br/>══════════════════════════<br/>Target:<br/>  s3://cloudmart-errors/<br/><br/>Path:<br/>  {error-category}/{date}/{filename}<br/><br/>Include error manifest:<br/>  {filename}_error.json<br/>    - error_type<br/>    - error_message<br/>    - original_location<br/>    - validation_report"]
-        
+
         CheckRetryable["🔁 Check if Retryable?<br/>════════════════════════<br/>Retryable errors:<br/>• Network timeout<br/>• S3 throttling<br/>• Temporary service issues<br/><br/>Non-retryable:<br/>• Schema mismatch<br/>• Invalid format<br/>• Content validation fail"]
-        
+
         RetryLogic["⏰ Retry with Backoff<br/>═══════════════════════<br/>Exponential backoff:<br/>• Retry 1: After 5 seconds<br/>• Retry 2: After 15 seconds<br/>• Retry 3: After 45 seconds<br/><br/>Max retries: 3<br/><br/>If still failing:<br/>  → Move to error bucket<br/>  → Send alert"]
-        
+
         SendAlert["📧 Send Alert<br/>═══════════════<br/>SNS Topic:<br/>  data-ingestion-errors<br/><br/>Recipients:<br/>• Data Engineering team<br/>• On-call engineer<br/><br/>Include:<br/>• Error summary<br/>• File details<br/>• S3 location<br/>• Action required"]
     end
 
@@ -146,11 +146,11 @@ flowchart TB
 
     subgraph MonitoringMetrics["📊 MONITORING & METRICS"]
         direction TB
-        
+
         PublishMetrics["📈 Publish CloudWatch Metrics<br/>═══════════════════════════════<br/>Standard Metrics:<br/>• Lambda Invocations<br/>• Lambda Duration<br/>• Lambda Errors<br/>• Lambda Concurrent Executions<br/><br/>Custom Metrics:<br/>• Files Processed (by source)<br/>• Files Failed (by error type)<br/>• Data Volume Ingested (bytes)<br/>• Record Count<br/>• Validation Success Rate<br/>• Average Processing Time<br/>• Duplicate Files Detected"]
-        
+
         UpdateDashboard["📺 Update CloudWatch Dashboard<br/>═════════════════════════════════<br/>Real-time widgets:<br/>• Ingestion rate (files/hour)<br/>• Error rate (percentage)<br/>• Processing latency (P50/P95/P99)<br/>• Data volume trend<br/>• Success vs failures<br/>• Cost per GB ingested"]
-        
+
         CheckThresholds["⚠️ Check Alarm Thresholds<br/>═══════════════════════════════<br/>Alarms configured:<br/>• Error rate > 5% (5 min)<br/>• Processing time > 60s (P95)<br/>• Failed files > 10 (5 min)<br/>• Memory utilization > 90%<br/>• Throttling errors > 0<br/><br/>Actions:<br/>• SNS notification<br/>• Create incident ticket<br/>• Auto-scaling trigger (if needed)"]
     end
 
@@ -160,9 +160,9 @@ flowchart TB
 
     subgraph Cleanup["🧹 CLEANUP"]
         direction TB
-        
+
         DeleteFromLanding["🗑️ Delete from Landing<br/>═══════════════════════════<br/>After successful Bronze write:<br/>• Delete original file<br/>• Update S3 inventory<br/><br/>Retention policy:<br/>• Success: Immediate delete<br/>• Error: Keep 7 days (lifecycle)<br/><br/>Cost savings:<br/>• ~$0.023/GB/month saved"]
-        
+
         FlushLogs["📤 Flush Logs to CloudWatch<br/>═══════════════════════════════<br/>Ensure all logs written:<br/>• Execution summary<br/>• Performance metrics<br/>• Error details (if any)<br/><br/>Log retention:<br/>• Default: 30 days<br/>• Error logs: 90 days"]
     end
 
@@ -180,7 +180,7 @@ flowchart TB
     LandingBucket -->|"Auto-configure"| S3EventConfig
     S3EventConfig -->|"Trigger"| S3Event
     S3Event -->|"Invoke Lambda"| InitLambda
-    
+
     InitLambda --> ParseEvent
     ParseEvent --> ExtractMetadata
     ExtractMetadata --> ValidateFormat
@@ -189,19 +189,19 @@ flowchart TB
     ValidateFormat --> DecisionFormat
     DecisionFormat -->|"❌ No"| CategorizeError
     DecisionFormat -->|"✅ Yes"| ValidateSize
-    
+
     ValidateSize --> DecisionSize
     DecisionSize -->|"❌ No"| CategorizeError
     DecisionSize -->|"✅ Yes"| ValidateSchema
-    
+
     ValidateSchema --> DecisionSchema
     DecisionSchema -->|"❌ No"| CategorizeError
     DecisionSchema -->|"✅ Yes"| ValidateContent
-    
+
     ValidateContent --> DecisionContent
     DecisionContent -->|"❌ No"| CategorizeError
     DecisionContent -->|"✅ Yes"| CheckDuplicate
-    
+
     CheckDuplicate --> DecisionDuplicate
     DecisionDuplicate -->|"✅ Yes"| LogError
     DecisionDuplicate -->|"❌ No"| ReadFile
@@ -227,16 +227,16 @@ flowchart TB
     CategorizeError --> LogError
     LogError --> MoveToError
     MoveToError --> CheckRetryable
-    
+
     CheckRetryable --> DecisionRetryable
     DecisionRetryable -->|"✅ Yes"| DecisionRetryCount
     DecisionRetryable -->|"❌ No"| SendAlert
-    
+
     DecisionRetryCount -->|"✅ Yes"| RetryLogic
     DecisionRetryCount -->|"❌ No"| SendAlert
-    
+
     RetryLogic -->|"Retry processing"| ReadFile
-    
+
     SendAlert --> PublishMetrics
 
     %% ============================================================================

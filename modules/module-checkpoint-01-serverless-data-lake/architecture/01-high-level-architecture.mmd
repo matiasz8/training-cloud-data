@@ -24,13 +24,13 @@ flowchart TB
 
     subgraph Sources["🗂️ DATA SOURCES"]
         direction TB
-        
+
         subgraph EcommerceApps["E-Commerce Applications"]
             direction LR
             SalesApp["💰 Sales System<br/>├─ CSV Files<br/>├─ Daily Exports<br/>└─ Transaction Data"]
             WebApp["🌐 Web Analytics<br/>├─ JSON/CSV<br/>├─ Clickstream<br/>└─ User Events"]
         end
-        
+
         subgraph BackendSystems["Backend Systems"]
             direction LR
             CRM["👥 CRM System<br/>├─ JSON Files<br/>├─ Customer Profiles<br/>└─ Contact Info"]
@@ -44,7 +44,7 @@ flowchart TB
 
     subgraph IngestionLayer["⚡ INGESTION LAYER"]
         direction TB
-        
+
         subgraph LandingBucket["S3 Landing Buckets"]
             direction TB
             LandingSales["s3://landing/sales/<br/>├─ Incoming CSVs<br/>└─ Auto-Delete: 7 days"]
@@ -52,14 +52,14 @@ flowchart TB
             LandingProducts["s3://landing/products/<br/>├─ Incoming Parquets<br/>└─ Auto-Delete: 7 days"]
             LandingWeb["s3://landing/web-events/<br/>├─ Incoming JSON/CSV<br/>└─ Auto-Delete: 7 days"]
         end
-        
+
         S3Events["📨 S3 Event Notifications<br/>├─ s3:ObjectCreated:*<br/>├─ s3:ObjectRemoved:*<br/>└─ Lambda Invocation"]
-        
+
         subgraph LambdaProcessing["Lambda Functions"]
             direction TB
             IngestLambda["🔄 Data Ingestion Lambda<br/>├─ Runtime: Python 3.9<br/>├─ Memory: 1024 MB<br/>├─ Timeout: 300s<br/>├─ Validation Logic<br/>├─ Partitioning<br/>└─ Error Handling"]
         end
-        
+
         ErrorBucket["🚨 Error Bucket<br/>s3://errors/<br/>├─ Failed Files<br/>├─ Error Metadata<br/>└─ Manual Review Queue"]
     end
 
@@ -69,12 +69,12 @@ flowchart TB
 
     subgraph DataLakeZones["🏞️ DATA LAKE (S3)"]
         direction TB
-        
+
         %% Bronze Zone
         subgraph BronzeZone["🥉 BRONZE ZONE (Raw)"]
             direction TB
             BronzeDesc["Storage: Raw data as-is<br/>Format: Original format<br/>Retention: 30→90 days<br/>Encryption: SSE-KMS"]
-            
+
             subgraph BronzeData["Bronze Data"]
                 BronzeSales["s3://bronze/transactions/<br/>└─ year/month/day/"]
                 BronzeCustomers["s3://bronze/customers/<br/>└─ year/month/day/"]
@@ -82,12 +82,12 @@ flowchart TB
                 BronzeWeb["s3://bronze/web-events/<br/>└─ year/month/day/"]
             end
         end
-        
+
         %% Silver Zone
         subgraph SilverZone["🥈 SILVER ZONE (Processed)"]
             direction TB
             SilverDesc["Storage: Cleaned & validated<br/>Format: Parquet + Snappy<br/>Retention: 60→180 days<br/>Schema: Standardized"]
-            
+
             subgraph SilverData["Silver Data"]
                 SilverSales["s3://silver/transactions/<br/>├─ Deduped<br/>├─ Validated<br/>└─ Typed"]
                 SilverCustomers["s3://silver/customers/<br/>├─ Standardized<br/>├─ Enriched<br/>└─ Clean"]
@@ -95,12 +95,12 @@ flowchart TB
                 SilverWeb["s3://silver/web-events/<br/>├─ Parsed<br/>└─ Sessionized"]
             end
         end
-        
+
         %% Gold Zone
         subgraph GoldZone["🥇 GOLD ZONE (Curated)"]
             direction TB
             GoldDesc["Storage: Business-ready<br/>Format: Parquet + Snappy<br/>Retention: Permanent (Standard)<br/>Schema: Star Schema"]
-            
+
             subgraph GoldData["Gold Data"]
                 GoldFacts["📊 Fact Tables<br/>├─ fact_sales<br/>├─ fact_web_sessions<br/>└─ fact_inventory"]
                 GoldDims["📐 Dimension Tables<br/>├─ dim_customers<br/>├─ dim_products<br/>├─ dim_date<br/>└─ dim_location"]
@@ -115,20 +115,20 @@ flowchart TB
 
     subgraph TransformationLayer["🔧 TRANSFORMATION LAYER (AWS GLUE)"]
         direction TB
-        
+
         subgraph GlueJobs["Glue ETL Jobs"]
             direction LR
             Bronze2Silver["Bronze → Silver<br/>════════════<br/>🧹 Cleaning<br/>✓ Validation<br/>🔄 Type Conversion<br/>📦 Parquet Conversion<br/>⏱️ 2 DPUs"]
             Silver2Gold["Silver → Gold<br/>════════════<br/>🔗 Joins<br/>📊 Aggregations<br/>🎯 Business Logic<br/>⭐ Star Schema<br/>⏱️ 5 DPUs"]
         end
-        
+
         subgraph GlueCrawlers["Glue Crawlers"]
             direction TB
             CrawlerBronze["🕷️ Bronze Crawler<br/>├─ Schedule: Event-driven<br/>├─ Discover Schema<br/>└─ Add Partitions"]
             CrawlerSilver["🕷️ Silver Crawler<br/>├─ Schedule: Post-ETL<br/>├─ Update Schema<br/>└─ Manage Partitions"]
             CrawlerGold["🕷️ Gold Crawler<br/>├─ Schedule: Post-ETL<br/>├─ Star Schema<br/>└─ Business Tables"]
         end
-        
+
         JobOrchestration["🎼 Glue Workflows<br/>├─ Job Dependencies<br/>├─ Error Handling<br/>├─ Retry Logic<br/>└─ EventBridge Trigger"]
     end
 
@@ -138,7 +138,7 @@ flowchart TB
 
     subgraph DataCatalog["📚 AWS GLUE DATA CATALOG"]
         direction TB
-        
+
         CatalogStructure["Catalog: cloudmart_datalake<br/>════════════════════<br/>📂 bronze_db (4 tables)<br/>📂 silver_db (4 tables)<br/>📂 gold_db (8 tables)<br/>════════════════════<br/>Schema Registry<br/>Partition Metadata<br/>Table Statistics"]
     end
 
@@ -148,9 +148,9 @@ flowchart TB
 
     subgraph AnalyticsLayer["📊 ANALYTICS LAYER"]
         direction TB
-        
+
         Athena["🔍 Amazon Athena<br/>═════════════════<br/>SQL Query Engine<br/>Workgroup: cloudmart-wg<br/>Results: s3://athena-results/<br/>Query Timeout: 30 min<br/>Cost: $5/TB scanned"]
-        
+
         QueryPatterns["Common Queries:<br/>├─ Daily Sales Reports<br/>├─ Customer Analytics<br/>├─ Product Performance<br/>├─ Web Funnel Analysis<br/>└─ Inventory Status"]
     end
 
@@ -160,11 +160,11 @@ flowchart TB
 
     subgraph ConsumptionLayer["👥 CONSUMPTION LAYER"]
         direction LR
-        
+
         BI["📈 BI Tools<br/>├─ QuickSight<br/>├─ Tableau<br/>├─ PowerBI<br/>└─ Looker"]
-        
+
         DataScience["🔬 Data Science<br/>├─ Jupyter<br/>├─ SageMaker<br/>├─ Python/R<br/>└─ ML Pipelines"]
-        
+
         APIAccess["🔌 API Access<br/>├─ REST APIs<br/>├─ GraphQL<br/>├─ JDBC/ODBC<br/>└─ Apps"]
     end
 
@@ -174,13 +174,13 @@ flowchart TB
 
     subgraph SecurityLayer["🔒 SECURITY & GOVERNANCE"]
         direction TB
-        
+
         IAM["IAM Roles & Policies<br/>════════════════<br/>🎭 Lambda Execution Role<br/>🎭 Glue Service Role<br/>🎭 Athena User Role<br/>🎭 Least Privilege"]
-        
+
         KMS["🔐 AWS KMS<br/>├─ Customer Managed Keys<br/>├─ Key Rotation: Annual<br/>├─ Key Policy: Restricted<br/>└─ Envelope Encryption"]
-        
+
         CloudTrail["📋 AWS CloudTrail<br/>├─ All API Calls<br/>├─ Multi-Region<br/>├─ Log Integrity<br/>└─ Audit Trail"]
-        
+
         S3Security["🛡️ S3 Security<br/>├─ Block Public Access<br/>├─ Bucket Policies<br/>├─ Versioning Enabled<br/>├─ MFA Delete<br/>└─ Access Logging"]
     end
 
@@ -190,13 +190,13 @@ flowchart TB
 
     subgraph MonitoringLayer["📡 MONITORING & LOGGING"]
         direction TB
-        
+
         CloudWatch["☁️ CloudWatch<br/>════════════<br/>Logs Groups:<br/>├─ /aws/lambda/<br/>├─ /aws/glue/<br/>└─ /aws/athena/"]
-        
+
         CloudWatchMetrics["📊 CloudWatch Metrics<br/>├─ Lambda: Invocations, Errors, Duration<br/>├─ Glue: Job Success/Failure, DPU Hours<br/>├─ Athena: Queries, Data Scanned<br/>├─ S3: PUT/GET Operations, Storage<br/>└─ Custom: Data Quality Metrics"]
-        
+
         Alarms["🚨 CloudWatch Alarms<br/>├─ Lambda Errors > 5/min<br/>├─ Glue Job Failures<br/>├─ High S3 Costs<br/>├─ Data Quality Issues<br/>└─ SNS Notifications"]
-        
+
         Dashboard["📺 CloudWatch Dashboard<br/>Real-time Metrics:<br/>├─ Ingestion Rate<br/>├─ Processing Latency<br/>├─ Error Rates<br/>├─ Cost Trends<br/>└─ Data Volume"]
     end
 
@@ -206,11 +206,11 @@ flowchart TB
 
     subgraph CostManagement["💰 COST MANAGEMENT"]
         direction TB
-        
+
         S3Lifecycle["♻️ S3 Lifecycle<br/>Bronze: 30d→Glacier<br/>Silver: 60d→IA<br/>Logs: 7d→IA"]
-        
+
         TagStrategy["🏷️ Tagging<br/>project:cloudmart<br/>environment:prod<br/>team:data-eng<br/>cost-center:analytics"]
-        
+
         Budgets["💵 AWS Budgets<br/>Monthly: $500<br/>Alerts: 50%/75%/90%<br/>Actions: SNS Email"]
     end
 
@@ -246,7 +246,7 @@ flowchart TB
     BronzeData --> CrawlerBronze
     SilverData --> CrawlerSilver
     GoldData --> CrawlerGold
-    
+
     CrawlerBronze & CrawlerSilver & CrawlerGold -->|"Schema"| CatalogStructure
 
     %% ETL Orchestration
@@ -265,24 +265,24 @@ flowchart TB
     IAM -.->|"Authorize"| IngestLambda
     IAM -.->|"Authorize"| Bronze2Silver & Silver2Gold
     IAM -.->|"Authorize"| Athena
-    
+
     KMS -.->|"Encrypt/Decrypt"| BronzeData & SilverData & GoldData
-    
+
     CloudTrail -.->|"Log API Calls"| IngestLambda & Bronze2Silver & Silver2Gold & Athena
-    
+
     S3Security -.->|"Enforce Policies"| BronzeData & SilverData & GoldData
 
     %% Monitoring Connections
     IngestLambda & Bronze2Silver & Silver2Gold & Athena -->|"Logs"| CloudWatch
     IngestLambda & Bronze2Silver & Silver2Gold & Athena -->|"Metrics"| CloudWatchMetrics
-    
+
     CloudWatchMetrics -->|"Threshold"| Alarms
     CloudWatchMetrics --> Dashboard
 
     %% Cost Management Connections
     S3Lifecycle -.->|"Transition"| BronzeData & SilverData
     TagStrategy -.->|"Tag"| BronzeData & SilverData & GoldData & IngestLambda & Bronze2Silver & Silver2Gold
-    
+
     CloudWatchMetrics -->|"Cost Metrics"| Budgets
 
     %% Apply Styles

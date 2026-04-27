@@ -75,22 +75,22 @@ CREATE TABLE hotspots_s3_sink (
     center_lon DOUBLE,
     window_start TIMESTAMP(3),
     window_end TIMESTAMP(3),
-    
+
     -- Activity counts
     pickup_count BIGINT,
     dropoff_count BIGINT,
     total_activity BIGINT,
-    
+
     -- Density metrics
     activity_density DOUBLE,  -- Activity per square km
     hotspot_rank INT,
     hotspot_score DOUBLE,
-    
+
     -- Characteristics
     avg_wait_time_minutes DOUBLE,
     avg_fare DOUBLE,
     unique_customers BIGINT,
-    
+
     calculation_timestamp TIMESTAMP(3),
     `date` VARCHAR(10),
     `hour` VARCHAR(2)
@@ -150,7 +150,7 @@ CREATE TEMPORARY FUNCTION calculate_geohash AS
 CREATE VIEW pickup_hotspots AS
 SELECT
     city,
-    
+
     -- Calculate geohash for spatial grouping
     -- Grid cell: ~5km x 5km
     CONCAT(
@@ -158,19 +158,19 @@ SELECT
         '_',
         CAST(CAST(FLOOR(pickup_lon / 0.05) * 0.05 AS DECIMAL(10,6)) AS VARCHAR)
     ) AS geohash,
-    
+
     -- Center coordinates of the grid cell
     CAST(FLOOR(pickup_lat / 0.05) * 0.05 AS DOUBLE) + 0.025 AS center_lat,
     CAST(FLOOR(pickup_lon / 0.05) * 0.05 AS DOUBLE) + 0.025 AS center_lon,
-    
+
     -- Window boundaries
     TUMBLE_START(`timestamp`, INTERVAL '15' MINUTE) AS window_start,
     TUMBLE_END(`timestamp`, INTERVAL '15' MINUTE) AS window_end,
-    
+
     -- Activity metrics
     COUNT(*) AS pickup_count,
     COUNT(DISTINCT ride_id) AS unique_rides,
-    
+
     -- Calculate approximate grid cell area (km²)
     -- At equator: 1 degree ≈ 111 km
     -- Grid cell: 0.05 degrees ≈ 5.5 km
@@ -202,19 +202,19 @@ GROUP BY
 CREATE VIEW dropoff_hotspots AS
 SELECT
     city,
-    
+
     CONCAT(
         CAST(CAST(FLOOR(dropoff_lat / 0.05) * 0.05 AS DECIMAL(10,6)) AS VARCHAR),
         '_',
         CAST(CAST(FLOOR(dropoff_lon / 0.05) * 0.05 AS DECIMAL(10,6)) AS VARCHAR)
     ) AS geohash,
-    
+
     CAST(FLOOR(dropoff_lat / 0.05) * 0.05 AS DOUBLE) + 0.025 AS center_lat,
     CAST(FLOOR(dropoff_lon / 0.05) * 0.05 AS DOUBLE) + 0.025 AS center_lon,
-    
+
     TUMBLE_START(`timestamp`, INTERVAL '15' MINUTE) AS window_start,
     TUMBLE_END(`timestamp`, INTERVAL '15' MINUTE) AS window_end,
-    
+
     COUNT(*) AS dropoff_count,
     30.25 AS grid_area_km2
 
@@ -248,12 +248,12 @@ SELECT
     COALESCE(p.center_lon, d.center_lon) AS center_lon,
     COALESCE(p.window_start, d.window_start) AS window_start,
     COALESCE(p.window_end, d.window_end) AS window_end,
-    
+
     -- Activity counts
     COALESCE(p.pickup_count, 0) AS pickup_count,
     COALESCE(d.dropoff_count, 0) AS dropoff_count,
     COALESCE(p.pickup_count, 0) + COALESCE(d.dropoff_count, 0) AS total_activity,
-    
+
     -- Grid area for density calculation
     COALESCE(p.grid_area_km2, d.grid_area_km2, 30.25) AS grid_area_km2
 
@@ -280,30 +280,30 @@ SELECT
     pickup_count,
     dropoff_count,
     total_activity,
-    
+
     -- Calculate activity density (events per km² per hour)
     -- 15-minute window = 0.25 hours, so multiply by 4 for hourly rate
     (CAST(total_activity AS DOUBLE) / grid_area_km2) * 4.0 AS activity_density,
-    
+
     -- Calculate hotspot score (weighted combination of factors)
     -- Weights: 60% total activity, 30% pickup density, 10% balance
     (
         (CAST(total_activity AS DOUBLE) * 0.6) +
         (CAST(pickup_count AS DOUBLE) * 0.3) +
-        (CASE 
+        (CASE
             WHEN pickup_count + dropoff_count > 0
-            THEN (1.0 - ABS(CAST(pickup_count AS DOUBLE) - CAST(dropoff_count AS DOUBLE)) / 
+            THEN (1.0 - ABS(CAST(pickup_count AS DOUBLE) - CAST(dropoff_count AS DOUBLE)) /
                          CAST(pickup_count + dropoff_count AS DOUBLE)) * total_activity * 0.1
             ELSE 0.0
         END)
     ) AS hotspot_score,
-    
+
     -- Rank within city and time window
     ROW_NUMBER() OVER (
         PARTITION BY city, window_start
         ORDER BY total_activity DESC, pickup_count DESC
     ) AS hotspot_rank,
-    
+
     CURRENT_TIMESTAMP AS calculation_timestamp
 
 FROM combined_hotspots
@@ -329,15 +329,15 @@ SELECT
     h.hotspot_score,
     h.hotspot_rank,
     h.calculation_timestamp,
-    
+
     -- Additional characteristics from ride data
     COUNT(DISTINCT r.ride_id) AS unique_rides_in_area,
     AVG(
-        CASE 
+        CASE
             WHEN r.event_type = 'ride_started' AND r.pickup_lat IS NOT NULL
-            THEN 
-                CASE 
-                    WHEN ABS(r.pickup_lat - h.center_lat) < 0.025 AND 
+            THEN
+                CASE
+                    WHEN ABS(r.pickup_lat - h.center_lat) < 0.025 AND
                          ABS(r.pickup_lon - h.center_lon) < 0.025
                     THEN 1
                     ELSE 0
@@ -379,14 +379,14 @@ SELECT
     activity_density,
     hotspot_rank,
     hotspot_score,
-    
+
     -- Placeholder for characteristics (would be enriched in production)
     0.0 AS avg_wait_time_minutes,
     0.0 AS avg_fare,
     0 AS unique_customers,
-    
+
     calculation_timestamp,
-    
+
     -- Partition columns
     CAST(DATE_FORMAT(window_start, 'yyyy-MM-dd') AS VARCHAR) AS `date`,
     CAST(DATE_FORMAT(window_start, 'HH') AS VARCHAR) AS `hour`
@@ -411,7 +411,7 @@ SELECT
     hotspot_rank,
     hotspot_score,
     calculation_timestamp,
-    
+
     -- DynamoDB TTL: expire after 4 hours (enough for historical comparison)
     UNIX_TIMESTAMP(calculation_timestamp) + 14400 AS ttl
 
@@ -432,7 +432,7 @@ WHERE hotspot_rank <= 20;  -- Top 20 per city for real-time driver recommendatio
 -- Query to find highly imbalanced areas (pickup != dropoff)
 -- SELECT city, geohash, pickup_count, dropoff_count,
 --        ABS(pickup_count - dropoff_count) AS imbalance,
---        CASE 
+--        CASE
 --            WHEN pickup_count > dropoff_count THEN 'NEEDS_MORE_DROPOFF_ZONES'
 --            WHEN dropoff_count > pickup_count THEN 'NEEDS_MORE_PICKUP_ZONES'
 --            ELSE 'BALANCED'

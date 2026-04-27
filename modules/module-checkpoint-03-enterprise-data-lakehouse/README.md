@@ -1,6 +1,6 @@
 # Checkpoint checkpoint-03: Enterprise Data Lakehouse
 
-🎯 **Project Type:** Integration Checkpoint  
+🎯 **Project Type:** Integration Checkpoint
 ⏱️ **Estimated Time:** TBD hours
 
 ## Prerequisites
@@ -17,6 +17,14 @@
 ## Project Overview
 
 [Description of the business scenario and technical challenge]
+
+## Learning Objectives
+
+By completing this checkpoint, you will:
+
+- Integrate advanced cloud-data architecture patterns in one solution.
+- Validate security, governance, and cost controls end-to-end.
+- Deliver a production-style implementation with measurable quality gates.
 
 ## Success Criteria
 

@@ -17,7 +17,6 @@ import os
 import base64
 from datetime import datetime
 from typing import Dict, Any, List
-import hashlib
 
 import boto3
 
@@ -51,21 +50,21 @@ location_buffer = []
 def calculate_geohash(lat: float, lon: float, precision: int = 5) -> str:
     """
     Calculate geohash for location-based indexing.
-    
+
     Simplified implementation using grid-based hashing.
     Precision 5 = ~5km grid cells.
     """
     # Simple grid-based hash (not a true geohash, but sufficient for demo)
     lat_grid = int((lat + 90) * (10 ** precision) / 180)
     lon_grid = int((lon + 180) * (10 ** precision) / 360)
-    
+
     return f"{lat_grid:010d}_{lon_grid:010d}"
 
 
 def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
     """
     Process driver location update.
-    
+
     Updates driver availability table with latest location and status.
     """
     driver_id = location_event['driver_id']
@@ -77,19 +76,19 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
     heading = location_event.get('heading', 0)
     current_ride_id = location_event.get('current_ride_id')
     timestamp = location_event.get('timestamp', datetime.utcnow().isoformat() + 'Z')
-    
+
     logger.debug(f"Processing location for driver {driver_id}: ({lat}, {lon})")
-    
+
     # Calculate geohash for spatial indexing
     geohash = calculate_geohash(lat, lon)
-    
+
     # Get existing driver record to preserve other fields
     existing_driver = get_item(
         DRIVER_AVAILABILITY_TABLE,
         {'driver_id': driver_id},
         region_name=REGION
     )
-    
+
     # Build update expression
     update_expression_parts = [
         'SET city = :city',
@@ -102,7 +101,7 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
         'last_location_update = :timestamp',
         'updated_at = :updated_at',
     ]
-    
+
     expression_values = {
         ':city': city,
         ':lat': lat,
@@ -114,7 +113,7 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
         ':timestamp': timestamp,
         ':updated_at': datetime.utcnow().isoformat() + 'Z',
     }
-    
+
     # Handle current_ride_id
     if current_ride_id:
         update_expression_parts.append('current_ride_id = :ride_id')
@@ -125,10 +124,10 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
         update_expression = ', '.join(update_expression_parts) + ' REMOVE current_ride_id'
     else:
         update_expression = ', '.join(update_expression_parts)
-    
+
     if 'REMOVE' not in update_expression:
         update_expression = ', '.join(update_expression_parts)
-    
+
     # If driver doesn't exist, create record
     if not existing_driver:
         driver_record = {
@@ -146,12 +145,12 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
             'avg_rating': 4.5,  # Default rating
             'total_rides': 0,
         }
-        
+
         if current_ride_id:
             driver_record['current_ride_id'] = current_ride_id
-        
+
         success = put_item(DRIVER_AVAILABILITY_TABLE, driver_record, region_name=REGION)
-        
+
         if success:
             logger.info(f"Created new driver record: {driver_id}")
             return {'status': 'created', 'driver_id': driver_id}
@@ -167,7 +166,7 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
             expression_attribute_values=expression_values,
             region_name=REGION
         )
-        
+
         if success:
             logger.debug(f"Updated driver location: {driver_id}")
             return {'status': 'updated', 'driver_id': driver_id}
@@ -179,13 +178,13 @@ def process_location_update(location_event: Dict[str, Any]) -> Dict[str, Any]:
 def archive_locations_to_s3():
     """Archive buffered location updates to S3."""
     global location_buffer
-    
+
     if not location_buffer:
         return
-    
+
     try:
         logger.info(f"Archiving {len(location_buffer)} location updates to S3")
-        
+
         s3_key = write_records_to_s3(
             bucket_name=ARCHIVE_BUCKET,
             prefix='locations/',
@@ -195,12 +194,12 @@ def archive_locations_to_s3():
             compress=True,
             region_name=REGION
         )
-        
+
         if s3_key:
             logger.info(f"Archived locations to {s3_key}")
             location_buffer = []  # Clear buffer
             return True
-        
+
     except Exception as e:
         logger.error(f"Error archiving locations to S3: {e}")
         return False
@@ -215,10 +214,10 @@ def publish_metrics(metric_name: str, value: float, dimensions: List[Dict] = Non
             'Unit': 'Count',
             'Timestamp': datetime.utcnow()
         }
-        
+
         if dimensions:
             metric_data['Dimensions'] = dimensions
-        
+
         cloudwatch.put_metric_data(
             Namespace='RideShare/Locations',
             MetricData=[metric_data]
@@ -230,41 +229,41 @@ def publish_metrics(metric_name: str, value: float, dimensions: List[Dict] = Non
 def lambda_handler(event, context):
     """
     Main Lambda handler for Kinesis stream events.
-    
+
     Processes batches of driver location updates from Kinesis.
     """
     global location_buffer
-    
+
     logger.info(f"Processing {len(event['Records'])} location records from Kinesis")
-    
+
     processed = 0
     failed = 0
     failed_records = []
-    
+
     # Track statistics
     by_city = {}
     available_count = 0
     busy_count = 0
-    
+
     for record in event['Records']:
         try:
             # Decode Kinesis record
             payload = base64.b64decode(record['kinesis']['data']).decode('utf-8')
             location_event = json.loads(payload)
-            
+
             # Process location update
             result = process_location_update(location_event)
-            
+
             if result.get('status') in ['created', 'updated']:
                 processed += 1
-                
+
                 # Add to archive buffer
                 location_buffer.append(location_event)
-                
+
                 # Track statistics
                 city = location_event.get('city', 'unknown')
                 by_city[city] = by_city.get(city, 0) + 1
-                
+
                 if location_event.get('available', True):
                     available_count += 1
                 else:
@@ -272,22 +271,22 @@ def lambda_handler(event, context):
             else:
                 failed += 1
                 failed_records.append(record)
-                
+
         except Exception as e:
             logger.error(f"Error processing location record: {e}", exc_info=True)
             failed += 1
             failed_records.append(record)
-    
+
     # Archive to S3 if buffer threshold reached
     if len(location_buffer) >= ARCHIVE_THRESHOLD:
         archive_locations_to_s3()
-    
+
     # Publish metrics
     publish_metrics('LocationUpdatesProcessed', processed)
     publish_metrics('LocationUpdatesFailed', failed)
     publish_metrics('DriversAvailable', available_count)
     publish_metrics('DriversBusy', busy_count)
-    
+
     # Publish per-city metrics
     for city, count in by_city.items():
         publish_metrics(
@@ -295,11 +294,11 @@ def lambda_handler(event, context):
             count,
             dimensions=[{'Name': 'City', 'Value': city}]
         )
-    
+
     logger.info(f"Batch complete: {processed} processed, {failed} failed. "
                f"Buffer size: {len(location_buffer)}")
     logger.info(f"Cities: {by_city}, Available: {available_count}, Busy: {busy_count}")
-    
+
     # Return failed records for retry (optional)
     if failed_records:
         return {
@@ -308,7 +307,7 @@ def lambda_handler(event, context):
                 for record in failed_records
             ]
         }
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps({

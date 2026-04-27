@@ -543,7 +543,7 @@ import json
 def lambda_handler(event, context):
     # Process event
     processed_count = len(event['Records'])
-    
+
     # Embed metric in log (free)
     print(json.dumps({
         "_aws": {

@@ -9,7 +9,7 @@
 
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -115,10 +115,10 @@ resource "aws_kms_alias" "s3" {
 # - Use kms_key_id = aws_kms_key.kinesis.key_id
 resource "aws_kinesis_stream" "rides" {
   name             = "${var.project_name}-${var.environment}-rides-stream"
-  
+
   # TODO: Configure shard count from variable
   shard_count      = var.kinesis_shard_count
-  
+
   # TODO: Set retention period to 24 hours
   retention_period = 24
 
@@ -143,7 +143,7 @@ resource "aws_kinesis_stream" "rides" {
 # Follow the same pattern as rides stream above
 resource "aws_kinesis_stream" "locations" {
   name             = "${var.project_name}-${var.environment}-locations-stream"
-  
+
   # TODO: Complete configuration
   shard_count      = var.kinesis_shard_count
   retention_period = 24
@@ -164,7 +164,7 @@ resource "aws_kinesis_stream" "locations" {
 
 resource "aws_kinesis_stream" "payments" {
   name             = "${var.project_name}-${var.environment}-payments-stream"
-  
+
   # TODO: Complete configuration
   shard_count      = 1  # Payments stream can have fewer shards
   retention_period = 24
@@ -183,7 +183,7 @@ resource "aws_kinesis_stream" "payments" {
 
 resource "aws_kinesis_stream" "ratings" {
   name             = "${var.project_name}-${var.environment}-ratings-stream"
-  
+
   # TODO: Complete configuration
   shard_count      = 1  # Ratings stream can have fewer shards
   retention_period = 24
@@ -284,7 +284,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
 resource "aws_dynamodb_table" "rides" {
   name         = "${var.project_name}-${var.environment}-rides"
   billing_mode = "PAY_PER_REQUEST"  # TODO: Set billing mode
-  
+
   # TODO: Configure partition key
   hash_key = "ride_id"
 

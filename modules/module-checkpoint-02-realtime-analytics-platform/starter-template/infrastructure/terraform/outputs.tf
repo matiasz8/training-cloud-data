@@ -227,16 +227,16 @@
 #   value = <<-EOT
 #     # View Kinesis stream details
 #     aws kinesis describe-stream --stream-name ${aws_kinesis_stream.ride_events.name} --region ${data.aws_region.current.name}
-#     
+#
 #     # View DynamoDB table
 #     aws dynamodb describe-table --table-name ${aws_dynamodb_table.rides.name} --region ${data.aws_region.current.name}
-#     
+#
 #     # Tail Lambda logs
 #     aws logs tail /aws/lambda/${aws_lambda_function.rides_processor.function_name} --follow --region ${data.aws_region.current.name}
-#     
+#
 #     # Run Glue crawler
 #     aws glue start-crawler --name ${aws_glue_crawler.ride_events.name} --region ${data.aws_region.current.name}
-#     
+#
 #     # Query Athena
 #     aws athena start-query-execution \
 #       --query-string "SELECT * FROM ${aws_glue_catalog_database.ride_analytics.name}.ride_events LIMIT 10" \

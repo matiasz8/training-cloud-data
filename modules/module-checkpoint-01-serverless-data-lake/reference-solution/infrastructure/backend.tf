@@ -23,20 +23,20 @@ terraform {
     # S3 bucket name for storing Terraform state
     # REPLACE WITH YOUR ACTUAL BUCKET NAME
     bucket = "your-org-terraform-state-cloudmart"
-    
+
     # Path within the bucket where this project's state will be stored
     key = "cloudmart-data-lake/terraform.tfstate"
-    
+
     # AWS region where the S3 bucket is located
     region = "us-east-1"
-    
+
     # Enable encryption at rest for the state file
     encrypt = true
-    
+
     # DynamoDB table name for state locking
     # REPLACE WITH YOUR ACTUAL TABLE NAME
     dynamodb_table = "terraform-state-lock-cloudmart"
-    
+
     # Enable versioning to maintain state file history
     # This is configured on the S3 bucket itself
     # versioning = true

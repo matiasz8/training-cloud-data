@@ -23,13 +23,13 @@ flowchart TB
 
     subgraph BronzeZone["🥉 BRONZE ZONE - Raw Data"]
         direction TB
-        
+
         BronzeTransactions["📊 bronze_transactions<br/>═══════════════════════<br/>Location:<br/>  s3://bronze/transactions/<br/><br/>Format: Parquet<br/>Partitioning: year/month/day<br/>Record Count: ~50K/day<br/>Size: ~10 MB/day<br/><br/>Schema:<br/>├─ transaction_id (string)<br/>├─ customer_id (string)<br/>├─ product_id (string)<br/>├─ quantity (int)<br/>├─ price (decimal)<br/>├─ transaction_date (string)<br/>├─ ingestion_timestamp (timestamp)<br/>└─ source_system (string)<br/><br/>Data Quality: ~85%<br/>Issues: Duplicates, nulls, format"]
-        
+
         BronzeCustomers["👥 bronze_customers<br/>═══════════════════════<br/>Location:<br/>  s3://bronze/customers/<br/><br/>Format: Parquet<br/>Partitioning: year/month/day<br/>Record Count: ~2K/day<br/>Size: ~1 MB/day<br/><br/>Schema:<br/>├─ customer_id (string)<br/>├─ first_name (string)<br/>├─ last_name (string)<br/>├─ email (string)<br/>├─ phone (string)<br/>├─ address (string)<br/>├─ city (string)<br/>├─ country (string)<br/>├─ created_date (string)<br/>├─ ingestion_timestamp (timestamp)<br/>└─ source_system (string)<br/><br/>Data Quality: ~80%<br/>Issues: Missing fields, inconsistent formats"]
-        
+
         BronzeProducts["📦 bronze_products<br/>═══════════════════════<br/>Location:<br/>  s3://bronze/products/<br/><br/>Format: Parquet<br/>Partitioning: year/month/day<br/>Record Count: ~500/day<br/>Size: ~500 KB/day<br/><br/>Schema:<br/>├─ product_id (string)<br/>├─ product_name (string)<br/>├─ category (string)<br/>├─ subcategory (string)<br/>├─ brand (string)<br/>├─ price (decimal)<br/>├─ cost (decimal)<br/>├─ stock_quantity (int)<br/>├─ supplier_id (string)<br/>├─ ingestion_timestamp (timestamp)<br/>└─ source_system (string)<br/><br/>Data Quality: ~90%<br/>Issues: Price inconsistencies"]
-        
+
         BronzeWebEvents["🌐 bronze_web_events<br/>═══════════════════════<br/>Location:<br/>  s3://bronze/web-events/<br/><br/>Format: Parquet<br/>Partitioning: year/month/day<br/>Record Count: ~200K/day<br/>Size: ~40 MB/day<br/><br/>Schema:<br/>├─ event_id (string)<br/>├─ session_id (string)<br/>├─ user_id (string)<br/>├─ event_type (string)<br/>├─ page_url (string)<br/>├─ referrer (string)<br/>├─ timestamp (string)<br/>├─ device_type (string)<br/>├─ browser (string)<br/>├─ ip_address (string)<br/>├─ ingestion_timestamp (timestamp)<br/>└─ source_system (string)<br/><br/>Data Quality: ~75%<br/>Issues: Bot traffic, malformed events"]
     end
 
@@ -39,54 +39,54 @@ flowchart TB
 
     subgraph Bronze2SilverJobs["🔄 BRONZE → SILVER ETL JOBS"]
         direction TB
-        
+
         %% Transactions Job
         subgraph TransactionsJob["ETL Job: transactions_cleaning"]
             direction TB
-            
+
             TxnJobConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.1X<br/>Number of Workers: 2 DPUs<br/>Timeout: 60 minutes<br/>Max Retries: 3<br/>Bookmark: Enabled<br/>Python Version: 3.9<br/>Spark Version: 3.1"]
-            
+
             TxnRead["📖 Read Bronze Data<br/>════════════════════<br/>Source: bronze_transactions<br/>Read Format: Parquet<br/>Partitions: Last 24 hours<br/>Push-down Predicates: True<br/><br/>Optimization:<br/>• Partition pruning<br/>• Column projection<br/>• Predicate pushdown"]
-            
+
             TxnClean["🧹 Cleaning Operations<br/>═══════════════════════<br/>1️⃣ Remove exact duplicates<br/>   GROUP BY all columns<br/><br/>2️⃣ Handle null values<br/>   • Drop rows with null IDs<br/>   • Fill nulls in quantity → 1<br/>   • Fill nulls in price → lookup<br/><br/>3️⃣ Fix data types<br/>   • Parse dates (multiple formats)<br/>   • Cast decimals consistently<br/>   • Convert strings to proper case<br/><br/>4️⃣ Standardize formats<br/>   • Date: ISO 8601 (YYYY-MM-DD)<br/>   • Currency: 2 decimal places<br/>   • IDs: Trim whitespace, uppercase"]
-            
+
             TxnValidate["✅ Validation Rules<br/>════════════════════<br/>Business Rules:<br/>• quantity > 0<br/>• price >= 0<br/>• transaction_date <= today<br/>• customer_id NOT NULL<br/>• product_id NOT NULL<br/><br/>Data Type Checks:<br/>• IDs are valid format<br/>• Dates are valid<br/>• Numbers in expected range<br/><br/>Referential Integrity:<br/>• customer_id exists (Silver)<br/>• product_id exists (Silver)"]
-            
+
             TxnEnrich["➕ Enrichment<br/>════════════════<br/>Add derived columns:<br/>├─ total_amount = quantity * price<br/>├─ year (partition)<br/>├─ month (partition)<br/>├─ day (partition)<br/>├─ quarter<br/>├─ day_of_week<br/>├─ is_weekend<br/>├─ processing_timestamp<br/>├─ data_quality_score<br/>└─ record_version"]
-            
+
             TxnWrite["💾 Write to Silver<br/>═════════════════════<br/>Target: silver_transactions<br/>Format: Parquet + Snappy<br/>Mode: Append<br/>Partitioning: year/month/day<br/>Optimization: Coalesce(4)<br/><br/>Statistics:<br/>• Enable column stats<br/>• Compute table stats"]
         end
-        
+
         %% Customers Job
         subgraph CustomersJob["ETL Job: customers_cleaning"]
             direction TB
-            
+
             CustJobConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.1X<br/>Number of Workers: 2 DPUs<br/>Timeout: 45 minutes<br/>Max Retries: 3<br/>Bookmark: Enabled"]
-            
+
             CustClean["🧹 Cleaning Operations<br/>═══════════════════════<br/>1️⃣ Deduplication<br/>   • Keep latest by ingestion_timestamp<br/>   • Merge conflicting records<br/><br/>2️⃣ Standardization<br/>   • Names: Title case<br/>   • Email: Lowercase<br/>   • Phone: Format +1-XXX-XXX-XXXX<br/>   • Address: Normalize<br/><br/>3️⃣ PII Handling<br/>   • Hash email (optional)<br/>   • Mask partial phone<br/>   • Tokenize sensitive fields<br/><br/>4️⃣ Enrichment<br/>   • Geocode city/country<br/>   • Add timezone<br/>   • Customer segment"]
-            
+
             CustValidate["✅ Validation Rules<br/>════════════════════<br/>Required Fields:<br/>• customer_id<br/>• email OR phone<br/><br/>Format Checks:<br/>• Email regex validation<br/>• Phone number validation<br/>• Country code (ISO 3166)<br/><br/>Business Rules:<br/>• created_date <= today<br/>• No test/dummy accounts"]
         end
-        
+
         %% Products Job
         subgraph ProductsJob["ETL Job: products_cleaning"]
             direction TB
-            
+
             ProdJobConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.1X<br/>Number of Workers: 2 DPUs<br/>Timeout: 30 minutes"]
-            
+
             ProdClean["🧹 Cleaning Operations<br/>═══════════════════════<br/>1️⃣ Master Data Management<br/>   • Dedup by product_id<br/>   • Keep latest version<br/>   • Track changes (SCD Type 2)<br/><br/>2️⃣ Standardization<br/>   • Category hierarchies<br/>   • Brand name normalization<br/>   • Unit of measure<br/><br/>3️⃣ Enrichment<br/>   • Calculate margin %<br/>   • Add price tier<br/>   • Product lifecycle stage<br/>   • Inventory status"]
-            
+
             ProdValidate["✅ Validation Rules<br/>════════════════════<br/>Business Rules:<br/>• price > cost<br/>• stock_quantity >= 0<br/>• category in valid list<br/><br/>Outlier Detection:<br/>• Price anomalies<br/>• Unusual margin<br/>• Stock level warnings"]
         end
-        
+
         %% Web Events Job
         subgraph WebEventsJob["ETL Job: web_events_cleaning"]
             direction TB
-            
+
             WebJobConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.1X<br/>Number of Workers: 3 DPUs<br/>Timeout: 90 minutes<br/>(Largest dataset)"]
-            
+
             WebClean["🧹 Cleaning Operations<br/>═══════════════════════<br/>1️⃣ Bot Filtering<br/>   • Remove known bot IPs<br/>   • Filter crawler user-agents<br/>   • Remove duplicate events (< 1s)<br/><br/>2️⃣ Sessionization<br/>   • Group by user + 30min window<br/>   • Assign session_id<br/>   • Calculate session metrics<br/><br/>3️⃣ URL Parsing<br/>   • Extract domain, path, params<br/>   • Clean tracking parameters<br/>   • Categorize page types<br/><br/>4️⃣ Device Classification<br/>   • Parse user-agent<br/>   • Device category (mobile/tablet/desktop)<br/>   • OS and browser version"]
-            
+
             WebValidate["✅ Validation Rules<br/>════════════════════<br/>Business Rules:<br/>• Valid event_type<br/>• Valid URL format<br/>• timestamp within 24 hours<br/><br/>Quality Filters:<br/>• Remove test traffic<br/>• Filter internal IPs<br/>• Remove malformed events"]
         end
     end
@@ -97,11 +97,11 @@ flowchart TB
 
     subgraph DataQualityLayer["✨ DATA QUALITY LAYER"]
         direction TB
-        
+
         QualityRules["📋 Quality Rules Engine<br/>══════════════════════════<br/>Rule Types:<br/>├─ Completeness: Non-null %<br/>├─ Uniqueness: Duplicate %<br/>├─ Validity: Format compliance<br/>├─ Consistency: Cross-field checks<br/>├─ Accuracy: Business rule validation<br/>└─ Timeliness: Data freshness<br/><br/>Thresholds:<br/>├─ Critical: 95% pass rate<br/>├─ Warning: 90% pass rate<br/>└─ Informational: < 90%"]
-        
+
         QualityMetrics["📊 Quality Metrics<br/>══════════════════════<br/>Per Dataset:<br/>├─ Total records processed<br/>├─ Records passed<br/>├─ Records failed<br/>├─ Pass rate %<br/>├─ Quality score (0-100)<br/>└─ Top 10 issues<br/><br/>Published to:<br/>• CloudWatch Custom Metrics<br/>• DynamoDB quality_metrics table<br/>• S3 quality reports bucket"]
-        
+
         QualityActions["⚡ Quality Actions<br/>═════════════════════<br/>If quality score < threshold:<br/><br/>🔴 Critical (< 80%):<br/>  • STOP pipeline<br/>  • Send alert<br/>  • Rollback Silver data<br/>  • Manual intervention required<br/><br/>🟡 Warning (80-90%):<br/>  • Continue pipeline<br/>  • Send notification<br/>  • Log detailed report<br/>  • Schedule review<br/><br/>🟢 Pass (> 90%):<br/>  • Continue pipeline<br/>  • Log summary metrics<br/>  • Update dashboard"]
     end
 
@@ -113,13 +113,13 @@ flowchart TB
 
     subgraph SilverZone["🥈 SILVER ZONE - Cleaned Data"]
         direction TB
-        
+
         SilverTransactions["📊 silver_transactions<br/>═══════════════════════<br/>Location:<br/>  s3://silver/transactions/<br/><br/>Format: Parquet + Snappy<br/>Partitioning: year/month/day<br/>Quality: ~98%<br/>Compression Ratio: ~8:1<br/><br/>Enhanced Schema:<br/>├─ transaction_id (string)<br/>├─ customer_id (string) ✓<br/>├─ product_id (string) ✓<br/>├─ quantity (int) ✓<br/>├─ unit_price (decimal(10,2)) ✓<br/>├─ total_amount (decimal(10,2)) NEW<br/>├─ transaction_date (date) ✓<br/>├─ year (int) NEW<br/>├─ month (int) NEW<br/>├─ day (int) NEW<br/>├─ quarter (int) NEW<br/>├─ day_of_week (string) NEW<br/>├─ is_weekend (boolean) NEW<br/>├─ processing_timestamp (timestamp) NEW<br/>├─ data_quality_score (int) NEW<br/>└─ record_version (int) NEW"]
-        
+
         SilverCustomers["👥 silver_customers<br/>═══════════════════════<br/>Location:<br/>  s3://silver/customers/<br/><br/>Format: Parquet + Snappy<br/>Quality: ~99%<br/>SCD Type: Type 2 (history preserved)<br/><br/>Enhanced Schema:<br/>├─ customer_id (string) PK<br/>├─ first_name (string) ✓<br/>├─ last_name (string) ✓<br/>├─ full_name (string) NEW<br/>├─ email (string) ✓<br/>├─ phone (string) ✓<br/>├─ address (string) ✓<br/>├─ city (string) ✓<br/>├─ state (string) NEW<br/>├─ postal_code (string) NEW<br/>├─ country (string) ✓<br/>├─ timezone (string) NEW<br/>├─ customer_segment (string) NEW<br/>├─ created_date (date) ✓<br/>├─ effective_date (date) NEW<br/>├─ end_date (date) NEW<br/>├─ is_current (boolean) NEW<br/>└─ processing_timestamp (timestamp) NEW"]
-        
+
         SilverProducts["📦 silver_products<br/>═══════════════════════<br/>Location:<br/>  s3://silver/products/<br/><br/>Format: Parquet + Snappy<br/>Quality: ~99%<br/>SCD Type: Type 2<br/><br/>Enhanced Schema:<br/>├─ product_id (string) PK<br/>├─ product_name (string) ✓<br/>├─ category (string) ✓<br/>├─ subcategory (string) ✓<br/>├─ brand (string) ✓<br/>├─ unit_price (decimal(10,2)) ✓<br/>├─ unit_cost (decimal(10,2)) ✓<br/>├─ margin_percent (decimal(5,2)) NEW<br/>├─ price_tier (string) NEW<br/>├─ stock_quantity (int) ✓<br/>├─ inventory_status (string) NEW<br/>├─ supplier_id (string) ✓<br/>├─ effective_date (date) NEW<br/>├─ end_date (date) NEW<br/>├─ is_current (boolean) NEW<br/>└─ processing_timestamp (timestamp) NEW"]
-        
+
         SilverWebEvents["🌐 silver_web_events<br/>═══════════════════════<br/>Location:<br/>  s3://silver/web-events/<br/><br/>Format: Parquet + Snappy<br/>Partitioning: year/month/day<br/>Quality: ~95%<br/>Bot Traffic Removed: ~30%<br/><br/>Enhanced Schema:<br/>├─ event_id (string) PK<br/>├─ session_id (string) ✓<br/>├─ user_id (string) ✓<br/>├─ event_type (string) ✓<br/>├─ event_category (string) NEW<br/>├─ page_url (string) ✓<br/>├─ page_path (string) NEW<br/>├─ page_category (string) NEW<br/>├─ referrer (string) ✓<br/>├─ referrer_source (string) NEW<br/>├─ timestamp (timestamp) ✓<br/>├─ device_type (string) ✓<br/>├─ device_category (string) NEW<br/>├─ browser (string) ✓<br/>├─ browser_version (string) NEW<br/>├─ os (string) NEW<br/>├─ is_bot (boolean) NEW<br/>└─ processing_timestamp (timestamp) NEW"]
     end
 
@@ -129,43 +129,43 @@ flowchart TB
 
     subgraph Silver2GoldJobs["🔄 SILVER → GOLD ETL JOBS"]
         direction TB
-        
+
         %% Fact Sales Job
         subgraph FactSalesJob["ETL Job: build_fact_sales"]
             direction TB
-            
+
             FactConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.2X<br/>Number of Workers: 5 DPUs<br/>Timeout: 90 minutes<br/>Bookmark: Enabled<br/>(Complex joins & aggregations)"]
-            
+
             FactJoin["🔗 Join Operations<br/>═══════════════════<br/>Main table: silver_transactions<br/><br/>LEFT JOIN silver_customers<br/>  ON txn.customer_id = cust.customer_id<br/>  AND cust.is_current = true<br/><br/>LEFT JOIN silver_products<br/>  ON txn.product_id = prod.product_id<br/>  AND prod.is_current = true<br/><br/>INNER JOIN dim_date<br/>  ON txn.transaction_date = date.date<br/><br/>Broadcast Hints:<br/>  • dim_date (small dimension)<br/>  • Optimize shuffle partitions"]
-            
+
             FactTransform["🎯 Business Logic<br/>════════════════════<br/>Calculate metrics:<br/>├─ revenue = quantity * unit_price<br/>├─ cost = quantity * unit_cost<br/>├─ profit = revenue - cost<br/>├─ margin = profit / revenue<br/>├─ discount_amount<br/>├─ net_revenue<br/>└─ tax_amount<br/><br/>Dimension keys:<br/>├─ date_key (FK)<br/>├─ customer_key (FK)<br/>├─ product_key (FK)<br/>└─ surrogate keys from dimensions"]
-            
+
             FactWrite["💾 Write Fact Table<br/>═════════════════════<br/>Target: gold_fact_sales<br/>Format: Parquet + Snappy<br/>Partitioning: year/month<br/>Clustering: customer_id<br/>Optimize: Z-order(transaction_date)<br/><br/>Statistics: Full"]
         end
-        
+
         %% Dimensions Job
         subgraph DimensionsJob["ETL Job: build_dimensions"]
             direction TB
-            
+
             DimConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.1X<br/>Number of Workers: 2 DPUs<br/>Timeout: 30 minutes<br/>(Small dimensions)"]
-            
+
             BuildDimCustomer["👥 dim_customers<br/>════════════════<br/>Source: silver_customers<br/><br/>SCD Type 2: Full history<br/>Surrogate Key: customer_key<br/>Natural Key: customer_id<br/><br/>Attributes:<br/>├─ Customer info<br/>├─ Demographics<br/>├─ Segmentation<br/>└─ Effective dates"]
-            
+
             BuildDimProduct["📦 dim_products<br/>════════════════<br/>Source: silver_products<br/><br/>SCD Type 2: Full history<br/>Surrogate Key: product_key<br/>Natural Key: product_id<br/><br/>Attributes:<br/>├─ Product details<br/>├─ Category hierarchy<br/>├─ Pricing tiers<br/>└─ Effective dates"]
-            
+
             BuildDimDate["📅 dim_date<br/>════════════════<br/>Source: Generated<br/><br/>SCD Type 0: Static<br/>Natural Key: date<br/><br/>Attributes:<br/>├─ Date components<br/>├─ Fiscal calendar<br/>├─ Holidays<br/>└─ Business days"]
         end
-        
+
         %% Aggregations Job
         subgraph AggregationsJob["ETL Job: build_aggregations"]
             direction TB
-            
+
             AggConfig["⚙️ Job Configuration<br/>═════════════════════<br/>Worker Type: G.2X<br/>Number of Workers: 3 DPUs<br/>Timeout: 60 minutes"]
-            
+
             DailySales["📊 agg_daily_sales<br/>═══════════════════════<br/>Granularity: Day<br/><br/>GROUP BY:<br/>  date, product_id, customer_segment<br/><br/>Metrics:<br/>├─ total_revenue<br/>├─ total_profit<br/>├─ total_quantity<br/>├─ avg_order_value<br/>├─ order_count<br/>├─ unique_customers<br/>└─ margin_percent"]
-            
+
             CustomerMetrics["👤 agg_customer_metrics<br/>══════════════════════════<br/>Granularity: Customer + Month<br/><br/>Metrics:<br/>├─ total_spend<br/>├─ order_count<br/>├─ avg_order_value<br/>├─ first_purchase_date<br/>├─ last_purchase_date<br/>├─ recency_days<br/>├─ frequency<br/>├─ monetary<br/>├─ rfm_score<br/>└─ customer_lifetime_value"]
-            
+
             ProductPerf["📈 agg_product_performance<br/>════════════════════════════<br/>Granularity: Product + Month<br/><br/>Metrics:<br/>├─ units_sold<br/>├─ revenue<br/>├─ profit<br/>├─ return_rate<br/>├─ inventory_turns<br/>├─ days_of_supply<br/>└─ stock_out_days"]
         end
     end
@@ -176,11 +176,11 @@ flowchart TB
 
     subgraph GoldZone["🥇 GOLD ZONE - Business-Ready Data"]
         direction TB
-        
+
         GoldFacts["📊 FACT TABLES<br/>═══════════════<br/>fact_sales<br/>├─ Transaction-level grain<br/>├─ All metrics pre-calculated<br/>├─ Slowly changing dimensions joined<br/>├─ Partitioned by year/month<br/>└─ ~50K rows/day<br/><br/>fact_web_sessions (Future)<br/>└─ Session-level analytics"]
-        
+
         GoldDimensions["📐 DIMENSION TABLES<br/>═════════════════════<br/>dim_customers (SCD Type 2)<br/>├─ Customer master data<br/>├─ Current and historical<br/>└─ ~20K rows total<br/><br/>dim_products (SCD Type 2)<br/>├─ Product master data<br/>└─ ~5K rows total<br/><br/>dim_date (Static)<br/>├─ Date dimension<br/>└─ 10 years of dates<br/><br/>dim_location (Future)<br/>└─ Geographic hierarchy"]
-        
+
         GoldAggregations["📈 AGGREGATION TABLES<br/>═══════════════════════════<br/>agg_daily_sales<br/>├─ Pre-aggregated daily metrics<br/>├─ Fast query performance<br/>└─ Powers dashboards<br/><br/>agg_customer_metrics<br/>├─ Customer analytics<br/>├─ RFM segmentation<br/>└─ CLV calculations<br/><br/>agg_product_performance<br/>├─ Product KPIs<br/>├─ Inventory metrics<br/>└─ Profitability analysis"]
     end
 
@@ -190,13 +190,13 @@ flowchart TB
 
     subgraph OrchestrationLayer["🎼 ORCHESTRATION & SCHEDULING"]
         direction TB
-        
+
         GlueWorkflow["AWS Glue Workflow<br/>════════════════════<br/>Workflow: cloudmart-etl-pipeline<br/><br/>Triggers:<br/>├─ Scheduled (Daily 2 AM UTC)<br/>├─ On-Demand (Manual)<br/>└─ Event-Driven (S3 notification)<br/><br/>Execution Mode:<br/>  • Sequential within stage<br/>  • Parallel across data sources<br/>  • Retry on failure (3 attempts)"]
-        
+
         JobDependencies["Job Dependencies<br/>═══════════════════<br/>Stage 1: Bronze → Silver<br/>  ├─ transactions_cleaning<br/>  ├─ customers_cleaning<br/>  ├─ products_cleaning<br/>  └─ web_events_cleaning<br/>  (Run in parallel)<br/><br/>Stage 2: Silver → Gold<br/>  ├─ build_dimensions<br/>  │   (Wait for all Stage 1)<br/>  ├─ build_fact_sales<br/>  │   (Wait for dimensions)<br/>  └─ build_aggregations<br/>      (Wait for fact tables)"]
-        
+
         EventBridge["Amazon EventBridge<br/>═════════════════════<br/>Rules:<br/>├─ Daily schedule (cron)<br/>├─ S3 object created<br/>├─ Glue job state change<br/>└─ CloudWatch alarms<br/><br/>Targets:<br/>├─ Start Glue Workflow<br/>├─ Send SNS notification<br/>├─ Update DynamoDB<br/>└─ Invoke Lambda"]
-        
+
         ErrorHandling["Error Handling<br/>═══════════════<br/>On Job Failure:<br/>1️⃣ Retry with exponential backoff<br/>2️⃣ Send SNS alert after 3 failures<br/>3️⃣ Log to CloudWatch<br/>4️⃣ Update job status DynamoDB<br/>5️⃣ Create incident ticket<br/><br/>Rollback Strategy:<br/>• Keep previous version<br/>• Atomic partition replacement<br/>• Restore from backup if needed"]
     end
 
@@ -206,11 +206,11 @@ flowchart TB
 
     subgraph MonitoringLayer["📊 MONITORING & OBSERVABILITY"]
         direction TB
-        
+
         JobMetrics["Glue Job Metrics<br/>═════════════════════<br/>Per Job:<br/>├─ Execution time<br/>├─ DPU hours consumed<br/>├─ Data processed (GB)<br/>├─ Records read/written<br/>├─ Success/failure rate<br/>└─ Cost per run<br/><br/>Published to CloudWatch"]
-        
+
         PipelineMetrics["Pipeline Metrics<br/>════════════════════<br/>End-to-End:<br/>├─ Total pipeline duration<br/>├─ Stage completion times<br/>├─ Data latency (ingestion→gold)<br/>├─ Data freshness<br/>└─ SLA compliance<br/><br/>Business Metrics:<br/>├─ Data quality scores<br/>├─ Record counts by zone<br/>└─ Growth trends"]
-        
+
         Alerts["CloudWatch Alarms<br/>════════════════════<br/>🚨 Critical Alarms:<br/>├─ Job failure (any)<br/>├─ Pipeline duration > 4 hours<br/>├─ Data quality < 90%<br/>└─ Cost spike > 150% avg<br/><br/>⚠️ Warning Alarms:<br/>├─ Job duration > P95<br/>├─ Data quality 90-95%<br/>└─ DPU utilization < 30%"]
     end
 

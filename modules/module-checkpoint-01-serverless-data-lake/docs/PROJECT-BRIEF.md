@@ -512,9 +512,9 @@ aws s3 cp test-orders.json s3://cloudmart-raw/orders/
 
 **Description:** Production transactional database containing orders, customers, and products
 
-**Owner:** Engineering Team  
-**Update Frequency:** Real-time  
-**Export Frequency:** Daily at 2:00 AM UTC  
+**Owner:** Engineering Team
+**Update Frequency:** Real-time
+**Export Frequency:** Daily at 2:00 AM UTC
 **Export Method:** Automated SQL export to S3
 
 **Schema:**
@@ -593,9 +593,9 @@ CREATE TABLE products (
 
 **Description:** Application logs capturing user interactions and page views
 
-**Owner:** Application Team  
-**Update Frequency:** Real-time (log buffering every 5 minutes)  
-**Storage Location:** s3://cloudmart-app-logs/clickstream/  
+**Owner:** Application Team
+**Update Frequency:** Real-time (log buffering every 5 minutes)
+**Storage Location:** s3://cloudmart-app-logs/clickstream/
 **File Format:** Newline-delimited JSON (NDJSON)
 
 **Event Schema:**
@@ -634,9 +634,9 @@ CREATE TABLE products (
 
 **Description:** Real-time product information from inventory management system
 
-**Owner:** Operations Team  
-**Update Frequency:** Hourly  
-**Export Method:** REST API → Lambda → S3  
+**Owner:** Operations Team
+**Update Frequency:** Hourly
+**Export Method:** REST API → Lambda → S3
 **File Format:** JSON
 
 **API Response Schema:**
@@ -680,9 +680,9 @@ CREATE TABLE products (
 
 **Description:** Campaign performance metrics and customer engagement data
 
-**Owner:** Marketing Team  
-**Update Frequency:** Daily at 6:00 AM UTC  
-**Export Method:** Manual CSV export to S3 (to be automated)  
+**Owner:** Marketing Team
+**Update Frequency:** Daily at 6:00 AM UTC
+**Export Method:** Manual CSV export to S3 (to be automated)
 **File Format:** CSV
 
 **Schema:**
@@ -1778,6 +1778,6 @@ This project represents the culmination of Modules 01-06 and your first major cl
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** March 9, 2026  
+**Document Version:** 1.0
+**Last Updated:** March 9, 2026
 **Next Review:** After 10 student submissions

@@ -18,18 +18,8 @@ TODO SECTIONS:
 6. Write aggregated Gold table
 """
 
-import sys
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import (
-    col, sum as spark_sum, count, avg, min as spark_min, max as spark_max,
-    to_date, year, month, dayofmonth, lag, rank, dense_rank,
-    round as spark_round, when, lit, countDistinct
-)
-from pyspark.sql.window import Window
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
 from awsglue.context import GlueContext
-from awsglue.job import Job
 
 
 def read_silver_orders(glue_context: GlueContext, database: str) -> DataFrame:
@@ -55,11 +45,11 @@ def read_silver_products(glue_context: GlueContext, database: str) -> DataFrame:
     return None  # TODO: Implement
 
 
-def join_tables(orders_df: DataFrame, customers_df: DataFrame, 
+def join_tables(orders_df: DataFrame, customers_df: DataFrame,
                 products_df: DataFrame) -> DataFrame:
     """
     Join orders with customers and products
-    
+
     TODO: Perform left joins to enrich orders with customer and product details
     - orders LEFT JOIN customers ON customer_id
     - orders LEFT JOIN products ON product_id
@@ -70,21 +60,21 @@ def join_tables(orders_df: DataFrame, customers_df: DataFrame,
     #     orders_df.customer_id == customers_df.customer_id,
     #     'left'
     # )
-    
+
     # TODO: Join with products
     # df = df.join(
     #     products_df,
     #     df.product_id == products_df.product_id,
     #     'left'
     # )
-    
+
     return None  # TODO: Implement
 
 
 def calculate_daily_sales_summary(df: DataFrame) -> DataFrame:
     """
     Calculate daily sales metrics
-    
+
     TODO: Group by order_date and calculate:
     - total_revenue: SUM(total_amount)
     - total_orders: COUNT(*)
@@ -100,14 +90,14 @@ def calculate_daily_sales_summary(df: DataFrame) -> DataFrame:
     #     avg('total_amount').alias('avg_order_value'),
     #     countDistinct('customer_id').alias('unique_customers')
     # )
-    
+
     return None  # TODO: Implement
 
 
 def calculate_product_rankings(df: DataFrame) -> DataFrame:
     """
     Calculate top products by revenue and quantity
-    
+
     TODO: Group by product and add ranking:
     - Rank products by total revenue
     - Use dense_rank() over window ordered by revenue DESC
@@ -118,21 +108,21 @@ def calculate_product_rankings(df: DataFrame) -> DataFrame:
     #     spark_sum('quantity').alias('total_quantity'),
     #     count('*').alias('order_count')
     # )
-    
+
     # TODO: Add ranking
     # window = Window.orderBy(col('total_revenue').desc())
     # product_summary = product_summary.withColumn(
     #     'revenue_rank',
     #     dense_rank().over(window)
     # )
-    
+
     return None  # TODO: Implement
 
 
 def calculate_customer_metrics(df: DataFrame) -> DataFrame:
     """
     Calculate customer-level metrics
-    
+
     TODO: Group by customer and calculate:
     - Total spend
     - Order count
@@ -148,7 +138,7 @@ def calculate_customer_metrics(df: DataFrame) -> DataFrame:
 def calculate_trends(df: DataFrame) -> DataFrame:
     """
     Calculate month-over-month and year-over-year trends
-    
+
     TODO: Use window functions with lag() to calculate:
     - Previous month revenue
     - MoM growth % = (current - previous) / previous * 100
@@ -157,14 +147,14 @@ def calculate_trends(df: DataFrame) -> DataFrame:
     # TODO: Add year and month columns
     # df = df.withColumn('year', year('order_date'))
     # df = df.withColumn('month', month('order_date'))
-    
+
     # TODO: Calculate MoM trends
     # window = Window.orderBy('year', 'month')
     # df = df.withColumn('prev_month_revenue', lag('total_revenue', 1).over(window))
     # df = df.withColumn('mom_growth_pct',
     #     ((col('total_revenue') - col('prev_month_revenue')) / col('prev_month_revenue')) * 100
     # )
-    
+
     return None  # TODO: Implement
 
 
@@ -194,7 +184,7 @@ if __name__ == "__main__":
 # ===============================================================================
 # HINTS FOR COMPLEX OPERATIONS:
 # ===============================================================================
-# 
+#
 # JOIN SYNTAX:
 # df_joined = df1.join(df2, df1.key == df2.key, 'inner')  # or 'left', 'right', 'outer'
 #
@@ -212,7 +202,7 @@ if __name__ == "__main__":
 #
 # LAG/LEAD for trends:
 # df = df.withColumn('prev_value', lag('value', 1).over(window))
-# 
+#
 # FILTERING TOP N:
 # df.filter(col('rank') <= 10)
 # ===============================================================================

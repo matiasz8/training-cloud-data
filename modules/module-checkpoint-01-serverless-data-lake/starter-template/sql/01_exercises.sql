@@ -86,7 +86,7 @@ USE cloudmart_silver_dev;
 -- WITH monthly_revenue AS (
 --   SELECT ...
 -- )
--- SELECT 
+-- SELECT
 --   year, month, revenue,
 --   LAG(revenue, 1) OVER (ORDER BY year, month) as prev_month_revenue,
 --   ...
@@ -127,7 +127,7 @@ USE cloudmart_silver_dev;
 -- Expected output: customer_id | email | last_order_date | days_since_last_order
 
 -- Your query here:
--- SELECT 
+-- SELECT
 --   c.customer_id,
 --   c.email,
 --   MAX(o.order_date) as last_order_date,
@@ -152,7 +152,7 @@ USE cloudmart_silver_dev;
 --   FROM orders
 --   GROUP BY customer_id
 -- )
--- SELECT 
+-- SELECT
 --   APPROX_PERCENTILE(total_spent, 0.25) as percentile_25,
 --   ...
 
@@ -179,7 +179,7 @@ USE cloudmart_silver_dev;
 -- Expected output: customer_id | recency_days | frequency | monetary
 
 -- Your query here:
--- SELECT 
+-- SELECT
 --   customer_id,
 --   DATE_DIFF('day', MAX(order_date), CURRENT_DATE) as recency_days,
 --   COUNT(DISTINCT order_id) as frequency,
@@ -217,7 +217,7 @@ USE cloudmart_silver_dev;
 --   GROUP BY customer_id
 -- ),
 -- customer_metrics AS (
---   SELECT 
+--   SELECT
 --     fp.customer_id,
 --     DATE_TRUNC('month', fp.first_purchase_date) as cohort_month,
 --     SUM(o.total_amount) as lifetime_value
@@ -225,7 +225,7 @@ USE cloudmart_silver_dev;
 --   JOIN orders o ON ...
 --   GROUP BY ...
 -- )
--- SELECT 
+-- SELECT
 --   cohort_month,
 --   COUNT(DISTINCT customer_id) as customers,
 --   AVG(lifetime_value) as avg_lifetime_value
@@ -246,13 +246,13 @@ USE cloudmart_silver_dev;
 
 -- Your query here:
 -- This is a market basket analysis query
--- SELECT 
+-- SELECT
 --   o1.product_id as product_1,
 --   o2.product_id as product_2,
 --   COUNT(*) as times_bought_together
 -- FROM orders o1
--- JOIN orders o2 
---   ON o1.customer_id = o2.customer_id 
+-- JOIN orders o2
+--   ON o1.customer_id = o2.customer_id
 --   AND o1.order_id = o2.order_id
 --   AND o1.product_id < o2.product_id  -- Avoid duplicates
 -- GROUP BY o1.product_id, o2.product_id
@@ -270,7 +270,7 @@ USE cloudmart_silver_dev;
 -- BONUS 1: Calculate customer churn rate by cohort
 -- TODO: For each first purchase month cohort, calculate % who haven't ordered in 90 days
 
--- BONUS 2: Identify anomalies in daily revenue 
+-- BONUS 2: Identify anomalies in daily revenue
 -- TODO: Find days where revenue is more than 2 standard deviations from average
 
 -- BONUS 3: Product stock optimization

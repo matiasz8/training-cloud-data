@@ -6,7 +6,6 @@ Provides AWS clients, test data generators, and cleanup utilities
 import os
 import pytest
 import boto3
-import json
 import random
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
@@ -34,7 +33,7 @@ def aws_region():
 def aws_session():
     """
     Create boto3 session with credentials
-    
+
     Returns:
         boto3.Session: Configured session
     """
@@ -47,7 +46,7 @@ def aws_session():
 def s3_client(aws_session):
     """
     Get S3 client for tests
-    
+
     Returns:
         boto3.client: S3 client
     """
@@ -60,7 +59,7 @@ def s3_client(aws_session):
 def s3_resource(aws_session):
     """
     Get S3 resource for tests
-    
+
     Returns:
         boto3.resource: S3 resource
     """
@@ -73,7 +72,7 @@ def s3_resource(aws_session):
 def glue_client(aws_session):
     """
     Get Glue client for tests
-    
+
     Returns:
         boto3.client: Glue client
     """
@@ -86,7 +85,7 @@ def glue_client(aws_session):
 def lambda_client(aws_session):
     """
     Get Lambda client for tests
-    
+
     Returns:
         boto3.client: Lambda client
     """
@@ -99,7 +98,7 @@ def lambda_client(aws_session):
 def iam_client(aws_session):
     """
     Get IAM client for tests
-    
+
     Returns:
         boto3.client: IAM client
     """
@@ -112,7 +111,7 @@ def iam_client(aws_session):
 def athena_client(aws_session):
     """
     Get Athena client for tests
-    
+
     Returns:
         boto3.client: Athena client
     """
@@ -125,7 +124,7 @@ def athena_client(aws_session):
 def logs_client(aws_session):
     """
     Get CloudWatch Logs client for tests
-    
+
     Returns:
         boto3.client: CloudWatch Logs client
     """
@@ -138,7 +137,7 @@ def logs_client(aws_session):
 def cloudwatch_client(aws_session):
     """
     Get CloudWatch client for tests
-    
+
     Returns:
         boto3.client: CloudWatch client
     """
@@ -151,7 +150,7 @@ def cloudwatch_client(aws_session):
 def sns_client(aws_session):
     """
     Get SNS client for tests
-    
+
     Returns:
         boto3.client: SNS client
     """
@@ -164,7 +163,7 @@ def sns_client(aws_session):
 def bucket_names():
     """
     Get expected bucket names
-    
+
     Returns:
         dict: Dictionary of bucket names
     """
@@ -181,7 +180,7 @@ def bucket_names():
 def lambda_function_names():
     """
     Get expected Lambda function names
-    
+
     Returns:
         dict: Dictionary of Lambda function names
     """
@@ -197,7 +196,7 @@ def lambda_function_names():
 def test_data_generator():
     """
     Factory for generating test datasets
-    
+
     Returns:
         function: Generator function
     """
@@ -214,7 +213,7 @@ def test_data_generator():
                 'is_active': random.choice([True, False])
             })
         return customers
-    
+
     def generate_orders(count: int = 500, customer_count: int = 100) -> List[Dict[str, Any]]:
         """Generate order test data"""
         orders = []
@@ -228,7 +227,7 @@ def test_data_generator():
                 'quantity': random.randint(1, 10)
             })
         return orders
-    
+
     def generate_products(count: int = 50) -> List[Dict[str, Any]]:
         """Generate product test data"""
         products = []
@@ -243,7 +242,7 @@ def test_data_generator():
                 'created_at': (datetime.now() - timedelta(days=random.randint(1, 180))).strftime('%Y-%m-%d')
             })
         return products
-    
+
     return {
         'customers': generate_customers,
         'orders': generate_orders,
@@ -255,17 +254,17 @@ def test_data_generator():
 def cleanup_test_data(s3_client, bucket_names):
     """
     Fixture to cleanup test data after tests
-    
+
     Yields control to test, then cleans up
     """
     test_keys = []
-    
+
     def register_key(bucket: str, key: str):
         """Register a key for cleanup"""
         test_keys.append((bucket, key))
-    
+
     yield register_key
-    
+
     # Cleanup after test
     logger.info(f"Cleaning up {len(test_keys)} test objects")
     for bucket, key in test_keys:

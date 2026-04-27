@@ -7,7 +7,7 @@
 
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -30,7 +30,7 @@ terraform {
 
 provider "aws" {
   region = var.region
-  
+
   default_tags {
     tags = merge(
       var.common_tags,
@@ -85,7 +85,7 @@ resource "aws_vpc" "lakehouse" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-vpc"
   }
@@ -94,7 +94,7 @@ resource "aws_vpc" "lakehouse" {
 # Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.lakehouse.id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-igw"
   }
@@ -107,7 +107,7 @@ resource "aws_subnet" "public" {
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
   availability_zone       = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
   map_public_ip_on_launch = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-public-subnet-${count.index + 1}"
     Tier = "Public"
@@ -120,7 +120,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.lakehouse.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + var.public_subnet_count)
   availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-private-subnet-${count.index + 1}"
     Tier = "Private"
@@ -133,7 +133,7 @@ resource "aws_subnet" "data" {
   vpc_id            = aws_vpc.lakehouse.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + var.public_subnet_count + var.private_subnet_count)
   availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-data-subnet-${count.index + 1}"
     Tier = "Data"
@@ -144,11 +144,11 @@ resource "aws_subnet" "data" {
 resource "aws_eip" "nat" {
   count  = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : var.private_subnet_count) : 0
   domain = "vpc"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-nat-eip-${count.index + 1}"
   }
-  
+
   depends_on = [aws_internet_gateway.main]
 }
 
@@ -157,18 +157,18 @@ resource "aws_nat_gateway" "main" {
   count         = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : var.private_subnet_count) : 0
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index % length(aws_subnet.public)].id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-nat-gw-${count.index + 1}"
   }
-  
+
   depends_on = [aws_internet_gateway.main]
 }
 
 # Public Route Table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.lakehouse.id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-public-rt"
   }
@@ -190,7 +190,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_route_table" "private" {
   count  = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : var.private_subnet_count) : 1
   vpc_id = aws_vpc.lakehouse.id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-private-rt-${count.index + 1}"
   }
@@ -213,7 +213,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_route_table" "data" {
   count  = var.data_subnet_count
   vpc_id = aws_vpc.lakehouse.id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-data-rt-${count.index + 1}"
   }
@@ -239,7 +239,7 @@ resource "aws_vpc_endpoint" "s3" {
     aws_route_table.private[*].id,
     aws_route_table.data[*].id
   )
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-s3-endpoint"
   }
@@ -255,7 +255,7 @@ resource "aws_vpc_endpoint" "dynamodb" {
     aws_route_table.private[*].id,
     aws_route_table.data[*].id
   )
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-dynamodb-endpoint"
   }
@@ -266,7 +266,7 @@ resource "aws_security_group" "vpc_endpoints" {
   name_prefix = "${var.project_name}-${var.environment}-vpce-"
   description = "Security group for VPC endpoints"
   vpc_id      = aws_vpc.lakehouse.id
-  
+
   ingress {
     description = "HTTPS from VPC"
     from_port   = 443
@@ -274,7 +274,7 @@ resource "aws_security_group" "vpc_endpoints" {
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
-  
+
   egress {
     description = "Allow all outbound"
     from_port   = 0
@@ -282,7 +282,7 @@ resource "aws_security_group" "vpc_endpoints" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-vpce-sg"
   }
@@ -296,7 +296,7 @@ resource "aws_vpc_endpoint" "glue" {
   subnet_ids          = aws_subnet.private[*].id
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-glue-endpoint"
   }
@@ -310,7 +310,7 @@ resource "aws_vpc_endpoint" "sts" {
   subnet_ids          = aws_subnet.private[*].id
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-sts-endpoint"
   }
@@ -324,7 +324,7 @@ resource "aws_vpc_endpoint" "logs" {
   subnet_ids          = aws_subnet.private[*].id
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-logs-endpoint"
   }
@@ -338,7 +338,7 @@ resource "aws_vpc_endpoint" "monitoring" {
   subnet_ids          = aws_subnet.private[*].id
   security_group_ids  = [aws_security_group.vpc_endpoints.id]
   private_dns_enabled = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-monitoring-endpoint"
   }
@@ -353,7 +353,7 @@ resource "aws_kms_key" "data" {
   description             = "KMS key for data lakehouse encryption"
   deletion_window_in_days = var.kms_deletion_window
   enable_key_rotation     = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-data-key"
   }
@@ -369,7 +369,7 @@ resource "aws_kms_key" "catalog" {
   description             = "KMS key for Glue Data Catalog encryption"
   deletion_window_in_days = var.kms_deletion_window
   enable_key_rotation     = true
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-catalog-key"
   }
@@ -385,7 +385,7 @@ resource "aws_kms_key" "logs" {
   description             = "KMS key for CloudWatch Logs encryption"
   deletion_window_in_days = var.kms_deletion_window
   enable_key_rotation     = true
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -421,7 +421,7 @@ resource "aws_kms_key" "logs" {
       }
     ]
   })
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-logs-key"
   }
@@ -439,7 +439,7 @@ resource "aws_kms_alias" "logs" {
 # Raw Zone Bucket
 resource "aws_s3_bucket" "raw" {
   bucket = "${var.project_name}-${var.environment}-raw-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-raw"
     Zone = "raw"
@@ -448,7 +448,7 @@ resource "aws_s3_bucket" "raw" {
 
 resource "aws_s3_bucket_versioning" "raw" {
   bucket = aws_s3_bucket.raw.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -456,7 +456,7 @@ resource "aws_s3_bucket_versioning" "raw" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "raw" {
   bucket = aws_s3_bucket.raw.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -468,7 +468,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "raw" {
 
 resource "aws_s3_bucket_public_access_block" "raw" {
   bucket = aws_s3_bucket.raw.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -477,30 +477,30 @@ resource "aws_s3_bucket_public_access_block" "raw" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "raw" {
   bucket = aws_s3_bucket.raw.id
-  
+
   rule {
     id     = "transition-to-intelligent-tiering"
     status = "Enabled"
-    
+
     transition {
       days          = 30
       storage_class = "INTELLIGENT_TIERING"
     }
   }
-  
+
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
-    
+
     noncurrent_version_expiration {
       noncurrent_days = var.s3_noncurrent_version_expiration
     }
   }
-  
+
   rule {
     id     = "delete-incomplete-multipart-uploads"
     status = "Enabled"
-    
+
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
@@ -509,7 +509,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw" {
 
 resource "aws_s3_bucket_logging" "raw" {
   bucket = aws_s3_bucket.raw.id
-  
+
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3-access-logs/raw/"
 }
@@ -517,7 +517,7 @@ resource "aws_s3_bucket_logging" "raw" {
 # Bronze Zone Bucket
 resource "aws_s3_bucket" "bronze" {
   bucket = "${var.project_name}-${var.environment}-bronze-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-bronze"
     Zone = "bronze"
@@ -526,7 +526,7 @@ resource "aws_s3_bucket" "bronze" {
 
 resource "aws_s3_bucket_versioning" "bronze" {
   bucket = aws_s3_bucket.bronze.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -534,7 +534,7 @@ resource "aws_s3_bucket_versioning" "bronze" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "bronze" {
   bucket = aws_s3_bucket.bronze.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -546,7 +546,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bronze" {
 
 resource "aws_s3_bucket_public_access_block" "bronze" {
   bucket = aws_s3_bucket.bronze.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -555,26 +555,26 @@ resource "aws_s3_bucket_public_access_block" "bronze" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "bronze" {
   bucket = aws_s3_bucket.bronze.id
-  
+
   rule {
     id     = "transition-to-ia"
     status = "Enabled"
-    
+
     transition {
       days          = 90
       storage_class = "STANDARD_IA"
     }
-    
+
     transition {
       days          = 180
       storage_class = "GLACIER_IR"
     }
   }
-  
+
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
-    
+
     noncurrent_version_expiration {
       noncurrent_days = var.s3_noncurrent_version_expiration
     }
@@ -583,7 +583,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bronze" {
 
 resource "aws_s3_bucket_logging" "bronze" {
   bucket = aws_s3_bucket.bronze.id
-  
+
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3-access-logs/bronze/"
 }
@@ -591,7 +591,7 @@ resource "aws_s3_bucket_logging" "bronze" {
 # Silver Zone Bucket
 resource "aws_s3_bucket" "silver" {
   bucket = "${var.project_name}-${var.environment}-silver-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-silver"
     Zone = "silver"
@@ -600,7 +600,7 @@ resource "aws_s3_bucket" "silver" {
 
 resource "aws_s3_bucket_versioning" "silver" {
   bucket = aws_s3_bucket.silver.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -608,7 +608,7 @@ resource "aws_s3_bucket_versioning" "silver" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "silver" {
   bucket = aws_s3_bucket.silver.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -620,7 +620,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "silver" {
 
 resource "aws_s3_bucket_public_access_block" "silver" {
   bucket = aws_s3_bucket.silver.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -629,21 +629,21 @@ resource "aws_s3_bucket_public_access_block" "silver" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "silver" {
   bucket = aws_s3_bucket.silver.id
-  
+
   rule {
     id     = "transition-to-ia"
     status = "Enabled"
-    
+
     transition {
       days          = 60
       storage_class = "STANDARD_IA"
     }
   }
-  
+
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
-    
+
     noncurrent_version_expiration {
       noncurrent_days = var.s3_noncurrent_version_expiration
     }
@@ -652,7 +652,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "silver" {
 
 resource "aws_s3_bucket_logging" "silver" {
   bucket = aws_s3_bucket.silver.id
-  
+
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3-access-logs/silver/"
 }
@@ -660,7 +660,7 @@ resource "aws_s3_bucket_logging" "silver" {
 # Gold Zone Bucket
 resource "aws_s3_bucket" "gold" {
   bucket = "${var.project_name}-${var.environment}-gold-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-gold"
     Zone = "gold"
@@ -669,7 +669,7 @@ resource "aws_s3_bucket" "gold" {
 
 resource "aws_s3_bucket_versioning" "gold" {
   bucket = aws_s3_bucket.gold.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -677,7 +677,7 @@ resource "aws_s3_bucket_versioning" "gold" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "gold" {
   bucket = aws_s3_bucket.gold.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -689,7 +689,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "gold" {
 
 resource "aws_s3_bucket_public_access_block" "gold" {
   bucket = aws_s3_bucket.gold.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -698,21 +698,21 @@ resource "aws_s3_bucket_public_access_block" "gold" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "gold" {
   bucket = aws_s3_bucket.gold.id
-  
+
   rule {
     id     = "transition-to-ia"
     status = "Enabled"
-    
+
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
     }
   }
-  
+
   rule {
     id     = "expire-old-versions"
     status = "Enabled"
-    
+
     noncurrent_version_expiration {
       noncurrent_days = var.s3_noncurrent_version_expiration
     }
@@ -721,7 +721,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "gold" {
 
 resource "aws_s3_bucket_logging" "gold" {
   bucket = aws_s3_bucket.gold.id
-  
+
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "s3-access-logs/gold/"
 }
@@ -730,9 +730,9 @@ resource "aws_s3_bucket_logging" "gold" {
 resource "aws_s3_bucket" "gold_replica" {
   count  = var.enable_cross_region_replication ? 1 : 0
   bucket = "${var.project_name}-${var.environment}-gold-replica-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   provider = aws.replica
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-gold-replica"
     Zone = "gold-replica"
@@ -742,9 +742,9 @@ resource "aws_s3_bucket" "gold_replica" {
 resource "aws_s3_bucket_versioning" "gold_replica" {
   count  = var.enable_cross_region_replication ? 1 : 0
   bucket = aws_s3_bucket.gold_replica[0].id
-  
+
   provider = aws.replica
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -752,31 +752,31 @@ resource "aws_s3_bucket_versioning" "gold_replica" {
 
 resource "aws_s3_bucket_replication_configuration" "gold" {
   count = var.enable_cross_region_replication ? 1 : 0
-  
+
   role   = aws_iam_role.replication[0].arn
   bucket = aws_s3_bucket.gold.id
-  
+
   rule {
     id     = "replicate-all"
     status = "Enabled"
-    
+
     destination {
       bucket        = aws_s3_bucket.gold_replica[0].arn
       storage_class = "STANDARD_IA"
-      
+
       encryption_configuration {
         replica_kms_key_id = aws_kms_key.data.arn
       }
     }
   }
-  
+
   depends_on = [aws_s3_bucket_versioning.gold]
 }
 
 # Logs Bucket
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.project_name}-${var.environment}-logs-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-logs"
   }
@@ -784,7 +784,7 @@ resource "aws_s3_bucket" "logs" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -796,7 +796,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
 
 resource "aws_s3_bucket_public_access_block" "logs" {
   bucket = aws_s3_bucket.logs.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -805,11 +805,11 @@ resource "aws_s3_bucket_public_access_block" "logs" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
-  
+
   rule {
     id     = "expire-logs"
     status = "Enabled"
-    
+
     expiration {
       days = var.logs_retention_days
     }
@@ -819,7 +819,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 # Scripts Bucket
 resource "aws_s3_bucket" "scripts" {
   bucket = "${var.project_name}-${var.environment}-scripts-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-scripts"
   }
@@ -827,7 +827,7 @@ resource "aws_s3_bucket" "scripts" {
 
 resource "aws_s3_bucket_versioning" "scripts" {
   bucket = aws_s3_bucket.scripts.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -835,7 +835,7 @@ resource "aws_s3_bucket_versioning" "scripts" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "scripts" {
   bucket = aws_s3_bucket.scripts.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -847,7 +847,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "scripts" {
 
 resource "aws_s3_bucket_public_access_block" "scripts" {
   bucket = aws_s3_bucket.scripts.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -861,7 +861,7 @@ resource "aws_s3_bucket_public_access_block" "scripts" {
 resource "aws_iam_role" "replication" {
   count = var.enable_cross_region_replication ? 1 : 0
   name  = "${var.project_name}-${var.environment}-s3-replication-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -879,7 +879,7 @@ resource "aws_iam_role" "replication" {
 resource "aws_iam_role_policy" "replication" {
   count = var.enable_cross_region_replication ? 1 : 0
   role  = aws_iam_role.replication[0].id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -920,36 +920,36 @@ resource "aws_iam_role_policy" "replication" {
 resource "aws_glue_catalog_database" "raw" {
   name        = "${var.project_name}_${var.environment}_raw"
   description = "Raw layer - ingested data in original format"
-  
+
   catalog_id = data.aws_caller_identity.current.account_id
-  
+
   location_uri = "s3://${aws_s3_bucket.raw.bucket}/"
 }
 
 resource "aws_glue_catalog_database" "bronze" {
   name        = "${var.project_name}_${var.environment}_bronze"
   description = "Bronze layer - validated and deduplicated data"
-  
+
   catalog_id = data.aws_caller_identity.current.account_id
-  
+
   location_uri = "s3://${aws_s3_bucket.bronze.bucket}/"
 }
 
 resource "aws_glue_catalog_database" "silver" {
   name        = "${var.project_name}_${var.environment}_silver"
   description = "Silver layer - cleansed and conformed data"
-  
+
   catalog_id = data.aws_caller_identity.current.account_id
-  
+
   location_uri = "s3://${aws_s3_bucket.silver.bucket}/"
 }
 
 resource "aws_glue_catalog_database" "gold" {
   name        = "${var.project_name}_${var.environment}_gold"
   description = "Gold layer - business-level aggregates and features"
-  
+
   catalog_id = data.aws_caller_identity.current.account_id
-  
+
   location_uri = "s3://${aws_s3_bucket.gold.bucket}/"
 }
 
@@ -960,12 +960,12 @@ resource "aws_glue_catalog_database" "gold" {
 # Lake Formation Data Lake Settings
 resource "aws_lakeformation_data_lake_settings" "main" {
   admins = [aws_iam_role.lakeformation_admin.arn]
-  
+
   create_database_default_permissions {
     permissions = []
     principal   = []
   }
-  
+
   create_table_default_permissions {
     permissions = []
     principal   = []
@@ -975,7 +975,7 @@ resource "aws_lakeformation_data_lake_settings" "main" {
 # Lake Formation Admin Role
 resource "aws_iam_role" "lakeformation_admin" {
   name = "${var.project_name}-${var.environment}-lakeformation-admin"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -1005,25 +1005,25 @@ resource "aws_iam_role_policy_attachment" "lakeformation_admin" {
 # Register S3 Locations with Lake Formation
 resource "aws_lakeformation_resource" "raw" {
   arn = aws_s3_bucket.raw.arn
-  
+
   depends_on = [aws_lakeformation_data_lake_settings.main]
 }
 
 resource "aws_lakeformation_resource" "bronze" {
   arn = aws_s3_bucket.bronze.arn
-  
+
   depends_on = [aws_lakeformation_data_lake_settings.main]
 }
 
 resource "aws_lakeformation_resource" "silver" {
   arn = aws_s3_bucket.silver.arn
-  
+
   depends_on = [aws_lakeformation_data_lake_settings.main]
 }
 
 resource "aws_lakeformation_resource" "gold" {
   arn = aws_s3_bucket.gold.arn
-  
+
   depends_on = [aws_lakeformation_data_lake_settings.main]
 }
 
@@ -1031,7 +1031,7 @@ resource "aws_lakeformation_resource" "gold" {
 resource "aws_lakeformation_permissions" "raw_database" {
   principal   = aws_iam_role.glue_service.arn
   permissions = ["CREATE_TABLE", "ALTER", "DROP"]
-  
+
   database {
     name       = aws_glue_catalog_database.raw.name
     catalog_id = data.aws_caller_identity.current.account_id
@@ -1041,7 +1041,7 @@ resource "aws_lakeformation_permissions" "raw_database" {
 resource "aws_lakeformation_permissions" "bronze_database" {
   principal   = aws_iam_role.glue_service.arn
   permissions = ["CREATE_TABLE", "ALTER", "DROP"]
-  
+
   database {
     name       = aws_glue_catalog_database.bronze.name
     catalog_id = data.aws_caller_identity.current.account_id
@@ -1051,7 +1051,7 @@ resource "aws_lakeformation_permissions" "bronze_database" {
 resource "aws_lakeformation_permissions" "silver_database" {
   principal   = aws_iam_role.glue_service.arn
   permissions = ["CREATE_TABLE", "ALTER", "DROP"]
-  
+
   database {
     name       = aws_glue_catalog_database.silver.name
     catalog_id = data.aws_caller_identity.current.account_id
@@ -1061,7 +1061,7 @@ resource "aws_lakeformation_permissions" "silver_database" {
 resource "aws_lakeformation_permissions" "gold_database" {
   principal   = aws_iam_role.glue_service.arn
   permissions = ["CREATE_TABLE", "ALTER", "DROP"]
-  
+
   database {
     name       = aws_glue_catalog_database.gold.name
     catalog_id = data.aws_caller_identity.current.account_id
@@ -1074,7 +1074,7 @@ resource "aws_lakeformation_permissions" "gold_database" {
 
 resource "aws_iam_role" "glue_service" {
   name = "${var.project_name}-${var.environment}-glue-service-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -1097,7 +1097,7 @@ resource "aws_iam_role_policy_attachment" "glue_service" {
 resource "aws_iam_role_policy" "glue_s3_access" {
   name = "glue-s3-access"
   role = aws_iam_role.glue_service.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -1161,7 +1161,7 @@ resource "aws_security_group" "emr_master" {
   name_prefix = "${var.project_name}-${var.environment}-emr-master-"
   description = "Security group for EMR master nodes"
   vpc_id      = aws_vpc.lakehouse.id
-  
+
   ingress {
     description     = "Allow from EMR workers"
     from_port       = 0
@@ -1169,7 +1169,7 @@ resource "aws_security_group" "emr_master" {
     protocol        = "tcp"
     security_groups = [aws_security_group.emr_worker.id]
   }
-  
+
   egress {
     description = "Allow all outbound"
     from_port   = 0
@@ -1177,7 +1177,7 @@ resource "aws_security_group" "emr_master" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-emr-master-sg"
   }
@@ -1187,7 +1187,7 @@ resource "aws_security_group" "emr_worker" {
   name_prefix = "${var.project_name}-${var.environment}-emr-worker-"
   description = "Security group for EMR worker nodes"
   vpc_id      = aws_vpc.lakehouse.id
-  
+
   ingress {
     description     = "Allow from EMR master"
     from_port       = 0
@@ -1195,7 +1195,7 @@ resource "aws_security_group" "emr_worker" {
     protocol        = "tcp"
     security_groups = [aws_security_group.emr_master.id]
   }
-  
+
   ingress {
     description = "Allow from other workers"
     from_port   = 0
@@ -1203,7 +1203,7 @@ resource "aws_security_group" "emr_worker" {
     protocol    = "tcp"
     self        = true
   }
-  
+
   egress {
     description = "Allow all outbound"
     from_port   = 0
@@ -1211,7 +1211,7 @@ resource "aws_security_group" "emr_worker" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-emr-worker-sg"
   }
@@ -1225,7 +1225,7 @@ resource "aws_cloudwatch_log_group" "glue_jobs" {
   name              = "/aws/glue/jobs/${var.project_name}-${var.environment}"
   retention_in_days = var.logs_retention_days
   kms_key_id        = aws_kms_key.logs.arn
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-glue-jobs"
   }
@@ -1235,7 +1235,7 @@ resource "aws_cloudwatch_log_group" "glue_crawlers" {
   name              = "/aws/glue/crawlers/${var.project_name}-${var.environment}"
   retention_in_days = var.logs_retention_days
   kms_key_id        = aws_kms_key.logs.arn
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-glue-crawlers"
   }
@@ -1245,7 +1245,7 @@ resource "aws_cloudwatch_log_group" "emr_serverless" {
   name              = "/aws/emr-serverless/${var.project_name}-${var.environment}"
   retention_in_days = var.logs_retention_days
   kms_key_id        = aws_kms_key.logs.arn
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-emr-serverless"
   }
@@ -1255,7 +1255,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
   name              = "/aws/lambda/${var.project_name}-${var.environment}"
   retention_in_days = var.logs_retention_days
   kms_key_id        = aws_kms_key.logs.arn
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-lambda"
   }
@@ -1269,7 +1269,7 @@ resource "aws_sns_topic" "alerts" {
   name              = "${var.project_name}-${var.environment}-alerts"
   display_name      = "Data Lakehouse Alerts"
   kms_master_key_id = aws_kms_key.logs.id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-alerts"
   }
@@ -1286,7 +1286,7 @@ resource "aws_sns_topic" "data_quality" {
   name              = "${var.project_name}-${var.environment}-data-quality"
   display_name      = "Data Quality Notifications"
   kms_master_key_id = aws_kms_key.logs.id
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-data-quality"
   }
@@ -1314,7 +1314,7 @@ resource "aws_cloudwatch_metric_alarm" "glue_job_failures" {
   threshold           = "0"
   alarm_description   = "This metric monitors Glue job failures"
   alarm_actions       = [aws_sns_topic.alerts.arn]
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-glue-job-failures"
   }
@@ -1331,7 +1331,7 @@ resource "aws_cloudwatch_metric_alarm" "s3_4xx_errors" {
   threshold           = "10"
   alarm_description   = "This metric monitors S3 4xx errors"
   alarm_actions       = [aws_sns_topic.alerts.arn]
-  
+
   tags = {
     Name = "${var.project_name}-${var.environment}-s3-4xx-errors"
   }

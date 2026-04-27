@@ -10,14 +10,14 @@
 # - Add default tags for all resources (environment, project, managed_by)
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
-  
+
   # TODO: Uncomment and configure backend for state management
   # backend "s3" {
   #   bucket         = "your-terraform-state-bucket"
@@ -30,7 +30,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   # TODO: Add default tags
   # default_tags {
   #   tags = {

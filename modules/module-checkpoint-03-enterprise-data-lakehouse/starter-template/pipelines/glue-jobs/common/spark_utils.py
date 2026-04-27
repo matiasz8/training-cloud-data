@@ -17,17 +17,11 @@ Date: [Date]
 """
 
 import logging
-import re
-from typing import List, Dict, Any, Optional
-from datetime import datetime, date
+from typing import List, Dict, Any
+from datetime import date
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import (
-    col, lit, when, regexp_replace, trim, lower, upper,
-    to_date, to_timestamp, md5, sha2, concat_ws, current_timestamp
-)
 from pyspark.sql.types import (
-    StructType, StructField, StringType, IntegerType,
-    DoubleType, TimestampType, BooleanType, DateType
+    StructType
 )
 
 # ==============================================
@@ -37,11 +31,11 @@ from pyspark.sql.types import (
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     """
     Get configured logger instance.
-    
+
     Args:
         name: Logger name (typically __name__)
         level: Logging level (default: INFO)
-    
+
     Returns:
         Configured logger instance
     """
@@ -49,10 +43,10 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     # - Set up formatting
     # - Add CloudWatch Logs handler
     # - Configure log level
-    
+
     logger = logging.getLogger(name)
     logger.setLevel(level)
-    
+
     # TODO: Add handler if not already added
     # if not logger.handlers:
     #     handler = logging.StreamHandler()
@@ -61,13 +55,13 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     #     )
     #     handler.setFormatter(formatter)
     #     logger.addHandler(handler)
-    
+
     return logger
 
 def log_dataframe_info(df: DataFrame, name: str = "DataFrame") -> None:
     """
     Log useful information about a DataFrame.
-    
+
     Args:
         df: DataFrame to log info about
         name: Name to identify the DataFrame
@@ -77,7 +71,7 @@ def log_dataframe_info(df: DataFrame, name: str = "DataFrame") -> None:
     # - Column count
     # - Schema
     # - Sample data
-    
+
     print(f"=== {name} Info ===")
     # print(f"Row count: {df.count()}")
     # print(f"Column count: {len(df.columns)}")
@@ -95,11 +89,11 @@ def log_dataframe_info(df: DataFrame, name: str = "DataFrame") -> None:
 def validate_schema(df: DataFrame, expected_schema: StructType) -> bool:
     """
     Validate if DataFrame schema matches expected schema.
-    
+
     Args:
         df: DataFrame to validate
         expected_schema: Expected schema
-    
+
     Returns:
         True if schema matches, False otherwise
     """
@@ -107,7 +101,7 @@ def validate_schema(df: DataFrame, expected_schema: StructType) -> bool:
     # - Compare field names
     # - Compare data types
     # - Handle nullable differences
-    
+
     # if df.schema == expected_schema:
     #     print("Schema validation passed")
     #     return True
@@ -116,33 +110,33 @@ def validate_schema(df: DataFrame, expected_schema: StructType) -> bool:
     #     print(f"Expected: {expected_schema}")
     #     print(f"Actual: {df.schema}")
     #     return False
-    
+
     return True
 
 def validate_email(email_col: str) -> bool:
     """
     Validate email address format.
-    
+
     Args:
         email_col: Column containing email addresses
-    
+
     Returns:
         Boolean expression for email validation
     """
     # TODO: Implement email validation regex
     # email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     # return col(email_col).rlike(email_pattern)
-    
+
     pass
 
 def validate_phone(phone_col: str, country_code: str = "US") -> bool:
     """
     Validate phone number format.
-    
+
     Args:
         phone_col: Column containing phone numbers
         country_code: Country code for validation (default: US)
-    
+
     Returns:
         Boolean expression for phone validation
     """
@@ -151,30 +145,30 @@ def validate_phone(phone_col: str, country_code: str = "US") -> bool:
     # if country_code == "US":
     #     phone_pattern = r'^\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$'
     #     return col(phone_col).rlike(phone_pattern)
-    
+
     pass
 
 def validate_date_range(date_col: str, min_date: date, max_date: date) -> bool:
     """
     Validate if dates fall within specified range.
-    
+
     Args:
         date_col: Column containing dates
         min_date: Minimum valid date
         max_date: Maximum valid date
-    
+
     Returns:
         Boolean expression for date range validation
     """
     # TODO: Implement date range validation
     # return (col(date_col) >= lit(min_date)) & (col(date_col) <= lit(max_date))
-    
+
     pass
 
 def check_data_quality(df: DataFrame, rules: Dict[str, Any]) -> Dict[str, Any]:
     """
     Check data quality based on defined rules.
-    
+
     Args:
         df: DataFrame to check
         rules: Dictionary of quality rules
@@ -183,7 +177,7 @@ def check_data_quality(df: DataFrame, rules: Dict[str, Any]) -> Dict[str, Any]:
                 "uniqueness": {"unique_columns": ["id"]},
                 "validity": {"email": "email_column"}
             }
-    
+
     Returns:
         Dictionary with quality check results
     """
@@ -193,38 +187,38 @@ def check_data_quality(df: DataFrame, rules: Dict[str, Any]) -> Dict[str, Any]:
     # - Validity: Validate formats (email, phone, etc.)
     # - Accuracy: Check value ranges
     # - Consistency: Cross-field validations
-    
+
     results = {
         "passed": True,
         "checks": {}
     }
-    
+
     # TODO: Implement each check type
-    
+
     return results
 
 # ==============================================
 # Data Transformation Utilities
 # ==============================================
 
-def standardize_string(df: DataFrame, column: str, 
+def standardize_string(df: DataFrame, column: str,
                        case: str = "lower", trim_ws: bool = True) -> DataFrame:
     """
     Standardize string column.
-    
+
     Args:
         df: Input DataFrame
         column: Column name to standardize
         case: Case transformation ('lower', 'upper', 'title', 'none')
         trim_ws: Whether to trim whitespace
-    
+
     Returns:
         DataFrame with standardized column
     """
     # TODO: Implement string standardization
     # if trim_ws:
     #     df = df.withColumn(column, trim(col(column)))
-    
+
     # if case == "lower":
     #     df = df.withColumn(column, lower(col(column)))
     # elif case == "upper":
@@ -232,19 +226,19 @@ def standardize_string(df: DataFrame, column: str,
     # elif case == "title":
     #     # Implement title case
     #     pass
-    
+
     return df
 
-def remove_special_characters(df: DataFrame, column: str, 
+def remove_special_characters(df: DataFrame, column: str,
                               keep_pattern: str = "[a-zA-Z0-9 ]") -> DataFrame:
     """
     Remove special characters from string column.
-    
+
     Args:
         df: Input DataFrame
         column: Column name
         keep_pattern: Regex pattern of characters to keep
-    
+
     Returns:
         DataFrame with cleaned column
     """
@@ -253,20 +247,20 @@ def remove_special_characters(df: DataFrame, column: str,
     #     column,
     #     regexp_replace(col(column), f"[^{keep_pattern}]", "")
     # )
-    
+
     return df
 
-def standardize_date_format(df: DataFrame, column: str, 
+def standardize_date_format(df: DataFrame, column: str,
                            input_format: str, output_format: str = "yyyy-MM-dd") -> DataFrame:
     """
     Standardize date format.
-    
+
     Args:
         df: Input DataFrame
         column: Date column name
         input_format: Current date format
         output_format: Desired date format
-    
+
     Returns:
         DataFrame with standardized date
     """
@@ -275,13 +269,13 @@ def standardize_date_format(df: DataFrame, column: str,
     #     column,
     #     to_date(col(column), input_format)
     # )
-    
+
     return df
 
 def fill_missing_values(df: DataFrame, strategy: Dict[str, Any]) -> DataFrame:
     """
     Fill missing values based on strategy.
-    
+
     Args:
         df: Input DataFrame
         strategy: Dict mapping columns to fill values/methods
@@ -290,7 +284,7 @@ def fill_missing_values(df: DataFrame, strategy: Dict[str, Any]) -> DataFrame:
                 "city": {"value": "UNKNOWN"},
                 "status": {"value": "ACTIVE"}
             }
-    
+
     Returns:
         DataFrame with filled values
     """
@@ -299,7 +293,7 @@ def fill_missing_values(df: DataFrame, strategy: Dict[str, Any]) -> DataFrame:
     # - Mean/median/mode
     # - Forward fill/backward fill
     # - Interpolation
-    
+
     # for column, fill_config in strategy.items():
     #     if "value" in fill_config:
     #         df = df.fillna({column: fill_config["value"]})
@@ -308,23 +302,23 @@ def fill_missing_values(df: DataFrame, strategy: Dict[str, Any]) -> DataFrame:
     #         if method == "mean":
     #             mean_val = df.agg({column: "mean"}).collect()[0][0]
     #             df = df.fillna({column: mean_val})
-    
+
     return df
 
 # ==============================================
 # Key Generation Utilities
 # ==============================================
 
-def generate_surrogate_key(df: DataFrame, business_keys: List[str], 
+def generate_surrogate_key(df: DataFrame, business_keys: List[str],
                           key_name: str = "surrogate_key") -> DataFrame:
     """
     Generate surrogate key from business keys.
-    
+
     Args:
         df: Input DataFrame
         business_keys: List of columns forming business key
         key_name: Name for surrogate key column
-    
+
     Returns:
         DataFrame with surrogate key added
     """
@@ -333,19 +327,19 @@ def generate_surrogate_key(df: DataFrame, business_keys: List[str],
     #     key_name,
     #     md5(concat_ws("||", *[col(k) for k in business_keys]))
     # )
-    
+
     return df
 
-def generate_hash_key(df: DataFrame, columns: List[str], 
+def generate_hash_key(df: DataFrame, columns: List[str],
                       algorithm: str = "md5") -> DataFrame:
     """
     Generate hash from specified columns for change detection.
-    
+
     Args:
         df: Input DataFrame
         columns: List of columns to hash
         algorithm: Hash algorithm ('md5' or 'sha256')
-    
+
     Returns:
         DataFrame with hash column added
     """
@@ -360,7 +354,7 @@ def generate_hash_key(df: DataFrame, columns: List[str],
     #         "row_hash",
     #         sha2(concat_ws("||", *[col(c) for c in columns]), 256)
     #     )
-    
+
     return df
 
 # ==============================================
@@ -370,11 +364,11 @@ def generate_hash_key(df: DataFrame, columns: List[str],
 def optimize_dataframe(df: DataFrame, num_partitions: int = None) -> DataFrame:
     """
     Optimize DataFrame for better performance.
-    
+
     Args:
         df: Input DataFrame
         num_partitions: Target number of partitions (optional)
-    
+
     Returns:
         Optimized DataFrame
     """
@@ -382,22 +376,22 @@ def optimize_dataframe(df: DataFrame, num_partitions: int = None) -> DataFrame:
     # - Repartition for better parallelism
     # - Cache if used multiple times
     # - Coalesce to reduce small files
-    
+
     # if num_partitions:
     #     df = df.repartition(num_partitions)
     # else:
     #     # Auto-optimize based on data size
     #     pass
-    
+
     return df
 
-def write_with_optimization(df: DataFrame, path: str, 
+def write_with_optimization(df: DataFrame, path: str,
                            format: str = "parquet",
                            partition_by: List[str] = None,
                            mode: str = "overwrite") -> None:
     """
     Write DataFrame with optimization settings.
-    
+
     Args:
         df: DataFrame to write
         path: Output path
@@ -407,18 +401,18 @@ def write_with_optimization(df: DataFrame, path: str,
     """
     # TODO: Write with optimized settings
     # writer = df.write.mode(mode).format(format)
-    
+
     # # Set optimization options
     # if format == "parquet":
     #     writer = writer.option("compression", "snappy")
     #     writer = writer.option("maxRecordsPerFile", 100000)
-    
+
     # # Apply partitioning
     # if partition_by:
     #     writer = writer.partitionBy(*partition_by)
-    
+
     # writer.save(path)
-    
+
     pass
 
 # ==============================================
@@ -428,11 +422,11 @@ def write_with_optimization(df: DataFrame, path: str,
 def handle_bad_records(df: DataFrame, bad_records_path: str) -> DataFrame:
     """
     Separate and save bad records for review.
-    
+
     Args:
         df: Input DataFrame
         bad_records_path: Path to save bad records
-    
+
     Returns:
         DataFrame with only good records
     """
@@ -440,18 +434,18 @@ def handle_bad_records(df: DataFrame, bad_records_path: str) -> DataFrame:
     # - Define rules for bad records
     # - Filter and save bad records
     # - Return clean DataFrame
-    
+
     return df
 
 def retry_on_failure(func, max_retries: int = 3, delay: int = 60):
     """
     Decorator to retry function on failure.
-    
+
     Args:
         func: Function to retry
         max_retries: Maximum number of retries
         delay: Delay between retries in seconds
-    
+
     Returns:
         Wrapped function with retry logic
     """
@@ -467,7 +461,7 @@ def retry_on_failure(func, max_retries: int = 3, delay: int = 60):
     #             else:
     #                 raise
     # return wrapper
-    
+
     pass
 
 # ==============================================
@@ -477,11 +471,11 @@ def retry_on_failure(func, max_retries: int = 3, delay: int = 60):
 def add_audit_columns(df: DataFrame, source_system: str = None) -> DataFrame:
     """
     Add standard audit columns to DataFrame.
-    
+
     Args:
         df: Input DataFrame
         source_system: Source system identifier
-    
+
     Returns:
         DataFrame with audit columns added
     """
@@ -491,25 +485,25 @@ def add_audit_columns(df: DataFrame, source_system: str = None) -> DataFrame:
     # - source_system
     # - batch_id
     # - created_by
-    
+
     # df = df.withColumn("created_timestamp", current_timestamp())
     # df = df.withColumn("updated_timestamp", current_timestamp())
-    
+
     # if source_system:
     #     df = df.withColumn("source_system", lit(source_system))
-    
+
     return df
 
-def get_catalog_metadata(database: str, table: str, 
+def get_catalog_metadata(database: str, table: str,
                         glue_client = None) -> Dict[str, Any]:
     """
     Get table metadata from Glue Data Catalog.
-    
+
     Args:
         database: Database name
         table: Table name
         glue_client: Boto3 Glue client (optional)
-    
+
     Returns:
         Dictionary with table metadata
     """
@@ -517,7 +511,7 @@ def get_catalog_metadata(database: str, table: str,
     # import boto3
     # if not glue_client:
     #     glue_client = boto3.client('glue')
-    
+
     # try:
     #     response = glue_client.get_table(
     #         DatabaseName=database,
@@ -527,43 +521,43 @@ def get_catalog_metadata(database: str, table: str,
     # except Exception as e:
     #     print(f"Error getting catalog metadata: {e}")
     #     return {}
-    
+
     pass
 
 # ==============================================
 # Testing Utilities
 # ==============================================
 
-def create_test_dataframe(spark: SparkSession, 
-                         data: List[tuple], 
+def create_test_dataframe(spark: SparkSession,
+                         data: List[tuple],
                          schema: StructType) -> DataFrame:
     """
     Create test DataFrame from data and schema.
-    
+
     Args:
         spark: SparkSession
         data: List of tuples with test data
         schema: Schema for the DataFrame
-    
+
     Returns:
         Test DataFrame
     """
     # TODO: Create test DataFrame
     # df = spark.createDataFrame(data, schema)
     # return df
-    
+
     pass
 
-def compare_dataframes(df1: DataFrame, df2: DataFrame, 
+def compare_dataframes(df1: DataFrame, df2: DataFrame,
                       key_columns: List[str]) -> Dict[str, Any]:
     """
     Compare two DataFrames and return differences.
-    
+
     Args:
         df1: First DataFrame
         df2: Second DataFrame
         key_columns: Columns to join on
-    
+
     Returns:
         Dictionary with comparison results
     """
@@ -572,14 +566,14 @@ def compare_dataframes(df1: DataFrame, df2: DataFrame,
     # - Find records only in df2
     # - Find changed records
     # - Return statistics
-    
+
     results = {
         "only_in_df1": 0,
         "only_in_df2": 0,
         "changed": 0,
         "identical": 0
     }
-    
+
     return results
 
 # ==============================================

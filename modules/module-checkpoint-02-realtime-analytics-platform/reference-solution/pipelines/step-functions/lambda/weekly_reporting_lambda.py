@@ -20,9 +20,9 @@ import logging
 import os
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 
 # Configure logging
 logger = logging.getLogger()
@@ -54,19 +54,19 @@ class DecimalEncoder(json.JSONEncoder):
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     Main Lambda handler for weekly reporting operations
-    
+
     Args:
         event: Input containing action and parameters
         context: Lambda execution context
-        
+
     Returns:
         Dictionary with results based on action
     """
     try:
         logger.info(f"Weekly reporting lambda invoked with event: {json.dumps(event, cls=DecimalEncoder)}")
-        
+
         action = event.get('action')
-        
+
         if action == 'check_data_availability':
             return check_data_availability(event)
         elif action == 'process_athena_results':
@@ -75,7 +75,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             return generate_personalized_report(event)
         else:
             raise ValueError(f"Unknown action: {action}")
-            
+
     except Exception as e:
         logger.error(f"Error in weekly reporting lambda: {str(e)}", exc_info=True)
         raise
@@ -84,34 +84,34 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 def check_data_availability(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     Check if data is available for the past N days
-    
+
     Verifies that each day has sufficient data by checking for daily metrics
     in the aggregated_metrics table. Ensures data quality before generating reports.
-    
+
     Args:
         event: Contains days_back parameter
-        
+
     Returns:
         Dictionary with availability status and missing days
     """
     days_back = event.get('days_back', DAYS_TO_CHECK)
     execution_id = event.get('execution_id', 'unknown')
-    
+
     logger.info(f"Checking data availability for past {days_back} days")
-    
+
     table = dynamodb.Table(METRICS_TABLE)
     end_date = datetime.utcnow().date()
     start_date = end_date - timedelta(days=days_back)
-    
+
     # Check each day
     missing_days = []
     days_with_data = []
-    
+
     current_date = start_date
     while current_date <= end_date:
         # Query for daily metrics for this date
         date_str = current_date.strftime('%Y-%m-%d')
-        
+
         # Check for rides_daily metric
         response = table.query(
             IndexName='metric_type_timestamp_index',  # Assumes GSI exists
@@ -121,21 +121,21 @@ def check_data_availability(event: Dict[str, Any]) -> Dict[str, Any]:
                                       int(datetime.combine(current_date, datetime.max.time()).timestamp())
                                   )
         )
-        
+
         if response.get('Count', 0) > 0:
             days_with_data.append(date_str)
             logger.info(f"Data found for {date_str}")
         else:
             missing_days.append(date_str)
             logger.warning(f"No data found for {date_str}")
-        
+
         current_date += timedelta(days=1)
-    
+
     # Calculate completeness
     total_days = days_back + 1  # Include today
     data_completeness_pct = (len(days_with_data) / total_days) * 100
     data_available = data_completeness_pct >= MIN_DATA_COMPLETENESS_PCT
-    
+
     result = {
         'statusCode': 200,
         'data_available': data_available,
@@ -149,7 +149,7 @@ def check_data_availability(event: Dict[str, Any]) -> Dict[str, Any]:
         },
         'execution_id': execution_id
     }
-    
+
     logger.info(f"Data availability check completed: {json.dumps(result, cls=DecimalEncoder)}")
     return result
 
@@ -157,33 +157,33 @@ def check_data_availability(event: Dict[str, Any]) -> Dict[str, Any]:
 def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     Process Athena query results and calculate weekly KPIs
-    
+
     Fetches results from S3, parses CSV data, and calculates:
     - Total rides and revenue for the week
     - Week-over-week growth percentages
     - Top performing cities
     - Revenue trends and patterns
     - Customer insights
-    
+
     Args:
         event: Contains query_execution_id and output_location
-        
+
     Returns:
         Dictionary with calculated KPIs and insights
     """
     query_execution_id = event.get('query_execution_id')
     output_location = event.get('output_location')
     date_range = event.get('date_range', {})
-    
+
     logger.info(f"Processing Athena results for query: {query_execution_id}")
-    
+
     # Parse S3 location
     if output_location.startswith('s3://'):
         output_location = output_location[5:]
-    
+
     bucket_name = output_location.split('/')[0]
     key = '/'.join(output_location.split('/')[1:])
-    
+
     # Fetch results from S3
     try:
         response = s3.get_object(Bucket=bucket_name, Key=key)
@@ -192,17 +192,17 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error fetching Athena results from S3: {str(e)}")
         raise
-    
+
     # Parse CSV results
     lines = results_data.strip().split('\n')
     if len(lines) < 2:
         raise ValueError("No data rows in Athena results")
-    
+
     headers = lines[0].split(',')
     rows = [line.split(',') for line in lines[1:]]
-    
+
     logger.info(f"Parsed {len(rows)} data rows")
-    
+
     # Calculate KPIs
     total_rides = 0
     total_revenue = 0
@@ -210,7 +210,7 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
     city_metrics = {}
     daily_metrics = {}
     payment_method_revenue = {}
-    
+
     for row in rows:
         # Parse row data (assumes specific column order from query)
         try:
@@ -223,12 +223,12 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
             payment_method = row[6] if len(row) > 6 else 'unknown'
             transaction_count = int(row[7]) if len(row) > 7 else 0
             payment_amount = float(row[8]) if len(row) > 8 else 0
-            
+
             # Aggregate totals
             total_rides += rides
             completed_rides += completed
             total_revenue += revenue
-            
+
             # Aggregate by city
             if city not in city_metrics:
                 city_metrics[city] = {
@@ -239,7 +239,7 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
             city_metrics[city]['rides'] += rides
             city_metrics[city]['completed'] += completed
             city_metrics[city]['revenue'] += revenue
-            
+
             # Aggregate by date
             if date not in daily_metrics:
                 daily_metrics[date] = {
@@ -248,27 +248,27 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
                 }
             daily_metrics[date]['rides'] += rides
             daily_metrics[date]['revenue'] += revenue
-            
+
             # Aggregate by payment method
             if payment_method not in payment_method_revenue:
                 payment_method_revenue[payment_method] = 0
             payment_method_revenue[payment_method] += payment_amount
-            
+
         except (ValueError, IndexError) as e:
             logger.warning(f"Error parsing row: {row}, error: {str(e)}")
             continue
-    
+
     # Calculate averages
     avg_rides_per_day = total_rides / len(daily_metrics) if daily_metrics else 0
     avg_revenue_per_day = total_revenue / len(daily_metrics) if daily_metrics else 0
     completion_rate = (completed_rides / total_rides * 100) if total_rides > 0 else 0
-    
+
     # Calculate week-over-week growth (requires previous week's data)
     # For this example, we'll fetch previous week from DynamoDB
     previous_week_metrics = fetch_previous_week_metrics()
     wow_growth_rides = calculate_wow_growth(total_rides, previous_week_metrics.get('total_rides', 0))
     wow_growth_revenue = calculate_wow_growth(total_revenue, previous_week_metrics.get('total_revenue', 0))
-    
+
     # Rank cities
     city_rankings = sorted(
         [
@@ -283,7 +283,7 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
         key=lambda x: x['revenue'],
         reverse=True
     )[:10]
-    
+
     # Calculate revenue trends
     revenue_trend = [
         {
@@ -293,7 +293,7 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
         }
         for date, metrics in sorted(daily_metrics.items())
     ]
-    
+
     result = {
         'statusCode': 200,
         'kpis': {
@@ -321,7 +321,7 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
         },
         'revenue_trend': revenue_trend
     }
-    
+
     logger.info(f"Athena results processed successfully: {json.dumps(result, cls=DecimalEncoder)}")
     return result
 
@@ -329,17 +329,17 @@ def process_athena_results(event: Dict[str, Any]) -> Dict[str, Any]:
 def fetch_previous_week_metrics() -> Dict[str, Any]:
     """
     Fetch metrics from the previous week for comparison
-    
+
     Returns:
         Dictionary with previous week's metrics
     """
     try:
         table = dynamodb.Table(METRICS_TABLE)
-        
+
         # Calculate previous week's date range
         end_date = datetime.utcnow().date() - timedelta(days=7)
         start_date = end_date - timedelta(days=7)
-        
+
         # Query weekly summary metric if it exists
         response = table.query(
             IndexName='metric_type_timestamp_index',
@@ -349,7 +349,7 @@ def fetch_previous_week_metrics() -> Dict[str, Any]:
                                       int(datetime.combine(end_date, datetime.max.time()).timestamp())
                                   )
         )
-        
+
         if response.get('Count', 0) > 0:
             item = response['Items'][0]
             return {
@@ -359,7 +359,7 @@ def fetch_previous_week_metrics() -> Dict[str, Any]:
         else:
             logger.warning("No previous week metrics found")
             return {'total_rides': 0, 'total_revenue': 0}
-            
+
     except Exception as e:
         logger.warning(f"Error fetching previous week metrics: {str(e)}")
         return {'total_rides': 0, 'total_revenue': 0}
@@ -368,11 +368,11 @@ def fetch_previous_week_metrics() -> Dict[str, Any]:
 def calculate_wow_growth(current: float, previous: float) -> float:
     """
     Calculate week-over-week growth percentage
-    
+
     Args:
         current: Current week value
         previous: Previous week value
-        
+
     Returns:
         Growth percentage
     """
@@ -384,16 +384,16 @@ def calculate_wow_growth(current: float, previous: float) -> float:
 def generate_personalized_report(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     Generate a personalized report for a stakeholder
-    
+
     Creates HTML and PDF reports customized based on stakeholder role:
     - Executive: High-level KPIs and trends
     - Operations: Detailed operational metrics
     - Finance: Revenue and payment analysis
     - Product: User engagement and features
-    
+
     Args:
         event: Contains stakeholder info and KPIs
-        
+
     Returns:
         Dictionary with report HTML, PDF URL, and summary
     """
@@ -402,13 +402,13 @@ def generate_personalized_report(event: Dict[str, Any]) -> Dict[str, Any]:
     weekly_summary = event.get('weekly_summary', {})
     city_rankings = event.get('city_rankings', [])
     growth_metrics = event.get('growth_metrics', {})
-    
+
     stakeholder_name = stakeholder.get('name', 'Stakeholder')
     stakeholder_role = stakeholder.get('role', 'general')
     stakeholder_email = stakeholder.get('email', 'unknown@example.com')
-    
+
     logger.info(f"Generating personalized report for {stakeholder_name} ({stakeholder_role})")
-    
+
     # Generate report based on role
     if stakeholder_role == 'executive':
         report_html = generate_executive_report(stakeholder_name, kpis, growth_metrics, city_rankings)
@@ -422,11 +422,11 @@ def generate_personalized_report(event: Dict[str, Any]) -> Dict[str, Any]:
     else:
         report_html = generate_general_report(stakeholder_name, kpis, city_rankings)
         report_title = "Weekly Analytics Report"
-    
+
     # Save report to S3
     timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
     report_key = f"weekly-reports/{stakeholder_role}/{timestamp}_{stakeholder_name.replace(' ', '_')}.html"
-    
+
     try:
         s3.put_object(
             Bucket=REPORTS_BUCKET,
@@ -439,17 +439,17 @@ def generate_personalized_report(event: Dict[str, Any]) -> Dict[str, Any]:
                 'report_date': timestamp
             }
         )
-        
+
         report_pdf_url = f"https://{REPORTS_BUCKET}.s3.amazonaws.com/{report_key}"
         logger.info(f"Report saved to S3: {report_key}")
-        
+
     except Exception as e:
         logger.error(f"Error saving report to S3: {str(e)}")
         report_pdf_url = "Report generation failed"
-    
+
     # Generate summary for email
     report_summary = generate_report_summary(kpis, growth_metrics)
-    
+
     result = {
         'statusCode': 200,
         'report_html': report_html[:1000] + '...',  # Truncate for Step Functions
@@ -458,7 +458,7 @@ def generate_personalized_report(event: Dict[str, Any]) -> Dict[str, Any]:
         'report_title': report_title,
         'stakeholder': stakeholder_name
     }
-    
+
     logger.info(f"Personalized report generated for {stakeholder_name}")
     return result
 
@@ -485,23 +485,23 @@ def generate_executive_report(name: str, kpis: Dict, growth: Dict, cities: List)
         <h1>Weekly Executive Summary</h1>
         <p>Dear {name},</p>
         <p>Here is your weekly RideShare analytics summary:</p>
-        
+
         <div class="kpi">
             <h2>Key Performance Indicators</h2>
             <p><strong>Total Rides:</strong> {kpis.get('total_rides', 0):,}</p>
             <p><strong>Total Revenue:</strong> ${kpis.get('total_revenue', 0):,.2f}</p>
-            <p><strong>Week-over-Week Growth:</strong> 
+            <p><strong>Week-over-Week Growth:</strong>
                 <span class="{'positive' if growth.get('wow_growth_pct', 0) > 0 else 'negative'}">
                     {growth.get('wow_growth_pct', 0):+.2f}%
                 </span>
             </p>
         </div>
-        
+
         <h2>Top Performing Cities</h2>
         <table>
             <tr><th>Rank</th><th>City</th><th>Revenue</th><th>Rides</th></tr>
 """
-    
+
     for i, city in enumerate(cities[:5], 1):
         html += f"""
             <tr>
@@ -511,7 +511,7 @@ def generate_executive_report(name: str, kpis: Dict, growth: Dict, cities: List)
                 <td>{city.get('rides', 0):,}</td>
             </tr>
 """
-    
+
     html += """
         </table>
     </body>

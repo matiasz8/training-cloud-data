@@ -249,7 +249,7 @@ cloudmart_datalake (Catalog)
 **Security Layers:**
 
 **1. Identity & Access Management (IAM)**
-- **Lambda Execution Role:** 
+- **Lambda Execution Role:**
   - Read/write S3
   - Write CloudWatch Logs
   - KMS decrypt permissions
@@ -402,7 +402,7 @@ cloudmart_datalake (Catalog)
 ## 🎯 Key Design Decisions
 
 ### 1. Serverless-First Approach
-**Decision:** Use AWS serverless services (Lambda, Glue, Athena) exclusively  
+**Decision:** Use AWS serverless services (Lambda, Glue, Athena) exclusively
 **Rationale:**
 - No infrastructure management
 - Pay-per-use pricing model
@@ -415,7 +415,7 @@ cloudmart_datalake (Catalog)
 - Less control over infrastructure
 
 ### 2. Three-Zone Data Lake (Bronze/Silver/Gold)
-**Decision:** Implement medallion architecture with three zones  
+**Decision:** Implement medallion architecture with three zones
 **Rationale:**
 - Clear separation of concerns
 - Progressive data quality improvement
@@ -428,7 +428,7 @@ cloudmart_datalake (Catalog)
 - Higher complexity
 
 ### 3. Event-Driven Ingestion
-**Decision:** Use S3 events to trigger Lambda for ingestion  
+**Decision:** Use S3 events to trigger Lambda for ingestion
 **Rationale:**
 - Real-time processing
 - No polling overhead
@@ -441,19 +441,19 @@ cloudmart_datalake (Catalog)
 - Potential duplicate events
 
 ### 4. Glue Data Catalog as Metadata Store
-**Decision:** Use Glue Data Catalog instead of external metastore (Hive, etc.)  
+**Decision:** Use Glue Data Catalog instead of external metastore (Hive, etc.)
 **Rationale:**
 - Native AWS integration
 - No additional infrastructure
 - Shared by Glue and Athena
-- Serverless 
+- Serverless
 
 **Trade-offs:**
 - AWS vendor lock-in
 - Limited to AWS ecosystem
 
 ### 5. Parquet as Standard Format
-**Decision:** Standardize on Parquet for Silver and Gold zones  
+**Decision:** Standardize on Parquet for Silver and Gold zones
 **Rationale:**
 - Columnar storage (query performance)
 - Excellent compression
@@ -465,7 +465,7 @@ cloudmart_datalake (Catalog)
 - Write overhead vs. row formats
 
 ### 6. Date-Based Partitioning
-**Decision:** Partition all tables by year/month/day  
+**Decision:** Partition all tables by year/month/day
 **Rationale:**
 - Most queries filter by date
 - Efficient partition pruning
@@ -566,6 +566,6 @@ To add or modify diagrams:
 
 ---
 
-**Last Updated:** March 2026  
-**Maintained By:** CloudMart Data Engineering Team  
+**Last Updated:** March 2026
+**Maintained By:** CloudMart Data Engineering Team
 **Contact:** data-engineering@cloudmart.example.com

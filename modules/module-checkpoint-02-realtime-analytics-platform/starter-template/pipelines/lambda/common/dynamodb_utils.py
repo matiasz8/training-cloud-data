@@ -5,7 +5,6 @@ TODO: Complete implementation of DynamoDBClient class
 
 import logging
 from typing import Dict, List, Optional, Any
-from decimal import Decimal
 
 # TODO: Import boto3 for AWS SDK
 # import boto3
@@ -20,32 +19,32 @@ class DynamoDBClient:
     Utility class for DynamoDB operations with error handling
     TODO: Implement CRUD operations for DynamoDB
     """
-    
+
     def __init__(self, table_name: str, region: str = "us-east-1"):
         """
         Initialize DynamoDB client
-        
+
         Args:
             table_name: Name of the DynamoDB table
             region: AWS region
         """
         self.table_name = table_name
         self.region = region
-        
+
         # TODO: Initialize boto3 DynamoDB resource and table
         # self.dynamodb = boto3.resource('dynamodb', region_name=region)
         # self.table = self.dynamodb.Table(table_name)
-        
+
         logger.info(f"DynamoDBClient initialized for table: {table_name}")
-    
+
     def put_item(self, item: Dict) -> bool:
         """
         Insert or update an item in DynamoDB
         TODO: Implement put_item with error handling
-        
+
         Args:
             item: Dictionary containing item data
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -53,11 +52,11 @@ class DynamoDBClient:
         # try:
         #     # Convert float values to Decimal for DynamoDB
         #     item_converted = self._convert_floats_to_decimal(item)
-        #     
+        #
         #     response = self.table.put_item(Item=item_converted)
         #     logger.debug(f"Successfully put item with key: {self._get_key_from_item(item)}")
         #     return True
-        #     
+        #
         # except ClientError as e:
         #     error_code = e.response['Error']['Code']
         #     logger.error(f"Error putting item: {error_code} - {e}")
@@ -65,25 +64,25 @@ class DynamoDBClient:
         # except Exception as e:
         #     logger.error(f"Unexpected error putting item: {e}")
         #     return False
-        
+
         logger.warning("put_item not implemented yet")
         return False
-    
+
     def get_item(self, key: Dict) -> Optional[Dict]:
         """
         Retrieve an item from DynamoDB by key
         TODO: Implement get_item with error handling
-        
+
         Args:
             key: Dictionary containing partition key and sort key (if applicable)
-            
+
         Returns:
             Item dictionary if found, None otherwise
         """
         # TODO: Implement get_item
         # try:
         #     response = self.table.get_item(Key=key)
-        #     
+        #
         #     if 'Item' in response:
         #         # Convert Decimal back to float for easier handling
         #         item = self._convert_decimals_to_float(response['Item'])
@@ -92,7 +91,7 @@ class DynamoDBClient:
         #     else:
         #         logger.debug(f"Item not found with key: {key}")
         #         return None
-        #         
+        #
         # except ClientError as e:
         #     error_code = e.response['Error']['Code']
         #     logger.error(f"Error getting item: {error_code} - {e}")
@@ -100,51 +99,51 @@ class DynamoDBClient:
         # except Exception as e:
         #     logger.error(f"Unexpected error getting item: {e}")
         #     return None
-        
+
         logger.warning("get_item not implemented yet")
         return None
-    
+
     def update_item(self, key: Dict, attributes: Dict, condition: Optional[str] = None) -> bool:
         """
         Update specific attributes of an item
         TODO: Implement update_item with dynamic update expression
-        
+
         Args:
             key: Dictionary containing partition key and sort key
             attributes: Dictionary of attributes to update
             condition: Optional condition expression
-            
+
         Returns:
             True if successful, False otherwise
         """
         # TODO: Implement update_item
         # The challenge here is to dynamically build the UpdateExpression
-        # 
+        #
         # Example:
         # attributes = {'status': 'completed', 'fare': 25.50}
         # Should generate:
         # UpdateExpression: "SET #status = :status, #fare = :fare"
         # ExpressionAttributeNames: {'#status': 'status', '#fare': 'fare'}
         # ExpressionAttributeValues: {':status': 'completed', ':fare': 25.50}
-        
+
         # try:
         #     # Build update expression dynamically
         #     update_expr = "SET "
         #     expr_attr_names = {}
         #     expr_attr_values = {}
-        #     
+        #
         #     for idx, (attr_name, attr_value) in enumerate(attributes.items()):
         #         # Use attribute names to avoid reserved word conflicts
         #         name_placeholder = f"#{attr_name}"
         #         value_placeholder = f":{attr_name}"
-        #         
+        #
         #         if idx > 0:
         #             update_expr += ", "
-        #         
+        #
         #         update_expr += f"{name_placeholder} = {value_placeholder}"
         #         expr_attr_names[name_placeholder] = attr_name
         #         expr_attr_values[value_placeholder] = self._convert_floats_to_decimal(attr_value)
-        #     
+        #
         #     # Prepare update arguments
         #     update_args = {
         #         'Key': key,
@@ -153,15 +152,15 @@ class DynamoDBClient:
         #         'ExpressionAttributeValues': expr_attr_values,
         #         'ReturnValues': 'UPDATED_NEW'
         #     }
-        #     
+        #
         #     # Add condition expression if provided
         #     if condition:
         #         update_args['ConditionExpression'] = condition
-        #     
+        #
         #     response = self.table.update_item(**update_args)
         #     logger.debug(f"Successfully updated item with key: {key}")
         #     return True
-        #     
+        #
         # except ClientError as e:
         #     error_code = e.response['Error']['Code']
         #     if error_code == 'ConditionalCheckFailedException':
@@ -172,10 +171,10 @@ class DynamoDBClient:
         # except Exception as e:
         #     logger.error(f"Unexpected error updating item: {e}")
         #     return False
-        
+
         logger.warning("update_item not implemented yet")
         return False
-    
+
     def query(
         self,
         partition_key: str,
@@ -188,7 +187,7 @@ class DynamoDBClient:
         """
         Query items by partition key with optional filters
         TODO: Implement query operation
-        
+
         Args:
             partition_key: Name of partition key attribute
             partition_value: Value to query
@@ -196,7 +195,7 @@ class DynamoDBClient:
             filter_expression: Optional filter expression
             limit: Maximum number of items to return
             sort_descending: Whether to sort in descending order
-            
+
         Returns:
             List of items matching query
         """
@@ -207,23 +206,23 @@ class DynamoDBClient:
         #         'KeyConditionExpression': Key(partition_key).eq(partition_value),
         #         'ScanIndexForward': not sort_descending
         #     }
-        #     
+        #
         #     if limit:
         #         query_params['Limit'] = limit
-        #     
+        #
         #     if filter_expression:
         #         query_params['FilterExpression'] = filter_expression
-        #     
+        #
         #     # Execute query
         #     response = self.table.query(**query_params)
         #     items = response.get('Items', [])
-        #     
+        #
         #     # Convert Decimals to floats
         #     items = [self._convert_decimals_to_float(item) for item in items]
-        #     
+        #
         #     logger.debug(f"Query returned {len(items)} items")
         #     return items
-        #     
+        #
         # except ClientError as e:
         #     error_code = e.response['Error']['Code']
         #     logger.error(f"Error querying table: {error_code} - {e}")
@@ -231,18 +230,18 @@ class DynamoDBClient:
         # except Exception as e:
         #     logger.error(f"Unexpected error querying table: {e}")
         #     return []
-        
+
         logger.warning("query not implemented yet")
         return []
-    
+
     def batch_write(self, items: List[Dict]) -> tuple[int, int]:
         """
         Write multiple items in batches
         TODO: Implement batch write with automatic batching (max 25 per batch)
-        
+
         Args:
             items: List of items to write
-            
+
         Returns:
             Tuple of (success_count, failure_count)
         """
@@ -252,7 +251,7 @@ class DynamoDBClient:
         # 1. Split items into batches of 25
         # 2. Send each batch
         # 3. Handle unprocessed items (retry)
-        
+
         # if not items:
         #     return 0, 0
         #
@@ -264,7 +263,7 @@ class DynamoDBClient:
         #     # Process in batches of 25
         #     for i in range(0, len(items), batch_size):
         #         batch = items[i:i + batch_size]
-        #         
+        #
         #         # Prepare batch write request
         #         with self.table.batch_writer() as batch_writer:
         #             for item in batch:
@@ -275,25 +274,25 @@ class DynamoDBClient:
         #                 except Exception as e:
         #                     logger.error(f"Error in batch write for item: {e}")
         #                     failure_count += 1
-        #     
+        #
         #     logger.info(f"Batch write complete: {success_count} succeeded, {failure_count} failed")
         #     return success_count, failure_count
-        #     
+        #
         # except Exception as e:
         #     logger.error(f"Batch write error: {e}")
         #     return success_count, len(items) - success_count
-        
+
         logger.warning("batch_write not implemented yet")
         return 0, len(items)
-    
+
     def delete_item(self, key: Dict) -> bool:
         """
         Delete an item from DynamoDB
         TODO: Implement delete_item
-        
+
         Args:
             key: Dictionary containing partition key and sort key
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -305,28 +304,28 @@ class DynamoDBClient:
         # except ClientError as e:
         #     logger.error(f"Error deleting item: {e}")
         #     return False
-        
+
         logger.warning("delete_item not implemented yet")
         return False
-    
+
     # =============================================================================
     # HELPER METHODS
     # =============================================================================
-    
+
     def _convert_floats_to_decimal(self, obj: Any) -> Any:
         """
         Convert float values to Decimal for DynamoDB compatibility
         TODO: Implement recursive conversion
-        
+
         Args:
             obj: Object to convert (can be dict, list, or primitive)
-            
+
         Returns:
             Converted object
         """
         # TODO: DynamoDB doesn't support float type, only Decimal
         # Need to recursively convert floats in dicts and lists
-        
+
         # if isinstance(obj, float):
         #     return Decimal(str(obj))
         # elif isinstance(obj, dict):
@@ -335,22 +334,22 @@ class DynamoDBClient:
         #     return [self._convert_floats_to_decimal(item) for item in obj]
         # else:
         #     return obj
-        
+
         return obj
-    
+
     def _convert_decimals_to_float(self, obj: Any) -> Any:
         """
         Convert Decimal values to float for easier handling in Python
         TODO: Implement recursive conversion
-        
+
         Args:
             obj: Object to convert
-            
+
         Returns:
             Converted object
         """
         # TODO: Convert Decimal back to float
-        
+
         # if isinstance(obj, Decimal):
         #     return float(obj)
         # elif isinstance(obj, dict):
@@ -359,9 +358,9 @@ class DynamoDBClient:
         #     return [self._convert_decimals_to_float(item) for item in obj]
         # else:
         #     return obj
-        
+
         return obj
-    
+
     def _get_key_from_item(self, item: Dict) -> Dict:
         """
         Extract key attributes from item

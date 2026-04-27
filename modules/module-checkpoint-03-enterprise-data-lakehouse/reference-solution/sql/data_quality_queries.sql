@@ -2,7 +2,7 @@
 -- DATA QUALITY QUERIES - Enterprise Data Lakehouse
 -- =============================================================================
 -- Purpose: Comprehensive data quality monitoring queries to check completeness,
---          detect anomalies, identify schema drift, validate referential 
+--          detect anomalies, identify schema drift, validate referential
 --          integrity, and generate DQ scorecards
 -- Database: lakehouse_gold, lakehouse_silver, lakehouse_bronze
 -- Compatible: Amazon Athena, Presto, Trino
@@ -15,7 +15,7 @@
 -- =============================================================================
 
 WITH customer_completeness AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         COUNT(*) AS total_records,
         COUNT(customer_id) AS customer_id_count,
@@ -36,7 +36,7 @@ WITH customer_completeness AS (
     WHERE is_current = true
 ),
 product_completeness AS (
-    SELECT 
+    SELECT
         'dim_product' AS table_name,
         COUNT(*) AS total_records,
         COUNT(product_id) AS product_id_count,
@@ -55,7 +55,7 @@ product_completeness AS (
     FROM lakehouse_gold.dim_product
 ),
 transaction_completeness AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         COUNT(*) AS total_records,
         COUNT(transaction_id) AS transaction_id_count,
@@ -73,11 +73,11 @@ transaction_completeness AS (
         ROUND(COUNT(quantity) * 100.0 / COUNT(*), 2) AS quantity_completeness
     FROM lakehouse_gold.fact_transactions
 )
-SELECT 
+SELECT
     table_name,
     total_records,
     -- Average completeness score
-    ROUND((customer_id_completeness + customer_name_completeness + 
+    ROUND((customer_id_completeness + customer_name_completeness +
            email_completeness + phone_completeness) / 4.0, 2) AS avg_completeness_score,
     -- Individual field completeness
     customer_id_completeness,
@@ -87,7 +87,7 @@ SELECT
     state_completeness,
     country_completeness,
     -- Quality status
-    CASE 
+    CASE
         WHEN (customer_id_completeness + customer_name_completeness + email_completeness) / 3.0 >= 95 THEN 'Excellent'
         WHEN (customer_id_completeness + customer_name_completeness + email_completeness) / 3.0 >= 85 THEN 'Good'
         WHEN (customer_id_completeness + customer_name_completeness + email_completeness) / 3.0 >= 70 THEN 'Fair'
@@ -97,10 +97,10 @@ FROM customer_completeness
 
 UNION ALL
 
-SELECT 
+SELECT
     table_name,
     total_records,
-    ROUND((product_id_completeness + product_name_completeness + 
+    ROUND((product_id_completeness + product_name_completeness +
            category_completeness + brand_completeness) / 4.0, 2) AS avg_completeness_score,
     product_id_completeness,
     product_name_completeness,
@@ -108,7 +108,7 @@ SELECT
     brand_completeness,
     unit_price_completeness,
     cost_completeness,
-    CASE 
+    CASE
         WHEN (product_id_completeness + product_name_completeness + category_completeness) / 3.0 >= 95 THEN 'Excellent'
         WHEN (product_id_completeness + product_name_completeness + category_completeness) / 3.0 >= 85 THEN 'Good'
         WHEN (product_id_completeness + product_name_completeness + category_completeness) / 3.0 >= 70 THEN 'Fair'
@@ -118,10 +118,10 @@ FROM product_completeness
 
 UNION ALL
 
-SELECT 
+SELECT
     table_name,
     total_records,
-    ROUND((transaction_id_completeness + customer_sk_completeness + 
+    ROUND((transaction_id_completeness + customer_sk_completeness +
            product_sk_completeness + net_amount_completeness) / 4.0, 2) AS avg_completeness_score,
     transaction_id_completeness,
     customer_sk_completeness,
@@ -129,12 +129,12 @@ SELECT
     date_sk_completeness,
     net_amount_completeness,
     quantity_completeness,
-    CASE 
-        WHEN (transaction_id_completeness + customer_sk_completeness + 
+    CASE
+        WHEN (transaction_id_completeness + customer_sk_completeness +
               product_sk_completeness + net_amount_completeness) / 4.0 >= 95 THEN 'Excellent'
-        WHEN (transaction_id_completeness + customer_sk_completeness + 
+        WHEN (transaction_id_completeness + customer_sk_completeness +
               product_sk_completeness + net_amount_completeness) / 4.0 >= 85 THEN 'Good'
-        WHEN (transaction_id_completeness + customer_sk_completeness + 
+        WHEN (transaction_id_completeness + customer_sk_completeness +
               product_sk_completeness + net_amount_completeness) / 4.0 >= 70 THEN 'Fair'
         ELSE 'Poor'
     END AS quality_status
@@ -147,7 +147,7 @@ FROM transaction_completeness;
 -- =============================================================================
 
 WITH customer_duplicates AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         'customer_id' AS key_column,
         customer_id AS key_value,
@@ -158,7 +158,7 @@ WITH customer_duplicates AS (
     HAVING COUNT(*) > 1
 ),
 email_duplicates AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         'email' AS key_column,
         email AS key_value,
@@ -169,7 +169,7 @@ email_duplicates AS (
     HAVING COUNT(*) > 1
 ),
 product_duplicates AS (
-    SELECT 
+    SELECT
         'dim_product' AS table_name,
         'product_id' AS key_column,
         product_id AS key_value,
@@ -179,7 +179,7 @@ product_duplicates AS (
     HAVING COUNT(*) > 1
 ),
 transaction_duplicates AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         'transaction_id' AS key_column,
         transaction_id AS key_value,
@@ -188,12 +188,12 @@ transaction_duplicates AS (
     GROUP BY transaction_id
     HAVING COUNT(*) > 1
 )
-SELECT 
+SELECT
     table_name,
     key_column,
     key_value,
     duplicate_count,
-    CASE 
+    CASE
         WHEN duplicate_count >= 10 THEN 'Critical'
         WHEN duplicate_count >= 5 THEN 'High'
         WHEN duplicate_count >= 2 THEN 'Medium'
@@ -217,7 +217,7 @@ ORDER BY duplicate_count DESC;
 -- =============================================================================
 
 WITH orphan_transactions_customer AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS fact_table,
         'customer_sk' AS foreign_key,
         'dim_customer' AS dimension_table,
@@ -225,13 +225,13 @@ WITH orphan_transactions_customer AS (
         COUNT(*) * 100.0 / (SELECT COUNT(*) FROM lakehouse_gold.fact_transactions) AS orphan_percentage
     FROM lakehouse_gold.fact_transactions f
     WHERE NOT EXISTS (
-        SELECT 1 
-        FROM lakehouse_gold.dim_customer c 
+        SELECT 1
+        FROM lakehouse_gold.dim_customer c
         WHERE c.customer_sk = f.customer_sk
     )
 ),
 orphan_transactions_product AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS fact_table,
         'product_sk' AS foreign_key,
         'dim_product' AS dimension_table,
@@ -239,13 +239,13 @@ orphan_transactions_product AS (
         COUNT(*) * 100.0 / (SELECT COUNT(*) FROM lakehouse_gold.fact_transactions) AS orphan_percentage
     FROM lakehouse_gold.fact_transactions f
     WHERE NOT EXISTS (
-        SELECT 1 
-        FROM lakehouse_gold.dim_product p 
+        SELECT 1
+        FROM lakehouse_gold.dim_product p
         WHERE p.product_sk = f.product_sk
     )
 ),
 orphan_transactions_date AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS fact_table,
         'date_sk' AS foreign_key,
         'dim_date' AS dimension_table,
@@ -253,18 +253,18 @@ orphan_transactions_date AS (
         COUNT(*) * 100.0 / (SELECT COUNT(*) FROM lakehouse_gold.fact_transactions) AS orphan_percentage
     FROM lakehouse_gold.fact_transactions f
     WHERE NOT EXISTS (
-        SELECT 1 
-        FROM lakehouse_gold.dim_date d 
+        SELECT 1
+        FROM lakehouse_gold.dim_date d
         WHERE d.date_sk = f.date_sk
     )
 )
-SELECT 
+SELECT
     fact_table,
     foreign_key,
     dimension_table,
     orphan_count,
     ROUND(orphan_percentage, 4) AS orphan_percentage,
-    CASE 
+    CASE
         WHEN orphan_percentage = 0 THEN 'Perfect'
         WHEN orphan_percentage < 0.1 THEN 'Excellent'
         WHEN orphan_percentage < 1 THEN 'Good'
@@ -286,7 +286,7 @@ FROM (
 -- =============================================================================
 
 WITH table_freshness AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         MAX(updated_timestamp) AS last_update,
         MIN(updated_timestamp) AS first_update,
@@ -294,10 +294,10 @@ WITH table_freshness AS (
         COUNT(*) AS record_count,
         COUNT(DISTINCT DATE(updated_timestamp)) AS update_days
     FROM lakehouse_gold.dim_customer
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_product' AS table_name,
         MAX(updated_timestamp) AS last_update,
         MIN(updated_timestamp) AS first_update,
@@ -305,10 +305,10 @@ WITH table_freshness AS (
         COUNT(*) AS record_count,
         COUNT(DISTINCT DATE(updated_timestamp)) AS update_days
     FROM lakehouse_gold.dim_product
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'fact_transactions' AS table_name,
         MAX(created_timestamp) AS last_update,
         MIN(created_timestamp) AS first_update,
@@ -317,7 +317,7 @@ WITH table_freshness AS (
         COUNT(DISTINCT DATE(created_timestamp)) AS update_days
     FROM lakehouse_gold.fact_transactions
 )
-SELECT 
+SELECT
     table_name,
     last_update,
     first_update,
@@ -325,7 +325,7 @@ SELECT
     record_count,
     update_days,
     -- Freshness status
-    CASE 
+    CASE
         WHEN hours_since_update <= 1 THEN 'Real-time'
         WHEN hours_since_update <= 6 THEN 'Fresh'
         WHEN hours_since_update <= 24 THEN 'Acceptable'
@@ -333,7 +333,7 @@ SELECT
         ELSE 'Critical'
     END AS freshness_status,
     -- SLA compliance (assuming 24-hour SLA)
-    CASE 
+    CASE
         WHEN hours_since_update <= 24 THEN 'Meeting SLA'
         ELSE 'Breaching SLA'
     END AS sla_status
@@ -347,7 +347,7 @@ ORDER BY hours_since_update DESC;
 -- =============================================================================
 
 WITH transaction_stats AS (
-    SELECT 
+    SELECT
         AVG(net_amount) AS avg_amount,
         STDDEV(net_amount) AS stddev_amount,
         AVG(quantity) AS avg_quantity,
@@ -357,7 +357,7 @@ WITH transaction_stats AS (
     FROM lakehouse_gold.fact_transactions
 ),
 outlier_transactions AS (
-    SELECT 
+    SELECT
         f.transaction_id,
         f.customer_sk,
         f.product_sk,
@@ -374,7 +374,7 @@ outlier_transactions AS (
     FROM lakehouse_gold.fact_transactions f
     CROSS JOIN transaction_stats ts
 )
-SELECT 
+SELECT
     transaction_id,
     customer_sk,
     product_sk,
@@ -386,13 +386,13 @@ SELECT
     ROUND(quantity_z_score, 2) AS quantity_z_score,
     ROUND(margin_z_score, 2) AS margin_z_score,
     -- Outlier classification
-    CASE 
+    CASE
         WHEN ABS(amount_z_score) > 3 OR ABS(quantity_z_score) > 3 OR ABS(margin_z_score) > 3 THEN 'Extreme Outlier'
         WHEN ABS(amount_z_score) > 2 OR ABS(quantity_z_score) > 2 OR ABS(margin_z_score) > 2 THEN 'Moderate Outlier'
         ELSE 'Normal'
     END AS outlier_status,
     -- Specific outlier type
-    CASE 
+    CASE
         WHEN amount_z_score > 3 THEN 'Unusually High Amount'
         WHEN amount_z_score < -3 THEN 'Unusually Low Amount'
         WHEN quantity_z_score > 3 THEN 'Unusually High Quantity'
@@ -413,25 +413,25 @@ LIMIT 1000;
 -- =============================================================================
 
 WITH current_schema AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         'customer_sk' AS column_name,
         'bigint' AS expected_type,
         COUNT(CASE WHEN TRY_CAST(customer_sk AS BIGINT) IS NULL THEN 1 END) AS type_mismatch_count
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'fact_transactions' AS table_name,
         'net_amount' AS column_name,
         'double' AS expected_type,
         COUNT(CASE WHEN TRY_CAST(net_amount AS DOUBLE) IS NULL THEN 1 END) AS type_mismatch_count
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_customer' AS table_name,
         'email' AS column_name,
         'varchar' AS expected_type,
@@ -439,12 +439,12 @@ WITH current_schema AS (
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
 )
-SELECT 
+SELECT
     table_name,
     column_name,
     expected_type,
     type_mismatch_count,
-    CASE 
+    CASE
         WHEN type_mismatch_count = 0 THEN 'Valid'
         WHEN type_mismatch_count < 10 THEN 'Minor Issues'
         WHEN type_mismatch_count < 100 THEN 'Moderate Issues'
@@ -461,84 +461,84 @@ ORDER BY type_mismatch_count DESC;
 
 WITH validation_results AS (
     -- Rule 1: Transaction amount should be positive
-    SELECT 
+    SELECT
         'Transaction Amount Positive' AS rule_name,
         COUNT(*) AS total_records,
         SUM(CASE WHEN net_amount <= 0 THEN 1 ELSE 0 END) AS violations,
         ROUND(SUM(CASE WHEN net_amount <= 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
+
     -- Rule 2: Quantity should be positive
-    SELECT 
+    SELECT
         'Quantity Positive' AS rule_name,
         COUNT(*) AS total_records,
         SUM(CASE WHEN quantity <= 0 THEN 1 ELSE 0 END) AS violations,
         ROUND(SUM(CASE WHEN quantity <= 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
+
     -- Rule 3: Profit margin should be between -100 and 100
-    SELECT 
+    SELECT
         'Profit Margin Range' AS rule_name,
         COUNT(*) AS total_records,
         SUM(CASE WHEN profit_margin NOT BETWEEN -100 AND 100 THEN 1 ELSE 0 END) AS violations,
         ROUND(SUM(CASE WHEN profit_margin NOT BETWEEN -100 AND 100 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
+
     -- Rule 4: Email format validation
-    SELECT 
+    SELECT
         'Email Format Valid' AS rule_name,
         COUNT(*) AS total_records,
         SUM(CASE WHEN email NOT LIKE '%@%.%' AND email IS NOT NULL THEN 1 ELSE 0 END) AS violations,
         ROUND(SUM(CASE WHEN email NOT LIKE '%@%.%' AND email IS NOT NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
-    
+
     UNION ALL
-    
+
     -- Rule 5: Phone number format (basic check)
-    SELECT 
+    SELECT
         'Phone Format Valid' AS rule_name,
         COUNT(*) AS total_records,
-        SUM(CASE WHEN LENGTH(REGEXP_REPLACE(phone, '[^0-9]', '')) NOT BETWEEN 10 AND 15 
+        SUM(CASE WHEN LENGTH(REGEXP_REPLACE(phone, '[^0-9]', '')) NOT BETWEEN 10 AND 15
                  AND phone IS NOT NULL THEN 1 ELSE 0 END) AS violations,
-        ROUND(SUM(CASE WHEN LENGTH(REGEXP_REPLACE(phone, '[^0-9]', '')) NOT BETWEEN 10 AND 15 
+        ROUND(SUM(CASE WHEN LENGTH(REGEXP_REPLACE(phone, '[^0-9]', '')) NOT BETWEEN 10 AND 15
                       AND phone IS NOT NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
-    
+
     UNION ALL
-    
+
     -- Rule 6: Product price should be greater than cost
-    SELECT 
+    SELECT
         'Price Greater Than Cost' AS rule_name,
         COUNT(*) AS total_records,
         SUM(CASE WHEN unit_price <= cost THEN 1 ELSE 0 END) AS violations,
         ROUND(SUM(CASE WHEN unit_price <= cost THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.dim_product
     WHERE unit_price IS NOT NULL AND cost IS NOT NULL
-    
+
     UNION ALL
-    
+
     -- Rule 7: Transaction date should not be in the future
-    SELECT 
+    SELECT
         'Transaction Date Valid' AS rule_name,
         COUNT(*) AS total_records,
         SUM(CASE WHEN transaction_date > CURRENT_DATE THEN 1 ELSE 0 END) AS violations,
         ROUND(SUM(CASE WHEN transaction_date > CURRENT_DATE THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS violation_rate
     FROM lakehouse_gold.fact_transactions
 )
-SELECT 
+SELECT
     rule_name,
     total_records,
     violations,
     violation_rate,
-    CASE 
+    CASE
         WHEN violation_rate = 0 THEN 'Pass'
         WHEN violation_rate < 0.1 THEN 'Warning'
         WHEN violation_rate < 1 THEN 'Fail'
@@ -554,7 +554,7 @@ ORDER BY violations DESC;
 -- =============================================================================
 
 WITH gold_transaction_counts AS (
-    SELECT 
+    SELECT
         DATE(transaction_date) AS transaction_date,
         COUNT(*) AS gold_count,
         SUM(net_amount) AS gold_amount
@@ -562,13 +562,13 @@ WITH gold_transaction_counts AS (
     WHERE transaction_date >= DATE_ADD('day', -7, CURRENT_DATE)
     GROUP BY DATE(transaction_date)
 )
-SELECT 
+SELECT
     gtc.transaction_date,
     gtc.gold_count,
     gtc.gold_amount,
     ROUND(gtc.gold_amount, 2) AS rounded_gold_amount,
     -- Note: Would compare with silver/bronze if those tables have consistent schemas
-    CASE 
+    CASE
         WHEN gtc.gold_count > 0 THEN 'Data Present'
         ELSE 'Missing Data'
     END AS consistency_status
@@ -581,7 +581,7 @@ ORDER BY gtc.transaction_date DESC;
 -- Purpose: Measure lag between transaction time and processing time
 -- =============================================================================
 
-SELECT 
+SELECT
     DATE(transaction_date) AS transaction_date,
     COUNT(*) AS transactions,
     AVG(DATE_DIFF('hour', transaction_timestamp, created_timestamp)) AS avg_processing_lag_hours,
@@ -606,34 +606,34 @@ ORDER BY transaction_date DESC;
 -- =============================================================================
 
 WITH dq_metrics AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         COUNT(*) AS total_records,
         -- Completeness
-        ROUND((COUNT(transaction_id) + COUNT(customer_sk) + COUNT(product_sk) + 
+        ROUND((COUNT(transaction_id) + COUNT(customer_sk) + COUNT(product_sk) +
                COUNT(net_amount)) * 100.0 / (COUNT(*) * 4), 2) AS completeness_score,
         -- Validity
         ROUND((COUNT(*) - SUM(CASE WHEN net_amount <= 0 OR quantity <= 0 THEN 1 ELSE 0 END)) * 100.0 / COUNT(*), 2) AS validity_score,
         -- Uniqueness (transactions should have unique IDs)
         ROUND((COUNT(DISTINCT transaction_id) * 100.0 / COUNT(*)), 2) AS uniqueness_score,
         -- Timeliness
-        CASE 
+        CASE
             WHEN DATE_DIFF('hour', MAX(created_timestamp), CURRENT_TIMESTAMP) <= 24 THEN 100.0
             WHEN DATE_DIFF('hour', MAX(created_timestamp), CURRENT_TIMESTAMP) <= 48 THEN 80.0
             WHEN DATE_DIFF('hour', MAX(created_timestamp), CURRENT_TIMESTAMP) <= 72 THEN 60.0
             ELSE 40.0
         END AS timeliness_score
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_customer' AS table_name,
         COUNT(*) AS total_records,
         ROUND((COUNT(customer_id) + COUNT(customer_name) + COUNT(email)) * 100.0 / (COUNT(*) * 3), 2) AS completeness_score,
         ROUND((COUNT(*) - SUM(CASE WHEN email NOT LIKE '%@%' AND email IS NOT NULL THEN 1 ELSE 0 END)) * 100.0 / COUNT(*), 2) AS validity_score,
         ROUND((COUNT(DISTINCT customer_id) * 100.0 / COUNT(*)), 2) AS uniqueness_score,
-        CASE 
+        CASE
             WHEN DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) <= 24 THEN 100.0
             WHEN DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) <= 48 THEN 80.0
             WHEN DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) <= 72 THEN 60.0
@@ -641,16 +641,16 @@ WITH dq_metrics AS (
         END AS timeliness_score
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_product' AS table_name,
         COUNT(*) AS total_records,
         ROUND((COUNT(product_id) + COUNT(product_name) + COUNT(category)) * 100.0 / (COUNT(*) * 3), 2) AS completeness_score,
         ROUND((COUNT(*) - SUM(CASE WHEN unit_price <= 0 OR cost < 0 THEN 1 ELSE 0 END)) * 100.0 / COUNT(*), 2) AS validity_score,
         ROUND((COUNT(DISTINCT product_id) * 100.0 / COUNT(*)), 2) AS uniqueness_score,
-        CASE 
+        CASE
             WHEN DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) <= 24 THEN 100.0
             WHEN DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) <= 48 THEN 80.0
             WHEN DATE_DIFF('hour', MAX(updated_timestamp), CURRENT_TIMESTAMP) <= 72 THEN 60.0
@@ -658,7 +658,7 @@ WITH dq_metrics AS (
         END AS timeliness_score
     FROM lakehouse_gold.dim_product
 )
-SELECT 
+SELECT
     table_name,
     total_records,
     completeness_score,
@@ -666,19 +666,19 @@ SELECT
     uniqueness_score,
     timeliness_score,
     -- Overall DQ score (weighted average)
-    ROUND((completeness_score * 0.30 + 
-           validity_score * 0.30 + 
-           uniqueness_score * 0.20 + 
+    ROUND((completeness_score * 0.30 +
+           validity_score * 0.30 +
+           uniqueness_score * 0.20 +
            timeliness_score * 0.20), 2) AS overall_dq_score,
     -- Grade
-    CASE 
-        WHEN (completeness_score * 0.30 + validity_score * 0.30 + 
+    CASE
+        WHEN (completeness_score * 0.30 + validity_score * 0.30 +
               uniqueness_score * 0.20 + timeliness_score * 0.20) >= 90 THEN 'A (Excellent)'
-        WHEN (completeness_score * 0.30 + validity_score * 0.30 + 
+        WHEN (completeness_score * 0.30 + validity_score * 0.30 +
               uniqueness_score * 0.20 + timeliness_score * 0.20) >= 80 THEN 'B (Good)'
-        WHEN (completeness_score * 0.30 + validity_score * 0.30 + 
+        WHEN (completeness_score * 0.30 + validity_score * 0.30 +
               uniqueness_score * 0.20 + timeliness_score * 0.20) >= 70 THEN 'C (Fair)'
-        WHEN (completeness_score * 0.30 + validity_score * 0.30 + 
+        WHEN (completeness_score * 0.30 + validity_score * 0.30 +
               uniqueness_score * 0.20 + timeliness_score * 0.20) >= 60 THEN 'D (Poor)'
         ELSE 'F (Failed)'
     END AS dq_grade,
@@ -693,7 +693,7 @@ ORDER BY overall_dq_score DESC;
 -- =============================================================================
 
 WITH daily_counts AS (
-    SELECT 
+    SELECT
         DATE(transaction_date) AS transaction_date,
         COUNT(*) AS record_count
     FROM lakehouse_gold.fact_transactions
@@ -701,13 +701,13 @@ WITH daily_counts AS (
     GROUP BY DATE(transaction_date)
 ),
 count_stats AS (
-    SELECT 
+    SELECT
         AVG(record_count) AS avg_count,
         STDDEV(record_count) AS stddev_count
     FROM daily_counts
 ),
 anomaly_detection AS (
-    SELECT 
+    SELECT
         dc.transaction_date,
         dc.record_count,
         cs.avg_count,
@@ -717,24 +717,24 @@ anomaly_detection AS (
     FROM daily_counts dc
     CROSS JOIN count_stats cs
 )
-SELECT 
+SELECT
     transaction_date,
     record_count,
     ROUND(avg_count, 0) AS expected_count,
     ROUND(z_score, 2) AS z_score,
     record_count - prev_day_count AS day_over_day_change,
-    CASE 
-        WHEN prev_day_count > 0 
+    CASE
+        WHEN prev_day_count > 0
         THEN ROUND((record_count - prev_day_count) * 100.0 / prev_day_count, 2)
-        ELSE NULL 
+        ELSE NULL
     END AS dod_change_pct,
-    CASE 
+    CASE
         WHEN ABS(z_score) > 3 THEN 'Critical Anomaly'
         WHEN ABS(z_score) > 2 THEN 'Significant Anomaly'
         WHEN ABS(z_score) > 1.5 THEN 'Minor Anomaly'
         ELSE 'Normal'
     END AS anomaly_status,
-    CASE 
+    CASE
         WHEN z_score > 0 THEN 'Higher than expected'
         WHEN z_score < 0 THEN 'Lower than expected'
         ELSE 'As expected'

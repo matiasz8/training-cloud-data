@@ -394,26 +394,26 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-    
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
-    
+
     - name: Run tests
       run: |
         cd modules/module-checkpoint-02-realtime-analytics-platform/validation
@@ -421,7 +421,7 @@ jobs:
       env:
         PROJECT_NAME: rideshare-analytics
         ENVIRONMENT: dev
-    
+
     - name: Upload coverage
       uses: codecov/codecov-action@v2
       with:
@@ -463,20 +463,20 @@ Example `Jenkinsfile`:
 ```groovy
 pipeline {
     agent any
-    
+
     environment {
         AWS_REGION = 'us-east-1'
         PROJECT_NAME = 'rideshare-analytics'
         ENVIRONMENT = 'dev'
     }
-    
+
     stages {
         stage('Setup') {
             steps {
                 sh 'pip install -r requirements.txt'
             }
         }
-        
+
         stage('Test') {
             steps {
                 dir('modules/module-checkpoint-02-realtime-analytics-platform/validation') {
@@ -484,7 +484,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Publish Results') {
             steps {
                 junit 'validation/test-results/*.xml'
@@ -681,6 +681,6 @@ For issues or questions:
 
 ---
 
-**Last Updated**: March 2026  
-**Version**: 1.0  
+**Last Updated**: March 2026
+**Version**: 1.0
 **Maintained by**: Cloud Data Training Team

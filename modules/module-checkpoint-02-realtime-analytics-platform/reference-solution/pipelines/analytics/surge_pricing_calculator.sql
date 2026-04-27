@@ -167,19 +167,19 @@ SELECT
     COALESCE(d.city, s.city) AS city,
     COALESCE(d.window_start, s.window_start) AS window_start,
     COALESCE(d.window_end, s.window_end) AS window_end,
-    
+
     -- Demand and supply metrics
     COALESCE(d.ride_requests, 0) AS ride_requests,
     COALESCE(s.available_drivers, 0) AS available_drivers,
-    
+
     -- Calculate demand/supply ratio
     -- Prevent division by zero: if no drivers, ratio = 10 (extreme demand)
     CASE
         WHEN COALESCE(s.available_drivers, 0) = 0 THEN 10.0
-        ELSE CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) / 
+        ELSE CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) /
              CAST(s.available_drivers AS DOUBLE)
     END AS demand_supply_ratio,
-    
+
     -- Apply surge multiplier based on ratio
     -- Reasoning:
     --   - Ratio > 2.0: Severe shortage, 1.5x to incentivize drivers
@@ -188,15 +188,15 @@ SELECT
     --   - Otherwise: Normal conditions, no surge
     CASE
         WHEN COALESCE(s.available_drivers, 0) = 0 THEN 2.0  -- No drivers = max surge
-        WHEN (CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) / 
+        WHEN (CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) /
               CAST(s.available_drivers AS DOUBLE)) > 2.0 THEN 1.5
-        WHEN (CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) / 
+        WHEN (CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) /
               CAST(s.available_drivers AS DOUBLE)) > 1.5 THEN 1.3
-        WHEN (CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) / 
+        WHEN (CAST(COALESCE(d.ride_requests, 0) AS DOUBLE) /
               CAST(s.available_drivers AS DOUBLE)) > 1.2 THEN 1.2
         ELSE 1.0
     END AS surge_multiplier,
-    
+
     CURRENT_TIMESTAMP AS calculation_timestamp
 
 FROM ride_demand d
@@ -220,11 +220,11 @@ SELECT
     demand_supply_ratio,
     surge_multiplier,
     calculation_timestamp,
-    
+
     -- Partition columns
     CAST(DATE_FORMAT(window_start, 'yyyy-MM-dd') AS VARCHAR) AS `date`,
     CAST(DATE_FORMAT(window_start, 'HH') AS VARCHAR) AS `hour`
-    
+
 FROM surge_pricing_calculated;
 
 -- Write to DynamoDB for real-time lookups
@@ -239,11 +239,11 @@ SELECT
     demand_supply_ratio,
     surge_multiplier,
     calculation_timestamp,
-    
+
     -- DynamoDB TTL: expire after 24 hours
     -- Convert timestamp to epoch seconds and add 86400 (24 hours)
     UNIX_TIMESTAMP(calculation_timestamp) + 86400 AS ttl
-    
+
 FROM surge_pricing_calculated;
 
 -- =============================================================================

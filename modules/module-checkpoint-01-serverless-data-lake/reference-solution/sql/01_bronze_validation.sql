@@ -14,7 +14,7 @@ USE cloudmart_data_lake;
 
 -- Query 1: Count total records in raw_orders
 -- Purpose: Verify data ingestion volume
-SELECT 
+SELECT
     'raw_orders' as table_name,
     COUNT(*) as total_records,
     COUNT(DISTINCT order_id) as unique_orders,
@@ -25,7 +25,7 @@ FROM raw_orders;
 
 -- Query 2: Count records by partition for raw_orders
 -- Purpose: Verify partition distribution
-SELECT 
+SELECT
     year,
     month,
     day,
@@ -38,7 +38,7 @@ ORDER BY year DESC, month DESC, day DESC;
 
 -- Query 3: Count total records in raw_customers
 -- Purpose: Verify customer data completeness
-SELECT 
+SELECT
     'raw_customers' as table_name,
     COUNT(*) as total_records,
     COUNT(DISTINCT customer_id) as unique_customers,
@@ -48,7 +48,7 @@ FROM raw_customers;
 
 -- Query 4: Customer distribution by country
 -- Purpose: Validate geographic coverage
-SELECT 
+SELECT
     country,
     COUNT(*) as customer_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
@@ -58,7 +58,7 @@ ORDER BY customer_count DESC;
 
 -- Query 5: Count total records in raw_products
 -- Purpose: Verify product catalog size
-SELECT 
+SELECT
     'raw_products' as table_name,
     COUNT(*) as total_records,
     COUNT(DISTINCT product_id) as unique_products,
@@ -68,7 +68,7 @@ FROM raw_products;
 
 -- Query 6: Product distribution by category
 -- Purpose: Validate product catalog diversity
-SELECT 
+SELECT
     category,
     COUNT(*) as product_count,
     ROUND(AVG(price), 2) as avg_price,
@@ -81,7 +81,7 @@ ORDER BY product_count DESC;
 
 -- Query 7: Count total events
 -- Purpose: Verify event stream ingestion
-SELECT 
+SELECT
     'raw_events' as table_name,
     COUNT(*) as total_events,
     COUNT(DISTINCT event_id) as unique_events,
@@ -92,7 +92,7 @@ FROM raw_events;
 
 -- Query 8: Event distribution by type
 -- Purpose: Validate event type coverage
-SELECT 
+SELECT
     event_type,
     COUNT(*) as event_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage,
@@ -107,7 +107,7 @@ ORDER BY event_count DESC;
 
 -- Query 9: Check for NULL values in raw_orders critical fields
 -- Purpose: Identify data completeness issues
-SELECT 
+SELECT
     'raw_orders' as table_name,
     COUNT(*) as total_records,
     SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) as null_order_id,
@@ -120,7 +120,7 @@ FROM raw_orders;
 
 -- Query 10: Check for NULL values in raw_customers critical fields
 -- Purpose: Identify customer data quality issues
-SELECT 
+SELECT
     'raw_customers' as table_name,
     COUNT(*) as total_records,
     SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) as null_customer_id,
@@ -134,7 +134,7 @@ FROM raw_customers;
 
 -- Query 11: Check for NULL or invalid values in raw_products
 -- Purpose: Validate product data integrity
-SELECT 
+SELECT
     'raw_products' as table_name,
     COUNT(*) as total_records,
     SUM(CASE WHEN product_id IS NULL THEN 1 ELSE 0 END) as null_product_id,
@@ -152,7 +152,7 @@ FROM raw_products;
 
 -- Query 12: Check for duplicate order IDs
 -- Purpose: Identify potential data duplication issues
-SELECT 
+SELECT
     order_id,
     COUNT(*) as occurrences,
     MIN(order_date) as first_occurrence,
@@ -165,7 +165,7 @@ LIMIT 100;
 
 -- Query 13: Check for duplicate customer IDs
 -- Purpose: Identify customer data duplication
-SELECT 
+SELECT
     customer_id,
     COUNT(*) as occurrences,
     COUNT(DISTINCT email) as unique_emails,
@@ -178,7 +178,7 @@ LIMIT 100;
 
 -- Query 14: Check for duplicate product IDs
 -- Purpose: Identify product catalog duplication
-SELECT 
+SELECT
     product_id,
     COUNT(*) as occurrences,
     COUNT(DISTINCT name) as unique_names,
@@ -191,7 +191,7 @@ LIMIT 100;
 
 -- Query 15: Check for duplicate event IDs
 -- Purpose: Identify event stream duplication
-SELECT 
+SELECT
     event_id,
     COUNT(*) as occurrences
 FROM raw_events
@@ -206,7 +206,7 @@ LIMIT 100;
 
 -- Query 16: Check order status distribution
 -- Purpose: Validate status values are within expected set
-SELECT 
+SELECT
     status,
     COUNT(*) as order_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage,
@@ -217,7 +217,7 @@ ORDER BY order_count DESC;
 
 -- Query 17: Check customer segment distribution
 -- Purpose: Validate segment values
-SELECT 
+SELECT
     segment,
     COUNT(*) as customer_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
@@ -227,7 +227,7 @@ ORDER BY customer_count DESC;
 
 -- Query 18: Validate order amounts are reasonable
 -- Purpose: Identify potential data entry errors
-SELECT 
+SELECT
     'Order Amount Validation' as check_name,
     COUNT(*) as total_orders,
     COUNT(CASE WHEN total_amount <= 0 THEN 1 END) as zero_or_negative,
@@ -244,7 +244,7 @@ FROM raw_orders;
 
 -- Query 19: Check orders by date range
 -- Purpose: Validate temporal coverage and identify gaps
-SELECT 
+SELECT
     DATE_TRUNC('month', CAST(order_date AS DATE)) as order_month,
     COUNT(*) as order_count,
     COUNT(DISTINCT customer_id) as unique_customers,
@@ -257,7 +257,7 @@ ORDER BY order_month DESC;
 
 -- Query 20: Check customer signup trends
 -- Purpose: Validate customer acquisition timeline
-SELECT 
+SELECT
     DATE_TRUNC('month', CAST(signup_date AS DATE)) as signup_month,
     COUNT(*) as new_customers,
     COUNT(DISTINCT country) as countries_represented
@@ -268,25 +268,25 @@ ORDER BY signup_month DESC;
 
 -- Query 21: Check ingestion freshness
 -- Purpose: Verify data pipeline timeliness
-SELECT 
+SELECT
     'raw_orders' as table_name,
     MAX(ingestion_timestamp) as latest_ingestion,
     DATE_DIFF('hour', CAST(MAX(ingestion_timestamp) AS TIMESTAMP), CURRENT_TIMESTAMP) as hours_since_last_ingestion
 FROM raw_orders
 UNION ALL
-SELECT 
+SELECT
     'raw_customers' as table_name,
     MAX(ingestion_timestamp) as latest_ingestion,
     DATE_DIFF('hour', CAST(MAX(ingestion_timestamp) AS TIMESTAMP), CURRENT_TIMESTAMP) as hours_since_last_ingestion
 FROM raw_customers
 UNION ALL
-SELECT 
+SELECT
     'raw_products' as table_name,
     MAX(ingestion_timestamp) as latest_ingestion,
     DATE_DIFF('hour', CAST(MAX(ingestion_timestamp) AS TIMESTAMP), CURRENT_TIMESTAMP) as hours_since_last_ingestion
 FROM raw_products
 UNION ALL
-SELECT 
+SELECT
     'raw_events' as table_name,
     MAX(ingestion_timestamp) as latest_ingestion,
     DATE_DIFF('hour', CAST(MAX(ingestion_timestamp) AS TIMESTAMP), CURRENT_TIMESTAMP) as hours_since_last_ingestion
@@ -298,7 +298,7 @@ FROM raw_events;
 
 -- Query 22: Check email format validity
 -- Purpose: Identify potentially invalid email addresses
-SELECT 
+SELECT
     'Email Validation' as check_name,
     COUNT(*) as total_customers,
     COUNT(CASE WHEN email NOT LIKE '%@%' THEN 1 END) as missing_at_symbol,
@@ -309,7 +309,7 @@ FROM raw_customers;
 
 -- Query 23: Check for suspicious patterns in order data
 -- Purpose: Identify potential fraud or data quality issues
-SELECT 
+SELECT
     customer_id,
     COUNT(*) as order_count,
     SUM(total_amount) as total_spent,
@@ -329,22 +329,22 @@ LIMIT 50;
 
 -- Query 24: Validate data types can be cast properly
 -- Purpose: Check if string fields can be converted to appropriate types
-SELECT 
+SELECT
     'Data Type Validation' as check_name,
     COUNT(*) as total_orders,
-    COUNT(CASE 
-        WHEN TRY_CAST(order_date AS DATE) IS NULL 
-        THEN 1 
+    COUNT(CASE
+        WHEN TRY_CAST(order_date AS DATE) IS NULL
+        THEN 1
     END) as invalid_date_format,
-    COUNT(CASE 
-        WHEN TRY_CAST(total_amount AS DECIMAL(10,2)) IS NULL 
-        THEN 1 
+    COUNT(CASE
+        WHEN TRY_CAST(total_amount AS DECIMAL(10,2)) IS NULL
+        THEN 1
     END) as invalid_amount_format
 FROM raw_orders;
 
 -- Query 25: Summary validation report
 -- Purpose: Overall data quality score for Bronze zone
-SELECT 
+SELECT
     'Bronze Zone Quality Summary' as report_title,
     (SELECT COUNT(*) FROM raw_orders) as total_orders,
     (SELECT COUNT(*) FROM raw_customers) as total_customers,
@@ -353,13 +353,13 @@ SELECT
     (SELECT COUNT(DISTINCT order_id) FROM raw_orders) as unique_order_ids,
     (SELECT COUNT(DISTINCT customer_id) FROM raw_customers) as unique_customer_ids,
     ROUND(
-        (SELECT COUNT(DISTINCT order_id) FROM raw_orders) * 100.0 / 
-        NULLIF((SELECT COUNT(*) FROM raw_orders), 0), 
+        (SELECT COUNT(DISTINCT order_id) FROM raw_orders) * 100.0 /
+        NULLIF((SELECT COUNT(*) FROM raw_orders), 0),
         2
     ) as order_uniqueness_pct,
     ROUND(
-        (SELECT COUNT(DISTINCT customer_id) FROM raw_customers) * 100.0 / 
-        NULLIF((SELECT COUNT(*) FROM raw_customers), 0), 
+        (SELECT COUNT(DISTINCT customer_id) FROM raw_customers) * 100.0 /
+        NULLIF((SELECT COUNT(*) FROM raw_customers), 0),
         2
     ) as customer_uniqueness_pct;
 

@@ -13,7 +13,7 @@ USE cloudmart_data_lake;
 
 -- Query 1: Orders with missing customer references
 -- Purpose: Identify orders that reference non-existent customers
-SELECT 
+SELECT
     'Orders with Invalid Customer Reference' as check_name,
     COUNT(*) as invalid_count,
     ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM processed_orders), 4) as error_rate_pct
@@ -24,7 +24,7 @@ WHERE c.customer_id IS NULL
 
 -- Query 2: Detailed list of orders with missing customer references
 -- Purpose: Get specific records for investigation
-SELECT 
+SELECT
     o.order_id,
     o.customer_id,
     o.order_date,
@@ -39,7 +39,7 @@ LIMIT 100;
 
 -- Query 3: Check for orphaned customer records
 -- Purpose: Identify customers with no orders
-SELECT 
+SELECT
     'Customers with No Orders' as check_name,
     COUNT(*) as customer_count,
     ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM processed_customers), 2) as percentage
@@ -49,13 +49,13 @@ WHERE o.order_id IS NULL;
 
 -- Query 4: Cross-zone referential integrity (Bronze to Silver)
 -- Purpose: Ensure all Bronze records are processed to Silver
-SELECT 
+SELECT
     'Bronze Orders Missing in Silver' as check_name,
     COUNT(DISTINCT rb.order_id) as bronze_count,
     COUNT(DISTINCT ps.order_id) as silver_count,
     COUNT(DISTINCT rb.order_id) - COUNT(DISTINCT ps.order_id) as missing_count,
     ROUND(
-        (COUNT(DISTINCT rb.order_id) - COUNT(DISTINCT ps.order_id)) * 100.0 / 
+        (COUNT(DISTINCT rb.order_id) - COUNT(DISTINCT ps.order_id)) * 100.0 /
         NULLIF(COUNT(DISTINCT rb.order_id), 0),
         2
     ) as missing_pct
@@ -66,7 +66,7 @@ WHERE rb.year = 2024 AND rb.month = EXTRACT(MONTH FROM CURRENT_DATE);
 -- Query 5: Silver to Gold referential integrity
 -- Purpose: Verify Gold aggregations include all Silver data
 WITH silver_daily_counts AS (
-    SELECT 
+    SELECT
         order_date,
         COUNT(*) as silver_order_count,
         SUM(total_amount) as silver_revenue
@@ -74,7 +74,7 @@ WITH silver_daily_counts AS (
     WHERE year = 2024
     GROUP BY order_date
 )
-SELECT 
+SELECT
     s.order_date,
     s.silver_order_count,
     g.total_orders as gold_order_count,
@@ -94,7 +94,7 @@ LIMIT 50;
 
 -- Query 6: Completeness check for critical fields in processed_orders
 -- Purpose: Ensure all required fields are populated
-SELECT 
+SELECT
     'Processed Orders Completeness' as check_name,
     COUNT(*) as total_records,
     SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) as missing_order_id,
@@ -104,17 +104,17 @@ SELECT
     SUM(CASE WHEN status IS NULL THEN 1 ELSE 0 END) as missing_status,
     ROUND(SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 4) as missing_order_id_pct,
     ROUND(SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 4) as missing_customer_id_pct,
-    CASE 
-        WHEN SUM(CASE WHEN order_id IS NULL OR customer_id IS NULL OR order_date IS NULL THEN 1 ELSE 0 END) = 0 
-        THEN 'PASS' 
-        ELSE 'FAIL' 
+    CASE
+        WHEN SUM(CASE WHEN order_id IS NULL OR customer_id IS NULL OR order_date IS NULL THEN 1 ELSE 0 END) = 0
+        THEN 'PASS'
+        ELSE 'FAIL'
     END as quality_status
 FROM processed_orders
 WHERE year = 2024;
 
 -- Query 7: Completeness check for customer records
 -- Purpose: Validate customer data completeness
-SELECT 
+SELECT
     'Processed Customers Completeness' as check_name,
     COUNT(*) as total_records,
     SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) as missing_customer_id,
@@ -123,10 +123,10 @@ SELECT
     SUM(CASE WHEN country IS NULL OR country = '' THEN 1 ELSE 0 END) as missing_country,
     SUM(CASE WHEN segment IS NULL OR segment = '' THEN 1 ELSE 0 END) as missing_segment,
     ROUND(SUM(CASE WHEN email IS NULL OR email = '' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 4) as missing_email_pct,
-    CASE 
-        WHEN SUM(CASE WHEN customer_id IS NULL OR email IS NULL THEN 1 ELSE 0 END) = 0 
-        THEN 'PASS' 
-        ELSE 'FAIL' 
+    CASE
+        WHEN SUM(CASE WHEN customer_id IS NULL OR email IS NULL THEN 1 ELSE 0 END) = 0
+        THEN 'PASS'
+        ELSE 'FAIL'
     END as quality_status
 FROM processed_customers
 WHERE year = 2024;
@@ -140,10 +140,10 @@ WITH RECURSIVE date_series AS (
     FROM date_series
     WHERE expected_date < CURRENT_DATE
 )
-SELECT 
+SELECT
     ds.expected_date,
     COALESCE(COUNT(o.order_id), 0) as order_count,
-    CASE 
+    CASE
         WHEN COUNT(o.order_id) = 0 THEN 'MISSING DATA'
         WHEN COUNT(o.order_id) < 100 THEN 'LOW VOLUME'
         ELSE 'OK'
@@ -161,7 +161,7 @@ LIMIT 30;
 
 -- Query 9: Check for inconsistent customer data
 -- Purpose: Identify customers with conflicting information
-SELECT 
+SELECT
     customer_id,
     COUNT(DISTINCT name) as distinct_names,
     COUNT(DISTINCT email) as distinct_emails,
@@ -171,14 +171,14 @@ SELECT
     MAX(email) as email_example
 FROM processed_customers
 GROUP BY customer_id
-HAVING COUNT(DISTINCT name) > 1 
-    OR COUNT(DISTINCT email) > 1 
+HAVING COUNT(DISTINCT name) > 1
+    OR COUNT(DISTINCT email) > 1
     OR COUNT(DISTINCT country) > 1
 LIMIT 100;
 
 -- Query 10: Check for email format consistency
 -- Purpose: Validate email format standards
-SELECT 
+SELECT
     'Email Format Validation' as check_name,
     COUNT(*) as total_customers,
     SUM(CASE WHEN email LIKE '%@%.%' THEN 1 ELSE 0 END) as valid_format,
@@ -187,20 +187,20 @@ SELECT
     SUM(CASE WHEN LENGTH(email) < 5 THEN 1 ELSE 0 END) as too_short,
     SUM(CASE WHEN email LIKE '% %' THEN 1 ELSE 0 END) as contains_space,
     ROUND(SUM(CASE WHEN email LIKE '%@%.%' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as valid_pct,
-    CASE 
-        WHEN SUM(CASE WHEN email LIKE '%@%.%' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) >= 99 
-        THEN 'PASS' 
-        ELSE 'FAIL' 
+    CASE
+        WHEN SUM(CASE WHEN email LIKE '%@%.%' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) >= 99
+        THEN 'PASS'
+        ELSE 'FAIL'
     END as quality_status
 FROM processed_customers
 WHERE year = 2024;
 
 -- Query 11: Status value consistency
 -- Purpose: Ensure status values are from expected set
-SELECT 
+SELECT
     status,
     COUNT(*) as count,
-    CASE 
+    CASE
         WHEN status IN ('completed', 'pending', 'cancelled') THEN 'VALID'
         ELSE 'INVALID'
     END as validity
@@ -211,16 +211,16 @@ ORDER BY count DESC;
 
 -- Query 12: Date consistency checks
 -- Purpose: Ensure dates are logical and within expected ranges
-SELECT 
+SELECT
     'Date Consistency Check' as check_name,
     COUNT(*) as total_orders,
     SUM(CASE WHEN order_date > CURRENT_DATE THEN 1 ELSE 0 END) as future_dates,
     SUM(CASE WHEN order_date < DATE '2020-01-01' THEN 1 ELSE 0 END) as old_dates,
     SUM(CASE WHEN order_timestamp < CAST(order_date AS TIMESTAMP) THEN 1 ELSE 0 END) as timestamp_before_date,
-    CASE 
-        WHEN SUM(CASE WHEN order_date > CURRENT_DATE OR order_date < DATE '2020-01-01' THEN 1 ELSE 0 END) = 0 
-        THEN 'PASS' 
-        ELSE 'FAIL' 
+    CASE
+        WHEN SUM(CASE WHEN order_date > CURRENT_DATE OR order_date < DATE '2020-01-01' THEN 1 ELSE 0 END) = 0
+        THEN 'PASS'
+        ELSE 'FAIL'
     END as quality_status
 FROM processed_orders
 WHERE year = 2024;
@@ -231,7 +231,7 @@ WHERE year = 2024;
 
 -- Query 13: Numeric range validation
 -- Purpose: Check if numeric values are within reasonable bounds
-SELECT 
+SELECT
     'Numeric Range Validation' as check_name,
     COUNT(*) as total_orders,
     SUM(CASE WHEN total_amount <= 0 THEN 1 ELSE 0 END) as zero_or_negative_amount,
@@ -241,10 +241,10 @@ SELECT
     ROUND(MIN(total_amount), 2) as min_amount,
     ROUND(MAX(total_amount), 2) as max_amount,
     ROUND(AVG(total_amount), 2) as avg_amount,
-    CASE 
-        WHEN SUM(CASE WHEN total_amount <= 0 THEN 1 ELSE 0 END) = 0 
-        THEN 'PASS' 
-        ELSE 'FAIL' 
+    CASE
+        WHEN SUM(CASE WHEN total_amount <= 0 THEN 1 ELSE 0 END) = 0
+        THEN 'PASS'
+        ELSE 'FAIL'
     END as quality_status
 FROM processed_orders
 WHERE year = 2024;
@@ -252,19 +252,19 @@ WHERE year = 2024;
 -- Query 14: Statistical outlier detection
 -- Purpose: Identify statistical outliers in order amounts
 WITH stats AS (
-    SELECT 
+    SELECT
         AVG(total_amount) as mean_amount,
         STDDEV(total_amount) as stddev_amount
     FROM processed_orders
     WHERE year = 2024
 )
-SELECT 
+SELECT
     o.order_id,
     o.customer_id,
     o.order_date,
     o.total_amount,
     ROUND((o.total_amount - s.mean_amount) / s.stddev_amount, 2) as z_score,
-    CASE 
+    CASE
         WHEN ABS((o.total_amount - s.mean_amount) / s.stddev_amount) > 3 THEN 'Extreme Outlier'
         WHEN ABS((o.total_amount - s.mean_amount) / s.stddev_amount) > 2 THEN 'Moderate Outlier'
         ELSE 'Normal'
@@ -277,13 +277,13 @@ LIMIT 100;
 
 -- Query 15: Customer lifetime value validation
 -- Purpose: Verify CLV calculations are accurate
-SELECT 
+SELECT
     c.customer_id,
     c.name,
     c.lifetime_value as stored_clv,
     SUM(o.total_amount) as calculated_clv,
     ROUND(ABS(c.lifetime_value - SUM(o.total_amount)), 2) as difference,
-    CASE 
+    CASE
         WHEN ABS(c.lifetime_value - SUM(o.total_amount)) < 0.01 THEN 'MATCH'
         WHEN ABS(c.lifetime_value - SUM(o.total_amount)) < 1.00 THEN 'MINOR_DIFF'
         ELSE 'MISMATCH'
@@ -302,37 +302,37 @@ LIMIT 100;
 
 -- Query 16: Data freshness check
 -- Purpose: Ensure data is being ingested in a timely manner
-SELECT 
+SELECT
     'Data Freshness Check' as check_name,
     zone,
     table_name,
     latest_processing_timestamp,
     ROUND(DATE_DIFF('hour', latest_processing_timestamp, CURRENT_TIMESTAMP), 1) as hours_old,
-    CASE 
+    CASE
         WHEN DATE_DIFF('hour', latest_processing_timestamp, CURRENT_TIMESTAMP) <= 2 THEN 'FRESH'
         WHEN DATE_DIFF('hour', latest_processing_timestamp, CURRENT_TIMESTAMP) <= 24 THEN 'ACCEPTABLE'
         ELSE 'STALE'
     END as freshness_status
 FROM (
-    SELECT 
+    SELECT
         'Silver' as zone,
         'processed_orders' as table_name,
         MAX(processing_timestamp) as latest_processing_timestamp
     FROM processed_orders
     UNION ALL
-    SELECT 
+    SELECT
         'Silver' as zone,
         'processed_customers' as table_name,
         MAX(processing_timestamp) as latest_processing_timestamp
     FROM processed_customers
     UNION ALL
-    SELECT 
+    SELECT
         'Gold' as zone,
         'sales_summary' as table_name,
         MAX(calculation_timestamp) as latest_processing_timestamp
     FROM sales_summary
     UNION ALL
-    SELECT 
+    SELECT
         'Gold' as zone,
         'customer_360' as table_name,
         MAX(calculation_timestamp) as latest_processing_timestamp
@@ -341,26 +341,26 @@ FROM (
 
 -- Query 17: Processing lag analysis
 -- Purpose: Measure time between order date and processing
-SELECT 
+SELECT
     order_date,
     COUNT(*) as order_count,
     ROUND(AVG(DATE_DIFF('hour', order_timestamp, processing_timestamp)), 2) as avg_processing_lag_hours,
     ROUND(MAX(DATE_DIFF('hour', order_timestamp, processing_timestamp)), 2) as max_processing_lag_hours,
-    CASE 
+    CASE
         WHEN AVG(DATE_DIFF('hour', order_timestamp, processing_timestamp)) <= 2 THEN 'EXCELLENT'
         WHEN AVG(DATE_DIFF('hour', order_timestamp, processing_timestamp)) <= 6 THEN 'GOOD'
         WHEN AVG(DATE_DIFF('hour', order_timestamp, processing_timestamp)) <= 24 THEN 'ACCEPTABLE'
         ELSE 'POOR'
     END as lag_status
 FROM processed_orders
-WHERE year = 2024 
+WHERE year = 2024
     AND month >= EXTRACT(MONTH FROM CURRENT_DATE) - 1
 GROUP BY order_date
 ORDER BY order_date DESC;
 
 -- Query 18: Late arriving data detection
 -- Purpose: Identify data arriving significantly after event time
-SELECT 
+SELECT
     DATE(processing_timestamp) as processing_date,
     DATE(order_date) as order_date,
     COUNT(*) as record_count,
@@ -378,7 +378,7 @@ LIMIT 100;
 
 -- Query 19: Duplicate detection in processed_orders
 -- Purpose: Identify duplicate order records
-SELECT 
+SELECT
     order_id,
     COUNT(*) as occurrence_count,
     MIN(order_date) as first_occurrence,
@@ -394,7 +394,7 @@ LIMIT 100;
 
 -- Query 20: Duplicate detection in customer records
 -- Purpose: Identify duplicate or near-duplicate customers
-SELECT 
+SELECT
     email,
     COUNT(DISTINCT customer_id) as customer_count,
     ARRAY_AGG(DISTINCT customer_id) as customer_ids,
@@ -413,7 +413,7 @@ LIMIT 100;
 -- Query 21: Overall data quality summary score
 -- Purpose: Provide aggregated quality metrics across all checks
 WITH quality_metrics AS (
-    SELECT 
+    SELECT
         'Referential Integrity' as dimension,
         ROUND(
             (1 - COUNT(CASE WHEN c.customer_id IS NULL THEN 1 END) * 1.0 / COUNT(*)) * 100,
@@ -422,10 +422,10 @@ WITH quality_metrics AS (
     FROM processed_orders o
     LEFT JOIN processed_customers c ON o.customer_id = c.customer_id
     WHERE o.year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'Completeness' as dimension,
         ROUND(
             (1 - SUM(CASE WHEN order_id IS NULL OR customer_id IS NULL OR order_date IS NULL THEN 1 ELSE 0 END) * 1.0 / COUNT(*)) * 100,
@@ -433,10 +433,10 @@ WITH quality_metrics AS (
         ) as score
     FROM processed_orders
     WHERE year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'Accuracy' as dimension,
         ROUND(
             (1 - SUM(CASE WHEN total_amount <= 0 OR product_count <= 0 THEN 1 ELSE 0 END) * 1.0 / COUNT(*)) * 100,
@@ -444,10 +444,10 @@ WITH quality_metrics AS (
         ) as score
     FROM processed_orders
     WHERE year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'Uniqueness' as dimension,
         ROUND(
             COUNT(DISTINCT order_id) * 100.0 / COUNT(*),
@@ -455,10 +455,10 @@ WITH quality_metrics AS (
         ) as score
     FROM processed_orders
     WHERE year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'Email Validity' as dimension,
         ROUND(
             SUM(CASE WHEN email LIKE '%@%.%' THEN 1 ELSE 0 END) * 100.0 / COUNT(*),
@@ -467,16 +467,16 @@ WITH quality_metrics AS (
     FROM processed_customers
     WHERE year = 2024
 )
-SELECT 
+SELECT
     dimension,
     score,
-    CASE 
+    CASE
         WHEN score >= 99 THEN 'Excellent'
         WHEN score >= 95 THEN 'Good'
         WHEN score >= 90 THEN 'Acceptable'
         ELSE 'Poor'
     END as rating,
-    CASE 
+    CASE
         WHEN score >= 95 THEN 'PASS'
         ELSE 'FAIL'
     END as status
@@ -485,7 +485,7 @@ ORDER BY score ASC;
 
 -- Query 22: Data quality trend over time
 -- Purpose: Track data quality improvements or degradations
-SELECT 
+SELECT
     DATE_TRUNC('week', order_date) as week,
     COUNT(*) as total_records,
     COUNT(DISTINCT order_id) as unique_orders,
@@ -500,50 +500,50 @@ ORDER BY week DESC;
 
 -- Query 23: Critical quality violations report
 -- Purpose: List all critical data quality issues
-SELECT 
+SELECT
     'Critical Quality Violations' as report_title,
     violation_type,
     COUNT(*) as violation_count,
     severity
 FROM (
-    SELECT 
+    SELECT
         order_id,
         'Missing Customer Reference' as violation_type,
         'HIGH' as severity
     FROM processed_orders o
     LEFT JOIN processed_customers c ON o.customer_id = c.customer_id
     WHERE c.customer_id IS NULL AND o.year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         order_id,
         'Invalid Order Amount' as violation_type,
         'HIGH' as severity
     FROM processed_orders
     WHERE total_amount <= 0 AND year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         order_id,
         'Future Order Date' as violation_type,
         'HIGH' as severity
     FROM processed_orders
     WHERE order_date > CURRENT_DATE AND year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         customer_id,
         'Invalid Email Format' as violation_type,
         'MEDIUM' as severity
     FROM processed_customers
     WHERE email NOT LIKE '%@%.%' AND year = 2024
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         order_id,
         'Duplicate Order ID' as violation_type,
         'MEDIUM' as severity
@@ -556,8 +556,8 @@ FROM (
     )
 )
 GROUP BY violation_type, severity
-ORDER BY 
-    CASE severity 
+ORDER BY
+    CASE severity
         WHEN 'HIGH' THEN 1
         WHEN 'MEDIUM' THEN 2
         ELSE 3

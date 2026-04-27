@@ -250,23 +250,23 @@ This measures:
 ### Test Failures
 
 #### "Bucket does not exist"
-**Problem**: S3 buckets not created or name mismatch  
+**Problem**: S3 buckets not created or name mismatch
 **Solution**: Check `BUCKET_PREFIX` environment variable matches your deployment
 
 #### "IAM role does not exist"
-**Problem**: IAM roles not created or incorrect names  
+**Problem**: IAM roles not created or incorrect names
 **Solution**: Verify IAM roles are deployed with expected names
 
 #### "Lambda function does not exist"
-**Problem**: Lambda functions not deployed  
+**Problem**: Lambda functions not deployed
 **Solution**: Check Lambda deployment in AWS Console
 
 #### "No data in bronze/silver/gold layer"
-**Problem**: Pipeline hasn't processed data yet  
+**Problem**: Pipeline hasn't processed data yet
 **Solution**: Upload sample data and wait for processing
 
 #### "AWS credentials not configured"
-**Problem**: No AWS credentials available  
+**Problem**: No AWS credentials available
 **Solution**: Run `aws configure` or set environment variables
 
 ### Performance Issues

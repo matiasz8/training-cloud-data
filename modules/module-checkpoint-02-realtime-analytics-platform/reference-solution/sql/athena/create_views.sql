@@ -27,10 +27,10 @@ SELECT
     duration_seconds,
     duration_seconds / 60.0 AS duration_minutes,
     distance_km,
-    CASE 
-        WHEN distance_km > 0 AND duration_seconds > 0 
+    CASE
+        WHEN distance_km > 0 AND duration_seconds > 0
         THEN (distance_km / (duration_seconds / 3600.0))
-        ELSE 0 
+        ELSE 0
     END AS avg_speed_kmh,
     base_fare,
     surge_multiplier,
@@ -87,20 +87,20 @@ SELECT
     ds.avg_fare_per_ride,
     ds.total_distance_km,
     ds.total_hours_driving,
-    CASE 
-        WHEN ds.total_hours_driving > 0 
-        THEN ds.total_earnings / ds.total_hours_driving 
-        ELSE 0 
+    CASE
+        WHEN ds.total_hours_driving > 0
+        THEN ds.total_earnings / ds.total_hours_driving
+        ELSE 0
     END AS earnings_per_hour,
     ds.avg_ride_duration_minutes,
     ds.avg_distance_per_ride,
     ds.first_ride_date,
     ds.last_ride_date,
     ds.days_active,
-    CASE 
-        WHEN ds.days_active > 0 
-        THEN CAST(ds.total_rides AS DOUBLE) / ds.days_active 
-        ELSE 0 
+    CASE
+        WHEN ds.days_active > 0
+        THEN CAST(ds.total_rides AS DOUBLE) / ds.days_active
+        ELSE 0
     END AS rides_per_day,
     COALESCE(dr.rating_count, 0) AS rating_count,
     COALESCE(dr.avg_rating, 0.0) AS avg_rating,
@@ -111,10 +111,10 @@ SELECT
     COALESCE(dr.low_rating_count, 0) AS low_rating_count,
     COALESCE(dr.total_tips, 0.0) AS total_tips,
     COALESCE(dr.avg_tip, 0.0) AS avg_tip,
-    CASE 
-        WHEN dr.rating_count > 0 
-        THEN CAST(dr.five_star_count AS DOUBLE) / dr.rating_count 
-        ELSE 0 
+    CASE
+        WHEN dr.rating_count > 0
+        THEN CAST(dr.five_star_count AS DOUBLE) / dr.rating_count
+        ELSE 0
     END AS five_star_rate
 FROM driver_stats ds
 LEFT JOIN driver_ratings dr ON ds.driver_id = dr.driver_id;
@@ -162,22 +162,22 @@ SELECT
     dr.avg_fare,
     dr.avg_surge_multiplier,
     dr.surge_ride_count,
-    CASE 
-        WHEN dr.ride_count > 0 
-        THEN CAST(dr.surge_ride_count AS DOUBLE) / dr.ride_count 
-        ELSE 0 
+    CASE
+        WHEN dr.ride_count > 0
+        THEN CAST(dr.surge_ride_count AS DOUBLE) / dr.ride_count
+        ELSE 0
     END AS surge_ride_percentage,
     dr.avg_distance,
     dr.avg_duration_minutes,
-    CASE 
-        WHEN dr.avg_distance > 0 
-        THEN dr.total_revenue / dr.avg_distance 
-        ELSE 0 
+    CASE
+        WHEN dr.avg_distance > 0
+        THEN dr.total_revenue / dr.avg_distance
+        ELSE 0
     END AS revenue_per_km,
-    CASE 
-        WHEN dr.avg_duration_minutes > 0 
-        THEN dr.total_revenue / dr.avg_duration_minutes 
-        ELSE 0 
+    CASE
+        WHEN dr.avg_duration_minutes > 0
+        THEN dr.total_revenue / dr.avg_duration_minutes
+        ELSE 0
     END AS revenue_per_minute
 FROM daily_revenue dr;
 
@@ -238,18 +238,18 @@ SELECT
     ra.first_ride_date,
     ra.last_ride_date,
     ra.customer_lifetime_days,
-    CASE 
-        WHEN ra.customer_lifetime_days > 0 
-        THEN CAST(ra.total_spent AS DOUBLE) / ra.customer_lifetime_days 
-        ELSE 0 
+    CASE
+        WHEN ra.customer_lifetime_days > 0
+        THEN CAST(ra.total_spent AS DOUBLE) / ra.customer_lifetime_days
+        ELSE 0
     END AS daily_spending_rate,
     ra.cities_used,
     ra.vehicle_types_used,
     ra.surge_rides,
-    CASE 
-        WHEN ra.total_rides > 0 
-        THEN CAST(ra.surge_rides AS DOUBLE) / ra.total_rides 
-        ELSE 0 
+    CASE
+        WHEN ra.total_rides > 0
+        THEN CAST(ra.surge_rides AS DOUBLE) / ra.total_rides
+        ELSE 0
     END AS surge_acceptance_rate,
     ra.avg_ride_distance,
     COALESCE(rr.ratings_given, 0) AS ratings_given,
@@ -283,7 +283,7 @@ WITH location_activity AS (
         0 AS dropoff_count
     FROM rideshare_rides
     WHERE status = 'completed'
-    GROUP BY 
+    GROUP BY
         DATE(from_unixtime(timestamp)),
         HOUR(from_unixtime(timestamp)),
         pickup_location_city,
@@ -302,7 +302,7 @@ WITH location_activity AS (
         COUNT(*) AS dropoff_count
     FROM rideshare_rides
     WHERE status = 'completed'
-    GROUP BY 
+    GROUP BY
         DATE(from_unixtime(timestamp)),
         HOUR(from_unixtime(timestamp)),
         dropoff_location_city,

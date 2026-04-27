@@ -251,7 +251,7 @@ source .env
 
 ## 4. Phase 1: Infrastructure Setup
 
-**Duration:** 4-5 hours  
+**Duration:** 4-5 hours
 **Goal:** Set up all required AWS infrastructure components
 
 ### 4.1 S3 Buckets Creation
@@ -631,7 +631,7 @@ Parameters:
     Type: String
     Default: cloudmart-datalake
     Description: Project name prefix for all resources
-  
+
   Environment:
     Type: String
     Default: dev
@@ -950,7 +950,7 @@ aws cloudformation describe-stacks \
 
 ## 5. Phase 2: Data Ingestion
 
-**Duration:** 5-6 hours  
+**Duration:** 5-6 hours
 **Goal:** Implement automated data ingestion pipeline using Lambda
 
 ### 5.1 Lambda Function Development
@@ -985,18 +985,18 @@ def lambda_handler(event, context):
     """
     try:
         logger.info(f"Event received: {json.dumps(event)}")
-        
+
         # Parse S3 event
         for record in event['Records']:
             # Get bucket and key from event
             source_bucket = record['s3']['bucket']['name']
             source_key = record['s3']['object']['key']
-            
+
             logger.info(f"Processing file: s3://{source_bucket}/{source_key}")
-            
+
             # Determine data type from path
             data_type = source_key.split('/')[0]
-            
+
             # Process based on file type
             if source_key.endswith('.csv'):
                 process_csv_file(source_bucket, source_key, data_type)
@@ -1005,12 +1005,12 @@ def lambda_handler(event, context):
             else:
                 logger.warning(f"Unsupported file type: {source_key}")
                 continue
-        
+
         return {
             'statusCode': 200,
             'body': json.dumps('Processing completed successfully')
         }
-    
+
     except Exception as e:
         logger.error(f"Error processing event: {str(e)}", exc_info=True)
         raise
@@ -1021,32 +1021,32 @@ def process_csv_file(bucket, key, data_type):
         # Download file from S3
         response = s3_client.get_object(Bucket=bucket, Key=key)
         content = response['Body'].read().decode('utf-8')
-        
+
         # Parse CSV
         csv_reader = csv.DictReader(StringIO(content))
         rows = list(csv_reader)
-        
+
         logger.info(f"Parsed {len(rows)} rows from CSV")
-        
+
         # Validate data
         valid_rows = []
         invalid_rows = []
-        
+
         for row in rows:
             if validate_order_record(row):
                 valid_rows.append(row)
             else:
                 invalid_rows.append(row)
-        
+
         logger.info(f"Valid rows: {len(valid_rows)}, Invalid rows: {len(invalid_rows)}")
-        
+
         # Convert to JSON Lines format for better processing
         jsonl_content = '\n'.join([json.dumps(row) for row in valid_rows])
-        
+
         # Generate target key with partition
         current_date = datetime.now()
         target_key = f"{data_type}/year={current_date.year}/month={current_date.month:02d}/day={current_date.day:02d}/{os.path.basename(key).replace('.csv', '.jsonl')}"
-        
+
         # Upload to processed bucket
         s3_client.put_object(
             Bucket=PROCESSED_BUCKET,
@@ -1054,9 +1054,9 @@ def process_csv_file(bucket, key, data_type):
             Body=jsonl_content,
             ContentType='application/x-ndjson'
         )
-        
+
         logger.info(f"File uploaded to: s3://{PROCESSED_BUCKET}/{target_key}")
-        
+
         # Log invalid rows if any
         if invalid_rows:
             error_key = f"errors/{data_type}/{datetime.now().isoformat()}.json"
@@ -1066,9 +1066,9 @@ def process_csv_file(bucket, key, data_type):
                 Body=json.dumps(invalid_rows, indent=2)
             )
             logger.warning(f"Invalid rows logged to: {error_key}")
-        
+
         return len(valid_rows)
-    
+
     except Exception as e:
         logger.error(f"Error processing CSV file: {str(e)}", exc_info=True)
         raise
@@ -1079,35 +1079,35 @@ def process_json_file(bucket, key, data_type):
         # Download file from S3
         response = s3_client.get_object(Bucket=bucket, Key=key)
         content = response['Body'].read().decode('utf-8')
-        
+
         # Parse JSON
         data = json.loads(content)
-        
+
         # Handle both single object and array
         if not isinstance(data, list):
             data = [data]
-        
+
         logger.info(f"Parsed {len(data)} records from JSON")
-        
+
         # Validate data
         valid_records = []
         invalid_records = []
-        
+
         for record in data:
             if validate_json_record(record, data_type):
                 valid_records.append(record)
             else:
                 invalid_records.append(record)
-        
+
         logger.info(f"Valid records: {len(valid_records)}, Invalid records: {len(invalid_records)}")
-        
+
         # Convert to JSON Lines format
         jsonl_content = '\n'.join([json.dumps(record) for record in valid_records])
-        
+
         # Generate target key with partition
         current_date = datetime.now()
         target_key = f"{data_type}/year={current_date.year}/month={current_date.month:02d}/day={current_date.day:02d}/{os.path.basename(key).replace('.json', '.jsonl')}"
-        
+
         # Upload to processed bucket
         s3_client.put_object(
             Bucket=PROCESSED_BUCKET,
@@ -1115,9 +1115,9 @@ def process_json_file(bucket, key, data_type):
             Body=jsonl_content,
             ContentType='application/x-ndjson'
         )
-        
+
         logger.info(f"File uploaded to: s3://{PROCESSED_BUCKET}/{target_key}")
-        
+
         # Log invalid records if any
         if invalid_records:
             error_key = f"errors/{data_type}/{datetime.now().isoformat()}.json"
@@ -1127,9 +1127,9 @@ def process_json_file(bucket, key, data_type):
                 Body=json.dumps(invalid_records, indent=2)
             )
             logger.warning(f"Invalid records logged to: {error_key}")
-        
+
         return len(valid_records)
-    
+
     except Exception as e:
         logger.error(f"Error processing JSON file: {str(e)}", exc_info=True)
         raise
@@ -1137,18 +1137,18 @@ def process_json_file(bucket, key, data_type):
 def validate_order_record(record):
     """Validate order record"""
     required_fields = ['order_id', 'customer_id', 'order_date', 'total_amount']
-    
+
     # Check required fields exist
     for field in required_fields:
         if field not in record or not record[field]:
             return False
-    
+
     # Validate data types
     try:
         float(record['total_amount'])
     except ValueError:
         return False
-    
+
     return True
 
 def validate_json_record(record, data_type):
@@ -1161,12 +1161,12 @@ def validate_json_record(record, data_type):
         required_fields = ['event_id', 'user_id', 'event_type', 'timestamp']
     else:
         return True  # Unknown type, accept it
-    
+
     # Check required fields
     for field in required_fields:
         if field not in record or record[field] is None:
             return False
-    
+
     return True
 ```
 
@@ -1490,7 +1490,7 @@ cat verify_orders.jsonl
 
 ## 6. Phase 3: Data Cataloging
 
-**Duration:** 3-4 hours  
+**Duration:** 3-4 hours
 **Goal:** Set up AWS Glue Data Catalog with crawlers
 
 ### 6.1 Glue Database Setup
@@ -1609,7 +1609,7 @@ aws glue get-table \
 
 ## 7. Phase 4: Data Transformation
 
-**Duration:** 5-6 hours  
+**Duration:** 5-6 hours
 **Goal:** Create Glue ETL jobs to transform data into curated zone
 
 ### 7.1 ETL Job for Orders Transformation
@@ -1767,7 +1767,7 @@ df_customers = source_customers.toDF()
 df_transformed = df_customers \
     .withColumn("signup_date", to_date(col("signup_date"))) \
     .withColumn("days_since_signup", datediff(current_date(), col("signup_date"))) \
-    .withColumn("customer_segment", 
+    .withColumn("customer_segment",
         when(datediff(current_date(), col("signup_date")) < 30, "New")
         .when(datediff(current_date(), col("signup_date")) < 180, "Regular")
         .otherwise("Loyal")
@@ -1964,7 +1964,7 @@ aws glue start-crawler --name cloudmart-crawler-curated-products
 
 ## 8. Phase 5: Analytics & Querying
 
-**Duration:** 3-4 hours  
+**Duration:** 3-4 hours
 **Goal:** Set up Athena for SQL analytics
 
 ### 8.1 Athena Workgroup Setup
@@ -1989,7 +1989,7 @@ aws athena create-work-group \
 
 ```sql
 -- Total revenue by month
-SELECT 
+SELECT
     year,
     month,
     COUNT(DISTINCT order_id) as total_orders,
@@ -2023,7 +2023,7 @@ aws athena get-query-results --query-execution-id ${QUERY_ID} --output table
 
 ```sql
 -- Customer segmentation analysis
-SELECT 
+SELECT
     customer_segment,
     COUNT(DISTINCT customer_id) as customer_count,
     AVG(days_since_signup) as avg_days_active
@@ -2036,7 +2036,7 @@ ORDER BY customer_count DESC;
 
 ```sql
 -- Top selling products (requires join with orders)
-SELECT 
+SELECT
     p.product_id,
     p.name,
     p.category,
@@ -2092,7 +2092,7 @@ For better query performance on partitioned data, enable partition projection:
 
 ```sql
 -- Enable partition projection on fact_orders table
-ALTER TABLE curated_fact_orders 
+ALTER TABLE curated_fact_orders
 SET TBLPROPERTIES (
   'projection.enabled' = 'true',
   'projection.year.type' = 'integer',
@@ -2176,13 +2176,13 @@ def run_athena_query(query, database):
         QueryExecutionContext={'Database': database},
         ResultConfiguration={'OutputLocation': f's3://{ATHENA_RESULTS_BUCKET}/'}
     )
-    
+
     query_id = response['QueryExecutionId']
-    
+
     # Wait for query to complete
     waiter = athena.get_waiter('query_succeeded')
     waiter.wait(QueryExecutionId=query_id)
-    
+
     # Get results
     results = athena.get_query_results(QueryExecutionId=query_id)
     return results
@@ -2204,9 +2204,9 @@ quality_checks = [
     {
         'name': 'Referential Integrity - Orders x Customers',
         'query': '''
-            SELECT COUNT(*) as orphan_count 
-            FROM curated_fact_orders o 
-            LEFT JOIN curated_dim_customers c ON o.customer_id = c.customer_id 
+            SELECT COUNT(*) as orphan_count
+            FROM curated_fact_orders o
+            LEFT JOIN curated_dim_customers c ON o.customer_id = c.customer_id
             WHERE c.customer_id IS NULL
         '''
     }
@@ -2476,14 +2476,14 @@ After completing this implementation:
 
 Congratulations! You've successfully implemented a production-ready serverless data lake on AWS. This implementation demonstrates:
 
-✅ Infrastructure as Code with CloudFormation  
-✅ Event-driven architecture with Lambda  
-✅ Data cataloging and governance with Glue  
-✅ ETL processing with PySpark  
-✅ SQL analytics with Athena  
-✅ Monitoring and alerting with CloudWatch  
-✅ Security best practices with IAM  
-✅ Cost optimization strategies  
+✅ Infrastructure as Code with CloudFormation
+✅ Event-driven architecture with Lambda
+✅ Data cataloging and governance with Glue
+✅ ETL processing with PySpark
+✅ SQL analytics with Athena
+✅ Monitoring and alerting with CloudWatch
+✅ Security best practices with IAM
+✅ Cost optimization strategies
 
 **Total Implementation Cost:** ~$25-30/month (with sample data)
 
@@ -2498,7 +2498,6 @@ Congratulations! You've successfully implemented a production-ready serverless d
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** March 2026  
+**Document Version:** 1.0
+**Last Updated:** March 2026
 **Total Lines:** ~1,550
-

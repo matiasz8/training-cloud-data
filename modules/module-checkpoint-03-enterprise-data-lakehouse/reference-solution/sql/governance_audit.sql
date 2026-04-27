@@ -18,7 +18,7 @@
 -- Purpose: Track who accessed what data and when
 -- =============================================================================
 
-SELECT 
+SELECT
     event_time,
     principal_id,
     principal_type,
@@ -31,14 +31,14 @@ SELECT
     source_ip_address,
     user_agent,
     -- Access classification
-    CASE 
+    CASE
         WHEN action IN ('SELECT', 'DESCRIBE') THEN 'Read Access'
         WHEN action IN ('INSERT', 'UPDATE', 'DELETE') THEN 'Write Access'
         WHEN action IN ('ALTER', 'DROP', 'CREATE') THEN 'DDL Operation'
         ELSE 'Other'
     END AS access_type,
     -- Risk level
-    CASE 
+    CASE
         WHEN result = 'Failed' THEN 'Failed Attempt'
         WHEN action IN ('DROP', 'DELETE') THEN 'High Risk'
         WHEN action IN ('UPDATE', 'ALTER') THEN 'Medium Risk'
@@ -66,7 +66,7 @@ WITH pii_columns AS (
     SELECT 'customer_name', 'dim_customer', 'Low'
 ),
 pii_access_logs AS (
-    SELECT 
+    SELECT
         al.event_time,
         al.principal_id,
         al.principal_type,
@@ -85,7 +85,7 @@ pii_access_logs AS (
         AND (al.column_names LIKE '%' || pc.column_name || '%' OR al.column_names = '*')
         AND al.event_time >= DATE_ADD('day', -30, CURRENT_DATE)
 )
-SELECT 
+SELECT
     DATE(event_time) AS access_date,
     principal_id,
     principal_type,
@@ -97,7 +97,7 @@ SELECT
     COUNT(DISTINCT source_ip_address) AS unique_ips,
     MAX(event_time) AS last_access,
     -- Compliance flag
-    CASE 
+    CASE
         WHEN sensitivity = 'High' AND COUNT(*) > 100 THEN 'Review Required'
         WHEN COUNT(DISTINCT source_ip_address) > 5 THEN 'Multiple IPs - Investigation'
         ELSE 'Normal'
@@ -114,7 +114,7 @@ ORDER BY access_date DESC, access_count DESC;
 -- =============================================================================
 
 WITH failed_attempts AS (
-    SELECT 
+    SELECT
         event_time,
         principal_id,
         principal_type,
@@ -126,7 +126,7 @@ WITH failed_attempts AS (
         source_ip_address,
         user_agent,
         ROW_NUMBER() OVER (
-            PARTITION BY principal_id, DATE(event_time) 
+            PARTITION BY principal_id, DATE(event_time)
             ORDER BY event_time
         ) AS attempt_number
     FROM lake_formation_audit_logs
@@ -134,7 +134,7 @@ WITH failed_attempts AS (
         AND event_time >= DATE_ADD('day', -30, CURRENT_DATE)
 ),
 threat_assessment AS (
-    SELECT 
+    SELECT
         principal_id,
         DATE(event_time) AS attempt_date,
         COUNT(*) AS failed_attempts_count,
@@ -144,13 +144,13 @@ threat_assessment AS (
         MIN(event_time) AS first_attempt,
         MAX(event_time) AS last_attempt,
         -- Threat score
-        CASE 
+        CASE
             WHEN COUNT(*) >= 50 THEN 10
             WHEN COUNT(*) >= 20 THEN 7
             WHEN COUNT(*) >= 10 THEN 5
             ELSE 3
         END +
-        CASE 
+        CASE
             WHEN COUNT(DISTINCT table_name) >= 10 THEN 5
             WHEN COUNT(DISTINCT table_name) >= 5 THEN 3
             ELSE 1
@@ -158,7 +158,7 @@ threat_assessment AS (
     FROM failed_attempts
     GROUP BY principal_id, DATE(event_time)
 )
-SELECT 
+SELECT
     attempt_date,
     principal_id,
     failed_attempts_count,
@@ -168,13 +168,13 @@ SELECT
     first_attempt,
     last_attempt,
     threat_score,
-    CASE 
+    CASE
         WHEN threat_score >= 15 THEN 'Critical Threat'
         WHEN threat_score >= 10 THEN 'High Risk'
         WHEN threat_score >= 5 THEN 'Medium Risk'
         ELSE 'Low Risk'
     END AS threat_level,
-    CASE 
+    CASE
         WHEN threat_score >= 15 THEN 'Immediate investigation required. Block user access.'
         WHEN threat_score >= 10 THEN 'Investigate within 24 hours. Monitor closely.'
         WHEN threat_score >= 5 THEN 'Review user activity. Possible training issue.'
@@ -190,7 +190,7 @@ ORDER BY threat_score DESC, attempt_date DESC;
 -- Purpose: Track who modified permissions and what changes were made
 -- =============================================================================
 
-SELECT 
+SELECT
     event_time,
     principal_id AS modified_by,
     principal_type,
@@ -203,7 +203,7 @@ SELECT
     permissions_revoked,
     grantee_principal,
     -- Change classification
-    CASE 
+    CASE
         WHEN action = 'GrantPermissions' THEN 'Permission Granted'
         WHEN action = 'RevokePermissions' THEN 'Permission Revoked'
         WHEN action = 'BatchGrantPermissions' THEN 'Bulk Grant'
@@ -211,13 +211,13 @@ SELECT
         ELSE 'Other Permission Change'
     END AS change_type,
     -- Audit flag
-    CASE 
+    CASE
         WHEN permissions_granted LIKE '%ALL%' OR permissions_revoked LIKE '%ALL%' THEN 'High Impact'
         WHEN permissions_granted LIKE '%DROP%' OR permissions_granted LIKE '%DELETE%' THEN 'Sensitive Permission'
         ELSE 'Standard Change'
     END AS impact_level
 FROM lake_formation_audit_logs
-WHERE action IN ('GrantPermissions', 'RevokePermissions', 
+WHERE action IN ('GrantPermissions', 'RevokePermissions',
                  'BatchGrantPermissions', 'BatchRevokePermissions',
                  'PutDataLakeSettings', 'UpdateResource')
     AND event_time >= DATE_ADD('day', -90, CURRENT_DATE)
@@ -231,7 +231,7 @@ LIMIT 5000;
 -- =============================================================================
 
 WITH daily_activity AS (
-    SELECT 
+    SELECT
         principal_id,
         DATE(event_time) AS activity_date,
         COUNT(*) AS total_queries,
@@ -250,7 +250,7 @@ WITH daily_activity AS (
     GROUP BY principal_id, DATE(event_time)
 ),
 user_baselines AS (
-    SELECT 
+    SELECT
         principal_id,
         AVG(total_queries) AS avg_daily_queries,
         STDDEV(total_queries) AS stddev_queries,
@@ -260,7 +260,7 @@ user_baselines AS (
     GROUP BY principal_id
 ),
 anomaly_detection AS (
-    SELECT 
+    SELECT
         da.activity_date,
         da.principal_id,
         da.total_queries,
@@ -278,7 +278,7 @@ anomaly_detection AS (
     FROM daily_activity da
     INNER JOIN user_baselines ub ON da.principal_id = ub.principal_id
 )
-SELECT 
+SELECT
     activity_date,
     principal_id,
     total_queries,
@@ -292,13 +292,13 @@ SELECT
     active_hours,
     ROUND(query_volume_z_score, 2) AS query_volume_z_score,
     -- Anomaly classification
-    CASE 
+    CASE
         WHEN ABS(query_volume_z_score) > 3 THEN 'Extreme Anomaly'
         WHEN ABS(query_volume_z_score) > 2 THEN 'Significant Anomaly'
         WHEN ABS(query_volume_z_score) > 1.5 THEN 'Minor Anomaly'
         ELSE 'Normal'
     END AS anomaly_status,
-    CASE 
+    CASE
         WHEN query_volume_z_score > 3 AND failed_operations > 10 THEN 'Possible data exfiltration attempt'
         WHEN query_volume_z_score > 3 THEN 'Unusually high activity'
         WHEN query_volume_z_score < -2 THEN 'Unusually low activity'
@@ -307,8 +307,8 @@ SELECT
         ELSE 'Normal activity pattern'
     END AS behavior_assessment
 FROM anomaly_detection
-WHERE ABS(query_volume_z_score) > 1.5 
-    OR unique_ips > 3 
+WHERE ABS(query_volume_z_score) > 1.5
+    OR unique_ips > 3
     OR failed_operations > 10
 ORDER BY query_volume_z_score DESC;
 
@@ -319,7 +319,7 @@ ORDER BY query_volume_z_score DESC;
 -- =============================================================================
 
 WITH customer_data_inventory AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         'customer_id' AS key_column,
         customer_id AS customer_identifier,
@@ -336,7 +336,7 @@ WITH customer_data_inventory AS (
         AND customer_id = '${CUSTOMER_ID}'  -- Parameterized for specific customer
 ),
 customer_transactions AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         'transaction_id' AS record_identifier,
         f.transaction_id,
@@ -350,7 +350,7 @@ customer_transactions AS (
     WHERE c.customer_id = '${CUSTOMER_ID}'
 ),
 access_history AS (
-    SELECT 
+    SELECT
         event_time,
         principal_id,
         table_name,
@@ -363,7 +363,7 @@ access_history AS (
             OR (table_name = 'fact_transactions')
         )
 )
-SELECT 
+SELECT
     'Customer Profile' AS data_category,
     cdi.table_name,
     cdi.data_classification,
@@ -378,7 +378,7 @@ FROM customer_data_inventory cdi
 
 UNION ALL
 
-SELECT 
+SELECT
     'Transaction History' AS data_category,
     'fact_transactions' AS table_name,
     'Financial' AS data_classification,
@@ -399,7 +399,7 @@ GROUP BY data_category, table_name, data_classification, customer_identifier;
 -- =============================================================================
 
 WITH customer_footprint AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         customer_sk,
         customer_id,
@@ -410,7 +410,7 @@ WITH customer_footprint AS (
         AND is_current = true
 ),
 transaction_footprint AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         f.transaction_sk AS record_key,
         c.customer_id,
@@ -421,13 +421,13 @@ transaction_footprint AS (
     WHERE c.customer_id = '${CUSTOMER_ID}'
 ),
 anonymization_candidates AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         customer_id,
         'Anonymize PII' AS action_required,
         'Set email, phone, address to NULL or anonymized values' AS anonymization_details,
         last_transaction_date,
-        CASE 
+        CASE
             WHEN DATE_DIFF('day', last_transaction_date, CURRENT_DATE) > 1095 THEN 'Eligible for Deletion'
             WHEN DATE_DIFF('day', last_transaction_date, CURRENT_DATE) > 730 THEN 'Consider Anonymization'
             ELSE 'Retain - Active within 2 years'
@@ -435,7 +435,7 @@ anonymization_candidates AS (
     FROM lakehouse_gold.customer_360
     WHERE customer_id = '${CUSTOMER_ID}'
 )
-SELECT 
+SELECT
     table_name,
     customer_id,
     record_type,
@@ -446,7 +446,7 @@ FROM customer_footprint
 
 UNION ALL
 
-SELECT 
+SELECT
     table_name,
     customer_id,
     record_type,
@@ -457,7 +457,7 @@ FROM transaction_footprint
 
 UNION ALL
 
-SELECT 
+SELECT
     table_name,
     customer_id,
     action_required AS record_type,
@@ -475,7 +475,7 @@ ORDER BY deletion_priority;
 
 WITH data_sharing_log AS (
     -- This would typically come from an external data sharing tracking table
-    SELECT 
+    SELECT
         share_date,
         customer_id,
         third_party_name,
@@ -487,14 +487,14 @@ WITH data_sharing_log AS (
     WHERE share_date >= DATE_ADD('year', -1, CURRENT_DATE)
 ),
 customer_opt_out_status AS (
-    SELECT 
+    SELECT
         customer_id,
         has_opted_out_of_sale,
         opt_out_date,
         communication_preference
     FROM lakehouse_gold.customer_360
 )
-SELECT 
+SELECT
     dsl.customer_id,
     dsl.share_date,
     dsl.third_party_name,
@@ -504,7 +504,7 @@ SELECT
     cos.has_opted_out_of_sale,
     cos.opt_out_date,
     -- Compliance check
-    CASE 
+    CASE
         WHEN cos.has_opted_out_of_sale = true AND dsl.share_date > cos.opt_out_date THEN 'VIOLATION - Shared after opt-out'
         WHEN cos.has_opted_out_of_sale = true AND dsl.share_date <= cos.opt_out_date THEN 'Compliant - Shared before opt-out'
         WHEN cos.has_opted_out_of_sale = false THEN 'Compliant - No opt-out'
@@ -521,7 +521,7 @@ ORDER BY dsl.share_date DESC;
 -- =============================================================================
 
 WITH lineage_metadata AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS gold_table,
         'transactions_silver' AS silver_source,
         'transactions_bronze' AS bronze_source,
@@ -532,24 +532,24 @@ WITH lineage_metadata AS (
     GROUP BY gold_table, silver_source, bronze_source
 ),
 transformation_summary AS (
-    SELECT 
+    SELECT
         'bronze_to_silver' AS transformation_stage,
         'transactions' AS entity,
         -- Typical transformations
         'Data cleansing, type conversion, deduplication' AS transformations_applied,
         DATE_ADD('day', -1, CURRENT_DATE) AS last_run_date,
         'Success' AS status
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'silver_to_gold' AS transformation_stage,
         'fact_transactions' AS entity,
         'Surrogate key generation, dimension lookup, aggregations' AS transformations_applied,
         CURRENT_DATE AS last_run_date,
         'Success' AS status
 )
-SELECT 
+SELECT
     lm.gold_table,
     lm.silver_source,
     lm.bronze_source,
@@ -560,7 +560,7 @@ SELECT
     ts.last_run_date,
     ts.status,
     -- Lineage quality
-    CASE 
+    CASE
         WHEN DATE_DIFF('hour', lm.last_load_time, CURRENT_TIMESTAMP) <= 24 THEN 'Up to date'
         WHEN DATE_DIFF('hour', lm.last_load_time, CURRENT_TIMESTAMP) <= 48 THEN 'Slightly stale'
         ELSE 'Stale - Review pipeline'
@@ -576,7 +576,7 @@ ORDER BY lm.last_load_time DESC;
 -- =============================================================================
 
 WITH access_summary AS (
-    SELECT 
+    SELECT
         COUNT(*) AS total_access_events,
         COUNT(DISTINCT principal_id) AS unique_users,
         COUNT(DISTINCT table_name) AS tables_accessed,
@@ -587,7 +587,7 @@ WITH access_summary AS (
     WHERE event_time >= DATE_ADD('day', -30, CURRENT_DATE)
 ),
 permission_changes AS (
-    SELECT 
+    SELECT
         COUNT(*) AS total_permission_changes,
         COUNT(DISTINCT principal_id) AS users_modifying_permissions
     FROM lake_formation_audit_logs
@@ -595,11 +595,11 @@ permission_changes AS (
         AND event_time >= DATE_ADD('day', -30, CURRENT_DATE)
 ),
 security_incidents AS (
-    SELECT 
+    SELECT
         COUNT(DISTINCT principal_id) AS users_with_failed_attempts,
         SUM(CASE WHEN failed_count >= 10 THEN 1 ELSE 0 END) AS high_risk_users
     FROM (
-        SELECT 
+        SELECT
             principal_id,
             COUNT(*) AS failed_count
         FROM lake_formation_audit_logs
@@ -609,7 +609,7 @@ security_incidents AS (
     ) failed_summary
 ),
 gdpr_requests AS (
-    SELECT 
+    SELECT
         COUNT(*) AS total_gdpr_requests,
         SUM(CASE WHEN request_type = 'Access' THEN 1 ELSE 0 END) AS access_requests,
         SUM(CASE WHEN request_type = 'Erasure' THEN 1 ELSE 0 END) AS erasure_requests,
@@ -617,7 +617,7 @@ gdpr_requests AS (
     FROM gdpr_request_log  -- Assuming this table exists
     WHERE request_date >= DATE_ADD('day', -30, CURRENT_DATE)
 )
-SELECT 
+SELECT
     CURRENT_DATE AS report_date,
     '30-Day Summary' AS report_period,
     -- Access metrics
@@ -640,7 +640,7 @@ SELECT
     COALESCE(gr.erasure_requests, 0) AS gdpr_erasure_requests,
     COALESCE(gr.completed_requests, 0) AS gdpr_completed_requests,
     -- Overall health
-    CASE 
+    CASE
         WHEN acs.failed_access_rate < 1 AND si.high_risk_users = 0 THEN 'Healthy'
         WHEN acs.failed_access_rate < 5 AND si.high_risk_users <= 2 THEN 'Good'
         WHEN acs.failed_access_rate < 10 THEN 'Fair'
@@ -659,7 +659,7 @@ LEFT JOIN gdpr_requests gr ON 1=1;
 -- =============================================================================
 
 WITH log_age_distribution AS (
-    SELECT 
+    SELECT
         DATE_TRUNC('month', event_time) AS log_month,
         COUNT(*) AS event_count,
         MIN(event_time) AS oldest_event,
@@ -668,18 +668,18 @@ WITH log_age_distribution AS (
     FROM lake_formation_audit_logs
     GROUP BY DATE_TRUNC('month', event_time)
 )
-SELECT 
+SELECT
     log_month,
     event_count,
     oldest_event,
     newest_event,
     days_retained,
     -- Compliance with typical retention policies (7 years = 2555 days)
-    CASE 
+    CASE
         WHEN days_retained <= 2555 THEN 'Within Retention Period'
         ELSE 'eligible for Archival'
     END AS retention_status,
-    CASE 
+    CASE
         WHEN days_retained <= 90 THEN 'Hot Storage'
         WHEN days_retained <= 365 THEN 'Warm Storage'
         WHEN days_retained <= 2555 THEN 'Cold Storage'
@@ -695,7 +695,7 @@ ORDER BY log_month DESC;
 -- =============================================================================
 
 WITH data_classification AS (
-    SELECT 
+    SELECT
         'dim_customer' AS table_name,
         ARRAY['email', 'phone', 'address'] AS pii_columns,
         ARRAY['customer_name'] AS public_columns,
@@ -703,20 +703,20 @@ WITH data_classification AS (
         COUNT(*) AS record_count
     FROM lakehouse_gold.dim_customer
     WHERE is_current = true
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'fact_transactions' AS table_name,
         NULL AS pii_columns,
         ARRAY['transaction_date'] AS public_columns,
         ARRAY['net_amount', 'profit', 'profit_margin'] AS confidential_columns,
         COUNT(*) AS record_count
     FROM lakehouse_gold.fact_transactions
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         'dim_product' AS table_name,
         NULL AS pii_columns,
         ARRAY['product_name', 'category', 'brand'] AS public_columns,
@@ -724,7 +724,7 @@ WITH data_classification AS (
         COUNT(*) AS record_count
     FROM lakehouse_gold.dim_product
 )
-SELECT 
+SELECT
     table_name,
     record_count,
     CARDINALITY(pii_columns) AS pii_column_count,
@@ -734,13 +734,13 @@ SELECT
     public_columns,
     confidential_columns,
     -- Classification level
-    CASE 
+    CASE
         WHEN CARDINALITY(pii_columns) > 0 THEN 'Highly Sensitive'
         WHEN CARDINALITY(confidential_columns) > 0 THEN 'Confidential'
         ELSE 'Public'
     END AS overall_classification,
     -- Required controls
-    CASE 
+    CASE
         WHEN CARDINALITY(pii_columns) > 0 THEN 'Encryption at rest, column-level security, audit logging, data masking'
         WHEN CARDINALITY(confidential_columns) > 0 THEN 'Encryption at rest, role-based access control'
         ELSE 'Standard access controls'

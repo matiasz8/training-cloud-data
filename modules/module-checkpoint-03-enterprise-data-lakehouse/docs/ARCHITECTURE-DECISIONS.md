@@ -15,8 +15,8 @@ This document captures key architectural decisions made during the design of the
 
 ## ADR-001: Lake Formation vs Custom Catalog
 
-**Status**: Accepted  
-**Date**: January 15, 2026  
+**Status**: Accepted
+**Date**: January 15, 2026
 **Deciders**: Data Platform Team, Security Team
 
 ### Context
@@ -116,7 +116,7 @@ Two primary approaches were considered:
 
 ### Review Schedule
 
-**Next Review**: June 2026 (after 6 months production experience)  
+**Next Review**: June 2026 (after 6 months production experience)
 **Triggers for Re-evaluation**:
 - Multi-cloud expansion
 - Lake Formation limitations encountered in production
@@ -126,8 +126,8 @@ Two primary approaches were considered:
 
 ## ADR-002: Delta Lake vs Iceberg vs Hudi
 
-**Status**: Accepted  
-**Date**: January 20, 2026  
+**Status**: Accepted
+**Date**: January 20, 2026
 **Deciders**: Data Engineering Team, Data Platform Architect
 
 ### Context
@@ -257,7 +257,7 @@ If future requirements necessitate switching to Iceberg:
 
 ### Review Schedule
 
-**Next Review**: March 2027 (after 1 year in production)  
+**Next Review**: March 2027 (after 1 year in production)
 **Triggers for Re-evaluation**:
 - Athena Delta Lake support drops below Iceberg feature parity
 - Schema evolution limitations block critical use cases
@@ -267,8 +267,8 @@ If future requirements necessitate switching to Iceberg:
 
 ## ADR-003: EMR vs Glue vs Databricks
 
-**Status**: Accepted  
-**Date**: January 25, 2026  
+**Status**: Accepted
+**Date**: January 25, 2026
 **Deciders**: Data Engineering Team, FinOps
 
 ### Context
@@ -441,7 +441,7 @@ aws emr-serverless start-job-run \
 
 ### Review Schedule
 
-**Next Review**: September 2026 (after 6 months production)  
+**Next Review**: September 2026 (after 6 months production)
 **Triggers for Re-evaluation**:
 - Glue job duration exceeds 4 hours (considering EMR for large jobs)
 - Team size exceeds 10 engineers (Databricks collaboration features valuable)
@@ -451,8 +451,8 @@ aws emr-serverless start-job-run \
 
 ## ADR-004: Athena Iceberg vs Spark SQL
 
-**Status**: Accepted  
-**Date**: February 1, 2026  
+**Status**: Accepted
+**Date**: February 1, 2026
 **Deciders**: Analytics Team Lead, Data Engineering Team
 
 ### Context
@@ -548,7 +548,7 @@ Options:
    ```sql
    -- Good: Filters on partition column
    SELECT * FROM orders WHERE year = 2026 AND month = 3;
-   
+
    -- Bad: Scans all partitions
    SELECT * FROM orders WHERE order_date >= '2026-03-01';
    ```
@@ -598,7 +598,7 @@ Options:
 
 ### Review Schedule
 
-**Next Review**: August 2026 (after 6 months)  
+**Next Review**: August 2026 (after 6 months)
 **Triggers for Re-evaluation**:
 - User count exceeds 100 (consider Redshift Spectrum)
 - Monthly Athena cost exceeds $100 (investigate query patterns)
@@ -608,8 +608,8 @@ Options:
 
 ## ADR-005: Unity Catalog Pattern on AWS
 
-**Status**: Accepted  
-**Date**: February 5, 2026  
+**Status**: Accepted
+**Date**: February 5, 2026
 **Deciders**: Data Governance Lead, Security Team
 
 ### Context
@@ -674,11 +674,11 @@ lakehouse_prod (Catalog / Account)
 resource "aws_glue_catalog_table" "dim_employees" {
   database_name = aws_glue_catalog_database.hr_db.name
   name          = "dim_employees"
-  
+
   storage_descriptor {
     location = "s3://lakehouse/silver/hr/dim_employees/"
   }
-  
+
   parameters = {
     "classification" = "parquet"
     "domain"         = "hr"
@@ -698,8 +698,8 @@ resource "aws_glue_catalog_table" "dim_employees" {
 
 ## ADR-006: PII Detection Strategy
 
-**Status**: Accepted  
-**Date**: February 10, 2026  
+**Status**: Accepted
+**Date**: February 10, 2026
 **Deciders**: Data Governance Lead, Security Team, Legal
 
 ### Context
@@ -765,8 +765,8 @@ PII_PATTERNS = {
 
 ## ADR-007: Backup & Recovery Approach
 
-**Status**: Accepted  
-**Date**: February 15, 2026  
+**Status**: Accepted
+**Date**: February 15, 2026
 **Deciders**: Data Platform Team, Security Team
 
 ### Context
@@ -805,8 +805,8 @@ DataCorp requires disaster recovery capabilities to meet RPO (15 minutes) and RT
 
 ## ADR-008: Cost Optimization Decisions
 
-**Status**: Accepted  
-**Date**: February 20, 2026  
+**Status**: Accepted
+**Date**: February 20, 2026
 **Deciders**: FinOps, Data Platform Team
 
 ### Context
@@ -853,5 +853,5 @@ Target monthly cost: $100-150 for dev environment.
 
 ---
 
-**Last Updated**: March 10, 2026  
+**Last Updated**: March 10, 2026
 **Maintainer**: Data Platform Team (data-platform@datacorp.com)

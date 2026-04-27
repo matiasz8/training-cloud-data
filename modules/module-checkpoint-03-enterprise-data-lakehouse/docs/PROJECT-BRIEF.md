@@ -57,11 +57,11 @@
 
 ### DataCorp Inc. Profile
 
-**Industry**: Multi-Industry Conglomerate  
-**Headquarters**: San Francisco, CA  
-**Founded**: 1995  
-**Revenue**: $2.3B (FY2025)  
-**Employees**: 12,000 globally  
+**Industry**: Multi-Industry Conglomerate
+**Headquarters**: San Francisco, CA
+**Founded**: 1995
+**Revenue**: $2.3B (FY2025)
+**Employees**: 12,000 globally
 **Locations**: 25 countries, 80+ offices
 
 **Business Units**:

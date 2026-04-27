@@ -98,19 +98,19 @@ check_command() {
 
 validate_environment() {
     print_header "Validating Environment"
-    
+
     log_info "Checking required commands..."
     check_command python3
     check_command pip3
-    
+
     log_info "Python version: $(python3 --version)"
-    
+
     # Check if virtual environment exists
     if [ ! -d "${VENV_DIR}" ]; then
         log_warning "Virtual environment not found. Creating one..."
         python3 -m venv "${VENV_DIR}"
     fi
-    
+
     log_success "Environment validation complete"
 }
 
@@ -120,13 +120,13 @@ validate_environment() {
 
 install_dependencies() {
     print_header "Installing Dependencies"
-    
+
     log_info "Activating virtual environment..."
     source "${VENV_DIR}/bin/activate"
-    
+
     log_info "Upgrading pip..."
     pip install --upgrade pip > /dev/null
-    
+
     log_info "Installing test dependencies..."
     pip install -q pytest>=7.4.0 \
                    pytest-cov>=4.1.0 \
@@ -138,7 +138,7 @@ install_dependencies() {
                    numpy>=1.24.0 \
                    moto>=4.1.0 \
                    coverage>=7.2.0
-    
+
     log_success "Dependencies installed"
 }
 
@@ -148,13 +148,13 @@ install_dependencies() {
 
 configure_aws() {
     print_header "Configuring AWS (LocalStack)"
-    
+
     log_info "Setting AWS credentials for LocalStack..."
     export AWS_ACCESS_KEY_ID=test
     export AWS_SECRET_ACCESS_KEY=test
     export AWS_DEFAULT_REGION=us-east-1
     export AWS_ENDPOINT_URL=${LOCALSTACK_ENDPOINT}
-    
+
     log_info "Checking LocalStack availability..."
     if curl -s "${LOCALSTACK_ENDPOINT}/_localstack/health" > /dev/null 2>&1; then
         log_success "LocalStack is running at ${LOCALSTACK_ENDPOINT}"
@@ -170,12 +170,12 @@ configure_aws() {
 
 run_tests() {
     print_header "Running Tests"
-    
+
     source "${VENV_DIR}/bin/activate"
-    
+
     # Build pytest command
     PYTEST_CMD="pytest ${SCRIPT_DIR}"
-    
+
     # Add test module filter if specified
     if [ -n "${TEST_MODULE}" ]; then
         case "${TEST_MODULE}" in
@@ -197,40 +197,40 @@ run_tests() {
                 ;;
         esac
     fi
-    
+
     # Add options
     if [ "${VERBOSE}" = true ]; then
         PYTEST_CMD="${PYTEST_CMD} -v"
     fi
-    
+
     if [ "${FAST_MODE}" = true ]; then
         PYTEST_CMD="${PYTEST_CMD} -m 'not slow'"
     fi
-    
+
     # Coverage options
     if [ "${GENERATE_COVERAGE}" = true ]; then
         PYTEST_CMD="${PYTEST_CMD} --cov=${SCRIPT_DIR}"
         PYTEST_CMD="${PYTEST_CMD} --cov-report=term-missing"
         PYTEST_CMD="${PYTEST_CMD} --cov-report=xml:${PROJECT_ROOT}/coverage.xml"
     fi
-    
+
     # HTML report
     if [ "${GENERATE_HTML}" = true ]; then
         PYTEST_CMD="${PYTEST_CMD} --html=${PROJECT_ROOT}/test-report.html --self-contained-html"
         PYTEST_CMD="${PYTEST_CMD} --cov-report=html:${PROJECT_ROOT}/htmlcov"
     fi
-    
+
     # Parallel execution
     PYTEST_CMD="${PYTEST_CMD} -n ${PARALLEL_WORKERS}"
-    
+
     # JUnit XML for CI/CD
     PYTEST_CMD="${PYTEST_CMD} --junitxml=${PROJECT_ROOT}/junit.xml"
-    
+
     # Timeout for slow tests
     PYTEST_CMD="${PYTEST_CMD} --timeout=300"
-    
+
     log_info "Executing: ${PYTEST_CMD}"
-    
+
     # Run tests
     if eval "${PYTEST_CMD}"; then
         log_success "All tests passed!"
@@ -249,16 +249,16 @@ generate_coverage_report() {
     if [ "${GENERATE_COVERAGE}" = false ]; then
         return 0
     fi
-    
+
     print_header "Coverage Report"
-    
+
     source "${VENV_DIR}/bin/activate"
-    
+
     log_info "Generating coverage report..."
-    
+
     # Terminal report
     coverage report
-    
+
     # HTML report
     if [ "${GENERATE_HTML}" = true ]; then
         log_info "Generating HTML coverage report..."
@@ -273,17 +273,17 @@ generate_coverage_report() {
 
 generate_summary() {
     print_header "Test Summary"
-    
+
     if [ -f "${PROJECT_ROOT}/junit.xml" ]; then
         log_info "Parsing JUnit XML results..."
-        
+
         # Extract test statistics (requires xmllint)
         if command -v xmllint &> /dev/null; then
             TOTAL_TESTS=$(xmllint --xpath "string(//testsuite/@tests)" "${PROJECT_ROOT}/junit.xml")
             FAILURES=$(xmllint --xpath "string(//testsuite/@failures)" "${PROJECT_ROOT}/junit.xml")
             ERRORS=$(xmllint --xpath "string(//testsuite/@errors)" "${PROJECT_ROOT}/junit.xml")
             SKIPPED=$(xmllint --xpath "string(//testsuite/@skipped)" "${PROJECT_ROOT}/junit.xml")
-            
+
             echo "Total Tests:  ${TOTAL_TESTS}"
             echo "Passed:       $((TOTAL_TESTS - FAILURES - ERRORS - SKIPPED))"
             echo "Failed:       ${FAILURES}"
@@ -291,12 +291,12 @@ generate_summary() {
             echo "Skipped:      ${SKIPPED}"
         fi
     fi
-    
+
     # Coverage summary
     if [ -f "${PROJECT_ROOT}/coverage.xml" ]; then
         log_info "Coverage summary available in coverage.xml"
     fi
-    
+
     # Reports
     echo ""
     log_info "Generated Reports:"
@@ -312,14 +312,14 @@ generate_summary() {
 
 cleanup() {
     log_info "Cleaning up temporary files..."
-    
+
     # Remove pytest cache
     find "${SCRIPT_DIR}" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
     find "${SCRIPT_DIR}" -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
-    
+
     # Remove coverage files
     rm -f "${SCRIPT_DIR}/.coverage" 2>/dev/null || true
-    
+
     log_success "Cleanup complete"
 }
 
@@ -329,9 +329,9 @@ cleanup() {
 
 main() {
     local start_time=$(date +%s)
-    
+
     print_header "Enterprise Data Lakehouse - Test Suite"
-    
+
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -388,34 +388,34 @@ main() {
                 ;;
         esac
     done
-    
+
     # Execute test workflow
     validate_environment
     install_dependencies
     configure_aws
-    
+
     # Run tests
     if run_tests; then
         TEST_STATUS=0
     else
         TEST_STATUS=1
     fi
-    
+
     # Generate reports
     generate_coverage_report
     generate_summary
-    
+
     # Cleanup
     cleanup
-    
+
     # Calculate duration
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     echo ""
     print_header "Test Execution Complete"
     log_info "Total duration: ${duration} seconds"
-    
+
     if [ ${TEST_STATUS} -eq 0 ]; then
         log_success "All tests passed! ✓"
         exit 0

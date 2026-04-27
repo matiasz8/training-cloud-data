@@ -333,7 +333,7 @@ Use this checklist to track your progress through the project. Check off items a
 #### Terraform Lambda Resources
 - [ ] Create IAM role for Lambda
   - [ ] Add trust policy for Lambda service
-  
+
 - [ ] Create IAM policy for Lambda permissions
   - [ ] Kinesis: `GetRecords`, `GetShardIterator`, `DescribeStream`, `ListStreams`
   - [ ] DynamoDB: `PutItem`, `GetItem`, `UpdateItem`, `Query`

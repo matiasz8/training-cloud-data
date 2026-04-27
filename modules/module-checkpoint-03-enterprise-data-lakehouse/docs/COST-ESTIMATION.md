@@ -680,14 +680,14 @@ import boto3
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
     bucket = 'datacorp-lakehouse-prod'
-    
+
     # Check if new files in raw/ folder
     response = s3.list_objects_v2(
         Bucket=bucket,
         Prefix='raw/finance/',
         StartAfter=f'raw/finance/{last_processed_date}'
     )
-    
+
     if response['KeyCount'] > 0:
         # Trigger Glue job
         glue = boto3.client('glue')
@@ -981,7 +981,7 @@ Assumptions:
 
 ---
 
-**Last Updated**: March 10, 2026  
+**Last Updated**: March 10, 2026
 **Maintainer**: FinOps Team + Data Platform Team
 
 **Next Review**: Quarterly (June 2026, September 2026, December 2026)

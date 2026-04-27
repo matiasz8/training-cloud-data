@@ -3,12 +3,9 @@ Rides Processor Lambda Handler - Process ride events from Kinesis stream
 TODO: Complete implementation to process ride lifecycle events
 """
 
-import base64
-import json
 import logging
 import os
-from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 # TODO: Import boto3 for AWS SDK
 # import boto3
@@ -57,24 +54,24 @@ def lambda_handler(event: Dict, context: Any) -> Dict:
     """
     Main Lambda handler function
     TODO: Process Kinesis records and route to appropriate handlers
-    
+
     Args:
         event: Lambda event object containing Kinesis records
         context: Lambda context object
-        
+
     Returns:
         Response dict with processing results
     """
     logger.info(f"Processing {len(event.get('Records', []))} records")
-    
+
     # Initialize counters
     processed_count = 0
     error_count = 0
     batch_item_failures = []
-    
+
     # TODO: Extract Kinesis records from event
     # records = event.get('Records', [])
-    
+
     # TODO: Process each Kinesis record
     # for record in records:
     #     try:
@@ -82,11 +79,11 @@ def lambda_handler(event: Dict, context: Any) -> Dict:
     #         encoded_data = record['kinesis']['data']
     #         decoded_data = base64.b64decode(encoded_data)
     #         event_data = json.loads(decoded_data)
-    #         
+    #
     #         # Log event type
     #         event_type = event_data.get('event_type')
     #         logger.debug(f"Processing event: {event_type}")
-    #         
+    #
     #         # Route to appropriate handler based on event type
     #         if event_type == 'ride_started':
     #             process_ride_started(event_data)
@@ -96,26 +93,26 @@ def lambda_handler(event: Dict, context: Any) -> Dict:
     #             process_ride_cancelled(event_data)
     #         else:
     #             logger.warning(f"Unknown event type: {event_type}")
-    #         
+    #
     #         processed_count += 1
-    #         
+    #
     #     except Exception as e:
     #         error_count += 1
     #         logger.error(f"Error processing record: {e}", exc_info=True)
-    #         
+    #
     #         # Add to batch item failures for partial batch failure
     #         batch_item_failures.append({
     #             'itemIdentifier': record['kinesis']['sequenceNumber']
     #         })
-    
+
     # TODO: Archive events to S3
     # archive_events_to_s3(records)
-    
+
     # TODO: Publish CloudWatch metrics
     # publish_metrics(processed_count, error_count)
-    
+
     logger.info(f"Processed {processed_count} records, {error_count} errors")
-    
+
     # Return response for partial batch failure handling
     return {
         'batchItemFailures': batch_item_failures
@@ -130,12 +127,12 @@ def process_ride_started(event: Dict) -> None:
     """
     Process ride_started event
     TODO: Create new ride record in DynamoDB and update metrics
-    
+
     Args:
         event: Ride started event data
     """
     logger.info(f"Processing ride_started for ride_id: {event.get('ride_id')}")
-    
+
     # TODO: Extract event fields
     # ride_id = event['ride_id']
     # driver_id = event['driver_id']
@@ -145,7 +142,7 @@ def process_ride_started(event: Dict) -> None:
     # timestamp = event['timestamp']
     # vehicle_type = event.get('vehicle_type', 'unknown')
     # payment_method = event.get('payment_method', 'unknown')
-    
+
     # TODO: Create ride record for DynamoDB
     # ride_item = {
     #     'ride_id': ride_id,
@@ -161,14 +158,14 @@ def process_ride_started(event: Dict) -> None:
     #     'created_at': datetime.utcnow().isoformat(),
     #     'updated_at': datetime.utcnow().isoformat()
     # }
-    
+
     # TODO: Write to DynamoDB rides table
     # rides_table.put_item(ride_item)
-    
+
     # TODO: Increment active rides counter in metrics table
     # update_metric('active_rides', 1, operation='INCREMENT')
     # update_metric('total_rides_started', 1, operation='INCREMENT')
-    
+
     logger.info(f"Ride {event.get('ride_id')} started successfully")
 
 
@@ -176,12 +173,12 @@ def process_ride_completed(event: Dict) -> None:
     """
     Process ride_completed event
     TODO: Update ride record with completion data and update metrics
-    
+
     Args:
         event: Ride completed event data
     """
     logger.info(f"Processing ride_completed for ride_id: {event.get('ride_id')}")
-    
+
     # TODO: Extract event fields
     # ride_id = event['ride_id']
     # timestamp = event['timestamp']
@@ -190,14 +187,14 @@ def process_ride_completed(event: Dict) -> None:
     # fare = event['fare']
     # rating = event.get('rating')
     # tip = event.get('tip', 0)
-    
+
     # TODO: Get existing ride from DynamoDB to get original timestamp
     # existing_ride = rides_table.get_item({'ride_id': ride_id})
-    # 
+    #
     # if not existing_ride:
     #     logger.warning(f"Ride {ride_id} not found in database")
     #     return
-    
+
     # TODO: Update ride record in DynamoDB
     # update_attributes = {
     #     'status': 'completed',
@@ -209,12 +206,12 @@ def process_ride_completed(event: Dict) -> None:
     #     'tip': tip,
     #     'updated_at': datetime.utcnow().isoformat()
     # }
-    # 
+    #
     # rides_table.update_item(
     #     key={'ride_id': ride_id, 'timestamp': existing_ride['timestamp']},
     #     attributes=update_attributes
     # )
-    
+
     # TODO: Update metrics
     # update_metric('active_rides', -1, operation='INCREMENT')  # Decrement
     # update_metric('total_rides_completed', 1, operation='INCREMENT')
@@ -222,10 +219,10 @@ def process_ride_completed(event: Dict) -> None:
     # update_rolling_average('average_fare', fare)
     # update_rolling_average('average_duration', duration_minutes)
     # update_rolling_average('average_distance', distance_km)
-    
+
     # TODO: Calculate and update completion rate
     # update_completion_rate()
-    
+
     logger.info(f"Ride {event.get('ride_id')} completed successfully")
 
 
@@ -233,25 +230,25 @@ def process_ride_cancelled(event: Dict) -> None:
     """
     Process ride_cancelled event
     TODO: Update ride status to cancelled and update metrics
-    
+
     Args:
         event: Ride cancelled event data
     """
     logger.info(f"Processing ride_cancelled for ride_id: {event.get('ride_id')}")
-    
+
     # TODO: Extract event fields
     # ride_id = event['ride_id']
     # timestamp = event['timestamp']
     # cancellation_reason = event.get('cancellation_reason', 'unknown')
     # cancellation_fee = event.get('cancellation_fee', 0)
-    
+
     # TODO: Get existing ride from DynamoDB
     # existing_ride = rides_table.get_item({'ride_id': ride_id})
-    # 
+    #
     # if not existing_ride:
     #     logger.warning(f"Ride {ride_id} not found in database")
     #     return
-    
+
     # TODO: Update ride record
     # update_attributes = {
     #     'status': 'cancelled',
@@ -260,19 +257,19 @@ def process_ride_cancelled(event: Dict) -> None:
     #     'cancellation_fee': cancellation_fee,
     #     'updated_at': datetime.utcnow().isoformat()
     # }
-    # 
+    #
     # rides_table.update_item(
     #     key={'ride_id': ride_id, 'timestamp': existing_ride['timestamp']},
     #     attributes=update_attributes
     # )
-    
+
     # TODO: Update metrics
     # update_metric('active_rides', -1, operation='INCREMENT')
     # update_metric('total_rides_cancelled', 1, operation='INCREMENT')
-    # 
+    #
     # # Update cancellation rate
     # update_cancellation_rate()
-    
+
     logger.info(f"Ride {event.get('ride_id')} cancelled: {event.get('cancellation_reason')}")
 
 
@@ -284,7 +281,7 @@ def update_metric(metric_name: str, value: float, operation: str = 'SET') -> Non
     """
     Update a metric in DynamoDB metrics table
     TODO: Implement metric update logic
-    
+
     Args:
         metric_name: Name of the metric
         value: Value to set or increment/decrement
@@ -292,7 +289,7 @@ def update_metric(metric_name: str, value: float, operation: str = 'SET') -> Non
     """
     # TODO: Implement metric update
     # timestamp = int(datetime.utcnow().timestamp())
-    # 
+    #
     # if operation == 'SET':
     #     metrics_table.put_item({
     #         'metric_name': metric_name,
@@ -308,17 +305,17 @@ def update_metric(metric_name: str, value: float, operation: str = 'SET') -> Non
     #         limit=1,
     #         sort_descending=True
     #     )
-    #     
+    #
     #     current_value = current_metric[0]['value'] if current_metric else 0
     #     new_value = current_value + value
-    #     
+    #
     #     metrics_table.put_item({
     #         'metric_name': metric_name,
     #         'timestamp': timestamp,
     #         'value': new_value,
     #         'updated_at': datetime.utcnow().isoformat()
     #     })
-    
+
     pass
 
 
@@ -326,7 +323,7 @@ def update_rolling_average(metric_name: str, new_value: float, window_size: int 
     """
     Update a rolling average metric
     TODO: Implement rolling average calculation
-    
+
     Args:
         metric_name: Name of the metric
         new_value: New value to include in average
@@ -366,14 +363,14 @@ def archive_events_to_s3(records: List[Dict]) -> None:
     """
     Archive processed events to S3 with date partitioning
     TODO: Implement S3 archival with proper partitioning
-    
+
     Args:
         records: List of Kinesis records to archive
     """
     # TODO: Group records by date for partitioning
     # TODO: Format S3 key with partitions: year=YYYY/month=MM/day=DD/hour=HH/
     # TODO: Write batch to S3
-    
+
     # try:
     #     # Get current timestamp for partitioning
     #     now = datetime.utcnow()
@@ -381,12 +378,12 @@ def archive_events_to_s3(records: List[Dict]) -> None:
     #     month = f"{now.month:02d}"
     #     day = f"{now.day:02d}"
     #     hour = f"{now.hour:02d}"
-    #     
+    #
     #     # Create S3 key with partitioning
     #     import uuid
     #     batch_id = str(uuid.uuid4())
     #     s3_key = f"year={year}/month={month}/day={day}/hour={hour}/batch_{batch_id}.json"
-    #     
+    #
     #     # Prepare data for archival
     #     events = []
     #     for record in records:
@@ -394,7 +391,7 @@ def archive_events_to_s3(records: List[Dict]) -> None:
     #         decoded_data = base64.b64decode(encoded_data)
     #         event_data = json.loads(decoded_data)
     #         events.append(event_data)
-    #     
+    #
     #     # Write to S3
     #     s3_client.put_object(
     #         Bucket=PROCESSED_EVENTS_BUCKET,
@@ -402,12 +399,12 @@ def archive_events_to_s3(records: List[Dict]) -> None:
     #         Body=json.dumps(events),
     #         ContentType='application/json'
     #     )
-    #     
+    #
     #     logger.info(f"Archived {len(events)} events to s3://{PROCESSED_EVENTS_BUCKET}/{s3_key}")
-    #     
+    #
     # except Exception as e:
     #     logger.error(f"Error archiving events to S3: {e}")
-    
+
     pass
 
 
@@ -419,7 +416,7 @@ def publish_metrics(processed_count: int, error_count: int) -> None:
     """
     Publish custom metrics to CloudWatch
     TODO: Send processing metrics to CloudWatch
-    
+
     Args:
         processed_count: Number of successfully processed records
         error_count: Number of errors
@@ -452,7 +449,7 @@ def publish_metrics(processed_count: int, error_count: int) -> None:
     #     logger.debug("Published metrics to CloudWatch")
     # except Exception as e:
     #     logger.error(f"Error publishing CloudWatch metrics: {e}")
-    
+
     pass
 
 
@@ -461,7 +458,7 @@ def publish_metrics(processed_count: int, error_count: int) -> None:
 # =============================================================================
 
 # LAMBDA HANDLER PATTERNS:
-# 
+#
 # 1. Event Processing:
 #    - Extract records from event
 #    - Decode base64 Kinesis data

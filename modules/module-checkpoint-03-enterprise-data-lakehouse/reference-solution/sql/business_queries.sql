@@ -15,7 +15,7 @@
 -- =============================================================================
 
 WITH daily_revenue AS (
-    SELECT 
+    SELECT
         date,
         year,
         quarter,
@@ -30,17 +30,17 @@ WITH daily_revenue AS (
     GROUP BY date, year, quarter, month, week_of_year
 ),
 trend_metrics AS (
-    SELECT 
+    SELECT
         dr.*,
         AVG(dr.daily_revenue) OVER (
-            ORDER BY dr.date 
+            ORDER BY dr.date
             ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
         ) AS ma_7day,
         LAG(dr.daily_revenue, 7) OVER (ORDER BY dr.date) AS revenue_week_ago,
         LAG(dr.daily_revenue, 30) OVER (ORDER BY dr.date) AS revenue_month_ago
     FROM daily_revenue dr
 )
-SELECT 
+SELECT
     date,
     year,
     quarter,
@@ -52,16 +52,16 @@ SELECT
     transaction_count,
     ma_7day,
     daily_revenue - revenue_week_ago AS wow_change,
-    CASE 
-        WHEN revenue_week_ago > 0 
+    CASE
+        WHEN revenue_week_ago > 0
         THEN ((daily_revenue - revenue_week_ago) / revenue_week_ago) * 100
-        ELSE 0 
+        ELSE 0
     END AS wow_change_pct,
     daily_revenue - revenue_month_ago AS mom_change,
-    CASE 
-        WHEN revenue_month_ago > 0 
+    CASE
+        WHEN revenue_month_ago > 0
         THEN ((daily_revenue - revenue_month_ago) / revenue_month_ago) * 100
-        ELSE 0 
+        ELSE 0
     END AS mom_change_pct
 FROM trend_metrics
 ORDER BY date DESC;
@@ -72,7 +72,7 @@ ORDER BY date DESC;
 -- Business Question: How should we segment our customers for targeted marketing?
 -- =============================================================================
 
-SELECT 
+SELECT
     rfm_segment,
     COUNT(*) AS customer_count,
     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS pct_of_total,
@@ -83,7 +83,7 @@ SELECT
     AVG(engagement_score) AS avg_engagement,
     AVG(days_since_last_purchase) AS avg_days_since_purchase,
     -- Recommended actions
-    CASE 
+    CASE
         WHEN rfm_segment = 'Champions' THEN 'Reward loyalty, VIP treatment, early access'
         WHEN rfm_segment = 'Loyal Customers' THEN 'Upsell, ask for reviews, engagement programs'
         WHEN rfm_segment = 'New Customers' THEN 'Onboarding campaigns, build relationship'
@@ -105,14 +105,14 @@ ORDER BY total_revenue DESC;
 -- =============================================================================
 
 WITH top_customers AS (
-    SELECT 
+    SELECT
         c.*,
         ROW_NUMBER() OVER (ORDER BY c.customer_lifetime_value DESC) AS clv_rank
     FROM lakehouse_gold.customer_360 c
     WHERE c.is_churned = false
 ),
 top_customer_products AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         p.category,
         p.brand,
@@ -125,7 +125,7 @@ top_customer_products AS (
     WHERE tc.clv_rank <= 100
     GROUP BY f.customer_sk, p.category, p.brand
 )
-SELECT 
+SELECT
     tc.customer_id,
     tc.customer_name,
     tc.email,
@@ -151,7 +151,7 @@ ORDER BY tc.customer_lifetime_value DESC;
 -- Business Question: Which customers are at risk of churning and why?
 -- =============================================================================
 
-SELECT 
+SELECT
     churn_risk,
     customer_segment,
     COUNT(*) AS customer_count,
@@ -166,7 +166,7 @@ SELECT
     SUM(CASE WHEN days_since_last_purchase > 180 THEN 1 ELSE 0 END) AS inactive_180_days,
     SUM(CASE WHEN transactions_last_90d = 0 THEN 1 ELSE 0 END) AS no_recent_transactions,
     -- Recommended intervention
-    CASE 
+    CASE
         WHEN churn_risk = 'High Risk' THEN 'Immediate personalized outreach + special offer'
         WHEN churn_risk = 'Medium Risk' THEN 'Re-engagement email campaign + discount'
         WHEN churn_risk = 'Low Risk' THEN 'Standard retention communication'
@@ -184,7 +184,7 @@ ORDER BY at_risk_revenue DESC;
 -- =============================================================================
 
 WITH customer_purchase_history AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         f.product_sk,
         p.category,
@@ -196,20 +196,20 @@ WITH customer_purchase_history AS (
     GROUP BY f.customer_sk, f.product_sk, p.category
 ),
 similar_customers AS (
-    SELECT 
+    SELECT
         cph1.customer_sk AS customer_a,
         cph2.customer_sk AS customer_b,
         COUNT(DISTINCT cph1.product_sk) AS common_products,
         AVG(ABS(cph1.total_spent - cph2.total_spent)) AS avg_spend_diff
     FROM customer_purchase_history cph1
-    INNER JOIN customer_purchase_history cph2 
-        ON cph1.product_sk = cph2.product_sk 
+    INNER JOIN customer_purchase_history cph2
+        ON cph1.product_sk = cph2.product_sk
         AND cph1.customer_sk <> cph2.customer_sk
     GROUP BY cph1.customer_sk, cph2.customer_sk
     HAVING COUNT(DISTINCT cph1.product_sk) >= 3
 ),
 recommendations AS (
-    SELECT 
+    SELECT
         sc.customer_a AS target_customer_sk,
         cph.product_sk AS recommended_product_sk,
         p.product_name,
@@ -220,14 +220,14 @@ recommendations AS (
     INNER JOIN customer_purchase_history cph ON sc.customer_b = cph.customer_sk
     INNER JOIN lakehouse_gold.dim_product p ON cph.product_sk = p.product_sk
     WHERE NOT EXISTS (
-        SELECT 1 
-        FROM customer_purchase_history cph2 
-        WHERE cph2.customer_sk = sc.customer_a 
+        SELECT 1
+        FROM customer_purchase_history cph2
+        WHERE cph2.customer_sk = sc.customer_a
         AND cph2.product_sk = cph.product_sk
     )
     GROUP BY sc.customer_a, cph.product_sk, p.product_name, p.category
 )
-SELECT 
+SELECT
     c.customer_id,
     c.customer_name,
     c.email,
@@ -251,7 +251,7 @@ ORDER BY c.customer_lifetime_value DESC, recommendation_rank;
 -- =============================================================================
 
 WITH geographic_metrics AS (
-    SELECT 
+    SELECT
         country,
         state,
         COUNT(DISTINCT customer_id) AS total_customers,
@@ -266,7 +266,7 @@ WITH geographic_metrics AS (
     GROUP BY country, state
 ),
 rankings AS (
-    SELECT 
+    SELECT
         gm.*,
         ROW_NUMBER() OVER (PARTITION BY gm.country ORDER BY gm.total_revenue DESC) AS state_revenue_rank,
         total_revenue / NULLIF(total_customers, 0) AS revenue_per_customer,
@@ -274,7 +274,7 @@ rankings AS (
         CAST(high_value_customers AS DOUBLE) / NULLIF(total_customers, 0) * 100 AS high_value_pct
     FROM geographic_metrics gm
 )
-SELECT 
+SELECT
     country,
     state,
     total_customers,
@@ -288,7 +288,7 @@ SELECT
     high_value_customers,
     high_value_pct,
     state_revenue_rank,
-    CASE 
+    CASE
         WHEN state_revenue_rank = 1 THEN 'Top Performing State'
         WHEN churn_risk_pct > 30 THEN 'High Churn Risk Region'
         WHEN high_value_pct > 40 THEN 'Premium Market'
@@ -304,7 +304,7 @@ ORDER BY country, total_revenue DESC;
 -- =============================================================================
 
 WITH seasonal_revenue AS (
-    SELECT 
+    SELECT
         year,
         quarter,
         month,
@@ -320,14 +320,14 @@ WITH seasonal_revenue AS (
     GROUP BY year, quarter, month, day_of_week, is_weekend, is_holiday, category
 ),
 aggregated_patterns AS (
-    SELECT 
+    SELECT
         quarter,
         AVG(total_revenue) AS avg_quarterly_revenue,
         STDDEV(total_revenue) AS revenue_volatility
     FROM seasonal_revenue
     GROUP BY quarter
 )
-SELECT 
+SELECT
     sr.year,
     sr.quarter,
     sr.month,
@@ -343,7 +343,7 @@ SELECT
     -- Seasonality index
     sr.total_revenue / NULLIF(ap.avg_quarterly_revenue, 0) AS seasonality_index,
     -- Day performance
-    CASE 
+    CASE
         WHEN sr.is_weekend = true THEN 'Weekend'
         WHEN sr.day_of_week IN (1, 5) THEN 'Peak Weekday'
         ELSE 'Standard Weekday'
@@ -359,7 +359,7 @@ ORDER BY sr.year DESC, sr.month DESC, sr.total_revenue DESC;
 -- =============================================================================
 
 WITH customer_cohorts AS (
-    SELECT 
+    SELECT
         customer_sk,
         customer_id,
         DATE_TRUNC('month', registration_date) AS cohort_month,
@@ -372,7 +372,7 @@ WITH customer_cohorts AS (
     WHERE registration_date IS NOT NULL
 ),
 cohort_metrics AS (
-    SELECT 
+    SELECT
         cohort_month,
         COUNT(DISTINCT customer_id) AS cohort_size,
         AVG(net_spent_lifetime) AS avg_ltv,
@@ -386,7 +386,7 @@ cohort_metrics AS (
     FROM customer_cohorts
     GROUP BY cohort_month
 )
-SELECT 
+SELECT
     cohort_month,
     cohort_size,
     avg_ltv,
@@ -411,7 +411,7 @@ ORDER BY cohort_month DESC;
 -- =============================================================================
 
 WITH product_pairs AS (
-    SELECT 
+    SELECT
         f1.product_sk AS product_a,
         f2.product_sk AS product_b,
         p1.product_name AS product_a_name,
@@ -421,8 +421,8 @@ WITH product_pairs AS (
         COUNT(DISTINCT f1.customer_sk) AS customers_bought_both,
         AVG(f1.net_amount + f2.net_amount) AS avg_combined_value
     FROM lakehouse_gold.fact_transactions f1
-    INNER JOIN lakehouse_gold.fact_transactions f2 
-        ON f1.customer_sk = f2.customer_sk 
+    INNER JOIN lakehouse_gold.fact_transactions f2
+        ON f1.customer_sk = f2.customer_sk
         AND f1.product_sk < f2.product_sk
         AND ABS(DATE_DIFF('day', f1.transaction_date, f2.transaction_date)) <= 30
     INNER JOIN lakehouse_gold.dim_product p1 ON f1.product_sk = p1.product_sk
@@ -432,16 +432,16 @@ WITH product_pairs AS (
     HAVING COUNT(DISTINCT f1.customer_sk) >= 10
 ),
 support_metrics AS (
-    SELECT 
+    SELECT
         pp.*,
         -- Calculate support (how popular is this combination)
-        CAST(customers_bought_both AS DOUBLE) / 
+        CAST(customers_bought_both AS DOUBLE) /
             (SELECT COUNT(DISTINCT customer_sk) FROM lakehouse_gold.fact_transactions) AS support,
         -- Rank combinations
         ROW_NUMBER() OVER (ORDER BY pp.customers_bought_both DESC) AS popularity_rank
     FROM product_pairs pp
 )
-SELECT 
+SELECT
     product_a_name,
     product_b_name,
     category_a,
@@ -451,7 +451,7 @@ SELECT
     ROUND(support * 100, 4) AS support_pct,
     popularity_rank,
     -- Recommendation
-    CASE 
+    CASE
         WHEN category_a = category_b THEN 'Same-Category Bundle'
         ELSE 'Cross-Category Bundle'
     END AS bundle_type
@@ -466,7 +466,7 @@ ORDER BY customers_bought_both DESC;
 -- =============================================================================
 
 WITH daily_stats AS (
-    SELECT 
+    SELECT
         date,
         SUM(net_revenue) AS daily_revenue,
         SUM(transaction_count) AS daily_transactions,
@@ -476,7 +476,7 @@ WITH daily_stats AS (
     GROUP BY date
 ),
 stats_with_bounds AS (
-    SELECT 
+    SELECT
         ds.*,
         AVG(daily_revenue) OVER () AS avg_revenue,
         STDDEV(daily_revenue) OVER () AS stddev_revenue,
@@ -485,7 +485,7 @@ stats_with_bounds AS (
     FROM daily_stats ds
 ),
 anomalies AS (
-    SELECT 
+    SELECT
         swb.*,
         -- Z-score for revenue
         (swb.daily_revenue - swb.avg_revenue) / NULLIF(swb.stddev_revenue, 0) AS revenue_z_score,
@@ -493,7 +493,7 @@ anomalies AS (
         (swb.daily_transactions - swb.avg_transactions) / NULLIF(swb.stddev_transactions, 0) AS transaction_z_score
     FROM stats_with_bounds swb
 )
-SELECT 
+SELECT
     date,
     daily_revenue,
     avg_revenue,
@@ -503,13 +503,13 @@ SELECT
     revenue_z_score,
     transaction_z_score,
     -- Classify anomaly
-    CASE 
+    CASE
         WHEN ABS(revenue_z_score) > 3 THEN 'Extreme Anomaly'
         WHEN ABS(revenue_z_score) > 2 THEN 'Significant Anomaly'
         WHEN ABS(revenue_z_score) > 1.5 THEN 'Moderate Anomaly'
         ELSE 'Normal'
     END AS anomaly_classification,
-    CASE 
+    CASE
         WHEN revenue_z_score > 0 THEN 'Positive (Higher than expected)'
         ELSE 'Negative (Lower than expected)'
     END AS anomaly_direction
@@ -524,18 +524,18 @@ ORDER BY ABS(revenue_z_score) DESC;
 -- =============================================================================
 
 WITH purchase_intervals AS (
-    SELECT 
+    SELECT
         f.customer_sk,
         f.transaction_date,
         LAG(f.transaction_date) OVER (PARTITION BY f.customer_sk ORDER BY f.transaction_date) AS prev_transaction_date,
-        DATE_DIFF('day', 
+        DATE_DIFF('day',
             LAG(f.transaction_date) OVER (PARTITION BY f.customer_sk ORDER BY f.transaction_date),
             f.transaction_date
         ) AS days_between_purchases
     FROM lakehouse_gold.fact_transactions f
 ),
 frequency_metrics AS (
-    SELECT 
+    SELECT
         pi.customer_sk,
         COUNT(*) AS total_intervals,
         AVG(pi.days_between_purchases) AS avg_days_between_purchases,
@@ -546,7 +546,7 @@ frequency_metrics AS (
     WHERE pi.days_between_purchases IS NOT NULL
     GROUP BY pi.customer_sk
 )
-SELECT 
+SELECT
     c.customer_id,
     c.customer_name,
     c.customer_segment,
@@ -558,7 +558,7 @@ SELECT
     fm.min_days_between,
     fm.max_days_between,
     -- Frequency category
-    CASE 
+    CASE
         WHEN fm.avg_days_between_purchases <= 7 THEN 'Very Frequent (Weekly)'
         WHEN fm.avg_days_between_purchases <= 30 THEN 'Frequent (Monthly)'
         WHEN fm.avg_days_between_purchases <= 90 THEN 'Moderate (Quarterly)'
@@ -566,7 +566,7 @@ SELECT
         ELSE 'Rare (Annual+)'
     END AS frequency_category,
     -- Consistency score (lower stddev = more consistent)
-    CASE 
+    CASE
         WHEN fm.purchase_frequency_stddev <= fm.avg_days_between_purchases * 0.3 THEN 'Highly Consistent'
         WHEN fm.purchase_frequency_stddev <= fm.avg_days_between_purchases * 0.6 THEN 'Moderately Consistent'
         ELSE 'Inconsistent'
@@ -583,7 +583,7 @@ ORDER BY c.customer_lifetime_value DESC;
 -- =============================================================================
 
 WITH product_classification AS (
-    SELECT 
+    SELECT
         pp.product_id,
         pp.product_name,
         pp.category,
@@ -594,7 +594,7 @@ WITH product_classification AS (
         pp.total_quantity_sold,
         pp.revenue_rank,
         -- BCG Matrix Classification
-        CASE 
+        CASE
             WHEN pp.revenue_rank <= 100 AND pp.yoy_growth_rate > 20 THEN 'Star'
             WHEN pp.revenue_rank <= 100 AND pp.yoy_growth_rate <= 20 THEN 'Cash Cow'
             WHEN pp.revenue_rank > 100 AND pp.yoy_growth_rate > 20 THEN 'Question Mark'
@@ -606,7 +606,7 @@ WITH product_classification AS (
     FROM lakehouse_gold.product_performance pp
 ),
 category_summary AS (
-    SELECT 
+    SELECT
         category,
         COUNT(*) AS products_in_category,
         SUM(net_revenue) AS category_revenue,
@@ -618,7 +618,7 @@ category_summary AS (
     FROM product_classification
     GROUP BY category
 )
-SELECT 
+SELECT
     pc.category,
     pc.product_name,
     pc.brand,
@@ -631,7 +631,7 @@ SELECT
     pc.inventory_classification,
     cs.category_revenue,
     -- Strategic recommendation
-    CASE 
+    CASE
         WHEN pc.bcg_classification = 'Star' THEN 'Invest & Grow - High potential'
         WHEN pc.bcg_classification = 'Cash Cow' THEN 'Maintain & Extract - Stable revenue'
         WHEN pc.bcg_classification = 'Question Mark' THEN 'Test & Decide - Monitor closely'
@@ -647,7 +647,7 @@ ORDER BY pc.category, pc.net_revenue DESC;
 -- Business Question: Which churned customers should we target for winback?
 -- =============================================================================
 
-SELECT 
+SELECT
     customer_id,
     customer_name,
     email,
@@ -661,7 +661,7 @@ SELECT
     most_frequent_category,
     most_frequent_brand,
     -- Winback priority score
-    CASE 
+    CASE
         WHEN customer_lifetime_value >= 5000 AND days_since_last_purchase BETWEEN 90 AND 180 THEN 100
         WHEN customer_lifetime_value >= 2000 AND days_since_last_purchase BETWEEN 90 AND 270 THEN 80
         WHEN net_spent_lifetime >= 1000 AND days_since_last_purchase BETWEEN 180 AND 365 THEN 60
@@ -669,14 +669,14 @@ SELECT
         ELSE 30
     END AS winback_priority_score,
     -- Recommended offer
-    CASE 
+    CASE
         WHEN days_since_last_purchase <= 120 THEN '15% discount + free shipping'
         WHEN days_since_last_purchase <= 180 THEN '25% discount on favorite category'
         WHEN days_since_last_purchase <= 270 THEN '30% discount + exclusive access'
         ELSE '40% winback offer + gift'
     END AS recommended_offer,
     -- Channel recommendation
-    CASE 
+    CASE
         WHEN customer_lifetime_value >= 3000 THEN 'Personal phone call'
         WHEN total_transactions >= 15 THEN 'Personalized email series'
         ELSE 'Standard email campaign'
@@ -694,7 +694,7 @@ LIMIT 1000;
 -- Business Question: Which channels drive the most revenue?
 -- =============================================================================
 
-SELECT 
+SELECT
     c.preferred_channel,
     c.customer_segment,
     COUNT(DISTINCT c.customer_id) AS customers,
@@ -707,10 +707,10 @@ SELECT
     -- Retention metrics
     AVG(c.engagement_score) AS avg_engagement,
     SUM(CASE WHEN c.churn_risk IN ('High Risk', 'Medium Risk') THEN 1 ELSE 0 END) AS at_risk_count,
-    CAST(SUM(CASE WHEN c.churn_risk IN ('High Risk', 'Medium Risk') THEN 1 ELSE 0 END) AS DOUBLE) / 
+    CAST(SUM(CASE WHEN c.churn_risk IN ('High Risk', 'Medium Risk') THEN 1 ELSE 0 END) AS DOUBLE) /
         NULLIF(COUNT(DISTINCT c.customer_id), 0) * 100 AS churn_risk_pct,
     -- Channel effectiveness score
-    (SUM(c.net_spent_lifetime) * AVG(c.engagement_score) / 100) / 
+    (SUM(c.net_spent_lifetime) * AVG(c.engagement_score) / 100) /
         NULLIF(COUNT(DISTINCT c.customer_id), 0) AS channel_effectiveness_score
 FROM lakehouse_gold.customer_360 c
 WHERE c.preferred_channel IS NOT NULL
@@ -724,7 +724,7 @@ ORDER BY total_revenue DESC;
 -- =============================================================================
 
 WITH discount_buckets AS (
-    SELECT 
+    SELECT
         f.transaction_id,
         f.product_sk,
         f.customer_sk,
@@ -732,7 +732,7 @@ WITH discount_buckets AS (
         f.discount_amount,
         f.profit,
         f.profit_margin,
-        CASE 
+        CASE
             WHEN f.discount_amount = 0 THEN 'No Discount'
             WHEN (f.discount_amount / NULLIF(f.total_amount, 0)) <= 0.05 THEN '1-5%'
             WHEN (f.discount_amount / NULLIF(f.total_amount, 0)) <= 0.10 THEN '6-10%'
@@ -747,7 +747,7 @@ WITH discount_buckets AS (
     INNER JOIN lakehouse_gold.dim_customer c ON f.customer_sk = c.customer_sk
     WHERE f.transaction_date >= DATE_ADD('month', -6, CURRENT_DATE)
 )
-SELECT 
+SELECT
     discount_bucket,
     category,
     customer_segment,
@@ -760,7 +760,7 @@ SELECT
     -- Efficiency metrics
     SUM(profit) / NULLIF(SUM(discount_amount), 0) AS profit_per_discount_dollar,
     -- Recommendations
-    CASE 
+    CASE
         WHEN AVG(profit_margin) < 10 THEN 'Reduce discount depth'
         WHEN AVG(profit_margin) > 30 AND COUNT(*) < 100 THEN 'Increase discount to drive volume'
         ELSE 'Current discount strategy effective'
@@ -776,7 +776,7 @@ ORDER BY discount_bucket, total_revenue DESC;
 -- =============================================================================
 
 WITH transaction_products AS (
-    SELECT 
+    SELECT
         f.transaction_id,
         f.customer_sk,
         f.product_sk,
@@ -788,26 +788,26 @@ WITH transaction_products AS (
     WHERE f.transaction_date >= DATE_ADD('month', -3, CURRENT_DATE)
 ),
 product_associations AS (
-    SELECT 
+    SELECT
         tp1.product_sk AS product_a,
         tp2.product_sk AS product_b,
         COUNT(DISTINCT tp1.transaction_id) AS co_occurrence_count,
         AVG(tp1.net_amount + tp2.net_amount) AS avg_basket_value
     FROM transaction_products tp1
-    INNER JOIN transaction_products tp2 
-        ON tp1.transaction_id = tp2.transaction_id 
+    INNER JOIN transaction_products tp2
+        ON tp1.transaction_id = tp2.transaction_id
         AND tp1.product_sk < tp2.product_sk
     GROUP BY tp1.product_sk, tp2.product_sk
 ),
 product_counts AS (
-    SELECT 
+    SELECT
         product_sk,
         COUNT(DISTINCT transaction_id) AS product_transaction_count
     FROM transaction_products
     GROUP BY product_sk
 ),
 association_rules AS (
-    SELECT 
+    SELECT
         pa.product_a,
         pa.product_b,
         pa1.product_name AS product_a_name,
@@ -816,9 +816,9 @@ association_rules AS (
         pc1.product_transaction_count AS product_a_count,
         pc2.product_transaction_count AS product_b_count,
         -- Calculate lift
-        CAST(pa.co_occurrence_count AS DOUBLE) / 
-            (CAST(pc1.product_transaction_count AS DOUBLE) * 
-             CAST(pc2.product_transaction_count AS DOUBLE) / 
+        CAST(pa.co_occurrence_count AS DOUBLE) /
+            (CAST(pc1.product_transaction_count AS DOUBLE) *
+             CAST(pc2.product_transaction_count AS DOUBLE) /
              POWER((SELECT COUNT(DISTINCT transaction_id) FROM transaction_products), 2)) AS lift,
         pa.avg_basket_value
     FROM product_associations pa
@@ -828,7 +828,7 @@ association_rules AS (
     INNER JOIN lakehouse_gold.product_performance pa2 ON pa.product_b = pa2.product_sk
     WHERE pa.co_occurrence_count >= 5
 )
-SELECT 
+SELECT
     product_a_name,
     product_b_name,
     co_occurrence_count,
@@ -837,7 +837,7 @@ SELECT
     ROUND(lift, 2) AS lift,
     avg_basket_value,
     -- Interpretation
-    CASE 
+    CASE
         WHEN lift > 3 THEN 'Very Strong Association'
         WHEN lift > 2 THEN 'Strong Association'
         WHEN lift > 1.5 THEN 'Moderate Association'
@@ -855,7 +855,7 @@ LIMIT 100;
 -- =============================================================================
 
 WITH historical_spending AS (
-    SELECT 
+    SELECT
         c.customer_sk,
         c.customer_id,
         c.customer_name,
@@ -865,16 +865,16 @@ WITH historical_spending AS (
         c.net_spent_lifetime,
         c.avg_transaction_value,
         -- Calculate monthly spend rate
-        CASE 
-            WHEN c.days_since_registration > 0 
+        CASE
+            WHEN c.days_since_registration > 0
             THEN c.net_spent_lifetime / (c.days_since_registration / 30.0)
-            ELSE 0 
+            ELSE 0
         END AS monthly_spend_rate,
         -- Transaction frequency (transactions per month)
-        CASE 
-            WHEN c.days_since_registration > 0 
+        CASE
+            WHEN c.days_since_registration > 0
             THEN c.total_transactions * 30.0 / c.days_since_registration
-            ELSE 0 
+            ELSE 0
         END AS monthly_transaction_frequency,
         c.engagement_score,
         c.churn_risk
@@ -883,27 +883,27 @@ WITH historical_spending AS (
         AND c.days_since_registration >= 30
 ),
 predicted_ltv AS (
-    SELECT 
+    SELECT
         hs.*,
         -- Predict 12-month LTV
         hs.monthly_spend_rate * 12 AS predicted_12m_ltv,
         -- Predict 24-month LTV with decay factor
-        hs.monthly_spend_rate * 24 * 
-            (CASE 
+        hs.monthly_spend_rate * 24 *
+            (CASE
                 WHEN hs.churn_risk = 'Active' THEN 0.95
                 WHEN hs.churn_risk = 'Low Risk' THEN 0.85
                 WHEN hs.churn_risk = 'Medium Risk' THEN 0.65
                 ELSE 0.40
             END) AS predicted_24m_ltv,
         -- Confidence score
-        LEAST(100, 
-            (hs.engagement_score * 0.4) + 
+        LEAST(100,
+            (hs.engagement_score * 0.4) +
             (LEAST(hs.total_transactions * 5, 50) * 0.3) +
             (CASE WHEN hs.days_since_registration >= 90 THEN 30 ELSE hs.days_since_registration / 3 END * 0.3)
         ) AS prediction_confidence
     FROM historical_spending hs
 )
-SELECT 
+SELECT
     customer_id,
     customer_name,
     days_since_registration,
@@ -917,7 +917,7 @@ SELECT
     ROUND(predicted_24m_ltv, 2) AS predicted_24m_ltv,
     ROUND(prediction_confidence, 1) AS prediction_confidence,
     -- Investment priority
-    CASE 
+    CASE
         WHEN predicted_24m_ltv >= 10000 AND prediction_confidence >= 70 THEN 'High Priority'
         WHEN predicted_24m_ltv >= 5000 AND prediction_confidence >= 60 THEN 'Medium Priority'
         WHEN predicted_24m_ltv >= 2000 THEN 'Low Priority'
@@ -933,7 +933,7 @@ ORDER BY predicted_24m_ltv DESC;
 -- =============================================================================
 
 WITH new_products AS (
-    SELECT 
+    SELECT
         pp.product_sk,
         pp.product_name,
         pp.category,
@@ -945,7 +945,7 @@ WITH new_products AS (
         pp.unique_customers,
         pp.revenue_rank,
         -- Launch performance metrics
-        CASE 
+        CASE
             WHEN pp.days_since_launch <= 30 THEN '0-30 days'
             WHEN pp.days_since_launch <= 90 THEN '31-90 days'
             WHEN pp.days_since_launch <= 180 THEN '91-180 days'
@@ -955,7 +955,7 @@ WITH new_products AS (
     WHERE pp.launch_date >= DATE_ADD('year', -1, CURRENT_DATE)
 ),
 phase_benchmarks AS (
-    SELECT 
+    SELECT
         launch_phase,
         AVG(net_revenue) AS avg_phase_revenue,
         AVG(total_quantity_sold) AS avg_phase_volume,
@@ -963,7 +963,7 @@ phase_benchmarks AS (
     FROM new_products
     GROUP BY launch_phase
 )
-SELECT 
+SELECT
     np.product_name,
     np.category,
     np.brand,
@@ -978,7 +978,7 @@ SELECT
     -- Performance vs benchmark
     (np.net_revenue - pb.avg_phase_revenue) / NULLIF(pb.avg_phase_revenue, 0) * 100 AS revenue_vs_benchmark_pct,
     -- Launch success indicator
-    CASE 
+    CASE
         WHEN np.revenue_rank <= 100 THEN 'Blockbuster Launch'
         WHEN np.net_revenue > pb.avg_phase_revenue * 1.5 THEN 'Strong Launch'
         WHEN np.net_revenue > pb.avg_phase_revenue THEN 'Moderate Launch'
@@ -995,7 +995,7 @@ ORDER BY np.launch_date DESC, np.net_revenue DESC;
 -- =============================================================================
 
 WITH monthly_engagement AS (
-    SELECT 
+    SELECT
         DATE_TRUNC('month', f.transaction_date) AS month,
         COUNT(DISTINCT f.customer_sk) AS active_customers,
         AVG(c.engagement_score) AS avg_engagement_score,
@@ -1008,14 +1008,14 @@ WITH monthly_engagement AS (
     GROUP BY DATE_TRUNC('month', f.transaction_date)
 ),
 engagement_trends AS (
-    SELECT 
+    SELECT
         me.*,
         LAG(me.active_customers, 1) OVER (ORDER BY me.month) AS prev_month_customers,
         LAG(me.avg_engagement_score, 1) OVER (ORDER BY me.month) AS prev_month_engagement,
         LAG(me.monthly_revenue, 1) OVER (ORDER BY me.month) AS prev_month_revenue
     FROM monthly_engagement me
 )
-SELECT 
+SELECT
     month,
     active_customers,
     avg_engagement_score,
@@ -1024,19 +1024,19 @@ SELECT
     total_transactions,
     -- Month-over-month changes
     active_customers - prev_month_customers AS customer_change,
-    CASE 
-        WHEN prev_month_customers > 0 
+    CASE
+        WHEN prev_month_customers > 0
         THEN ((active_customers - prev_month_customers) * 100.0 / prev_month_customers)
-        ELSE 0 
+        ELSE 0
     END AS customer_growth_pct,
     avg_engagement_score - prev_month_engagement AS engagement_change,
-    CASE 
-        WHEN prev_month_revenue > 0 
+    CASE
+        WHEN prev_month_revenue > 0
         THEN ((monthly_revenue - prev_month_revenue) * 100.0 / prev_month_revenue)
-        ELSE 0 
+        ELSE 0
     END AS revenue_growth_pct,
     -- Trend indicator
-    CASE 
+    CASE
         WHEN avg_engagement_score > prev_month_engagement AND active_customers > prev_month_customers THEN 'Growing & Engaging'
         WHEN avg_engagement_score > prev_month_engagement AND active_customers <= prev_month_customers THEN 'Higher Quality'
         WHEN avg_engagement_score <= prev_month_engagement AND active_customers > prev_month_customers THEN 'Growing but Disengaging'
@@ -1051,7 +1051,7 @@ ORDER BY month DESC;
 -- Business Question: Who should we target for premium programs?
 -- =============================================================================
 
-SELECT 
+SELECT
     customer_id,
     customer_name,
     email,
@@ -1066,13 +1066,13 @@ SELECT
     most_frequent_category,
     -- Premium eligibility score
     LEAST(100,
-        (CASE 
+        (CASE
             WHEN net_spent_lifetime >= 10000 THEN 40
             WHEN net_spent_lifetime >= 5000 THEN 30
             WHEN net_spent_lifetime >= 2000 THEN 20
             ELSE 10
         END) +
-        (CASE 
+        (CASE
             WHEN total_transactions >= 50 THEN 30
             WHEN total_transactions >= 20 THEN 20
             WHEN total_transactions >= 10 THEN 10
@@ -1081,7 +1081,7 @@ SELECT
         (engagement_score * 0.3)
     ) AS premium_eligibility_score,
     -- Benefits recommendation
-    CASE 
+    CASE
         WHEN customer_lifetime_value >= 15000 THEN 'Platinum: Concierge service, 25% discount, free expedited shipping'
         WHEN customer_lifetime_value >= 7500 THEN 'Gold: Priority support, 15% discount, free shipping'
         WHEN customer_lifetime_value >= 3000 THEN 'Silver: 10% discount, early access to sales'
@@ -1101,7 +1101,7 @@ LIMIT 500;
 -- =============================================================================
 
 WITH territory_performance AS (
-    SELECT 
+    SELECT
         c.country,
         c.state,
         COUNT(DISTINCT c.customer_id) AS total_customers,
@@ -1117,14 +1117,14 @@ WITH territory_performance AS (
     GROUP BY c.country, c.state
 ),
 territory_ranks AS (
-    SELECT 
+    SELECT
         tp.*,
         ROW_NUMBER() OVER (PARTITION BY tp.country ORDER BY tp.total_revenue DESC) AS state_rank,
         total_revenue / NULLIF(total_customers, 0) AS revenue_per_customer,
         total_profit / NULLIF(total_revenue, 0) * 100 AS profit_margin_pct
     FROM territory_performance tp
 )
-SELECT 
+SELECT
     country,
     state,
     total_customers,
@@ -1137,14 +1137,14 @@ SELECT
     transactions_last_year,
     state_rank,
     -- Territory classification
-    CASE 
+    CASE
         WHEN state_rank <= 3 AND profit_margin_pct > 25 THEN 'Premium Territory'
         WHEN total_revenue > 100000 THEN 'High-Value Territory'
         WHEN avg_engagement < 40 THEN 'Needs Attention'
         ELSE 'Standard Territory'
     END AS territory_class,
     -- Growth opportunity
-    CASE 
+    CASE
         WHEN total_customers < 100 AND revenue_per_customer > 500 THEN 'High potential for expansion'
         WHEN avg_engagement < 50 THEN 'Focus on retention'
         ELSE 'Maintain and grow'
@@ -1159,7 +1159,7 @@ ORDER BY country, total_revenue DESC;
 -- =============================================================================
 
 WITH current_metrics AS (
-    SELECT 
+    SELECT
         category,
         SUM(net_revenue) AS current_revenue,
         SUM(profit) AS current_profit,
@@ -1171,7 +1171,7 @@ WITH current_metrics AS (
     GROUP BY category
 ),
 scenarios AS (
-    SELECT 
+    SELECT
         cm.category,
         cm.current_revenue,
         cm.current_profit,
@@ -1188,7 +1188,7 @@ scenarios AS (
         (cm.current_revenue * 1.20 * 0.80) - (cm.current_revenue - cm.current_profit) * 0.80 AS scenario3_profit
     FROM current_metrics cm
 )
-SELECT 
+SELECT
     category,
     -- Current state
     ROUND(current_revenue, 2) AS current_revenue,
@@ -1207,7 +1207,7 @@ SELECT
     ROUND(scenario3_profit, 2) AS premium_position_profit,
     ROUND((scenario3_profit - current_profit) / NULLIF(current_profit, 0) * 100, 2) AS s3_profit_change_pct,
     -- Best scenario
-    CASE 
+    CASE
         WHEN scenario1_profit > scenario2_profit AND scenario1_profit > scenario3_profit THEN 'Price Increase'
         WHEN scenario2_profit > scenario3_profit THEN 'Discount Strategy'
         ELSE 'Premium Positioning'
@@ -1222,7 +1222,7 @@ ORDER BY current_revenue DESC;
 -- =============================================================================
 
 WITH customer_cohorts AS (
-    SELECT 
+    SELECT
         DATE_TRUNC('month', registration_date) AS cohort_month,
         customer_sk,
         customer_id,
@@ -1235,7 +1235,7 @@ WITH customer_cohorts AS (
         AND registration_date >= DATE_ADD('year', -2, CURRENT_DATE)
 ),
 cohort_metrics AS (
-    SELECT 
+    SELECT
         cohort_month,
         COUNT(DISTINCT customer_id) AS cohort_size,
         SUM(net_spent_lifetime) AS total_cohort_revenue,
@@ -1248,7 +1248,7 @@ cohort_metrics AS (
     FROM customer_cohorts
     GROUP BY cohort_month
 )
-SELECT 
+SELECT
     cohort_month,
     cohort_size,
     total_cohort_revenue,
@@ -1262,13 +1262,13 @@ SELECT
     (total_cohort_revenue - estimated_acquisition_cost) / NULLIF(estimated_acquisition_cost, 0) * 100 AS roi_pct,
     avg_actual_revenue / 50 AS ltv_to_cac_ratio,
     -- Payback period (days to recover CAC)
-    CASE 
-        WHEN avg_actual_revenue > 50 
+    CASE
+        WHEN avg_actual_revenue > 50
         THEN CAST((50 / (avg_actual_revenue / avg_tenure_days)) AS INTEGER)
-        ELSE NULL 
+        ELSE NULL
     END AS payback_period_days,
     -- Cohort health
-    CASE 
+    CASE
         WHEN (avg_actual_revenue / 50) >= 3 THEN 'Excellent'
         WHEN (avg_actual_revenue / 50) >= 2 THEN 'Good'
         WHEN (avg_actual_revenue / 50) >= 1 THEN 'Break-even'
@@ -1283,7 +1283,7 @@ ORDER BY cohort_month DESC;
 -- Business Question: Which products should we stock more/less of?
 -- =============================================================================
 
-SELECT 
+SELECT
     pp.product_id,
     pp.product_name,
     pp.category,
@@ -1299,17 +1299,17 @@ SELECT
     pp.quantity_last_30d / 30.0 AS daily_velocity,
     pp.quantity_last_90d / 90.0 AS avg_daily_velocity,
     -- Stock recommendation
-    CASE 
-        WHEN pp.inventory_classification = 'Fast Moving' AND pp.days_since_last_sale <= 3 
+    CASE
+        WHEN pp.inventory_classification = 'Fast Moving' AND pp.days_since_last_sale <= 3
             THEN pp.quantity_last_30d * 2
-        WHEN pp.inventory_classification = 'Moderate Moving' 
+        WHEN pp.inventory_classification = 'Moderate Moving'
             THEN pp.quantity_last_30d * 1.5
-        WHEN pp.inventory_classification = 'Slow Moving' AND pp.days_since_last_sale > 30 
+        WHEN pp.inventory_classification = 'Slow Moving' AND pp.days_since_last_sale > 30
             THEN pp.quantity_last_30d * 0.5
         ELSE pp.quantity_last_30d
     END AS recommended_stock_level,
     -- Action items
-    CASE 
+    CASE
         WHEN pp.inventory_classification = 'Fast Moving' AND pp.days_since_last_sale <= 3 THEN 'Increase Stock - High Demand'
         WHEN pp.days_since_last_sale > 90 THEN 'Clearance Sale - Slow Moving'
         WHEN pp.avg_profit_margin < 10 THEN 'Review Pricing - Low Margin'
@@ -1317,7 +1317,7 @@ SELECT
         ELSE 'Standard Replenishment'
     END AS action_item,
     -- Priority
-    CASE 
+    CASE
         WHEN pp.revenue_rank <= 50 THEN 'Critical'
         WHEN pp.revenue_rank <= 200 THEN 'High'
         WHEN pp.revenue_rank <= 500 THEN 'Medium'
@@ -1333,7 +1333,7 @@ ORDER BY pp.revenue_rank;
 -- =============================================================================
 
 WITH current_period AS (
-    SELECT 
+    SELECT
         SUM(net_revenue) AS current_revenue,
         SUM(gross_profit) AS current_profit,
         AVG(avg_transaction_value) AS current_aov,
@@ -1344,7 +1344,7 @@ WITH current_period AS (
     WHERE fs.date >= DATE_TRUNC('month', CURRENT_DATE)
 ),
 previous_period AS (
-    SELECT 
+    SELECT
         SUM(net_revenue) AS prev_revenue,
         SUM(gross_profit) AS prev_profit,
         AVG(avg_transaction_value) AS prev_aov,
@@ -1354,7 +1354,7 @@ previous_period AS (
         AND date < DATE_TRUNC('month', CURRENT_DATE)
 ),
 customer_metrics AS (
-    SELECT 
+    SELECT
         COUNT(*) AS total_customers,
         AVG(customer_lifetime_value) AS avg_clv,
         SUM(CASE WHEN rfm_segment IN ('Champions', 'Loyal Customers') THEN 1 ELSE 0 END) AS high_value_customers,
@@ -1363,21 +1363,21 @@ customer_metrics AS (
     FROM lakehouse_gold.customer_360
     WHERE is_churned = false
 )
-SELECT 
+SELECT
     -- Revenue Metrics
     ROUND(cp.current_revenue, 2) AS mtd_revenue,
     ROUND(pp.prev_revenue, 2) AS prev_month_revenue,
     ROUND((cp.current_revenue - pp.prev_revenue) / NULLIF(pp.prev_revenue, 0) * 100, 2) AS revenue_mom_change_pct,
-    
+
     -- Profitability
     ROUND(cp.current_profit, 2) AS mtd_profit,
     ROUND(cp.current_profit / NULLIF(cp.current_revenue, 0) * 100, 2) AS profit_margin_pct,
-    
+
     -- Transaction Metrics
     cp.current_transactions AS mtd_transactions,
     ROUND(cp.current_aov, 2) AS avg_order_value,
     ROUND((cp.current_aov - pp.prev_aov) / NULLIF(pp.prev_aov, 0) * 100, 2) AS aov_change_pct,
-    
+
     -- Customer Metrics
     cp.active_customers AS mtd_active_customers,
     cm.total_customers,
@@ -1386,19 +1386,19 @@ SELECT
     ROUND(CAST(cm.high_value_customers AS DOUBLE) / cm.total_customers * 100, 2) AS high_value_customer_pct,
     cm.at_risk_customers,
     ROUND(cm.avg_engagement, 1) AS avg_engagement_score,
-    
+
     -- Health Indicators
-    CASE 
+    CASE
         WHEN (cp.current_revenue - pp.prev_revenue) / NULLIF(pp.prev_revenue, 0) > 0.05 THEN '🟢 Growing'
         WHEN (cp.current_revenue - pp.prev_revenue) / NULLIF(pp.prev_revenue, 0) > -0.05 THEN '🟡 Stable'
         ELSE '🔴 Declining'
     END AS revenue_health,
-    CASE 
+    CASE
         WHEN cm.avg_engagement >= 70 THEN '🟢 High'
         WHEN cm.avg_engagement >= 50 THEN '🟡 Moderate'
         ELSE '🔴 Low'
     END AS engagement_health,
-    
+
     -- Generated timestamp
     CURRENT_TIMESTAMP AS dashboard_generated_at
 FROM current_period cp

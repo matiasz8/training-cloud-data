@@ -16,8 +16,6 @@ import json
 
 import boto3
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 from faker import Faker
 from botocore.exceptions import ClientError
 
@@ -31,47 +29,47 @@ logger = logging.getLogger(__name__)
 
 class SalesDataGenerator:
     """Generator for synthetic sales data."""
-    
+
     PRODUCT_CATEGORIES = [
         'Electronics', 'Clothing', 'Home & Garden', 'Sports & Outdoors',
         'Books', 'Toys & Games', 'Health & Beauty', 'Automotive',
         'Food & Beverage', 'Pet Supplies', 'Office Supplies', 'Jewelry'
     ]
-    
+
     ORDER_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED']
-    
+
     PAYMENT_METHODS = ['CREDIT_CARD', 'DEBIT_CARD', 'PAYPAL', 'APPLE_PAY', 'GOOGLE_PAY', 'BANK_TRANSFER']
-    
+
     SHIPPING_METHODS = ['STANDARD', 'EXPRESS', 'OVERNIGHT', 'INTERNATIONAL']
-    
+
     CUSTOMER_SEGMENTS = ['PREMIUM', 'REGULAR', 'OCCASIONAL', 'NEW']
-    
+
     RETURN_REASONS = [
         'Defective Product', 'Wrong Item', 'Not as Described', 'Changed Mind',
         'Better Price Found', 'Quality Issues', 'Size/Fit Issues', 'Late Delivery'
     ]
-    
+
     def __init__(self, seed: Optional[int] = 42):
         """Initialize the generator with optional seed for reproducibility."""
         self.fake = Faker()
         if seed:
             Faker.seed(seed)
             random.seed(seed)
-        
+
         self.products = []
         self.customers = []
         self.orders = []
         self.returns = []
-    
+
     def generate_products(self, num_products: int = 1000) -> List[Dict]:
         """Generate product catalog data."""
         logger.info(f"Generating {num_products} products...")
-        
+
         products = []
-        
+
         for i in range(num_products):
             category = random.choice(self.PRODUCT_CATEGORIES)
-            
+
             # Generate price based on category
             if category == 'Electronics':
                 base_price = random.uniform(50, 2000)
@@ -83,9 +81,9 @@ class SalesDataGenerator:
                 base_price = random.uniform(10, 50)
             else:
                 base_price = random.uniform(15, 500)
-            
+
             cost = base_price * random.uniform(0.40, 0.70)
-            
+
             product = {
                 'product_id': f'PROD{i+1:06d}',
                 'product_name': f"{self.fake.catch_phrase()} {category}",
@@ -110,21 +108,21 @@ class SalesDataGenerator:
                 'updated_at': datetime.now().isoformat()
             }
             products.append(product)
-        
+
         self.products = products
         logger.info(f"Generated {len(products)} products")
         return products
-    
+
     def generate_customers(self, num_customers: int = 50000) -> List[Dict]:
         """Generate customer data with demographics and purchase history."""
         logger.info(f"Generating {num_customers} customers...")
-        
+
         customers = []
-        
+
         for i in range(num_customers):
             # Registration date
             registration_date = self.fake.date_between(start_date='-5y', end_date='today')
-            
+
             # Customer segment based on tenure and activity
             days_since_registration = (datetime.now().date() - registration_date).days
             if days_since_registration < 90:
@@ -134,7 +132,7 @@ class SalesDataGenerator:
                     ['PREMIUM', 'REGULAR', 'OCCASIONAL'],
                     weights=[0.20, 0.50, 0.30]
                 )[0]
-            
+
             # Generate purchase history metrics
             if segment == 'PREMIUM':
                 total_orders = random.randint(20, 100)
@@ -148,13 +146,13 @@ class SalesDataGenerator:
             else:  # NEW
                 total_orders = random.randint(0, 3)
                 total_spent = round(random.uniform(0, 500), 2)
-            
+
             avg_order_value = round(total_spent / total_orders, 2) if total_orders > 0 else 0.0
-            
+
             # Demographics
             age = random.randint(18, 75)
             gender = random.choice(['Male', 'Female', 'Other', 'Prefer not to say'])
-            
+
             customer = {
                 'customer_id': f'CUST{i+1:08d}',
                 'first_name': self.fake.first_name(),
@@ -188,11 +186,11 @@ class SalesDataGenerator:
                 'updated_at': datetime.now().isoformat()
             }
             customers.append(customer)
-        
+
         self.customers = customers
         logger.info(f"Generated {len(customers)} customers")
         return customers
-    
+
     def generate_orders(
         self,
         num_orders: int = 200000,
@@ -201,43 +199,43 @@ class SalesDataGenerator:
     ) -> List[Dict]:
         """Generate order data with line items."""
         logger.info(f"Generating {num_orders} orders...")
-        
+
         if not self.products:
             logger.warning("No products generated. Generating products first.")
             self.generate_products()
-        
+
         if not self.customers:
             logger.warning("No customers generated. Generating customers first.")
             self.generate_customers()
-        
+
         if not start_date:
             start_date = datetime.now() - timedelta(days=365)
         if not end_date:
             end_date = datetime.now()
-        
+
         orders = []
-        
+
         for i in range(num_orders):
             # Select customer
             customer = random.choice(self.customers)
-            
+
             # Generate order timestamp
             time_delta = end_date - start_date
             random_seconds = random.randint(0, int(time_delta.total_seconds()))
             order_date = start_date + timedelta(seconds=random_seconds)
-            
+
             # Generate line items (1-5 products per order)
             num_items = random.choices([1, 2, 3, 4, 5], weights=[0.40, 0.30, 0.15, 0.10, 0.05])[0]
             order_items = random.sample(self.products, min(num_items, len(self.products)))
-            
+
             subtotal = 0.0
             total_quantity = 0
-            
+
             line_items = []
             for item_idx, product in enumerate(order_items, start=1):
                 quantity = random.randint(1, 5)
                 unit_price = product['unit_price']
-                
+
                 # Apply discounts randomly
                 discount_pct = random.choices(
                     [0, 5, 10, 15, 20, 25],
@@ -245,7 +243,7 @@ class SalesDataGenerator:
                 )[0]
                 discount_amount = round(unit_price * quantity * (discount_pct / 100), 2)
                 line_total = round(unit_price * quantity - discount_amount, 2)
-                
+
                 line_items.append({
                     'line_item_id': f"{i+1:010d}-{item_idx:02d}",
                     'product_id': product['product_id'],
@@ -257,10 +255,10 @@ class SalesDataGenerator:
                     'discount_amount': discount_amount,
                     'line_total': line_total
                 })
-                
+
                 subtotal += line_total
                 total_quantity += quantity
-            
+
             # Calculate shipping and tax
             shipping_method = random.choice(self.SHIPPING_METHODS)
             if shipping_method == 'STANDARD':
@@ -271,11 +269,11 @@ class SalesDataGenerator:
                 shipping_cost = 29.99
             else:  # INTERNATIONAL
                 shipping_cost = round(random.uniform(25, 100), 2)
-            
+
             tax_rate = random.uniform(0.06, 0.10)
             tax_amount = round(subtotal * tax_rate, 2)
             total_amount = round(subtotal + shipping_cost + tax_amount, 2)
-            
+
             # Order status based on date
             days_since_order = (datetime.now() - order_date).days
             if days_since_order > 14:
@@ -298,7 +296,7 @@ class SalesDataGenerator:
                     ['PROCESSING', 'PENDING', 'CANCELLED'],
                     weights=[0.70, 0.25, 0.05]
                 )[0]
-            
+
             order = {
                 'order_id': f'ORD{i+1:010d}',
                 'customer_id': customer['customer_id'],
@@ -340,45 +338,45 @@ class SalesDataGenerator:
                 'updated_at': datetime.now().isoformat()
             }
             orders.append(order)
-        
+
         self.orders = orders
         logger.info(f"Generated {len(orders)} orders")
         return orders
-    
+
     def generate_returns(self, return_rate: float = 0.05) -> List[Dict]:
         """Generate return records for delivered orders."""
         logger.info(f"Generating returns with {return_rate*100}% return rate...")
-        
+
         if not self.orders:
             logger.warning("No orders generated. Generating orders first.")
             self.generate_orders()
-        
+
         # Filter delivered orders
         delivered_orders = [order for order in self.orders if order['order_status'] == 'DELIVERED']
-        
+
         num_returns = int(len(delivered_orders) * return_rate)
         orders_to_return = random.sample(delivered_orders, min(num_returns, len(delivered_orders)))
-        
+
         returns = []
-        
+
         for i, order in enumerate(orders_to_return, start=1):
             order_date = datetime.fromisoformat(order['order_date'])
             return_date = order_date + timedelta(days=random.randint(5, 30))
-            
+
             # Select items to return (may be partial return)
             items_to_return = random.sample(
                 order['line_items'],
                 random.randint(1, len(order['line_items']))
             )
-            
+
             refund_amount = sum(item['line_total'] for item in items_to_return)
-            
+
             # Determine refund method (usually same as payment)
             refund_status = random.choices(
                 ['APPROVED', 'PENDING', 'REJECTED'],
                 weights=[0.85, 0.10, 0.05]
             )[0]
-            
+
             return_record = {
                 'return_id': f'RET{i:08d}',
                 'order_id': order['order_id'],
@@ -407,30 +405,30 @@ class SalesDataGenerator:
                 'updated_at': datetime.now().isoformat()
             }
             returns.append(return_record)
-        
+
         self.returns = returns
         logger.info(f"Generated {len(returns)} returns")
         return returns
-    
+
     def write_to_parquet_local(self, output_dir: str):
         """Write generated data to local Parquet files."""
         logger.info(f"Writing sales data to local directory: {output_dir}")
-        
+
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Write products
         if self.products:
             df = pd.DataFrame(self.products)
             df.to_parquet(output_path / 'products.parquet', index=False, compression='snappy')
             logger.info(f"Wrote {len(self.products)} products to Parquet")
-        
+
         # Write customers
         if self.customers:
             df = pd.DataFrame(self.customers)
             df.to_parquet(output_path / 'customers.parquet', index=False, compression='snappy')
             logger.info(f"Wrote {len(self.customers)} customers to Parquet")
-        
+
         # Write orders (convert nested structures to JSON strings)
         if self.orders:
             orders_flat = []
@@ -440,11 +438,11 @@ class SalesDataGenerator:
                 order_flat['billing_address'] = json.dumps(order['billing_address'])
                 order_flat['line_items'] = json.dumps(order['line_items'])
                 orders_flat.append(order_flat)
-            
+
             df = pd.DataFrame(orders_flat)
             df.to_parquet(output_path / 'orders.parquet', index=False, compression='snappy')
             logger.info(f"Wrote {len(self.orders)} orders to Parquet")
-        
+
         # Write returns
         if self.returns:
             returns_flat = []
@@ -452,18 +450,18 @@ class SalesDataGenerator:
                 ret_flat = ret.copy()
                 ret_flat['items_returned'] = json.dumps(ret['items_returned'])
                 returns_flat.append(ret_flat)
-            
+
             df = pd.DataFrame(returns_flat)
             df.to_parquet(output_path / 'returns.parquet', index=False, compression='snappy')
             logger.info(f"Wrote {len(self.returns)} returns to Parquet")
-    
+
     def write_to_s3(self, s3_bucket: str, s3_prefix: str = 'raw/sales'):
         """Write generated data to S3 as Parquet files."""
         logger.info(f"Writing sales data to S3: s3://{s3_bucket}/{s3_prefix}")
-        
+
         try:
             s3_client = boto3.client('s3')
-            
+
             # Write products
             if self.products:
                 df = pd.DataFrame(self.products)
@@ -474,7 +472,7 @@ class SalesDataGenerator:
                     Body=parquet_buffer
                 )
                 logger.info(f"Wrote {len(self.products)} products to S3")
-            
+
             # Write customers
             if self.customers:
                 df = pd.DataFrame(self.customers)
@@ -485,7 +483,7 @@ class SalesDataGenerator:
                     Body=parquet_buffer
                 )
                 logger.info(f"Wrote {len(self.customers)} customers to S3")
-            
+
             # Write orders
             if self.orders:
                 orders_flat = []
@@ -495,7 +493,7 @@ class SalesDataGenerator:
                     order_flat['billing_address'] = json.dumps(order['billing_address'])
                     order_flat['line_items'] = json.dumps(order['line_items'])
                     orders_flat.append(order_flat)
-                
+
                 df = pd.DataFrame(orders_flat)
                 parquet_buffer = df.to_parquet(index=False, compression='snappy')
                 s3_client.put_object(
@@ -504,7 +502,7 @@ class SalesDataGenerator:
                     Body=parquet_buffer
                 )
                 logger.info(f"Wrote {len(self.orders)} orders to S3")
-            
+
             # Write returns
             if self.returns:
                 returns_flat = []
@@ -512,7 +510,7 @@ class SalesDataGenerator:
                     ret_flat = ret.copy()
                     ret_flat['items_returned'] = json.dumps(ret['items_returned'])
                     returns_flat.append(ret_flat)
-                
+
                 df = pd.DataFrame(returns_flat)
                 parquet_buffer = df.to_parquet(index=False, compression='snappy')
                 s3_client.put_object(
@@ -521,7 +519,7 @@ class SalesDataGenerator:
                     Body=parquet_buffer
                 )
                 logger.info(f"Wrote {len(self.returns)} returns to S3")
-            
+
         except ClientError as e:
             logger.error(f"Error writing to S3: {e}")
             raise
@@ -532,103 +530,103 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate synthetic sales data for Enterprise Data Lakehouse'
     )
-    
+
     parser.add_argument(
         '--orders',
         type=int,
         default=200000,
         help='Number of order records to generate (default: 200000)'
     )
-    
+
     parser.add_argument(
         '--customers',
         type=int,
         default=50000,
         help='Number of customer records to generate (default: 50000)'
     )
-    
+
     parser.add_argument(
         '--products',
         type=int,
         default=1000,
         help='Number of product records to generate (default: 1000)'
     )
-    
+
     parser.add_argument(
         '--return-rate',
         type=float,
         default=0.05,
         help='Return rate as decimal (default: 0.05 = 5%%)'
     )
-    
+
     parser.add_argument(
         '--start-date',
         type=str,
         help='Start date for order generation (YYYY-MM-DD)'
     )
-    
+
     parser.add_argument(
         '--end-date',
         type=str,
         help='End date for order generation (YYYY-MM-DD)'
     )
-    
+
     parser.add_argument(
         '--output-path',
         type=str,
         default='./data/sales',
         help='Local output path for generated data'
     )
-    
+
     parser.add_argument(
         '--s3-bucket',
         type=str,
         help='S3 bucket name for output (if not specified, writes to local only)'
     )
-    
+
     parser.add_argument(
         '--s3-prefix',
         type=str,
         default='raw/sales',
         help='S3 key prefix (default: raw/sales)'
     )
-    
+
     parser.add_argument(
         '--seed',
         type=int,
         default=42,
         help='Random seed for reproducibility (default: 42)'
     )
-    
+
     return parser.parse_args()
 
 
 def main():
     """Main execution function."""
     args = parse_args()
-    
+
     # Parse dates if provided
     start_date = None
     end_date = None
-    
+
     if args.start_date:
         try:
             start_date = datetime.strptime(args.start_date, '%Y-%m-%d')
         except ValueError:
             logger.error(f"Invalid start date format: {args.start_date}. Use YYYY-MM-DD")
             sys.exit(1)
-    
+
     if args.end_date:
         try:
             end_date = datetime.strptime(args.end_date, '%Y-%m-%d')
         except ValueError:
             logger.error(f"Invalid end date format: {args.end_date}. Use YYYY-MM-DD")
             sys.exit(1)
-    
+
     # Initialize generator
     logger.info("Initializing Sales Data Generator...")
     generator = SalesDataGenerator(seed=args.seed)
-    
+
     # Generate data
     generator.generate_products(num_products=args.products)
     generator.generate_customers(num_customers=args.customers)
@@ -638,14 +636,14 @@ def main():
         end_date=end_date
     )
     generator.generate_returns(return_rate=args.return_rate)
-    
+
     # Write to local
     generator.write_to_parquet_local(args.output_path)
-    
+
     # Write to S3 if bucket specified
     if args.s3_bucket:
         generator.write_to_s3(args.s3_bucket, args.s3_prefix)
-    
+
     logger.info("Sales data generation completed successfully!")
     logger.info(f"Generated: {len(generator.products)} products, "
                 f"{len(generator.customers)} customers, "

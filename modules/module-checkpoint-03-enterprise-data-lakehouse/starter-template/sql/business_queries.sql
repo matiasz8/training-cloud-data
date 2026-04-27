@@ -46,29 +46,29 @@ SHOW TABLES;
 
 /*
 WITH daily_sales AS (
-    SELECT 
+    SELECT
         -- TODO: Add date dimensions
         -- d.date_key,
         -- d.fiscal_year,
         -- d.fiscal_quarter,
         -- d.fiscal_month,
-        
+
         -- TODO: Add store dimensions
         -- s.store_id,
         -- s.store_name,
         -- s.region,
         -- s.district,
-        
+
         -- TODO: Add product dimensions
         -- p.category_name,
         -- p.subcategory_name,
-        
+
         -- TODO: Calculate metrics
         -- SUM(f.sales_amount) as total_revenue,
         -- SUM(f.quantity) as total_units,
         -- COUNT(DISTINCT f.transaction_id) as transaction_count,
         -- AVG(f.sales_amount) as avg_transaction_value
-        
+
         1 as placeholder -- TODO: Remove this line
     FROM fact_sales f
     -- TODO: Join with dimension tables
@@ -83,10 +83,10 @@ WITH daily_sales AS (
 ),
 prior_period AS (
     -- TODO: Calculate prior year metrics for YoY comparison
-    SELECT 
+    SELECT
         1 as placeholder
 )
-SELECT 
+SELECT
     -- TODO: Calculate growth rates
     -- current.store_name,
     -- current.category_name,
@@ -131,19 +131,19 @@ WITH customer_rfm AS (
         -- c.customer_key,
         -- c.customer_id,
         -- c.customer_name,
-        
+
         -- Recency: Days since last purchase
         -- TODO: Calculate recency
         -- DATEDIFF(CURRENT_DATE, MAX(f.transaction_date)) as recency_days,
-        
+
         -- Frequency: Number of purchases
         -- TODO: Calculate frequency
         -- COUNT(DISTINCT f.transaction_id) as frequency,
-        
+
         -- Monetary: Total spend
         -- TODO: Calculate monetary value
         -- SUM(f.sales_amount) as monetary_value,
-        
+
         1 as placeholder
     FROM fact_sales f
     -- TODO: Join with dimension tables
@@ -167,7 +167,7 @@ customer_segments AS (
     SELECT
         *,
         -- TODO: Assign segment based on RFM scores
-        -- CASE 
+        -- CASE
         --     WHEN recency_score >= 4 AND frequency_score >= 4 AND monetary_score >= 4 THEN 'Platinum'
         --     WHEN ... THEN 'Gold'
         --     WHEN ... THEN 'Silver'
@@ -176,7 +176,7 @@ customer_segments AS (
         'TODO' as customer_segment
     FROM rfm_scores
 )
-SELECT 
+SELECT
     customer_segment,
     COUNT(*) as customer_count,
     ROUND(AVG(monetary_value), 2) as avg_customer_value,
@@ -194,12 +194,12 @@ ORDER BY segment_total_value DESC;
 /*
 WITH customer_cohorts AS (
     -- TODO: Define customer cohorts by acquisition date
-    SELECT 
+    SELECT
         1 as placeholder
 ),
 cohort_behavior AS (
     -- TODO: Calculate cohort retention and spending patterns
-    SELECT 
+    SELECT
         1 as placeholder
 )
 SELECT
@@ -231,22 +231,22 @@ SELECT
     -- p.product_name,
     -- p.category_name,
     -- s.store_name,
-    
+
     -- TODO: Add inventory metrics
     -- i.current_quantity,
     -- i.reorder_point,
     -- i.reorder_quantity,
-    
+
     -- TODO: Calculate days of supply
     -- i.current_quantity / NULLIF(AVG(daily_sales.units_sold), 0) as days_of_supply,
-    
+
     -- TODO: Flag items needing reorder
-    -- CASE 
+    -- CASE
     --     WHEN i.current_quantity <= i.reorder_point THEN 'REORDER NOW'
     --     WHEN i.current_quantity <= i.reorder_point * 1.5 THEN 'REORDER SOON'
     --     ELSE 'OK'
     -- END as reorder_status
-    
+
     1 as placeholder
 FROM fact_inventory i
 -- TODO: Join with dimension tables
@@ -297,16 +297,16 @@ WITH product_metrics AS (
         -- p.product_name,
         -- p.category_name,
         -- p.brand,
-        
+
         -- TODO: Calculate performance metrics
         -- SUM(f.sales_amount) as total_revenue,
         -- SUM(f.quantity) as total_units_sold,
         -- SUM(f.profit_amount) as total_profit,
         -- SUM(f.profit_amount) / NULLIF(SUM(f.sales_amount), 0) as profit_margin,
-        
+
         -- TODO: Add time period
         -- DATE_TRUNC('month', f.transaction_date) as sales_month
-        
+
         1 as placeholder
     FROM fact_sales f
     -- TODO: Join with dimensions
@@ -338,7 +338,7 @@ WITH product_pairs AS (
         -- COUNT(DISTINCT a.transaction_id) as times_purchased_together
         1 as placeholder
     FROM fact_sales a
-    INNER JOIN fact_sales b 
+    INNER JOIN fact_sales b
         ON a.transaction_id = b.transaction_id
         AND a.product_key < b.product_key  -- Avoid duplicates
     GROUP BY 1, 2 -- TODO: Update
@@ -376,18 +376,18 @@ WITH store_metrics AS (
         -- s.region,
         -- s.district,
         -- s.store_size_sqft,
-        
+
         -- TODO: Calculate sales metrics
         -- SUM(f.sales_amount) as total_revenue,
         -- SUM(f.quantity) as units_sold,
         -- COUNT(DISTINCT f.transaction_id) as transaction_count,
         -- COUNT(DISTINCT f.customer_key) as unique_customers,
-        
+
         -- TODO: Calculate operational metrics
         -- SUM(f.sales_amount) / s.store_size_sqft as revenue_per_sqft,
         -- SUM(f.sales_amount) / COUNT(DISTINCT date_key) as avg_daily_revenue,
         -- COUNT(DISTINCT f.transaction_id) / COUNT(DISTINCT f.date_key) as avg_daily_transactions,
-        
+
         1 as placeholder
     FROM fact_sales f
     -- TODO: Join with dimensions
@@ -408,7 +408,7 @@ store_rankings AS (
 SELECT
     *,
     -- TODO: Add performance indicators
-    -- CASE 
+    -- CASE
     --     WHEN revenue_rank_in_region <= 3 THEN 'Top Performer'
     --     WHEN revenue_rank_in_region > (SELECT COUNT(*)/2 FROM store_rankings) THEN 'Needs Attention'
     --     ELSE 'Average'
@@ -493,7 +493,7 @@ LIMIT 100;
 -- ==========================================
 
 -- TODO: Check table sizes and record counts
--- SELECT 
+-- SELECT
 --     table_name,
 --     SUM(data_length) / 1024 / 1024 / 1024 as size_gb,
 --     table_rows

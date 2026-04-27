@@ -8,7 +8,7 @@ import logging
 import json
 import gzip
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import io
 
 import boto3
@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 def get_s3_client(region_name: str = 'us-east-1'):
     """
     Create and return an S3 client.
-    
+
     Args:
         region_name: AWS region name
-        
+
     Returns:
         boto3 S3 client
     """
@@ -42,7 +42,7 @@ def write_records_to_s3(
 ) -> str:
     """
     Write records to S3 with date/hour partitioning.
-    
+
     Args:
         bucket_name: S3 bucket name
         prefix: Prefix for S3 path (e.g., 'rides/', 'locations/')
@@ -52,46 +52,46 @@ def write_records_to_s3(
         compress: Whether to gzip compress the data
         region_name: AWS region
         timestamp_field: Field to use for partitioning timestamp
-        
+
     Returns:
         S3 key of written object
     """
     if not records:
         logger.warning("No records to write to S3")
         return None
-    
+
     try:
         s3_client = get_s3_client(region_name)
-        
+
         # Get current timestamp for partitioning
         now = datetime.utcnow()
-        
+
         # Build S3 key with partitions
         key_parts = [prefix.rstrip('/')]
-        
+
         if partition_by_date:
             key_parts.extend([
                 f"year={now.year}",
                 f"month={now.month:02d}",
                 f"day={now.day:02d}"
             ])
-        
+
         if partition_by_hour:
             key_parts.append(f"hour={now.hour:02d}")
-        
+
         # Add filename with timestamp
         timestamp_str = now.strftime('%Y%m%d-%H%M%S-%f')[:-3]  # milliseconds
         filename = f"records_{timestamp_str}.json"
-        
+
         if compress:
             filename += '.gz'
-        
+
         key_parts.append(filename)
         s3_key = '/'.join(key_parts)
-        
+
         # Prepare data
         data = '\n'.join([json.dumps(record, default=str) for record in records])
-        
+
         # Compress if requested
         if compress:
             buffer = io.BytesIO()
@@ -102,7 +102,7 @@ def write_records_to_s3(
         else:
             data = data.encode('utf-8')
             content_type = 'application/json'
-        
+
         # Write to S3
         s3_client.put_object(
             Bucket=bucket_name,
@@ -110,10 +110,10 @@ def write_records_to_s3(
             Body=data,
             ContentType=content_type
         )
-        
+
         logger.info(f"Wrote {len(records)} records to s3://{bucket_name}/{s3_key}")
         return s3_key
-        
+
     except ClientError as e:
         logger.error(f"Error writing to S3: {e}")
         raise
@@ -131,23 +131,23 @@ def write_json_to_s3(
 ) -> bool:
     """
     Write JSON data to S3.
-    
+
     Args:
         bucket_name: S3 bucket name
         key: S3 object key
         data: Data to write (will be JSON serialized)
         compress: Whether to gzip compress
         region_name: AWS region
-        
+
     Returns:
         True if successful
     """
     try:
         s3_client = get_s3_client(region_name)
-        
+
         # Serialize to JSON
         json_data = json.dumps(data, default=str)
-        
+
         # Compress if requested
         if compress:
             buffer = io.BytesIO()
@@ -158,7 +158,7 @@ def write_json_to_s3(
         else:
             body = json_data.encode('utf-8')
             content_type = 'application/json'
-        
+
         # Write to S3
         s3_client.put_object(
             Bucket=bucket_name,
@@ -166,10 +166,10 @@ def write_json_to_s3(
             Body=body,
             ContentType=content_type
         )
-        
+
         logger.info(f"Wrote JSON to s3://{bucket_name}/{key}")
         return True
-        
+
     except Exception as e:
         logger.error(f"Error writing JSON to S3: {e}")
         raise
@@ -183,22 +183,22 @@ def append_to_s3_file(
 ) -> bool:
     """
     Append records to an existing S3 file (newline-delimited JSON).
-    
+
     Note: This downloads the existing file, appends, and re-uploads.
     For high-frequency appends, consider using batching instead.
-    
+
     Args:
         bucket_name: S3 bucket name
         key: S3 object key
         new_records: Records to append
         region_name: AWS region
-        
+
     Returns:
         True if successful
     """
     try:
         s3_client = get_s3_client(region_name)
-        
+
         # Try to get existing file
         try:
             response = s3_client.get_object(Bucket=bucket_name, Key=key)
@@ -208,15 +208,15 @@ def append_to_s3_file(
                 existing_data = ''
             else:
                 raise
-        
+
         # Append new records
         new_data = '\n'.join([json.dumps(record, default=str) for record in new_records])
-        
+
         if existing_data:
             combined_data = existing_data + '\n' + new_data
         else:
             combined_data = new_data
-        
+
         # Write back to S3
         s3_client.put_object(
             Bucket=bucket_name,
@@ -224,10 +224,10 @@ def append_to_s3_file(
             Body=combined_data.encode('utf-8'),
             ContentType='application/json'
         )
-        
+
         logger.info(f"Appended {len(new_records)} records to s3://{bucket_name}/{key}")
         return True
-        
+
     except Exception as e:
         logger.error(f"Error appending to S3 file: {e}")
         raise
@@ -239,16 +239,16 @@ def batch_records_by_partition(
 ) -> Dict[str, List[Dict[str, Any]]]:
     """
     Group records by date partition for efficient S3 writes.
-    
+
     Args:
         records: List of records
         timestamp_field: Field containing timestamp
-        
+
     Returns:
         Dictionary mapping partition keys to lists of records
     """
     partitions = {}
-    
+
     for record in records:
         try:
             # Parse timestamp
@@ -258,16 +258,16 @@ def batch_records_by_partition(
                 partition_key = f"{dt.year}/{dt.month:02d}/{dt.day:02d}/{dt.hour:02d}"
             else:
                 partition_key = 'unknown'
-            
+
             if partition_key not in partitions:
                 partitions[partition_key] = []
-            
+
             partitions[partition_key].append(record)
-            
+
         except Exception as e:
             logger.warning(f"Error parsing timestamp for record: {e}")
             if 'unknown' not in partitions:
                 partitions['unknown'] = []
             partitions['unknown'].append(record)
-    
+
     return partitions

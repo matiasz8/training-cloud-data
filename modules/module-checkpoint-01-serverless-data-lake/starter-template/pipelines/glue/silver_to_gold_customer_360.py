@@ -18,29 +18,19 @@ TODO SECTIONS:
 6. Write Customer 360 to Gold
 """
 
-import sys
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import (
-    col, sum as spark_sum, count, avg, min as spark_min, max as spark_max,
-    datediff, current_date, when, collect_list, size, array_distinct,
-    lit, countDistinct, ntile
-)
-from pyspark.sql.window import Window
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
 from awsglue.context import GlueContext
-from awsglue.job import Job
 
 
 def calculate_rfm_metrics(orders_df: DataFrame) -> DataFrame:
     """
     Calculate RFM (Recency, Frequency, Monetary) metrics per customer
-    
+
     RFM is a customer segmentation technique:
     - Recency: Days since last purchase
     - Frequency: Number of purchases
     - Monetary: Total amount spent
-    
+
     TODO: Group by customer_id and calculate:
     - recency = days between current_date and MAX(order_date)
     - frequency = COUNT(order_id)
@@ -52,19 +42,19 @@ def calculate_rfm_metrics(orders_df: DataFrame) -> DataFrame:
     #     count('order_id').alias('frequency'),
     #     spark_sum('total_amount').alias('monetary')
     # )
-    
+
     return None  # TODO: Implement
 
 
 def create_rfm_segments(rfm_df: DataFrame) -> DataFrame:
     """
     Create customer segments based on RFM scores
-    
+
     TODO: Use ntile() to divide customers into quintiles (1-5) for each metric
     - Lower recency = better (more recent purchase)
     - Higher frequency = better (more purchases)
     - Higher monetary = better (more spend)
-    
+
     Then create segments like:
     - Champions: High F, High M, Low R
     - Loyal: High F, Medium M
@@ -74,13 +64,13 @@ def create_rfm_segments(rfm_df: DataFrame) -> DataFrame:
     # TODO: Create R, F, M scores (1-5)
     # window = Window.orderBy(col('recency_days'))  # Lower is better
     # rfm_df = rfm_df.withColumn('R_score', ntile(5).over(window))
-    
+
     # window_f = Window.orderBy(col('frequency').desc())  # Higher is better
     # rfm_df = rfm_df.withColumn('F_score', ntile(5).over(window_f))
-    
+
     # window_m = Window.orderBy(col('monetary').desc())  # Higher is better
     # rfm_df = rfm_df.withColumn('M_score', ntile(5).over(window_m))
-    
+
     # TODO: Create segment labels
     # rfm_df = rfm_df.withColumn('segment',
     #     when((col('R_score') >= 4) & (col('F_score') >= 4), 'Champions')
@@ -89,14 +79,14 @@ def create_rfm_segments(rfm_df: DataFrame) -> DataFrame:
     #     .when(col('R_score') <= 2, 'Lost')
     #     .otherwise('Potential')
     # )
-    
+
     return None  # TODO: Implement
 
 
 def calculate_customer_lifetime_value(orders_df: DataFrame) -> DataFrame:
     """
     Calculate Customer Lifetime Value (CLV)
-    
+
     TODO: Aggregate per customer:
     - total_spent: SUM(total_amount)
     - total_orders: COUNT(*)
@@ -113,7 +103,7 @@ def calculate_customer_lifetime_value(orders_df: DataFrame) -> DataFrame:
 def calculate_product_affinity(orders_df: DataFrame) -> DataFrame:
     """
     Calculate customer product preferences
-    
+
     TODO: For each customer:
     - favorite_category: Most purchased category
     - categories_purchased: ARRAY of unique categories
@@ -126,11 +116,11 @@ def calculate_product_affinity(orders_df: DataFrame) -> DataFrame:
     return None  # TODO: Implement
 
 
-def join_customer_master_data(customer_metrics_df: DataFrame, 
+def join_customer_master_data(customer_metrics_df: DataFrame,
                                customers_df: DataFrame) -> DataFrame:
     """
     Join calculated metrics with customer master data
-    
+
     TODO: Join all calculated metrics with customer demographics
     - RFM segments
     - CLV metrics

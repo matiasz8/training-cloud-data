@@ -2,7 +2,7 @@
 
 ################################################################################
 # Acceptance Tests Runner for Serverless Data Lake Checkpoint
-# 
+#
 # This script runs all acceptance tests with proper configuration,
 # generates coverage reports, and provides a summary of results.
 ################################################################################
@@ -45,7 +45,7 @@ check_aws_credentials() {
 install_dependencies() {
     echo ""
     echo -e "${YELLOW}→ Installing test dependencies...${NC}"
-    
+
     if [ -f "requirements.txt" ]; then
         pip install -q -r requirements.txt
         echo -e "${GREEN}✓ Dependencies installed${NC}"
@@ -59,13 +59,13 @@ install_dependencies() {
 set_test_environment() {
     echo ""
     echo -e "${YELLOW}→ Setting test environment variables...${NC}"
-    
+
     # Use environment variables if set, otherwise use defaults
     export AWS_REGION="${AWS_REGION:-us-east-1}"
     export BUCKET_PREFIX="${BUCKET_PREFIX:-data-lake-checkpoint01}"
     export PROJECT_NAME="${PROJECT_NAME:-serverless-data-lake}"
     export ENVIRONMENT="${ENVIRONMENT:-test}"
-    
+
     echo "  AWS_REGION: $AWS_REGION"
     echo "  BUCKET_PREFIX: $BUCKET_PREFIX"
     echo "  PROJECT_NAME: $PROJECT_NAME"
@@ -80,12 +80,12 @@ run_tests() {
     echo -e "${BLUE}║  Running Tests                                            ║${NC}"
     echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    
+
     # Parse command line arguments
     TEST_MARKERS=""
     VERBOSE=""
     PARALLEL=""
-    
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             --quick)
@@ -114,10 +114,10 @@ run_tests() {
                 ;;
         esac
     done
-    
+
     # Create reports directory
     mkdir -p reports
-    
+
     # Run pytest with coverage
     pytest $TEST_MARKERS $VERBOSE $PARALLEL \
         --cov=. \
@@ -128,7 +128,7 @@ run_tests() {
         --tb=short \
         -ra \
         || TEST_EXIT_CODE=$?
-    
+
     return ${TEST_EXIT_CODE:-0}
 }
 
@@ -139,15 +139,15 @@ generate_summary() {
     echo -e "${BLUE}║  Test Summary                                             ║${NC}"
     echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    
+
     if [ -f "reports/test-report.html" ]; then
         echo -e "${GREEN}✓ Test report generated: reports/test-report.html${NC}"
     fi
-    
+
     if [ -d "reports/coverage" ]; then
         echo -e "${GREEN}✓ Coverage report generated: reports/coverage/index.html${NC}"
     fi
-    
+
     echo ""
     echo "To view reports:"
     echo "  Test Report:     open reports/test-report.html"
@@ -158,20 +158,20 @@ generate_summary() {
 main() {
     # Check prerequisites
     check_aws_credentials
-    
+
     # Install dependencies
     install_dependencies
-    
+
     # Set environment
     set_test_environment
-    
+
     # Run tests
     run_tests
     TEST_RESULT=$?
-    
+
     # Generate summary
     generate_summary
-    
+
     echo ""
     if [ $TEST_RESULT -eq 0 ]; then
         echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"

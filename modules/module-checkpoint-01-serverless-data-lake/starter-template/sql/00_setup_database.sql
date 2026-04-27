@@ -40,7 +40,7 @@ ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
 STORED AS PARQUET
 LOCATION 's3://your-bucket-prefix-cloudmart-raw-dev/orders/';
 
--- Bronze Customers Table  
+-- Bronze Customers Table
 -- TODO: Complete the table definition
 CREATE EXTERNAL TABLE IF NOT EXISTS cloudmart_bronze_dev.customers (
   customer_id STRING,
@@ -147,17 +147,17 @@ MSCK REPAIR TABLE cloudmart_silver_dev.orders;
 -- ============================================================================
 
 -- Check record counts per table
-SELECT 'bronze_orders' as table_name, COUNT(*) as record_count 
+SELECT 'bronze_orders' as table_name, COUNT(*) as record_count
 FROM cloudmart_bronze_dev.orders
 UNION ALL
-SELECT 'silver_orders', COUNT(*) 
+SELECT 'silver_orders', COUNT(*)
 FROM cloudmart_silver_dev.orders
 UNION ALL
-SELECT 'bronze_customers', COUNT(*) 
+SELECT 'bronze_customers', COUNT(*)
 FROM cloudmart_bronze_dev.customers;
 
 -- Check for nulls in key columns
-SELECT 
+SELECT
   COUNT(*) as total_records,
   COUNT(order_id) as non_null_order_id,
   COUNT(customer_id) as non_null_customer_id,
@@ -165,7 +165,7 @@ SELECT
 FROM cloudmart_bronze_dev.orders;
 
 -- Check data freshness
-SELECT 
+SELECT
   MAX(processed_timestamp) as latest_processed,
   MIN(processed_timestamp) as earliest_processed,
   DATE_DIFF('hour', MIN(processed_timestamp), MAX(processed_timestamp)) as hours_span

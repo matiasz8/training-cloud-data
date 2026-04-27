@@ -19,9 +19,9 @@ import logging
 import os
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Dict, Any, List
+from typing import Dict, Any
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Attr
 
 # Configure logging
 logger = logging.getLogger()
@@ -51,25 +51,25 @@ class DecimalEncoder(json.JSONEncoder):
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     Main Lambda handler invoked by Step Functions
-    
+
     Args:
         event: Input from Step Functions containing aggregation_type and parameters
         context: Lambda execution context
-        
+
     Returns:
         Dictionary with aggregated metrics and timestamp
     """
     try:
         logger.info(f"Starting aggregation with event: {json.dumps(event, cls=DecimalEncoder)}")
-        
+
         aggregation_type = event.get('aggregation_type')
         time_window_hours = event.get('time_window_hours', HOURS_BACK)
         execution_id = event.get('execution_id', 'unknown')
-        
+
         # Calculate time window
         end_time = datetime.utcnow()
         start_time = end_time - timedelta(hours=time_window_hours)
-        
+
         # Route to appropriate aggregation function
         if aggregation_type == 'rides':
             metrics = aggregate_rides(start_time, end_time)
@@ -79,10 +79,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             metrics = aggregate_ratings(start_time, end_time)
         else:
             raise ValueError(f"Unknown aggregation type: {aggregation_type}")
-        
+
         # Publish metrics to CloudWatch
         publish_cloudwatch_metrics(aggregation_type, metrics)
-        
+
         result = {
             'statusCode': 200,
             'metrics': metrics,
@@ -94,10 +94,10 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 'hours': time_window_hours
             }
         }
-        
+
         logger.info(f"Aggregation completed successfully: {json.dumps(result, cls=DecimalEncoder)}")
         return result
-        
+
     except Exception as e:
         logger.error(f"Error in aggregation: {str(e)}", exc_info=True)
         raise
@@ -106,26 +106,26 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 def aggregate_rides(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
     """
     Aggregate ride metrics for the time window
-    
+
     Calculates:
     - Total rides created
     - Completed rides
-    - Cancelled rides  
+    - Cancelled rides
     - Average ride duration
     - Total revenue (fare + surge)
     - Rides by city
-    
+
     Args:
         start_time: Start of time window
         end_time: End of time window
-        
+
     Returns:
         Dictionary with ride metrics
     """
     logger.info(f"Aggregating rides from {start_time} to {end_time}")
-    
+
     table = dynamodb.Table(RIDES_TABLE)
-    
+
     # Query rides within time window
     # Note: In production, you'd use a GSI on timestamp for efficient queries
     response = table.scan(
@@ -134,9 +134,9 @@ def aggregate_rides(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
             int(end_time.timestamp())
         )
     )
-    
+
     rides = response.get('Items', [])
-    
+
     # Handle pagination
     while 'LastEvaluatedKey' in response:
         response = table.scan(
@@ -147,9 +147,9 @@ def aggregate_rides(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
             ExclusiveStartKey=response['LastEvaluatedKey']
         )
         rides.extend(response.get('Items', []))
-    
+
     logger.info(f"Retrieved {len(rides)} rides for aggregation")
-    
+
     # Initialize counters
     total_rides = len(rides)
     completed_rides = 0
@@ -158,39 +158,39 @@ def aggregate_rides(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
     total_revenue = Decimal('0')
     rides_by_city = {}
     rides_with_duration = 0
-    
+
     # Aggregate metrics
     for ride in rides:
         status = ride.get('status', 'unknown')
-        
+
         if status == 'completed':
             completed_rides += 1
-            
+
             # Sum duration
             if 'duration_minutes' in ride:
                 total_duration += float(ride['duration_minutes'])
                 rides_with_duration += 1
-            
+
             # Sum revenue
             fare = Decimal(str(ride.get('fare_amount', 0)))
             surge = Decimal(str(ride.get('surge_amount', 0)))
             total_revenue += fare + surge
-            
+
         elif status == 'cancelled':
             cancelled_rides += 1
-        
+
         # Count by city
         city = ride.get('city', 'unknown')
         rides_by_city[city] = rides_by_city.get(city, 0) + 1
-    
+
     # Calculate averages
     avg_duration = total_duration / rides_with_duration if rides_with_duration > 0 else 0
     completion_rate = (completed_rides / total_rides * 100) if total_rides > 0 else 0
     cancellation_rate = (cancelled_rides / total_rides * 100) if total_rides > 0 else 0
-    
+
     # Get top cities
     top_cities = sorted(rides_by_city.items(), key=lambda x: x[1], reverse=True)[:10]
-    
+
     metrics = {
         'total_rides': total_rides,
         'completed_rides': completed_rides,
@@ -202,7 +202,7 @@ def aggregate_rides(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
         'cancellation_rate_pct': round(cancellation_rate, 2),
         'top_cities': [{'city': city, 'rides': count} for city, count in top_cities]
     }
-    
+
     logger.info(f"Ride aggregation completed: {json.dumps(metrics, cls=DecimalEncoder)}")
     return metrics
 
@@ -210,38 +210,38 @@ def aggregate_rides(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
 def aggregate_payments(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
     """
     Aggregate payment metrics for the time window
-    
+
     Calculates:
     - Total revenue
     - Revenue by payment method (credit card, cash, digital wallet)
     - Transaction count by payment method
     - Fraud detected count
     - Average transaction amount
-    
+
     Args:
         start_time: Start of time window
         end_time: End of time window
-        
+
     Returns:
         Dictionary with payment metrics
     """
     logger.info(f"Aggregating payments from {start_time} to {end_time}")
-    
+
     # In a real implementation, this would query a payments table
     # For this example, we'll query the metrics table for payment data
     table = dynamodb.Table(METRICS_TABLE)
-    
+
     # Query payment records
     response = table.scan(
-        FilterExpression=Attr('metric_type').eq('payment') & 
+        FilterExpression=Attr('metric_type').eq('payment') &
                          Attr('timestamp').between(
                              int(start_time.timestamp()),
                              int(end_time.timestamp())
                          )
     )
-    
+
     payments = response.get('Items', [])
-    
+
     # Handle pagination
     while 'LastEvaluatedKey' in response:
         response = table.scan(
@@ -253,9 +253,9 @@ def aggregate_payments(start_time: datetime, end_time: datetime) -> Dict[str, An
             ExclusiveStartKey=response['LastEvaluatedKey']
         )
         payments.extend(response.get('Items', []))
-    
+
     logger.info(f"Retrieved {len(payments)} payment records for aggregation")
-    
+
     # Initialize counters
     total_revenue = Decimal('0')
     payment_methods = {
@@ -264,24 +264,24 @@ def aggregate_payments(start_time: datetime, end_time: datetime) -> Dict[str, An
         'digital_wallet': {'count': 0, 'amount': Decimal('0')}
     }
     fraud_detected = 0
-    
+
     # Aggregate metrics
     for payment in payments:
         amount = Decimal(str(payment.get('amount', 0)))
         method = payment.get('payment_method', 'unknown')
-        
+
         total_revenue += amount
-        
+
         if method in payment_methods:
             payment_methods[method]['count'] += 1
             payment_methods[method]['amount'] += amount
-        
+
         if payment.get('fraud_detected', False):
             fraud_detected += 1
-    
+
     total_transactions = sum(m['count'] for m in payment_methods.values())
     avg_transaction = float(total_revenue / total_transactions) if total_transactions > 0 else 0
-    
+
     metrics = {
         'total_revenue': float(total_revenue),
         'total_transactions': total_transactions,
@@ -299,7 +299,7 @@ def aggregate_payments(start_time: datetime, end_time: datetime) -> Dict[str, An
         'fraud_detected': fraud_detected,
         'fraud_rate_pct': round((fraud_detected / total_transactions * 100) if total_transactions > 0 else 0, 2)
     }
-    
+
     logger.info(f"Payment aggregation completed: {json.dumps(metrics, cls=DecimalEncoder)}")
     return metrics
 
@@ -307,27 +307,27 @@ def aggregate_payments(start_time: datetime, end_time: datetime) -> Dict[str, An
 def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any]:
     """
     Aggregate rating metrics for the time window
-    
+
     Calculates:
     - Average rating
     - Total ratings count
     - Rating distribution (5-star: X%, 4-star: Y%, etc.)
     - Low rating alerts (ratings below threshold)
     - Top and bottom rated drivers
-    
+
     Args:
         start_time: Start of time window
         end_time: End of time window
-        
+
     Returns:
         Dictionary with rating metrics
     """
     logger.info(f"Aggregating ratings from {start_time} to {end_time}")
-    
+
     # In a real implementation, this would query a ratings table
     # For this example, we'll query the metrics table for rating data
     table = dynamodb.Table(METRICS_TABLE)
-    
+
     # Query rating records
     response = table.scan(
         FilterExpression=Attr('metric_type').eq('rating') &
@@ -336,9 +336,9 @@ def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any
                              int(end_time.timestamp())
                          )
     )
-    
+
     ratings = response.get('Items', [])
-    
+
     # Handle pagination
     while 'LastEvaluatedKey' in response:
         response = table.scan(
@@ -350,37 +350,37 @@ def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any
             ExclusiveStartKey=response['LastEvaluatedKey']
         )
         ratings.extend(response.get('Items', []))
-    
+
     logger.info(f"Retrieved {len(ratings)} rating records for aggregation")
-    
+
     # Initialize counters
     total_ratings = len(ratings)
     sum_ratings = 0
     rating_distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
     low_rating_alerts = 0
     driver_ratings = {}
-    
+
     # Aggregate metrics
     for rating in ratings:
         rating_value = int(rating.get('rating', 0))
         driver_id = rating.get('driver_id', 'unknown')
-        
+
         if 1 <= rating_value <= 5:
             sum_ratings += rating_value
             rating_distribution[rating_value] += 1
-            
+
             if rating_value <= RATING_THRESHOLD_LOW:
                 low_rating_alerts += 1
-            
+
             # Track driver ratings
             if driver_id not in driver_ratings:
                 driver_ratings[driver_id] = {'sum': 0, 'count': 0}
             driver_ratings[driver_id]['sum'] += rating_value
             driver_ratings[driver_id]['count'] += 1
-    
+
     # Calculate metrics
     avg_rating = sum_ratings / total_ratings if total_ratings > 0 else 0
-    
+
     # Calculate distribution percentages
     distribution_pct = {
         'five_star_pct': round((rating_distribution[5] / total_ratings * 100) if total_ratings > 0 else 0, 2),
@@ -389,7 +389,7 @@ def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any
         'two_star_pct': round((rating_distribution[2] / total_ratings * 100) if total_ratings > 0 else 0, 2),
         'one_star_pct': round((rating_distribution[1] / total_ratings * 100) if total_ratings > 0 else 0, 2)
     }
-    
+
     # Calculate driver averages
     driver_averages = [
         {
@@ -399,11 +399,11 @@ def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any
         }
         for driver_id, stats in driver_ratings.items()
     ]
-    
+
     # Get top and bottom drivers
     top_drivers = sorted(driver_averages, key=lambda x: x['avg_rating'], reverse=True)[:10]
     bottom_drivers = sorted(driver_averages, key=lambda x: x['avg_rating'])[:10]
-    
+
     metrics = {
         'avg_rating': round(avg_rating, 2),
         'total_ratings': total_ratings,
@@ -420,7 +420,7 @@ def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any
         'bottom_drivers': bottom_drivers,
         'unique_drivers_rated': len(driver_ratings)
     }
-    
+
     logger.info(f"Rating aggregation completed: {json.dumps(metrics, cls=DecimalEncoder)}")
     return metrics
 
@@ -428,7 +428,7 @@ def aggregate_ratings(start_time: datetime, end_time: datetime) -> Dict[str, Any
 def publish_cloudwatch_metrics(aggregation_type: str, metrics: Dict[str, Any]) -> None:
     """
     Publish key metrics to CloudWatch for monitoring and alerting
-    
+
     Args:
         aggregation_type: Type of aggregation (rides, payments, ratings)
         metrics: Aggregated metrics to publish
@@ -436,7 +436,7 @@ def publish_cloudwatch_metrics(aggregation_type: str, metrics: Dict[str, Any]) -
     try:
         metric_data = []
         namespace = 'RideShare/DailyAggregation'
-        
+
         if aggregation_type == 'rides':
             metric_data.extend([
                 {
@@ -481,14 +481,14 @@ def publish_cloudwatch_metrics(aggregation_type: str, metrics: Dict[str, Any]) -
                     'Unit': 'Count'
                 }
             ])
-        
+
         if metric_data:
             cloudwatch.put_metric_data(
                 Namespace=namespace,
                 MetricData=metric_data
             )
             logger.info(f"Published {len(metric_data)} metrics to CloudWatch")
-            
+
     except Exception as e:
         logger.warning(f"Failed to publish CloudWatch metrics: {str(e)}")
         # Don't fail the Lambda if CloudWatch publishing fails

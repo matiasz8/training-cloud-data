@@ -335,55 +335,55 @@ output "cloudwatch_log_group_rating_processor" {
 output "deployment_instructions" {
   description = "Next steps after infrastructure deployment"
   value = <<-EOT
-    
+
     ╔════════════════════════════════════════════════════════════════════════╗
     ║  REAL-TIME ANALYTICS PLATFORM - DEPLOYMENT COMPLETE                    ║
     ╚════════════════════════════════════════════════════════════════════════╝
-    
+
     Infrastructure has been successfully deployed!
-    
+
     📋 NEXT STEPS:
-    
+
     1. Upload Lambda Function Code
        - Package your Lambda functions with dependencies
        - Upload to each function using AWS CLI or console
        - Update environment variables if needed
-    
+
     2. Test Event Ingestion
        aws kinesis put-record \
          --stream-name ${aws_kinesis_stream.rides.name} \
          --partition-key test-key \
          --data '{"ride_id":"123","status":"requested"}'
-    
+
     3. Monitor Lambda Execution
        aws logs tail /aws/lambda/${aws_lambda_function.ride_processor.function_name} --follow
-    
+
     4. Check DynamoDB Tables
        aws dynamodb scan --table-name ${aws_dynamodb_table.rides_state.name} --limit 10
-    
+
     5. View CloudWatch Dashboard
        ${self.cloudwatch_dashboard_url}
-    
+
     6. Configure SNS Subscriptions
        - Confirm email subscription sent to: ${var.alert_email}
        - Add additional subscribers if needed
-    
+
     7. Deploy Kinesis Analytics Applications
        - Create surge pricing analytics app
        - Create real-time metrics analytics app
        - Create hot spots detection app
-    
+
     8. Set Up QuickSight
        - Create datasets from DynamoDB and S3
        - Build dashboards for visualization
        - Configure scheduled refreshes
-    
+
     9. Test End-to-End Flow
        - Generate test events
        - Verify processing in CloudWatch Logs
        - Check data in DynamoDB and S3
        - Validate metrics in dashboard
-    
+
     10. Production Checklist
         ☐ Review IAM permissions (least privilege)
         ☐ Enable AWS CloudTrail for audit logs
@@ -393,7 +393,7 @@ output "deployment_instructions" {
         ☐ Configure cost budgets and alerts
         ☐ Enable AWS Config for compliance
         ☐ Set up centralized logging
-    
+
     📊 RESOURCE SUMMARY:
     - Kinesis Streams: 4
     - Lambda Functions: 4
@@ -402,15 +402,15 @@ output "deployment_instructions" {
     - CloudWatch Alarms: 3+
     - SNS Topics: 1
     - SQS Queues: 4 (DLQs)
-    
+
     🔗 USEFUL LINKS:
     - Lambda Console: https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.name}
     - Kinesis Console: https://console.aws.amazon.com/kinesis/home?region=${data.aws_region.current.name}
     - DynamoDB Console: https://console.aws.amazon.com/dynamodb/home?region=${data.aws_region.current.name}
     - S3 Console: https://console.aws.amazon.com/s3/home?region=${data.aws_region.current.name}
     - CloudWatch Console: https://console.aws.amazon.com/cloudwatch/home?region=${data.aws_region.current.name}
-    
+
     📧 Support: For issues, check CloudWatch Logs and DLQs first
-    
+
   EOT
 }

@@ -132,11 +132,11 @@ VACUUM lakehouse_silver.products_silver RETAIN 72 HOURS;
 ANALYZE TABLE lakehouse_gold.fact_transactions COMPUTE STATISTICS;
 
 -- Analyze specific columns for better selectivity estimates
-ANALYZE TABLE lakehouse_gold.fact_transactions COMPUTE STATISTICS FOR COLUMNS 
+ANALYZE TABLE lakehouse_gold.fact_transactions COMPUTE STATISTICS FOR COLUMNS
     customer_sk, product_sk, date_sk, net_amount, quantity, profit_margin;
 
 -- For partitioned tables, analyze partitions
--- ANALYZE TABLE lakehouse_gold.fact_transactions 
+-- ANALYZE TABLE lakehouse_gold.fact_transactions
 -- PARTITION (year='2024', month='03') COMPUTE STATISTICS;
 
 -- =============================================================================
@@ -144,15 +144,15 @@ ANALYZE TABLE lakehouse_gold.fact_transactions COMPUTE STATISTICS FOR COLUMNS
 -- =============================================================================
 
 ANALYZE TABLE lakehouse_gold.dim_customer COMPUTE STATISTICS;
-ANALYZE TABLE lakehouse_gold.dim_customer COMPUTE STATISTICS FOR COLUMNS 
+ANALYZE TABLE lakehouse_gold.dim_customer COMPUTE STATISTICS FOR COLUMNS
     customer_id, customer_segment, state, country, loyalty_tier;
 
 ANALYZE TABLE lakehouse_gold.dim_product COMPUTE STATISTICS;
-ANALYZE TABLE lakehouse_gold.dim_product COMPUTE STATISTICS FOR COLUMNS 
+ANALYZE TABLE lakehouse_gold.dim_product COMPUTE STATISTICS FOR COLUMNS
     product_id, category, subcategory, brand, status;
 
 ANALYZE TABLE lakehouse_gold.dim_date COMPUTE STATISTICS;
-ANALYZE TABLE lakehouse_gold.dim_date COMPUTE STATISTICS FOR COLUMNS 
+ANALYZE TABLE lakehouse_gold.dim_date COMPUTE STATISTICS FOR COLUMNS
     date, year, month, quarter, day_of_week;
 
 -- =============================================================================
@@ -181,7 +181,7 @@ DESCRIBE FORMATTED lakehouse_gold.fact_transactions customer_sk;
 MSCK REPAIR TABLE lakehouse_gold.fact_transactions;
 
 -- Alternative: Add specific partition
--- ALTER TABLE lakehouse_gold.fact_transactions 
+-- ALTER TABLE lakehouse_gold.fact_transactions
 -- ADD IF NOT EXISTS PARTITION (year='2024', month='03');
 
 -- =============================================================================
@@ -247,7 +247,7 @@ OPTIMIZE lakehouse_gold.dim_date;
 -- =============================================================================
 
 -- Delta Lake: Configure target file size
--- ALTER TABLE lakehouse_gold.fact_transactions 
+-- ALTER TABLE lakehouse_gold.fact_transactions
 -- SET TBLPROPERTIES ('delta.targetFileSize' = '1073741824'); -- 1GB
 
 -- Then optimize
@@ -289,7 +289,7 @@ ZORDER BY (category, brand, status);
 -- =============================================================================
 
 -- Check partition age first
-SELECT 
+SELECT
     year,
     month,
     COUNT(*) AS record_count,
@@ -301,7 +301,7 @@ HAVING DATE_DIFF('day', MAX(transaction_date), CURRENT_DATE) > 2555  -- 7 years
 ORDER BY year, month;
 
 -- Drop old partitions beyond retention
--- ALTER TABLE lakehouse_gold.fact_transactions 
+-- ALTER TABLE lakehouse_gold.fact_transactions
 -- DROP IF EXISTS PARTITION (year='2017', month='01');
 
 -- =============================================================================
@@ -312,21 +312,21 @@ ORDER BY year, month;
 -- =============================================================================
 
 -- Query to identify partitions for archival
-SELECT 
+SELECT
     's3://lakehouse-gold-bucket/gold/fact_transactions/year=' || year || '/month=' || month AS partition_path,
     year,
     month,
     COUNT(*) AS record_count,
     SUM(bytes) AS partition_size_bytes,
     DATE_DIFF('day', MAX(transaction_date), CURRENT_DATE) AS days_old,
-    CASE 
+    CASE
         WHEN DATE_DIFF('day', MAX(transaction_date), CURRENT_DATE) > 2190 THEN 'Glacier Deep Archive'
         WHEN DATE_DIFF('day', MAX(transaction_date), CURRENT_DATE) > 1095 THEN 'Glacier'
         WHEN DATE_DIFF('day', MAX(transaction_date), CURRENT_DATE) > 365 THEN 'Intelligent-Tiering'
         ELSE 'Standard/Infrequent Access'
     END AS recommended_storage_class
 FROM (
-    SELECT 
+    SELECT
         year,
         month,
         transaction_date,
@@ -343,8 +343,8 @@ ORDER BY days_old DESC;
 -- =============================================================================
 
 -- Check partition scan for a typical query
-EXPLAIN 
-SELECT 
+EXPLAIN
+SELECT
     customer_sk,
     SUM(net_amount) AS total_spent
 FROM lakehouse_gold.fact_transactions
@@ -363,26 +363,26 @@ GROUP BY customer_sk;
 
 -- Query to analyze file sizes (example for CloudWatch/S3 inventory)
 WITH file_inventory AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         's3://lakehouse-gold-bucket/gold/fact_transactions/' AS table_path,
         1000 AS file_count,  -- Would come from actual S3 inventory
         524288000 AS total_bytes,  -- 500MB
         524288 AS avg_file_size_bytes  -- 500KB
 )
-SELECT 
+SELECT
     table_name,
     file_count,
     total_bytes / (1024*1024*1024) AS total_size_gb,
     avg_file_size_bytes / (1024*1024) AS avg_file_size_mb,
-    CASE 
+    CASE
         WHEN avg_file_size_bytes < 134217728 THEN 'Small File Problem - Needs Compaction'
         WHEN avg_file_size_bytes < 268435456 THEN 'Acceptable - Consider Compaction'
         WHEN avg_file_size_bytes < 1073741824 THEN 'Optimal'
         ELSE 'Large Files - Consider Splitting'
     END AS file_size_assessment,
     -- Estimated query cost impact
-    CASE 
+    CASE
         WHEN file_count > 10000 THEN 'High Cost - Many S3 list operations'
         WHEN file_count > 1000 THEN 'Moderate Cost'
         ELSE 'Low Cost'
@@ -413,7 +413,7 @@ ON TABLE lakehouse_gold.fact_transactions
 FOR COLUMNS (customer_sk)
 OPTIONS (fpp = 0.01, numItems = 10000000);
 
--- Enable bloom filter for product lookups  
+-- Enable bloom filter for product lookups
 CREATE BLOOMFILTER INDEX idx_product
 ON TABLE lakehouse_gold.fact_transactions
 FOR COLUMNS (product_sk)
@@ -454,7 +454,7 @@ OPTIONS (fpp = 0.01, numItems = 1000000);
 -- HEALTH 1: Table size and growth monitoring
 -- =============================================================================
 
-SELECT 
+SELECT
     table_schema,
     table_name,
     SUM(bytes) / (1024*1024*1024) AS size_gb,
@@ -475,7 +475,7 @@ ORDER BY size_gb DESC;
 -- =============================================================================
 
 WITH table_metrics AS (
-    SELECT 
+    SELECT
         'fact_transactions' AS table_name,
         COUNT(*) AS file_count,
         SUM(file_size) AS total_size,
@@ -486,7 +486,7 @@ WITH table_metrics AS (
     FROM delta_table_files('lakehouse_gold.fact_transactions')
     GROUP BY table_name
 )
-SELECT 
+SELECT
     table_name,
     file_count,
     total_size / (1024*1024*1024) AS total_size_gb,
@@ -495,14 +495,14 @@ SELECT
     max_file_size / (1024*1024) AS max_file_size_mb,
     DATE_DIFF('day', last_optimized, CURRENT_TIMESTAMP) AS days_since_optimization,
     -- Optimization recommendation
-    CASE 
+    CASE
         WHEN file_count > 10000 THEN 'CRITICAL: Too many files, compact immediately'
         WHEN avg_file_size < 134217728 THEN 'HIGH: Small files detected, compact soon'
         WHEN DATE_DIFF('day', last_optimized, CURRENT_TIMESTAMP) > 7 THEN 'MEDIUM: Regular maintenance needed'
         ELSE 'LOW: Table is healthy'
     END AS optimization_priority,
     -- Recommended action
-    CASE 
+    CASE
         WHEN file_count > 10000 THEN 'Run OPTIMIZE with WHERE clause for incremental compaction'
         WHEN avg_file_size < 134217728 THEN 'Run full OPTIMIZE with ZORDER'
         WHEN DATE_DIFF('day', last_optimized, CURRENT_TIMESTAMP) > 7 THEN 'Schedule routine OPTIMIZE'
@@ -515,7 +515,7 @@ FROM table_metrics;
 -- =============================================================================
 
 -- Analyze query performance (from query logs)
-SELECT 
+SELECT
     query_date,
     table_name,
     COUNT(*) AS query_count,
@@ -594,7 +594,7 @@ MSCK REPAIR TABLE lakehouse_silver.transactions_silver;
 ANALYZE TABLE lakehouse_gold.fact_transactions COMPUTE STATISTICS FOR ALL COLUMNS;
 
 -- Check and report table health
-SELECT 
+SELECT
     'fact_transactions' AS table_name,
     COUNT(*) AS record_count,
     MAX(created_timestamp) AS last_updated,
@@ -609,8 +609,8 @@ FROM lakehouse_gold.fact_transactions;
 -- =============================================================================
 
 -- Identify old partitions for archival (> 2 years)
-SELECT 
-    'ALTER TABLE lakehouse_gold.fact_transactions DROP PARTITION (year=' || 
+SELECT
+    'ALTER TABLE lakehouse_gold.fact_transactions DROP PARTITION (year=' ||
     CAST(year AS VARCHAR) || ', month=' || CAST(month AS VARCHAR) || ');' AS drop_partition_sql
 FROM (
     SELECT DISTINCT year, month

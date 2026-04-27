@@ -86,7 +86,7 @@ SELECT
     AVG(surge_ride_percentage) * 100 AS avg_surge_ride_pct
 FROM revenue_analysis
 WHERE revenue_date >= CURRENT_DATE - INTERVAL '90' DAY
-GROUP BY 
+GROUP BY
     CASE
         WHEN avg_surge_multiplier >= 2.0 THEN '2.0x+'
         WHEN avg_surge_multiplier >= 1.5 THEN '1.5x-2.0x'
@@ -139,11 +139,11 @@ SELECT
     SUM(total_spent) * 100.0 / SUM(SUM(total_spent)) OVER () AS ltv_share_pct
 FROM customer_insights
 GROUP BY churn_risk, rider_segment, value_segment
-ORDER BY 
-    CASE churn_risk 
-        WHEN 'At Risk' THEN 1 
-        WHEN 'Declining' THEN 2 
-        ELSE 3 
+ORDER BY
+    CASE churn_risk
+        WHEN 'At Risk' THEN 1
+        WHEN 'Declining' THEN 2
+        ELSE 3
     END,
     total_lifetime_value DESC;
 
@@ -383,7 +383,7 @@ SELECT
     SUM(total_fare) AS total_revenue
 FROM daily_rides
 WHERE ride_date >= CURRENT_DATE - INTERVAL '30' DAY
-GROUP BY 
+GROUP BY
     CASE
         WHEN distance_km < 5 THEN '0-5 km'
         WHEN distance_km < 10 THEN '5-10 km'
@@ -465,19 +465,19 @@ cohort_analysis AS (
     SELECT
         m1.month,
         COUNT(DISTINCT m1.rider_id) AS total_riders,
-        COUNT(DISTINCT CASE 
+        COUNT(DISTINCT CASE
             WHEN NOT EXISTS (
-                SELECT 1 FROM monthly_riders m2 
-                WHERE m2.rider_id = m1.rider_id 
+                SELECT 1 FROM monthly_riders m2
+                WHERE m2.rider_id = m1.rider_id
                 AND m2.month < m1.month
-            ) THEN m1.rider_id 
+            ) THEN m1.rider_id
         END) AS new_riders,
-        COUNT(DISTINCT CASE 
+        COUNT(DISTINCT CASE
             WHEN EXISTS (
-                SELECT 1 FROM monthly_riders m2 
-                WHERE m2.rider_id = m1.rider_id 
+                SELECT 1 FROM monthly_riders m2
+                WHERE m2.rider_id = m1.rider_id
                 AND m2.month = m1.month - INTERVAL '1' MONTH
-            ) THEN m1.rider_id 
+            ) THEN m1.rider_id
         END) AS retained_riders
     FROM monthly_riders m1
     GROUP BY m1.month
@@ -514,7 +514,7 @@ SELECT
 FROM rideshare_rides
 WHERE status = 'completed'
     AND DATE(from_unixtime(timestamp)) >= CURRENT_DATE - INTERVAL '30' DAY
-GROUP BY 
+GROUP BY
     pickup_location_city,
     CASE
         WHEN HOUR(from_unixtime(timestamp)) BETWEEN 6 AND 9 THEN 'Morning Rush (6-9 AM)'
