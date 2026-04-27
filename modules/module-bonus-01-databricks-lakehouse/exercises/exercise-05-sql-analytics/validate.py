@@ -47,20 +47,20 @@ print("-" * 70)
 try:
     # Check table exists
     tables = [t.name for t in spark.catalog.listTables()]
-    check("sales_transactions" in tables, 
+    check("sales_transactions" in tables,
           "Table 'sales_transactions' exists", 10)
-    
+
     if "sales_transactions" in tables:
         df = spark.table("sales_transactions")
-        
+
         # Check row count
         row_count = df.count()
         check(row_count == 10000,
               f"Table has 10,000 rows (found: {row_count:,})", 10)
-        
+
         # Check required columns
         required_cols = [
-            "transaction_id", "transaction_date", "product_name", 
+            "transaction_id", "transaction_date", "product_name",
             "product_category", "quantity", "unit_price", "total_amount",
             "region", "salesperson_name", "customer_id", "customer_signup_date"
         ]
@@ -68,29 +68,29 @@ try:
         missing_cols = [col for col in required_cols if col not in existing_cols]
         check(len(missing_cols) == 0,
               f"All required columns present (missing: {missing_cols if missing_cols else 'none'})", 5)
-        
+
         # Check unique products
         unique_products = df.select("product_name").distinct().count()
         check(40 <= unique_products <= 50,
               f"40-50 unique products (found: {unique_products})", 5)
-        
+
         # Check unique regions
         unique_regions = df.select("region").distinct().count()
         check(8 <= unique_regions <= 12,
               f"8-12 unique regions (found: {unique_regions})", 5)
-        
+
         # Check unique salespeople
         unique_salespeople = df.select("salesperson_name").distinct().count()
         check(18 <= unique_salespeople <= 22,
               f"18-22 unique salespeople (found: {unique_salespeople})", 5)
-        
+
         # Check revenue range
         total_revenue = df.agg(sum("net_revenue").alias("total")).collect()[0][0] or \
                        df.agg(sum("total_amount").alias("total")).collect()[0][0]
         revenue_in_millions = total_revenue / 1_000_000
         check(2.0 <= revenue_in_millions <= 5.0,
               f"Total revenue $2M-$5M (found: ${revenue_in_millions:.2f}M)", 5)
-        
+
 except Exception as e:
     print(f"❌ Error validating Task 1: {str(e)}")
 
@@ -110,7 +110,7 @@ try:
     """)
     check(result.count() >= 8,
           "Revenue by region query works", 5)
-    
+
     # Query 2: Monthly Trends
     result = spark.sql("""
         SELECT DATE_TRUNC('month', transaction_date) as month,
@@ -120,7 +120,7 @@ try:
     """)
     check(result.count() >= 10,
           "Monthly trends query works", 5)
-    
+
     # Query 3: Top Products
     result = spark.sql("""
         SELECT product_name, SUM(COALESCE(net_revenue, total_amount)) as revenue
@@ -131,7 +131,7 @@ try:
     """)
     check(result.count() == 10,
           "Top 10 products query works", 5)
-    
+
     # Query 4: Salesperson Performance
     result = spark.sql("""
         SELECT salesperson_name, COUNT(*) as deals,
@@ -141,7 +141,7 @@ try:
     """)
     check(result.count() >= 18,
           "Salesperson performance query works", 5)
-    
+
 except Exception as e:
     print(f"❌ Error validating Task 2: {str(e)}")
 
@@ -167,18 +167,18 @@ try:
     """)
     check(result.count() == 10 and "cumulative" in result.columns,
           "Running totals with window functions work", 10)
-    
+
     # Test RANK within partition
     result = spark.sql("""
         SELECT product_category, product_name,
-               RANK() OVER (PARTITION BY product_category 
+               RANK() OVER (PARTITION BY product_category
                            ORDER BY SUM(COALESCE(net_revenue, total_amount)) DESC) as rank
         FROM sales_transactions
         GROUP BY product_category, product_name
     """)
     check(result.count() > 0 and "rank" in result.columns,
           "RANK with PARTITION BY works", 10)
-    
+
     # Test LAG function
     result = spark.sql("""
         WITH monthly AS (
@@ -193,7 +193,7 @@ try:
     """)
     check(result.count() > 0 and "prev_month" in result.columns,
           "LAG function for MoM growth works", 10)
-    
+
 except Exception as e:
     print(f"❌ Error validating Task 3: {str(e)}")
 
@@ -218,7 +218,7 @@ try:
     """)
     check(result.count() > 0,
           "Cohort analysis query works", 10)
-    
+
 except Exception as e:
     print(f"❌ Error validating Task 4: {str(e)}")
 
@@ -238,7 +238,7 @@ try:
     """)
     check(result.count() >= 50,
           "Weekly revenue trend query works", 5)
-    
+
     # Category breakdown
     result = spark.sql("""
         SELECT product_category,
@@ -248,7 +248,7 @@ try:
     """)
     check(result.count() == 5,
           "Category breakdown query works", 5)
-    
+
     # KPI query
     result = spark.sql("""
         SELECT 'Total Revenue' as metric,
@@ -257,7 +257,7 @@ try:
     """)
     check(result.count() > 0,
           "KPI metrics query works", 5)
-    
+
     # Regional matrix (simplified check)
     result = spark.sql("""
         SELECT product_category, region,
@@ -267,7 +267,7 @@ try:
     """)
     check(result.count() >= 25,
           "Category × Region matrix data available", 5)
-    
+
 except Exception as e:
     print(f"❌ Error validating Task 6: {str(e)}")
 

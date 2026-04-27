@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Exercise 01: Delta Lake Fundamentals - Starter Code
-# MAGIC 
+# MAGIC
 # MAGIC **Instructions**: Complete all TODO sections below
 
 # COMMAND ----------
@@ -27,7 +27,7 @@ print("✅ Database created: exercise_01_db")
 
 # MAGIC %md
 # MAGIC ## Task 1: Create Delta Table
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Create a Delta table with 1,000 customer records
 
 # COMMAND ----------
@@ -36,7 +36,7 @@ print("✅ Database created: exercise_01_db")
 def generate_customers(num_customers):
     """
     Generate sample customer data.
-    
+
     Schema:
     - customer_id (INT)
     - name (STRING)
@@ -61,7 +61,7 @@ print(f"✅ Table created with {spark.table('customers').count()} rows")
 
 # MAGIC %md
 # MAGIC ## Task 2: ACID Transactions
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Demonstrate ACID properties
 
 # COMMAND ----------
@@ -112,7 +112,7 @@ demonstrate_isolation()
 
 # MAGIC %md
 # MAGIC ## Task 3: Time Travel
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Query historical versions
 
 # COMMAND ----------
@@ -154,7 +154,7 @@ spark.sql("DESCRIBE HISTORY customers").show(truncate=False)
 
 # MAGIC %md
 # MAGIC ## Task 4: Schema Evolution
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Add new columns to existing table
 
 # COMMAND ----------
@@ -176,7 +176,7 @@ print("✅ Schema evolution complete")
 
 # MAGIC %md
 # MAGIC ## Task 5: MERGE Operations
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Implement UPSERT with MERGE
 
 # COMMAND ----------
@@ -204,7 +204,7 @@ print(f"Final count: {final_count} (expected: 1,050)")
 
 # MAGIC %md
 # MAGIC ## Task 6: Optimize Performance
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Optimize table for better query performance
 
 # COMMAND ----------
@@ -256,7 +256,7 @@ print("✅ VACUUM complete")
 
 # MAGIC %md
 # MAGIC ## Summary
-# MAGIC 
+# MAGIC
 # MAGIC **TODO**: Run validation script to check your work:
 # MAGIC ```bash
 # MAGIC cd exercises/exercise-01-delta-lake-basics

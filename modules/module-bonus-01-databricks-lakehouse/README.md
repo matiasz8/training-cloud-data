@@ -1,9 +1,9 @@
 # Bonus Module 01: Databricks Lakehouse Platform
 
-🎁 **Type:** Optional Bonus Module  
-☁️ **Platform:** Databricks (Cloud-Managed Service)  
-⏱️ **Estimated Time:** 12-15 hours  
-🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced  
+🎁 **Type:** Optional Bonus Module
+☁️ **Platform:** Databricks (Cloud-Managed Service)
+⏱️ **Estimated Time:** 12-15 hours
+🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced
 💰 **Cost:** Free tier available (Community Edition or 14-day trial)
 
 ## Prerequisites
@@ -77,7 +77,7 @@ By the end of this module, you will be able to:
   - `setup-guide.md` - Account setup, workspace configuration, cluster creation
   - `best-practices.md` - Development workflows, optimization, cost management
   - `resources.md` - Official docs, certifications, learning materials
-  
+
 - **notebooks/**: Interactive Databricks notebooks (Python/SQL/Scala)
   - `01-delta-lake-basics.py` - Create tables, ACID transactions, time travel
   - `02-etl-pipeline.py` - Bronze/Silver/Gold medallion architecture
@@ -85,7 +85,7 @@ By the end of this module, you will be able to:
   - `04-streaming-analytics.py` - Structured Streaming with Delta Lake
   - `05-sql-analytics.py` - Databricks SQL, dashboards, BI integration
   - `06-ml-with-mlflow.py` - AutoML, experiment tracking, model registry
-  
+
 - **exercises/**: 6 hands-on labs with validation scripts
   - Exercise 01: Delta Lake Fundamentals
   - Exercise 02: Production ETL Pipelines
@@ -93,23 +93,23 @@ By the end of this module, you will be able to:
   - Exercise 04: Real-Time Streaming
   - Exercise 05: SQL Analytics & Dashboards
   - Exercise 06: ML with MLflow
-  
+
 - **scripts/**: Setup and deployment automation
   - `setup_databricks_cli.sh` - Install and configure Databricks CLI
   - `deploy_workspace.py` - Automated workspace setup
   - `create_sample_data.py` - Generate sample datasets
-  
+
 - **data/**: Sample datasets for exercises
   - `sample/` - CSV/JSON/Parquet files for ingestion
   - `schemas/` - Table schemas and data contracts
-  
+
 - **assets/diagrams/**: Architecture diagrams
   - Databricks platform architecture
   - Delta Lake internals
   - Unity Catalog three-level namespace
   - Medallion architecture (Bronze/Silver/Gold)
   - Databricks vs AWS comparison
-  
+
 - **validation/**: Self-assessment and automated tests
   - Validation scripts for each exercise
   - Performance benchmarks
@@ -366,7 +366,7 @@ See [COST-ALERT.md](COST-ALERT.md) for:
 
 ---
 
-**Module Maintainer**: Data Engineering Training Team  
-**Last Updated**: March 2026  
-**Databricks Version**: Runtime 14.3 LTS (Spark 3.5.x)  
+**Module Maintainer**: Data Engineering Training Team
+**Last Updated**: March 2026
+**Databricks Version**: Runtime 14.3 LTS (Spark 3.5.x)
 **Next Module**: [Bonus 02: Snowflake Data Cloud](../module-bonus-02-snowflake-data-cloud/)

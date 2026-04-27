@@ -3,8 +3,8 @@
 ## Overview
 Master Delta Lake basics by creating tables, demonstrating ACID transactions, using time travel, and optimizing performance.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐ Intermediate  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐ Intermediate
 **Prerequisites**: Module 07 (Spark basics)
 
 ---

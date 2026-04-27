@@ -975,5 +975,5 @@ HAVING total > 1000;
 
 ---
 
-**Last Updated**: March 2026  
+**Last Updated**: March 2026
 **Module**: Bonus 02 - Snowflake Data Cloud

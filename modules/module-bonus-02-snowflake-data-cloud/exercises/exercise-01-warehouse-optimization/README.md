@@ -3,8 +3,8 @@
 ## Overview
 Master Virtual Warehouse sizing, auto-suspend/resume, and cost optimization strategies to build efficient compute infrastructure.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐ Intermediate  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐ Intermediate
 **Prerequisites**: Module 03 (SQL basics), Snowflake account with ACCOUNTADMIN access
 
 ---
@@ -74,7 +74,7 @@ SELECT
 FROM table(generator(rowcount => 1000000));
 
 -- Test query
-SELECT 
+SELECT
     category,
     COUNT(*) as transaction_count,
     AVG(amount) as avg_amount,
@@ -117,7 +117,7 @@ Configure and verify auto-suspend behavior.
    ALTER WAREHOUSE WH_XSMALL_DEV SET AUTO_SUSPEND = 30;
    ```
 
-2. **Test Suspension**: 
+2. **Test Suspension**:
    - Run a quick query
    - Wait 35 seconds
    - Verify warehouse suspended using `SHOW WAREHOUSES`
@@ -158,7 +158,7 @@ WITH
 ```
 
 **Test Scaling**:
-1. **Economy Mode**: 
+1. **Economy Mode**:
    - Requires 6 minutes of queuing before adding cluster
    - Test with simulated concurrent queries
    - Observe scaling behavior in QUERY_HISTORY
@@ -315,7 +315,7 @@ FROM performance_test
 GROUP BY category;
 
 -- Check execution time in QUERY_HISTORY
-SELECT 
+SELECT
     query_id,
     query_text,
     warehouse_name,
@@ -350,7 +350,7 @@ ALTER WAREHOUSE WH_MULTI_CLUSTER SET SCALING_POLICY = 'STANDARD';
 SHOW WAREHOUSES LIKE 'WH_MULTI_CLUSTER';
 
 -- View warehouse load
-SELECT 
+SELECT
     warehouse_name,
     AVG(avg_running) as avg_queries_running,
     AVG(avg_queued_load) as avg_queries_queued
@@ -367,7 +367,7 @@ GROUP BY warehouse_name;
 ```sql
 -- Create resource monitor
 CREATE RESOURCE MONITOR monthly_quota
-WITH 
+WITH
     CREDIT_QUOTA = 1000  -- Maximum credits per month
     FREQUENCY = MONTHLY
     START_TIMESTAMP = IMMEDIATELY

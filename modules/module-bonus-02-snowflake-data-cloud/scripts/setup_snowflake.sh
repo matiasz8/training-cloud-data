@@ -89,7 +89,7 @@ log_message() {
 
 check_snowsql_installed() {
     print_header "Checking SnowSQL Installation"
-    
+
     if ! command -v snowsql &> /dev/null; then
         print_error "SnowSQL is not installed"
         echo ""
@@ -101,7 +101,7 @@ check_snowsql_installed() {
         echo "  Windows: https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/installer/snowsql-installer-latest.exe"
         exit 1
     fi
-    
+
     local version
     version=$(snowsql --version 2>&1 | grep -oP 'Version: \K[\d.]+' || echo "unknown")
     print_success "SnowSQL is installed (version: $version)"
@@ -110,7 +110,7 @@ check_snowsql_installed() {
 
 check_data_files() {
     print_header "Checking Sample Data Files"
-    
+
     if [ ! -d "$DATA_DIR" ]; then
         print_warning "Sample data directory not found: $DATA_DIR"
         echo ""
@@ -118,10 +118,10 @@ check_data_files() {
         echo "  python ${SCRIPT_DIR}/create_sample_data.py --output-dir ${DATA_DIR}"
         return 1
     fi
-    
+
     local missing_files=0
     local required_files=("customers.csv" "orders.csv" "events.json")
-    
+
     for file in "${required_files[@]}"; do
         if [ -f "${DATA_DIR}/${file}" ]; then
             local size
@@ -132,14 +132,14 @@ check_data_files() {
             missing_files=$((missing_files + 1))
         fi
     done
-    
+
     if [ $missing_files -gt 0 ]; then
         echo ""
         echo "Generate missing files with:"
         echo "  python ${SCRIPT_DIR}/create_sample_data.py --output-dir ${DATA_DIR}"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -158,29 +158,29 @@ load_config_file() {
 
 prompt_for_credentials() {
     print_header "Snowflake Account Configuration"
-    
+
     if [ -z "$SNOWFLAKE_ACCOUNT" ]; then
         echo -n "Enter Snowflake account identifier (e.g., xy12345.us-east-1): "
         read -r SNOWFLAKE_ACCOUNT
     fi
-    
+
     if [ -z "$SNOWFLAKE_USERNAME" ]; then
         echo -n "Enter Snowflake username: "
         read -r SNOWFLAKE_USERNAME
     fi
-    
+
     if [ -z "$SNOWFLAKE_PASSWORD" ]; then
         echo -n "Enter Snowflake password: "
         read -rs SNOWFLAKE_PASSWORD
         echo ""
     fi
-    
+
     # Validate inputs
     if [ -z "$SNOWFLAKE_ACCOUNT" ] || [ -z "$SNOWFLAKE_USERNAME" ] || [ -z "$SNOWFLAKE_PASSWORD" ]; then
         print_error "All credentials are required"
         exit 1
     fi
-    
+
     print_success "Configuration complete"
     log_message "Account: $SNOWFLAKE_ACCOUNT, User: $SNOWFLAKE_USERNAME"
 }
@@ -192,9 +192,9 @@ prompt_for_credentials() {
 execute_snowflake_query() {
     local query="$1"
     local description="${2:-Executing query}"
-    
+
     log_message "Executing: $query"
-    
+
     if snowsql \
         -a "$SNOWFLAKE_ACCOUNT" \
         -u "$SNOWFLAKE_USERNAME" \
@@ -216,11 +216,11 @@ execute_snowflake_query() {
 
 test_connection() {
     print_header "Testing Snowflake Connection"
-    
+
     local query="SELECT CURRENT_VERSION() AS version, CURRENT_ACCOUNT() AS account, CURRENT_USER() AS user;"
-    
+
     log_message "Testing connection to $SNOWFLAKE_ACCOUNT"
-    
+
     if snowsql \
         -a "$SNOWFLAKE_ACCOUNT" \
         -u "$SNOWFLAKE_USERNAME" \
@@ -245,14 +245,14 @@ test_connection() {
 
 create_database() {
     print_header "Creating Training Database"
-    
+
     local query="CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME} COMMENT='Training database for Snowflake exercises';"
     execute_snowflake_query "$query" "Database ${DATABASE_NAME} created"
 }
 
 create_schemas() {
     print_header "Creating Schemas"
-    
+
     for schema in "${SCHEMAS[@]}"; do
         local query="CREATE SCHEMA IF NOT EXISTS ${DATABASE_NAME}.${schema} COMMENT='${schema} schema for data organization';"
         execute_snowflake_query "$query" "Schema ${schema} created"
@@ -261,7 +261,7 @@ create_schemas() {
 
 create_warehouse() {
     print_header "Creating Training Warehouse"
-    
+
     local query="
     CREATE WAREHOUSE IF NOT EXISTS ${WAREHOUSE_NAME}
     WITH
@@ -271,9 +271,9 @@ create_warehouse() {
         INITIALLY_SUSPENDED = TRUE
         COMMENT = 'Training warehouse with auto-suspend for cost optimization';
     "
-    
+
     execute_snowflake_query "$query" "Warehouse ${WAREHOUSE_NAME} created"
-    
+
     print_info "Warehouse configuration:"
     echo "  • Size: X-SMALL"
     echo "  • Auto-suspend: 60 seconds"
@@ -282,11 +282,11 @@ create_warehouse() {
 
 create_resource_monitor() {
     print_header "Creating Resource Monitor"
-    
+
     # Drop existing monitor if it exists
     local drop_query="DROP RESOURCE MONITOR IF EXISTS ${RESOURCE_MONITOR_NAME};"
     execute_snowflake_query "$drop_query" "Dropped existing resource monitor" || true
-    
+
     # Create new resource monitor
     local create_query="
     CREATE RESOURCE MONITOR ${RESOURCE_MONITOR_NAME}
@@ -299,13 +299,13 @@ create_resource_monitor() {
             ON 90 PERCENT DO SUSPEND
             ON 100 PERCENT DO SUSPEND_IMMEDIATE;
     "
-    
+
     execute_snowflake_query "$create_query" "Resource monitor ${RESOURCE_MONITOR_NAME} created"
-    
+
     # Assign monitor to warehouse
     local assign_query="ALTER WAREHOUSE ${WAREHOUSE_NAME} SET RESOURCE_MONITOR = ${RESOURCE_MONITOR_NAME};"
     execute_snowflake_query "$assign_query" "Resource monitor assigned to warehouse"
-    
+
     print_info "Resource monitor configuration:"
     echo "  • Credit quota: ${CREDIT_QUOTA} credits/month"
     echo "  • Alert at: 75% usage"
@@ -315,15 +315,15 @@ create_resource_monitor() {
 
 load_sample_data() {
     print_header "Loading Sample Data"
-    
+
     if ! check_data_files; then
         print_warning "Skipping data load - sample files not available"
         return 0
     fi
-    
+
     # Create tables
     print_info "Creating tables..."
-    
+
     local create_customers="
     CREATE TABLE IF NOT EXISTS ${DATABASE_NAME}.RAW.CUSTOMERS (
         CUSTOMER_ID INTEGER,
@@ -335,7 +335,7 @@ load_sample_data() {
     );
     "
     execute_snowflake_query "$create_customers" "Table CUSTOMERS created"
-    
+
     local create_orders="
     CREATE TABLE IF NOT EXISTS ${DATABASE_NAME}.RAW.ORDERS (
         ORDER_ID INTEGER,
@@ -347,7 +347,7 @@ load_sample_data() {
     );
     "
     execute_snowflake_query "$create_orders" "Table ORDERS created"
-    
+
     local create_events="
     CREATE TABLE IF NOT EXISTS ${DATABASE_NAME}.RAW.EVENTS (
         EVENT_ID INTEGER,
@@ -358,29 +358,29 @@ load_sample_data() {
     );
     "
     execute_snowflake_query "$create_events" "Table EVENTS created"
-    
+
     print_success "Tables created successfully"
 }
 
 verify_setup() {
     print_header "Verifying Setup"
-    
+
     # Check database exists
     local db_query="SHOW DATABASES LIKE '${DATABASE_NAME}';"
     execute_snowflake_query "$db_query" "Database verification"
-    
+
     # Check schemas exist
     local schema_query="SHOW SCHEMAS IN DATABASE ${DATABASE_NAME};"
     execute_snowflake_query "$schema_query" "Schema verification"
-    
+
     # Check warehouse exists
     local wh_query="SHOW WAREHOUSES LIKE '${WAREHOUSE_NAME}';"
     execute_snowflake_query "$wh_query" "Warehouse verification"
-    
+
     # Count tables
     local table_query="SHOW TABLES IN SCHEMA ${DATABASE_NAME}.RAW;"
     execute_snowflake_query "$table_query" "Table verification"
-    
+
     print_success "Setup verification complete"
 }
 
@@ -415,12 +415,12 @@ print_success_message() {
 
 cleanup_on_error() {
     print_error "Setup failed. Check log file: $LOG_FILE"
-    
+
     if [ -n "${ROLLBACK:-}" ]; then
         print_info "Rolling back changes..."
         # Add rollback logic here if needed
     fi
-    
+
     exit 1
 }
 
@@ -446,33 +446,33 @@ main() {
                 ;;
         esac
     done
-    
+
     # Setup trap for errors
     trap cleanup_on_error ERR
-    
+
     # Start setup
     print_header "Snowflake Training Environment Setup"
     echo ""
     print_info "Log file: $LOG_FILE"
     echo ""
-    
+
     log_message "=== Setup started ==="
-    
+
     # Execute setup steps
     check_snowsql_installed
     load_config_file
     prompt_for_credentials
     test_connection || exit 1
-    
+
     create_database
     create_schemas
     create_warehouse
     create_resource_monitor
     load_sample_data
     verify_setup
-    
+
     log_message "=== Setup completed successfully ==="
-    
+
     # Print success message
     print_success_message
 }

@@ -21,7 +21,6 @@ from delta.tables import DeltaTable
 import uuid
 import random
 import time
-import json
 from datetime import datetime, timedelta
 
 
@@ -40,13 +39,13 @@ def setup_environment():
         .config("spark.databricks.delta.optimizeWrite.enabled", "true") \
         .config("spark.databricks.delta.autoCompact.enabled", "true") \
         .getOrCreate()
-    
+
     spark.sparkContext.setLogLevel("WARN")
-    
+
     # Create database
     spark.sql("CREATE DATABASE IF NOT EXISTS streaming_exercise")
     spark.sql("USE streaming_exercise")
-    
+
     print("✅ Spark session initialized")
     return spark
 
@@ -54,7 +53,7 @@ def setup_environment():
 def cleanup_previous_run(spark):
     """Clean up tables and checkpoints from previous runs"""
     print("\n🧹 Cleaning up previous run...")
-    
+
     tables = [
         "bronze_ride_events",
         "silver_ride_events",
@@ -65,10 +64,10 @@ def cleanup_previous_run(spark):
         "gold_user_profiles",
         "streaming_metrics"
     ]
-    
+
     for table in tables:
         spark.sql(f"DROP TABLE IF EXISTS {table}")
-    
+
     print("✅ Cleanup complete")
 
 
@@ -79,7 +78,7 @@ def cleanup_previous_run(spark):
 def generate_event_batch(num_events=100):
     """
     Generate realistic batch of ride events for streaming simulation.
-    
+
     Includes:
     - Multiple event types (request, accept, start, complete)
     - Geographic distribution across 4 cities
@@ -88,14 +87,14 @@ def generate_event_batch(num_events=100):
     """
     event_types = ["ride_request", "driver_accept", "ride_start", "ride_complete"]
     cities = ["San Francisco", "New York", "Los Angeles", "Chicago"]
-    
+
     events = []
     current_time = datetime.now()
-    
+
     for i in range(num_events):
         event_type = random.choice(event_types)
         city = random.choice(cities)
-        
+
         # City coordinates (lat, lon)
         city_coords = {
             "San Francisco": (37.7749, -122.4194),
@@ -104,7 +103,7 @@ def generate_event_batch(num_events=100):
             "Chicago": (41.8781, -87.6298)
         }
         base_lat, base_lon = city_coords[city]
-        
+
         # Simulate late events (5-10% of events)
         if random.random() < 0.08:
             # Late event: 2-8 minutes in the past
@@ -112,11 +111,11 @@ def generate_event_batch(num_events=100):
         else:
             # On-time event: 0-60 seconds in the past
             event_time = current_time - timedelta(seconds=random.randint(0, 60))
-        
+
         # Very late events (should be dropped by watermark)
         if random.random() < 0.02:
             event_time = current_time - timedelta(minutes=random.randint(12, 20))
-        
+
         event = {
             "event_id": str(uuid.uuid4()),
             "event_type": event_type,
@@ -131,7 +130,7 @@ def generate_event_batch(num_events=100):
             "distance_km": round(random.uniform(1, 50), 2) if event_type == "ride_complete" else None
         }
         events.append(event)
-    
+
     return events
 
 
@@ -142,7 +141,7 @@ def generate_event_batch(num_events=100):
 def task1_stream_to_bronze(spark):
     """
     Set up streaming ingestion to Bronze layer.
-    
+
     Implementation:
     - Read from rate source (simulates streaming data)
     - Transform to realistic ride events
@@ -150,7 +149,7 @@ def task1_stream_to_bronze(spark):
     - Append-only mode for raw data
     """
     print("\n=== Task 1: Stream to Bronze ===")
-    
+
     # Define event schema
     event_schema = StructType([
         StructField("event_id", StringType(), False),
@@ -165,14 +164,14 @@ def task1_stream_to_bronze(spark):
         StructField("fare", DoubleType(), True),
         StructField("distance_km", DoubleType(), True)
     ])
-    
+
     # Create streaming source using rate
     rate_stream = spark.readStream \
         .format("rate") \
         .option("rowsPerSecond", 50) \
         .option("numPartitions", 4) \
         .load()
-    
+
     # Transform rate stream to ride events
     # Note: In production, you'd read from Kafka/Kinesis/Event Hub
     bronze_stream = rate_stream.select(
@@ -195,7 +194,7 @@ def task1_stream_to_bronze(spark):
         when(col("value") % 4 == 3, (rand() * 90 + 10)).otherwise(lit(None)).alias("fare"),
         when(col("value") % 4 == 3, (rand() * 49 + 1)).otherwise(lit(None)).alias("distance_km")
     )
-    
+
     # Write to Bronze Delta table
     print("Starting Bronze stream...")
     query = bronze_stream.writeStream \
@@ -204,12 +203,12 @@ def task1_stream_to_bronze(spark):
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/bronze") \
         .trigger(processingTime="10 seconds") \
         .table("bronze_ride_events")
-    
+
     print(f"✅ Bronze stream started (Query ID: {query.id})")
-    print(f"   - Table: bronze_ride_events")
-    print(f"   - Trigger: 10 seconds")
-    print(f"   - Mode: append")
-    
+    print("   - Table: bronze_ride_events")
+    print("   - Trigger: 10 seconds")
+    print("   - Mode: append")
+
     return query
 
 
@@ -220,7 +219,7 @@ def task1_stream_to_bronze(spark):
 def task2_stream_transformations(spark):
     """
     Apply real-time cleaning and enrichment transformations.
-    
+
     Transformations:
     - Parse and validate timestamps
     - Add processing latency metrics
@@ -229,12 +228,12 @@ def task2_stream_transformations(spark):
     - Filter invalid records to quarantine
     """
     print("\n=== Task 2: Stream Transformations (Bronze → Silver) ===")
-    
+
     # Read from Bronze
     bronze_stream = spark.readStream \
         .format("delta") \
         .table("bronze_ride_events")
-    
+
     # Apply transformations
     silver_stream = bronze_stream \
         .withColumn("processing_latency_seconds",
@@ -250,7 +249,7 @@ def task2_stream_transformations(spark):
                    (col("latitude").between(-90, 90)) &
                    (col("longitude").between(-180, 180)) &
                    (col("timestamp") <= current_timestamp() + expr("INTERVAL 5 MINUTES")))
-    
+
     # Split valid and invalid records
     valid_stream = silver_stream.filter(col("is_valid"))
     invalid_stream = silver_stream.filter(~col("is_valid")) \
@@ -260,12 +259,12 @@ def task2_stream_transformations(spark):
                    .when(~col("latitude").between(-90, 90), lit("Invalid latitude"))
                    .when(~col("longitude").between(-180, 180), lit("Invalid longitude"))
                    .otherwise(lit("Future timestamp")))
-    
+
     # Deduplicate valid records using watermark
     deduplicated_stream = valid_stream \
         .withWatermark("timestamp", "10 minutes") \
         .dropDuplicates(["event_id"])
-    
+
     # Write Silver table
     print("Starting Silver stream...")
     silver_query = deduplicated_stream \
@@ -276,7 +275,7 @@ def task2_stream_transformations(spark):
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/silver") \
         .trigger(processingTime="15 seconds") \
         .table("silver_ride_events")
-    
+
     # Write quarantine table
     print("Starting Quarantine stream...")
     quarantine_query = invalid_stream \
@@ -286,12 +285,12 @@ def task2_stream_transformations(spark):
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/quarantine") \
         .trigger(processingTime="30 seconds") \
         .table("silver_ride_events_quarantine")
-    
+
     print(f"✅ Silver stream started (Query ID: {silver_query.id})")
-    print(f"   - Table: silver_ride_events")
-    print(f"   - Deduplication: enabled with 10-min watermark")
-    print(f"   - Quarantine: silver_ride_events_quarantine")
-    
+    print("   - Table: silver_ride_events")
+    print("   - Deduplication: enabled with 10-min watermark")
+    print("   - Quarantine: silver_ride_events_quarantine")
+
     return silver_query, quarantine_query
 
 
@@ -302,24 +301,24 @@ def task2_stream_transformations(spark):
 def task3_windowed_aggregations(spark):
     """
     Calculate real-time metrics with 5-minute tumbling windows.
-    
+
     Creates three Gold tables:
     1. Event funnel metrics (conversion rates)
     2. City demand heatmap (geographic patterns)
     3. Active rides dashboard (operational view)
     """
     print("\n=== Task 3: Windowed Aggregations ===")
-    
+
     # Read from Silver
     silver_stream = spark.readStream \
         .format("delta") \
         .table("silver_ride_events")
-    
+
     # -------------------------------------------------------------------------
     # Gold Table 1: Event Funnel Metrics (5-minute windows)
     # -------------------------------------------------------------------------
     print("Creating Event Funnel aggregations...")
-    
+
     funnel_stream = silver_stream \
         .withWatermark("timestamp", "10 minutes") \
         .groupBy(window(col("timestamp"), "5 minutes")) \
@@ -339,19 +338,19 @@ def task3_windowed_aggregations(spark):
             (col("total_accepts") / col("total_requests") * 100).alias("acceptance_rate"),
             (col("total_completes") / col("total_requests") * 100).alias("completion_rate")
         )
-    
+
     funnel_query = funnel_stream.writeStream \
         .format("delta") \
         .outputMode("append") \
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/gold_funnel") \
         .trigger(processingTime="30 seconds") \
         .table("gold_event_funnel_5min")
-    
+
     # -------------------------------------------------------------------------
     # Gold Table 2: City Demand Heatmap (5-minute windows by city)
     # -------------------------------------------------------------------------
     print("Creating City Demand aggregations...")
-    
+
     demand_stream = silver_stream \
         .withWatermark("timestamp", "10 minutes") \
         .withColumn("lat_bucket", round(col("latitude"), 2).cast("string")) \
@@ -377,19 +376,19 @@ def task3_windowed_aggregations(spark):
             col("avg_fare"),
             col("total_events")
         )
-    
+
     demand_query = demand_stream.writeStream \
         .format("delta") \
         .outputMode("append") \
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/gold_demand") \
         .trigger(processingTime="30 seconds") \
         .table("gold_city_demand_5min")
-    
+
     # -------------------------------------------------------------------------
     # Gold Table 3: Active Rides Dashboard (5-minute windows by city)
     # -------------------------------------------------------------------------
     print("Creating Active Rides aggregations...")
-    
+
     active_rides_stream = silver_stream \
         .withWatermark("timestamp", "10 minutes") \
         .groupBy(
@@ -411,19 +410,19 @@ def task3_windowed_aggregations(spark):
             col("drivers_active"),
             col("avg_processing_latency_sec")
         )
-    
+
     active_query = active_rides_stream.writeStream \
         .format("delta") \
         .outputMode("append") \
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/gold_active") \
         .trigger(processingTime="30 seconds") \
         .table("gold_active_rides_5min")
-    
-    print(f"✅ Windowed aggregations started")
-    print(f"   - gold_event_funnel_5min: Conversion metrics")
-    print(f"   - gold_city_demand_5min: Geographic heatmap")
-    print(f"   - gold_active_rides_5min: Operational dashboard")
-    
+
+    print("✅ Windowed aggregations started")
+    print("   - gold_event_funnel_5min: Conversion metrics")
+    print("   - gold_city_demand_5min: Geographic heatmap")
+    print("   - gold_active_rides_5min: Operational dashboard")
+
     return funnel_query, demand_query, active_query
 
 
@@ -434,20 +433,20 @@ def task3_windowed_aggregations(spark):
 def task4_watermarking(spark):
     """
     Demonstrate watermarking for late data handling.
-    
+
     Configuration:
     - 10-minute watermark tolerance
     - Events older than watermark are dropped
     - Tracks late event metrics
     """
     print("\n=== Task 4: Watermarking ===")
-    
+
     print("ℹ️  Watermarking is configured in all streaming aggregations:")
     print("   - Watermark duration: 10 minutes")
     print("   - Late events within 10 min: PROCESSED")
     print("   - Events older than 10 min: DROPPED")
     print("   - Prevents unbounded state growth")
-    
+
     print("\n✅ Watermarking configured across all streaming queries")
     print("   Use query.lastProgress['eventTime'] to monitor watermark")
 
@@ -459,7 +458,7 @@ def task4_watermarking(spark):
 def task5_streaming_merge(spark):
     """
     Maintain real-time user profiles using streaming MERGE.
-    
+
     Implementation:
     - foreachBatch for custom processing
     - DeltaTable.merge() for UPSERT operations
@@ -467,7 +466,7 @@ def task5_streaming_merge(spark):
     - Idempotent (safe to replay batches)
     """
     print("\n=== Task 5: Streaming MERGE (foreachBatch UPSERT) ===")
-    
+
     # Create user profiles table
     spark.sql("""
         CREATE TABLE IF NOT EXISTS gold_user_profiles (
@@ -481,17 +480,17 @@ def task5_streaming_merge(spark):
             last_updated TIMESTAMP
         ) USING DELTA
     """)
-    
+
     def upsert_user_profiles(batch_df, batch_id):
         """
         UPSERT user profiles using Delta MERGE.
-        
+
         This function is idempotent - running the same batch_id multiple times
         will produce the same result (important for exactly-once semantics).
         """
         if batch_df.count() == 0:
             return
-        
+
         # Aggregate ride completions in this batch
         profiles_update = batch_df \
             .filter(col("event_type") == "ride_complete") \
@@ -504,13 +503,13 @@ def task5_streaming_merge(spark):
                 sum("distance_km").alias("distance_in_batch"),
                 first("city").alias("city")
             )
-        
+
         if profiles_update.count() == 0:
             return
-        
+
         # MERGE into profiles table
         target = DeltaTable.forName(batch_df.sparkSession, "gold_user_profiles")
-        
+
         target.alias("target").merge(
             profiles_update.alias("source"),
             "target.user_id = source.user_id"
@@ -530,24 +529,24 @@ def task5_streaming_merge(spark):
             "favorite_city": "source.city",
             "last_updated": "current_timestamp()"
         }).execute()
-    
+
     # Read from Silver and apply foreachBatch
     silver_stream = spark.readStream \
         .format("delta") \
         .table("silver_ride_events")
-    
+
     print("Starting Streaming MERGE query...")
     merge_query = silver_stream.writeStream \
         .foreachBatch(upsert_user_profiles) \
         .option("checkpointLocation", "/tmp/exercise04/checkpoints/profiles") \
         .trigger(processingTime="20 seconds") \
         .start()
-    
+
     print(f"✅ Streaming MERGE started (Query ID: {merge_query.id})")
-    print(f"   - Table: gold_user_profiles")
-    print(f"   - Operation: UPSERT (whenMatched + whenNotMatched)")
-    print(f"   - Idempotency: Enabled (safe to replay)")
-    
+    print("   - Table: gold_user_profiles")
+    print("   - Operation: UPSERT (whenMatched + whenNotMatched)")
+    print("   - Idempotency: Enabled (safe to replay)")
+
     return merge_query
 
 
@@ -558,7 +557,7 @@ def task5_streaming_merge(spark):
 def task6_monitoring(spark):
     """
     Monitor streaming pipeline health and performance.
-    
+
     Metrics tracked:
     - Throughput (input/process rates)
     - Latency (batch duration)
@@ -566,7 +565,7 @@ def task6_monitoring(spark):
     - Watermark advancement
     """
     print("\n=== Task 6: Monitoring ===")
-    
+
     # Create metrics table
     spark.sql("""
         CREATE TABLE IF NOT EXISTS streaming_metrics (
@@ -581,26 +580,26 @@ def task6_monitoring(spark):
             is_active BOOLEAN
         ) USING DELTA
     """)
-    
+
     def collect_metrics():
         """Collect metrics from all active streaming queries"""
         active_streams = [s for s in spark.streams.active]
-        
+
         if not active_streams:
             print("⚠️  No active streaming queries found")
             return
-        
+
         print(f"\n📊 Monitoring {len(active_streams)} active queries:")
-        
+
         metrics_batch = []
         for query in active_streams:
             try:
                 status = query.status
                 recent = query.recentProgress
-                
+
                 if recent:
                     progress = recent[-1]
-                    
+
                     metric = {
                         "query_id": query.id,
                         "query_name": query.name if query.name else f"query_{query.id[:8]}",
@@ -613,17 +612,17 @@ def task6_monitoring(spark):
                         "is_active": status.get("isDataAvailable", False)
                     }
                     metrics_batch.append(metric)
-                    
+
                     print(f"\n  Query: {metric['query_name']}")
                     print(f"    Status: {'🟢 Active' if metric['is_active'] else '🟡 Idle'}")
                     print(f"    Input rate: {metric['input_rate']:.2f} rows/sec")
                     print(f"    Process rate: {metric['process_rate']:.2f} rows/sec")
                     print(f"    Batch duration: {metric['batch_duration_ms']} ms")
                     print(f"    Watermark: {metric['watermark']}")
-            
+
             except Exception as e:
                 print(f"  ⚠️  Error collecting metrics for query {query.id}: {e}")
-        
+
         # Write metrics to table
         if metrics_batch:
             metrics_df = spark.createDataFrame(metrics_batch)
@@ -631,12 +630,12 @@ def task6_monitoring(spark):
                 .format("delta") \
                 .mode("append") \
                 .saveAsTable("streaming_metrics")
-            
+
             print(f"\n✅ Collected metrics for {len(metrics_batch)} queries")
-    
+
     # Collect initial metrics
     collect_metrics()
-    
+
     print("\n💡 To monitor continuously, run:")
     print("   while True:")
     print("       collect_metrics()")
@@ -659,14 +658,14 @@ def show_results(spark):
     print("\n" + "=" * 80)
     print("Sample Results")
     print("=" * 80)
-    
+
     tables = [
         ("bronze_ride_events", 5),
         ("silver_ride_events", 5),
         ("gold_event_funnel_5min", 3),
         ("gold_user_profiles", 10)
     ]
-    
+
     for table_name, limit in tables:
         try:
             count = spark.sql(f"SELECT COUNT(*) as cnt FROM {table_name}").first()["cnt"]
@@ -694,35 +693,35 @@ def main():
     print("=" * 80)
     print("Exercise 04: Real-Time Streaming Analytics - SOLUTION")
     print("=" * 80)
-    
+
     # Setup
     spark = setup_environment()
     cleanup_previous_run(spark)
-    
+
     # Task 1: Bronze ingestion
     bronze_query = task1_stream_to_bronze(spark)
-    
+
     # Task 2: Silver transformations
     silver_query, quarantine_query = task2_stream_transformations(spark)
-    
+
     # Task 3: Windowed aggregations
     funnel_query, demand_query, active_query = task3_windowed_aggregations(spark)
-    
+
     # Task 4: Watermarking (demonstrated in aggregations)
     task4_watermarking(spark)
-    
+
     # Task 5: Streaming MERGE
     merge_query = task5_streaming_merge(spark)
-    
+
     # Wait for data processing
     wait_for_streams(seconds=45)
-    
+
     # Task 6: Monitoring
     task6_monitoring(spark)
-    
+
     # Show results
     show_results(spark)
-    
+
     print("\n" + "=" * 80)
     print("🎉 Exercise 04 Solution Complete!")
     print("=" * 80)
@@ -731,17 +730,17 @@ def main():
     print("2. Check streaming metrics dashboard")
     print("3. Test failure scenarios (restart queries)")
     print("4. Monitor long-running performance")
-    
+
     # Keep streams running or stop them
     print("\n⚠️  Streams are still running. To stop:")
     print("   stop_all_streams(spark)")
-    
+
     return spark
 
 
 if __name__ == "__main__":
     spark = main()
-    
+
     # Uncomment to keep running and monitor
     # while True:
     #     time.sleep(60)

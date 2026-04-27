@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Exercise 02: Zero-Copy Cloning for Development - SOLUTION
 -- ============================================================================
--- 
+--
 -- This solution demonstrates Snowflake's powerful zero-copy cloning feature
 -- for creating instant, storage-efficient copies of databases and tables.
 -- ============================================================================
@@ -81,22 +81,22 @@ SELECT
 FROM TABLE(GENERATOR(ROWCOUNT => 150000));
 
 -- Verify production data
-SELECT 
-    'customers' as table_name, 
+SELECT
+    'customers' as table_name,
     COUNT(*) as row_count,
     MIN(signup_date) as earliest_signup,
     MAX(signup_date) as latest_signup
 FROM customers
 UNION ALL
-SELECT 
-    'orders', 
+SELECT
+    'orders',
     COUNT(*),
     MIN(order_date),
     MAX(order_date)
 FROM orders
 UNION ALL
-SELECT 
-    'order_items', 
+SELECT
+    'order_items',
     COUNT(*),
     NULL,
     NULL
@@ -124,7 +124,7 @@ CREATE OR REPLACE DATABASE dev_db CLONE prod_db;
 SET clone_end_time = (SELECT CURRENT_TIMESTAMP());
 
 -- Calculate clone duration (should be < 1 second for metadata-only operation)
-SELECT 
+SELECT
     'Database Cloned' as operation,
     $clone_start_time as start_time,
     $clone_end_time as end_time,
@@ -144,7 +144,7 @@ FROM dev_db.INFORMATION_SCHEMA.TABLES
 WHERE TABLE_SCHEMA = 'SALES';
 
 -- Compare row counts between prod and dev
-SELECT 'Production' as environment, 
+SELECT 'Production' as environment,
        (SELECT COUNT(*) FROM prod_db.sales.customers) as customers,
        (SELECT COUNT(*) FROM prod_db.sales.orders) as orders,
        (SELECT COUNT(*) FROM prod_db.sales.order_items) as order_items
@@ -178,7 +178,7 @@ FROM orders_1hr_ago;
 CREATE SCHEMA IF NOT EXISTS sales_backup CLONE sales;
 
 -- Verify schema clone
-SELECT 
+SELECT
     'sales_backup schema' as clone_type,
     COUNT(DISTINCT TABLE_NAME) as table_count
 FROM INFORMATION_SCHEMA.TABLES
@@ -263,8 +263,8 @@ SET target_timestamp = (SELECT DATEADD(hour, -1, CURRENT_TIMESTAMP())::VARCHAR);
 -- Create time-travel clone (note: in real scenario, use actual timestamp)
 CREATE OR REPLACE TABLE orders_historical CLONE orders AT(OFFSET => -3600);
 
-SELECT 
-    'Orders Historical' as clone_type, 
+SELECT
+    'Orders Historical' as clone_type,
     COUNT(*) as row_count,
     MIN(order_date) as earliest_order,
     MAX(order_date) as latest_order
@@ -273,10 +273,10 @@ FROM orders_historical;
 -- Clone before a specific statement
 -- First, get a query ID from recent history
 SET recent_query_id = (
-    SELECT query_id 
-    FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY 
+    SELECT query_id
+    FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
     WHERE query_text LIKE '%INSERT INTO customers%'
-    ORDER BY start_time DESC 
+    ORDER BY start_time DESC
     LIMIT 1
 );
 
@@ -322,10 +322,10 @@ SELECT
     prod_bytes / POWER(1024, 3) as prod_gb,
     dev_bytes / POWER(1024, 3) as dev_gb,
     (dev_bytes - prod_bytes) / POWER(1024, 3) as divergence_gb,
-    CASE 
-        WHEN prod_bytes > 0 
+    CASE
+        WHEN prod_bytes > 0
         THEN ROUND(((dev_bytes - prod_bytes) / prod_bytes * 100), 2)
-        ELSE 0 
+        ELSE 0
     END as divergence_percentage
 FROM storage_comparison
 WHERE prod_bytes > 0

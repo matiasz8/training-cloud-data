@@ -476,7 +476,7 @@ This module includes 10 hands-on exercises covering all major Snowflake concepts
 | **09**   | Performance Optimization           | 60 min   | Clustering, MVs, query tuning       |
 | **10**   | Cost Monitoring & Governance       | 45 min   | Resource monitors, usage tracking   |
 
-**Total Exercise Time**: ~6 hours  
+**Total Exercise Time**: ~6 hours
 **Completion**: Sequential recommended (some exercises build on previous)
 
 ### Module Repository Structure
@@ -702,8 +702,8 @@ YouTube:             https://www.youtube.com/snowflakeinc
 
 ---
 
-**Last Updated**: March 2026  
-**Module**: Bonus 02 - Snowflake Data Cloud  
-**Maintained By**: Training Repository Contributors  
+**Last Updated**: March 2026
+**Module**: Bonus 02 - Snowflake Data Cloud
+**Maintained By**: Training Repository Contributors
 
 **Feedback**: Found an error or have suggestions? Open an issue in the repository or contact the maintainers.

@@ -36,16 +36,16 @@ def generate_sales_data(num_records=10000):
     and seasonal trends.
     """
     print(f"Generating {num_records:,} sales transactions...")
-    
+
     # Define categories
     categories = ["Electronics", "Clothing", "Home", "Beauty", "Sports"]
-    
+
     # Define regions
     regions = [
         "Northeast", "Southeast", "Midwest", "West", "Southwest",
         "Northwest", "Central", "Canada", "Mexico", "Europe"
     ]
-    
+
     # Generate 50 products with base prices
     products = []
     for i in range(50):
@@ -57,10 +57,10 @@ def generate_sales_data(num_records=10000):
             "category": category,
             "base_price": base_price
         })
-    
+
     # Generate 20 salespeople
     salespeople = []
-    first_names = ["John", "Sarah", "Michael", "Emily", "David", "Jessica", 
+    first_names = ["John", "Sarah", "Michael", "Emily", "David", "Jessica",
                    "James", "Lisa", "Robert", "Maria", "William", "Jennifer",
                    "Richard", "Linda", "Joseph", "Patricia", "Thomas", "Nancy",
                    "Charles", "Karen"]
@@ -68,43 +68,43 @@ def generate_sales_data(num_records=10000):
                   "Miller", "Davis", "Rodriguez", "Martinez", "Anderson", "Taylor",
                   "Thomas", "Moore", "Jackson", "Martin", "Lee", "Thompson",
                   "White", "Harris"]
-    
+
     for i in range(20):
         salespeople.append({
             "id": f"SALES_{i:03d}",
             "name": f"{first_names[i]} {last_names[i]}"
         })
-    
+
     # Generate customer pool
     num_customers = 2500
     customers = []
     base_date = datetime(2025, 1, 1)
-    
+
     for i in range(num_customers):
         # Random signup date over past 18 months
         signup_days_back = random.randint(0, 540)
         signup_date = base_date - timedelta(days=signup_days_back)
-        
+
         customers.append({
             "id": f"CUST_{i:04d}",
             "signup_date": signup_date
         })
-    
+
     # Generate transactions with Pareto distribution
     transactions = []
-    
+
     # Pareto weights: top 20% products (10 products) get 60% of sales
     product_weights = [6] * 10 + [1] * 40
-    
+
     for i in range(num_records):
         # Weighted random product selection (Pareto principle)
         product_idx = random.choices(range(50), weights=product_weights)[0]
         product = products[product_idx]
-        
+
         # Random date within last 12 months
         days_offset = random.randint(0, 364)
         trans_date = base_date + timedelta(days=days_offset)
-        
+
         # Seasonal adjustment
         month = trans_date.month
         if month == 12:  # December boost
@@ -115,27 +115,27 @@ def generate_sales_data(num_records=10000):
             seasonal_multiplier = 1.10
         else:
             seasonal_multiplier = 1.0
-        
+
         # Quantity and pricing
         quantity = random.randint(1, 10)
         unit_price = round(product["base_price"] * seasonal_multiplier, 2)
-        
+
         # Discount (15% of transactions have discounts)
         discount_pct = random.uniform(5, 25) if random.random() < 0.15 else 0
         discount_amount = round(unit_price * quantity * (discount_pct / 100), 2)
         total_amount = round(unit_price * quantity, 2)
         net_revenue = round(total_amount - discount_amount, 2)
-        
+
         # Regional distribution (40% from top 3 regions)
         if random.random() < 0.40:
             region = random.choice(["West", "Northeast", "Southeast"])
         else:
             region = random.choice(regions)
-        
+
         # Random salesperson and customer
         salesperson = random.choice(salespeople)
         customer = random.choice(customers)
-        
+
         transactions.append({
             "transaction_id": f"TXN_{i:06d}",
             "transaction_date": trans_date.date(),
@@ -154,7 +154,7 @@ def generate_sales_data(num_records=10000):
             "customer_id": customer["id"],
             "customer_signup_date": customer["signup_date"].date()
         })
-    
+
     # Create DataFrame with proper schema
     schema = StructType([
         StructField("transaction_id", StringType(), False),
@@ -174,21 +174,21 @@ def generate_sales_data(num_records=10000):
         StructField("customer_id", StringType(), False),
         StructField("customer_signup_date", DateType(), False)
     ])
-    
+
     df = spark.createDataFrame(transactions, schema=schema)
-    
+
     # Write as Delta table
     df.write.format("delta") \
         .mode("overwrite") \
         .option("overwriteSchema", "true") \
         .saveAsTable("sales_transactions")
-    
+
     # Calculate summary statistics
     total_revenue = sum(t["net_revenue"] for t in transactions)
     unique_products = len(set(t["product_id"] for t in transactions))
     unique_salespeople = len(set(t["salesperson_name"] for t in transactions))
     unique_regions = len(set(t["region"] for t in transactions))
-    
+
     print(f"✅ Generated {num_records:,} transactions")
     print(f"   Total Revenue: ${total_revenue:,.2f}")
     print(f"   Unique Products: {unique_products}")
@@ -196,7 +196,7 @@ def generate_sales_data(num_records=10000):
     print(f"   Unique Regions: {unique_regions}")
     print(f"   Date Range: {min(t['transaction_date'] for t in transactions)} to "
           f"{max(t['transaction_date'] for t in transactions)}")
-    
+
     return df
 
 # Generate the data
@@ -318,11 +318,11 @@ FROM (
         product_name,
         SUM(net_revenue) as category_revenue,
         RANK() OVER (
-            PARTITION BY product_category 
+            PARTITION BY product_category
             ORDER BY SUM(net_revenue) DESC
         ) as rank_in_category,
         PERCENT_RANK() OVER (
-            PARTITION BY product_category 
+            PARTITION BY product_category
             ORDER BY SUM(net_revenue) DESC
         ) as percentile_in_category
     FROM sales_transactions
@@ -350,8 +350,8 @@ SELECT
     ROUND(LAG(revenue) OVER (ORDER BY month), 2) as prev_month_revenue,
     ROUND(revenue - LAG(revenue) OVER (ORDER BY month), 2) as mom_change,
     ROUND(
-        (revenue - LAG(revenue) OVER (ORDER BY month)) / 
-        LAG(revenue) OVER (ORDER BY month) * 100, 
+        (revenue - LAG(revenue) OVER (ORDER BY month)) /
+        LAG(revenue) OVER (ORDER BY month) * 100,
         2
     ) as mom_growth_pct
 FROM monthly_sales
@@ -547,7 +547,7 @@ WITH current_month AS (
         COUNT(*) as current_transactions,
         COUNT(DISTINCT customer_id) as current_customers
     FROM sales_transactions
-    WHERE DATE_TRUNC('month', transaction_date) = 
+    WHERE DATE_TRUNC('month', transaction_date) =
           DATE_TRUNC('month', (SELECT MAX(transaction_date) FROM sales_transactions))
 ),
 previous_month AS (
@@ -556,7 +556,7 @@ previous_month AS (
         COUNT(*) as previous_transactions,
         COUNT(DISTINCT customer_id) as previous_customers
     FROM sales_transactions
-    WHERE DATE_TRUNC('month', transaction_date) = 
+    WHERE DATE_TRUNC('month', transaction_date) =
           DATE_TRUNC('month', (SELECT MAX(transaction_date) FROM sales_transactions)) - INTERVAL 1 MONTH
 )
 SELECT

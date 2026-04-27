@@ -57,7 +57,7 @@ utils/
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Bronze Layer: Customer Data Ingestion
-# MAGIC 
+# MAGIC
 # MAGIC **Purpose:** Ingest raw customer data from S3
 # MAGIC **Schedule:** Daily at 2 AM UTC
 # MAGIC **Owner:** data-engineering-team@example.com
@@ -172,7 +172,7 @@ dbutils.notebook.run(
 ```python
 # Check cluster metrics
 %sql
-SELECT 
+SELECT
   cluster_id,
   SUM(executor_memory_used_mb) / SUM(executor_memory_total_mb) * 100 as memory_utilization_pct,
   SUM(executor_cpu_used_cores) / SUM(executor_cpu_total_cores) * 100 as cpu_utilization_pct
@@ -283,7 +283,7 @@ class TableConfig:
     table: str
     path: str
     partition_by: list
-    
+
 # Define configs
 TABLES = {
     "customers": TableConfig(
@@ -347,7 +347,7 @@ df_bronze = spark.read.format("delta").load("/mnt/bronze/customers")
 assert df_bronze.count() > 0, "Bronze table is empty"
 assert "_ingested_at" in df_bronze.columns, "Missing audit column"
 
-# Test: Silver transformation  
+# Test: Silver transformation
 df_silver = spark.read.format("delta").load("/mnt/silver/customers")
 assert df_silver.where("email IS NULL").count() == 0, "Found NULL emails"
 assert df_silver.where("id < 0").count() == 0, "Found invalid IDs"
@@ -371,7 +371,7 @@ OPTIMIZE customers ZORDER BY (country, signup_date);
 
 -- Schedule weekly
 -- Databricks can auto-optimize with liquid clustering (DBR 13.2+)
-ALTER TABLE customers 
+ALTER TABLE customers
 SET TBLPROPERTIES ('delta.autoOptimize.optimizeWrite' = 'true');
 ```
 
@@ -604,7 +604,7 @@ CREATE FUNCTION prod.sales.region_filter()
 RETURNS BOOLEAN
 RETURN current_user_region() = region;
 
-ALTER TABLE prod.sales.customers 
+ALTER TABLE prod.sales.customers
 SET ROW FILTER prod.sales.region_filter ON (region);
 ```
 
@@ -666,13 +666,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Install Databricks CLI
         run: pip install databricks-cli
-      
+
       - name: Run tests
         run: pytest tests/
-      
+
       - name: Deploy notebooks
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -682,7 +682,7 @@ jobs:
             ./notebooks \
             /Repos/prod/pipelines \
             --overwrite
-      
+
       - name: Update job
         run: databricks jobs reset --job-id 123 --json-file job-config.json
 ```
@@ -701,7 +701,7 @@ def promote_table(source_catalog, target_catalog, schema, table):
     """Copy table from source to target catalog."""
     source = f"{source_catalog}.{schema}.{table}"
     target = f"{target_catalog}.{schema}.{table}"
-    
+
     # Deep clone (copy data + history)
     spark.sql(f"CREATE TABLE IF NOT EXISTS {target} DEEP CLONE {source}")
     print(f"✅ Promoted {source} → {target}")
@@ -716,10 +716,10 @@ promote_table("staging", "prod", "sales", "customers")
 ```python
 # In Databricks SQL
 -- Create alert: "Daily ETL failures"
-SELECT 
+SELECT
   COUNT(*) as failed_runs
 FROM system.compute.job_runs
-WHERE 
+WHERE
   run_date = CURRENT_DATE()
   AND state = 'FAILED'
   AND job_name LIKE 'prod-%'
@@ -741,16 +741,16 @@ def check_data_quality(df, table_name):
         "null_count": df.where(df.id.isNull()).count(),
         "duplicate_count": df.count() - df.dropDuplicates(["id"]).count()
     }
-    
+
     # Log to Delta table
     quality_df = spark.createDataFrame([{
         "table_name": table_name,
         "check_timestamp": F.current_timestamp(),
         **checks
     }])
-    
+
     quality_df.write.format("delta").mode("append").saveAsTable("monitoring.data_quality_checks")
-    
+
     # Alert if issues
     if checks["null_count"] > 0:
         print(f"⚠️ WARNING: {checks['null_count']} NULL IDs in {table_name}")
@@ -848,6 +848,6 @@ df.explain(mode="extended")
 
 ---
 
-**Best Practices Version:** 1.0  
-**Last Updated:** March 2026  
+**Best Practices Version:** 1.0
+**Last Updated:** March 2026
 **Databricks Runtime:** 14.3 LTS

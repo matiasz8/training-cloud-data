@@ -3,8 +3,8 @@
 ## Overview
 Use zero-copy cloning to create instant dev/test environments without duplicating storage, enabling isolated testing at minimal cost.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐ Intermediate  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐ Intermediate
 **Prerequisites**: Exercise 01 (Warehouse basics), understanding of storage costs
 
 ---
@@ -27,7 +27,7 @@ Your production database is 10TB and growing. Your team needs:
 - **Data Scientists**: Safe sandbox to explore and transform data
 - **Training**: Realistic data for onboarding new team members
 
-Traditional approach: Copy 10TB per environment = 40TB+ storage costs.  
+Traditional approach: Copy 10TB per environment = 40TB+ storage costs.
 **Snowflake approach**: Clone 10TB instantly, share storage until modifications = minimal cost.
 
 ---
@@ -129,7 +129,7 @@ Create granular clones at schema and table level.
 
 3. **Clone to Different Database**:
    ```sql
-   CREATE TABLE test_db.sandbox.customers 
+   CREATE TABLE test_db.sandbox.customers
    CLONE prod_ecommerce.sales.customers;
    ```
 
@@ -146,10 +146,10 @@ Create granular clones at schema and table level.
 **Cross-Database Access**:
 ```sql
 -- Query differences between prod and dev
-SELECT 'PROD' as source, COUNT(*) as row_count 
+SELECT 'PROD' as source, COUNT(*) as row_count
 FROM prod_ecommerce.sales.customers
 UNION ALL
-SELECT 'DEV' as source, COUNT(*) as row_count 
+SELECT 'DEV' as source, COUNT(*) as row_count
 FROM dev_ecommerce.sales.dev_customers;
 ```
 
@@ -171,21 +171,21 @@ Clone from past timestamps for debugging and recovery.
 1. **Clone from Time Offset**:
    ```sql
    -- Clone from 1 hour ago
-   CREATE DATABASE PROD_1H_AGO 
-   CLONE PROD_ECOMMERCE 
+   CREATE DATABASE PROD_1H_AGO
+   CLONE PROD_ECOMMERCE
    AT(OFFSET => -3600);  -- seconds
-   
+
    -- Clone from 3 hours ago
-   CREATE TABLE sales.customers_3h_ago 
-   CLONE sales.customers 
+   CREATE TABLE sales.customers_3h_ago
+   CLONE sales.customers
    AT(OFFSET => -10800);
    ```
 
 2. **Clone from Specific Timestamp**:
    ```sql
    -- Clone from exact timestamp
-   CREATE DATABASE PROD_MORNING 
-   CLONE PROD_ECOMMERCE 
+   CREATE DATABASE PROD_MORNING
+   CLONE PROD_ECOMMERCE
    AT(TIMESTAMP => '2026-03-09 08:00:00'::TIMESTAMP);
    ```
 
@@ -197,7 +197,7 @@ Clone from past timestamps for debugging and recovery.
    WHERE query_text LIKE '%DELETE FROM customers%'
    ORDER BY start_time DESC
    LIMIT 1;
-   
+
    -- Clone before that statement executed
    CREATE TABLE sales.customers_before_delete
    CLONE sales.customers
@@ -208,14 +208,14 @@ Clone from past timestamps for debugging and recovery.
 ```sql
 -- Compare data between timestamps
 WITH current_data AS (
-    SELECT customer_id, lifetime_value 
+    SELECT customer_id, lifetime_value
     FROM sales.customers
 ),
 historical_data AS (
-    SELECT customer_id, lifetime_value 
+    SELECT customer_id, lifetime_value
     FROM sales.customers_3h_ago
 )
-SELECT 
+SELECT
     c.customer_id,
     h.lifetime_value as value_3h_ago,
     c.lifetime_value as value_current,
@@ -277,7 +277,7 @@ Monitor storage divergence as clones are modified.
    -- Compare original vs clone storage
    WITH storage_summary AS (
        SELECT
-           CASE 
+           CASE
                WHEN table_catalog = 'PROD_ECOMMERCE' THEN 'PROD'
                ELSE 'DEV'
            END as environment,
@@ -326,7 +326,7 @@ Implement 3 clone-based scenarios for different use cases.
 CREATE DATABASE FEATURE_BRANCH_123 CLONE PROD_ECOMMERCE;
 
 -- Test schema migration
-ALTER TABLE feature_branch_123.sales.customers 
+ALTER TABLE feature_branch_123.sales.customers
 ADD COLUMN loyalty_points INT DEFAULT 0;
 
 -- Run tests, verify feature works
@@ -374,13 +374,13 @@ $$
 BEGIN
     -- Drop old dev database
     DROP DATABASE IF EXISTS DEV_ECOMMERCE;
-    
+
     -- Create fresh clone from prod
     CREATE DATABASE DEV_ECOMMERCE CLONE PROD_ECOMMERCE;
-    
+
     -- Apply dev-specific configurations
     -- (e.g., smaller warehouses, cost limits)
-    
+
     RETURN 'Dev environment refreshed successfully';
 END;
 $$;
@@ -429,11 +429,11 @@ CREATE SCHEMA dev_schema CLONE prod_schema;
 CREATE TABLE dev_table CLONE prod_table;
 
 -- Clone from specific time
-CREATE DATABASE dev_db CLONE prod_db 
+CREATE DATABASE dev_db CLONE prod_db
 AT(TIMESTAMP => '2026-03-09 10:00:00'::TIMESTAMP);
 
 -- Clone from time offset (seconds ago)
-CREATE DATABASE dev_db CLONE prod_db 
+CREATE DATABASE dev_db CLONE prod_db
 AT(OFFSET => -3600);  -- 1 hour ago
 
 -- Clone before specific statement
@@ -450,7 +450,7 @@ BEFORE(STATEMENT => 'query_id_here');
 SHOW CLONES;
 
 -- Check if table is a clone
-SELECT 
+SELECT
     table_catalog,
     table_schema,
     table_name,

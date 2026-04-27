@@ -1,18 +1,18 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Notebook 06: Machine Learning with MLflow
-# MAGIC 
+# MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC - Train ML models on Databricks
 # MAGIC - Use MLflow for experiment tracking
 # MAGIC - Register models in MLflow Model Registry
 # MAGIC - Deploy models for batch and real-time inference
 # MAGIC - Implement AutoML for rapid prototyping
-# MAGIC 
+# MAGIC
 # MAGIC ## Prerequisites
 # MAGIC - Databricks Runtime ML (14.3 LTS ML)
 # MAGIC - Basic machine learning knowledge
-# MAGIC 
+# MAGIC
 # MAGIC ## Estimated Time: 60-75 minutes
 
 # COMMAND ----------
@@ -71,7 +71,7 @@ def generate_churn_data(n_samples=5000):
         "num_support_tickets": np.random.poisson(2, n_samples),
         "satisfaction_score": np.random.randint(1, 6, n_samples)
     }
-    
+
     # Generate churn based on features (with some logic)
     churn_prob = (
         (data["tenure_months"] < 12) * 0.3 +
@@ -80,9 +80,9 @@ def generate_churn_data(n_samples=5000):
         (data["num_support_tickets"] > 3) * 0.15 +
         np.random.uniform(0, 0.2, n_samples)
     )
-    
+
     data["churned"] = (churn_prob > 0.5).astype(int)
-    
+
     return pd.DataFrame(data)
 
 # Generate data
@@ -142,15 +142,15 @@ with mlflow.start_run(run_name="random_forest_baseline") as run:
         "random_state": 42
     }
     mlflow.log_params(params)
-    
+
     # Train model
     rf_model = RandomForestClassifier(**params)
     rf_model.fit(X_train, y_train)
-    
+
     # Predictions
     y_pred = rf_model.predict(X_test)
     y_pred_proba = rf_model.predict_proba(X_test)[:, 1]
-    
+
     # Calculate metrics
     metrics = {
         "accuracy": accuracy_score(y_test, y_pred),
@@ -159,21 +159,21 @@ with mlflow.start_run(run_name="random_forest_baseline") as run:
         "f1_score": f1_score(y_test, y_pred),
         "roc_auc": roc_auc_score(y_test, y_pred_proba)
     }
-    
+
     # Log metrics
     mlflow.log_metrics(metrics)
-    
+
     # Log model
     mlflow.sklearn.log_model(rf_model, "model", registered_model_name="churn_prediction_model")
-    
+
     # Log feature importance
     feature_importance = pd.DataFrame({
         "feature": feature_cols,
         "importance": rf_model.feature_importances_
     }).sort_values("importance", ascending=False)
-    
+
     mlflow.log_dict(feature_importance.to_dict(), "feature_importance.json")
-    
+
     run_id = run.info.run_id
     print(f"✅ Run completed: {run_id}")
     print("\nMetrics:")
@@ -208,7 +208,7 @@ best_params = None
 for n_est in param_grid["n_estimators"]:
     for depth in param_grid["max_depth"]:
         for min_split in param_grid["min_samples_split"]:
-            
+
             with mlflow.start_run(run_name=f"rf_n{n_est}_d{depth}_s{min_split}"):
                 # Parameters
                 params = {
@@ -218,23 +218,23 @@ for n_est in param_grid["n_estimators"]:
                     "random_state": 42
                 }
                 mlflow.log_params(params)
-                
+
                 # Train
                 model = RandomForestClassifier(**params)
                 model.fit(X_train, y_train)
-                
+
                 # Evaluate
                 y_pred_proba = model.predict_proba(X_test)[:, 1]
                 auc = roc_auc_score(y_test, y_pred_proba)
-                
+
                 mlflow.log_metric("roc_auc", auc)
-                
+
                 # Track best
                 if auc > best_auc:
                     best_auc = auc
                     best_params = params
 
-print(f"\n✅ Tuning complete")
+print("\n✅ Tuning complete")
 print(f"   Best ROC-AUC: {best_auc:.4f}")
 print(f"   Best params: {best_params}")
 
@@ -260,14 +260,14 @@ for algo_name, model in algorithms.items():
     with mlflow.start_run(run_name=f"comparison_{algo_name.replace(' ', '_')}"):
         # Log algorithm name
         mlflow.log_param("algorithm", algo_name)
-        
+
         # Train
         model.fit(X_train, y_train)
-        
+
         # Predictions
         y_pred = model.predict(X_test)
         y_pred_proba = model.predict_proba(X_test)[:, 1]
-        
+
         # Metrics
         metrics = {
             "accuracy": accuracy_score(y_test, y_pred),
@@ -276,10 +276,10 @@ for algo_name, model in algorithms.items():
             "f1_score": f1_score(y_test, y_pred),
             "roc_auc": roc_auc_score(y_test, y_pred_proba)
         }
-        
+
         mlflow.log_metrics(metrics)
         mlflow.sklearn.log_model(model, "model")
-        
+
         results.append({
             "algorithm": algo_name,
             **metrics
@@ -429,7 +429,7 @@ print("✅ Predictions saved to table: churn_predictions")
 
 # MAGIC %md
 # MAGIC **To enable model serving:**
-# MAGIC 
+# MAGIC
 # MAGIC 1. **Go to Models** page in Databricks
 # MAGIC 2. **Select model**: `churn_prediction_production`
 # MAGIC 3. **Click version** in Staging
@@ -474,7 +474,6 @@ print(example_curl)
 
 # Python example for calling served model
 import requests
-import json
 
 def predict_churn(customer_features, endpoint_url, token):
     """
@@ -484,13 +483,13 @@ def predict_churn(customer_features, endpoint_url, token):
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    
+
     payload = {
         "dataframe_records": [customer_features]
     }
-    
+
     response = requests.post(endpoint_url, headers=headers, json=payload)
-    
+
     if response.status_code == 200:
         return response.json()
     else:
@@ -512,7 +511,7 @@ def predict_churn(customer_features, endpoint_url, token):
 
 # MAGIC %md
 # MAGIC **Using Databricks AutoML:**
-# MAGIC 
+# MAGIC
 # MAGIC 1. **Go to Machine Learning** → **AutoML**
 # MAGIC 2. **Select table**: Choose training data table
 # MAGIC 3. **Configure**:
@@ -525,7 +524,7 @@ def predict_churn(customer_features, endpoint_url, token):
 # MAGIC    - Feature importance
 # MAGIC    - Generated notebook with code
 # MAGIC 6. **Register best model** to MLflow
-# MAGIC 
+# MAGIC
 # MAGIC AutoML automatically:
 # MAGIC - Tries multiple algorithms
 # MAGIC - Tunes hyperparameters
@@ -576,11 +575,11 @@ monitoring_data = []
 
 for day in range(30):
     date = pd.Timestamp.now() - pd.Timedelta(days=30-day)
-    
+
     # Simulate metrics with slight degradation
     accuracy = 0.85 - (day * 0.001)  # Slight decline
     roc_auc = 0.90 - (day * 0.0008)
-    
+
     monitoring_data.append({
         "date": date,
         "accuracy": accuracy,
@@ -605,13 +604,13 @@ baseline_auc = 0.90
 drift_threshold = 0.05
 
 if (baseline_auc - recent_auc) > drift_threshold:
-    print(f"⚠️ WARNING: Model drift detected!")
+    print("⚠️ WARNING: Model drift detected!")
     print(f"   Baseline ROC-AUC: {baseline_auc:.4f}")
     print(f"   Recent ROC-AUC (7 days): {recent_auc:.4f}")
     print(f"   Degradation: {(baseline_auc - recent_auc):.4f}")
     print("\n   Recommended action: Retrain model with recent data")
 else:
-    print(f"✅ Model performance stable")
+    print("✅ Model performance stable")
     print(f"   Baseline: {baseline_auc:.4f}")
     print(f"   Recent: {recent_auc:.4f}")
 
@@ -619,34 +618,34 @@ else:
 
 # MAGIC %md
 # MAGIC ## Summary & Key Takeaways
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **MLflow Tracking**
 # MAGIC - Log parameters, metrics, and artifacts
 # MAGIC - Track experiments automatically
 # MAGIC - Compare runs easily
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Model Registry**
 # MAGIC - Version control for models
 # MAGIC - Stage transitions (None → Staging → Production)
 # MAGIC - Model lineage and metadata
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Model Deployment**
 # MAGIC - Batch inference with saved models
 # MAGIC - Real-time serving via REST API
 # MAGIC - Integration with Databricks workflows
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **AutoML**
 # MAGIC - Rapid prototyping
 # MAGIC - Automated hyperparameter tuning
 # MAGIC - Generated notebooks for customization
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Production Best Practices**
 # MAGIC - Model monitoring and drift detection
 # MAGIC - A/B testing between versions
 # MAGIC - Automated retraining pipelines
-# MAGIC 
+# MAGIC
 # MAGIC ## Next Steps
-# MAGIC 
+# MAGIC
 # MAGIC - Complete Exercise 06: **ML with MLflow**
 # MAGIC - Build end-to-end ML pipeline
 # MAGIC - Deploy model to production

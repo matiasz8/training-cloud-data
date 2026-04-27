@@ -56,13 +56,13 @@ SELECT
         WHEN 3 THEN 'SHIPPED'
         ELSE 'PENDING'
     END AS STATUS,
-    DATEADD(SECOND, 
-            -UNIFORM(1, 2592000, RANDOM()), 
+    DATEADD(SECOND,
+            -UNIFORM(1, 2592000, RANDOM()),
             CURRENT_TIMESTAMP()) AS CREATED_AT
 FROM TABLE(GENERATOR(ROWCOUNT => 1000));
 
 -- Verify initial data load
-SELECT 
+SELECT
     COUNT(*) AS total_orders,
     COUNT(DISTINCT CUSTOMER_ID) AS unique_customers,
     SUM(AMOUNT) AS total_revenue,
@@ -73,7 +73,7 @@ FROM bronze_orders;
 -- Step 3: Create Stream for Change Tracking
 -- ============================================================================
 -- Create stream on bronze_orders to capture all changes
-CREATE OR REPLACE STREAM orders_stream 
+CREATE OR REPLACE STREAM orders_stream
 ON TABLE bronze_orders
 APPEND_ONLY = FALSE
 SHOW_INITIAL_ROWS = FALSE
@@ -81,7 +81,7 @@ COMMENT = 'Stream to capture INSERT, UPDATE, DELETE on bronze_orders';
 
 -- Query stream metadata structure
 -- Note: Stream is empty until changes occur
-SELECT 
+SELECT
     SYSTEM$STREAM_HAS_DATA('orders_stream') AS has_data,
     'Stream created successfully - waiting for changes' AS status;
 
@@ -110,8 +110,8 @@ FROM TABLE(GENERATOR(ROWCOUNT => 100));
 UPDATE bronze_orders
 SET STATUS = 'COMPLETED'
 WHERE ORDER_ID IN (
-    SELECT ORDER_ID 
-    FROM bronze_orders 
+    SELECT ORDER_ID
+    FROM bronze_orders
     WHERE STATUS = 'PENDING'
     LIMIT 50
 );
@@ -119,14 +119,14 @@ WHERE ORDER_ID IN (
 -- Delete 20 orders (cancelled orders)
 DELETE FROM bronze_orders
 WHERE ORDER_ID IN (
-    SELECT ORDER_ID 
-    FROM bronze_orders 
+    SELECT ORDER_ID
+    FROM bronze_orders
     WHERE STATUS = 'PENDING'
     LIMIT 20
 );
 
 -- Query stream to see captured changes
-SELECT 
+SELECT
     METADATA$ACTION AS action_type,
     METADATA$ISUPDATE AS is_update,
     METADATA$ROW_ID AS row_id,
@@ -141,7 +141,7 @@ ORDER BY METADATA$ACTION, ORDER_ID
 LIMIT 20;
 
 -- Count changes by type
-SELECT 
+SELECT
     METADATA$ACTION AS action_type,
     COUNT(*) AS change_count
 FROM orders_stream
@@ -166,7 +166,7 @@ CREATE OR REPLACE TABLE silver_orders (
 -- Consume stream and load into silver_orders
 MERGE INTO silver_orders AS target
 USING (
-    SELECT 
+    SELECT
         ORDER_ID,
         CUSTOMER_ID,
         PRODUCT,
@@ -180,11 +180,11 @@ USING (
 ) AS source
 ON target.ORDER_ID = source.ORDER_ID
 WHEN MATCHED AND source.METADATA$ACTION = 'DELETE' THEN
-    UPDATE SET 
+    UPDATE SET
         IS_DELETED = TRUE,
         UPDATED_AT = CURRENT_TIMESTAMP()
 WHEN MATCHED AND source.METADATA$ACTION = 'INSERT' AND source.METADATA$ISUPDATE = TRUE THEN
-    UPDATE SET 
+    UPDATE SET
         CUSTOMER_ID = source.CUSTOMER_ID,
         PRODUCT = source.PRODUCT,
         AMOUNT = source.AMOUNT,
@@ -192,17 +192,17 @@ WHEN MATCHED AND source.METADATA$ACTION = 'INSERT' AND source.METADATA$ISUPDATE 
         UPDATED_AT = CURRENT_TIMESTAMP()
 WHEN NOT MATCHED AND source.METADATA$ACTION = 'INSERT' THEN
     INSERT (ORDER_ID, CUSTOMER_ID, PRODUCT, AMOUNT, STATUS, CREATED_AT, UPDATED_AT, IS_DELETED)
-    VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT, 
+    VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT,
             source.STATUS, source.CREATED_AT, source.UPDATED_AT, FALSE);
 
 -- Verify stream is now empty (changes consumed)
-SELECT 
+SELECT
     SYSTEM$STREAM_HAS_DATA('orders_stream') AS has_data,
     COUNT(*) AS remaining_records
 FROM orders_stream;
 
 -- Verify silver_orders data
-SELECT 
+SELECT
     COUNT(*) AS total_records,
     SUM(CASE WHEN IS_DELETED THEN 1 ELSE 0 END) AS deleted_count,
     SUM(CASE WHEN NOT IS_DELETED THEN 1 ELSE 0 END) AS active_count
@@ -218,7 +218,7 @@ CREATE OR REPLACE TASK process_to_silver
     AS
     MERGE INTO silver_orders AS target
     USING (
-        SELECT 
+        SELECT
             ORDER_ID,
             CUSTOMER_ID,
             PRODUCT,
@@ -232,11 +232,11 @@ CREATE OR REPLACE TASK process_to_silver
     ) AS source
     ON target.ORDER_ID = source.ORDER_ID
     WHEN MATCHED AND source.METADATA$ACTION = 'DELETE' THEN
-        UPDATE SET 
+        UPDATE SET
             IS_DELETED = TRUE,
             UPDATED_AT = CURRENT_TIMESTAMP()
     WHEN MATCHED AND source.METADATA$ACTION = 'INSERT' AND source.METADATA$ISUPDATE = TRUE THEN
-        UPDATE SET 
+        UPDATE SET
             CUSTOMER_ID = source.CUSTOMER_ID,
             PRODUCT = source.PRODUCT,
             AMOUNT = source.AMOUNT,
@@ -244,7 +244,7 @@ CREATE OR REPLACE TASK process_to_silver
             UPDATED_AT = CURRENT_TIMESTAMP()
     WHEN NOT MATCHED AND source.METADATA$ACTION = 'INSERT' THEN
         INSERT (ORDER_ID, CUSTOMER_ID, PRODUCT, AMOUNT, STATUS, CREATED_AT, UPDATED_AT, IS_DELETED)
-        VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT, 
+        VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT,
                 source.STATUS, source.CREATED_AT, source.UPDATED_AT, FALSE);
 
 -- Resume task to activate it
@@ -263,7 +263,7 @@ SELECT
 FROM TABLE(GENERATOR(ROWCOUNT => 50));
 
 -- Check task execution history (wait 5-10 minutes for first run)
-SELECT 
+SELECT
     NAME AS task_name,
     SCHEDULED_TIME,
     COMPLETED_TIME,
@@ -302,7 +302,7 @@ CREATE OR REPLACE TASK extract_from_bronze
     AS
     -- Stage changes in temporary staging table
     CREATE OR REPLACE TEMPORARY TABLE stage_orders AS
-    SELECT 
+    SELECT
         ORDER_ID,
         CUSTOMER_ID,
         PRODUCT,
@@ -321,7 +321,7 @@ CREATE OR REPLACE TASK transform_to_silver
     AS
     MERGE INTO silver_orders AS target
     USING (
-        SELECT 
+        SELECT
             ORDER_ID,
             CUSTOMER_ID,
             PRODUCT,
@@ -335,11 +335,11 @@ CREATE OR REPLACE TASK transform_to_silver
     ) AS source
     ON target.ORDER_ID = source.ORDER_ID
     WHEN MATCHED AND source.METADATA$ACTION = 'DELETE' THEN
-        UPDATE SET 
+        UPDATE SET
             IS_DELETED = TRUE,
             UPDATED_AT = CURRENT_TIMESTAMP()
     WHEN MATCHED AND source.METADATA$ACTION = 'INSERT' AND source.METADATA$ISUPDATE = TRUE THEN
-        UPDATE SET 
+        UPDATE SET
             CUSTOMER_ID = source.CUSTOMER_ID,
             PRODUCT = source.PRODUCT,
             AMOUNT = source.AMOUNT,
@@ -347,7 +347,7 @@ CREATE OR REPLACE TASK transform_to_silver
             UPDATED_AT = CURRENT_TIMESTAMP()
     WHEN NOT MATCHED AND source.METADATA$ACTION = 'INSERT' THEN
         INSERT (ORDER_ID, CUSTOMER_ID, PRODUCT, AMOUNT, STATUS, CREATED_AT, UPDATED_AT, IS_DELETED)
-        VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT, 
+        VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT,
                 source.STATUS, source.CREATED_AT, source.UPDATED_AT, FALSE);
 
 -- Create final task: aggregate_to_gold
@@ -358,7 +358,7 @@ CREATE OR REPLACE TASK aggregate_to_gold
     AS
     MERGE INTO gold_daily_sales AS target
     USING (
-        SELECT 
+        SELECT
             DATE(CREATED_AT) AS SALE_DATE,
             COUNT(*) AS TOTAL_ORDERS,
             SUM(AMOUNT) AS TOTAL_REVENUE,
@@ -370,14 +370,14 @@ CREATE OR REPLACE TASK aggregate_to_gold
     ) AS source
     ON target.SALE_DATE = source.SALE_DATE
     WHEN MATCHED THEN
-        UPDATE SET 
+        UPDATE SET
             TOTAL_ORDERS = source.TOTAL_ORDERS,
             TOTAL_REVENUE = source.TOTAL_REVENUE,
             AVG_ORDER_VALUE = source.AVG_ORDER_VALUE,
             UPDATED_AT = CURRENT_TIMESTAMP()
     WHEN NOT MATCHED THEN
         INSERT (SALE_DATE, TOTAL_ORDERS, TOTAL_REVENUE, AVG_ORDER_VALUE, UPDATED_AT)
-        VALUES (source.SALE_DATE, source.TOTAL_ORDERS, source.TOTAL_REVENUE, 
+        VALUES (source.SALE_DATE, source.TOTAL_ORDERS, source.TOTAL_REVENUE,
                 source.AVG_ORDER_VALUE, CURRENT_TIMESTAMP());
 
 -- Resume tasks in correct order (child to parent)
@@ -386,7 +386,7 @@ ALTER TASK transform_to_silver RESUME;
 ALTER TASK extract_from_bronze RESUME;
 
 -- Verify task DAG
-SELECT 
+SELECT
     NAME,
     STATE,
     SCHEDULE,
@@ -419,7 +419,7 @@ CREATE OR REPLACE TASK transform_to_silver_with_error_handling
         -- Main transformation logic
         MERGE INTO silver_orders AS target
         USING (
-            SELECT 
+            SELECT
                 ORDER_ID,
                 CUSTOMER_ID,
                 PRODUCT,
@@ -433,11 +433,11 @@ CREATE OR REPLACE TASK transform_to_silver_with_error_handling
         ) AS source
         ON target.ORDER_ID = source.ORDER_ID
         WHEN MATCHED AND source.METADATA$ACTION = 'DELETE' THEN
-            UPDATE SET 
+            UPDATE SET
                 IS_DELETED = TRUE,
                 UPDATED_AT = CURRENT_TIMESTAMP()
         WHEN MATCHED AND source.METADATA$ACTION = 'INSERT' AND source.METADATA$ISUPDATE = TRUE THEN
-            UPDATE SET 
+            UPDATE SET
                 CUSTOMER_ID = source.CUSTOMER_ID,
                 PRODUCT = source.PRODUCT,
                 AMOUNT = source.AMOUNT,
@@ -445,7 +445,7 @@ CREATE OR REPLACE TASK transform_to_silver_with_error_handling
                 UPDATED_AT = CURRENT_TIMESTAMP()
         WHEN NOT MATCHED AND source.METADATA$ACTION = 'INSERT' THEN
             INSERT (ORDER_ID, CUSTOMER_ID, PRODUCT, AMOUNT, STATUS, CREATED_AT, UPDATED_AT, IS_DELETED)
-            VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT, 
+            VALUES (source.ORDER_ID, source.CUSTOMER_ID, source.PRODUCT, source.AMOUNT,
                     source.STATUS, source.CREATED_AT, source.UPDATED_AT, FALSE);
     EXCEPTION
         WHEN OTHER THEN
@@ -459,7 +459,7 @@ CREATE OR REPLACE TASK transform_to_silver_with_error_handling
 -- Step 9: Monitoring and Observability
 -- ============================================================================
 -- Query to show all tasks and their status
-SELECT 
+SELECT
     NAME AS task_name,
     DATABASE_NAME,
     SCHEMA_NAME,
@@ -473,7 +473,7 @@ WHERE SCHEMA_NAME = 'PIPELINE'
 ORDER BY NAME;
 
 -- Query task execution history (last 10 runs)
-SELECT 
+SELECT
     NAME AS task_name,
     DATABASE_NAME || '.' || SCHEMA_NAME AS full_schema,
     SCHEDULED_TIME,
@@ -493,12 +493,12 @@ LIMIT 10;
 -- Query stream metrics
 SHOW STREAMS LIKE 'orders_stream';
 
-SELECT 
+SELECT
     SYSTEM$STREAM_HAS_DATA('orders_stream') AS has_pending_data,
     (SELECT COUNT(*) FROM orders_stream) AS pending_changes;
 
 -- Calculate task credits consumed
-SELECT 
+SELECT
     NAME AS task_name,
     COUNT(*) AS execution_count,
     SUM(DATEDIFF(SECOND, SCHEDULED_TIME, COMPLETED_TIME)) AS total_seconds,
@@ -513,27 +513,27 @@ ORDER BY total_seconds DESC;
 -- Step 10: Validation Queries
 -- ============================================================================
 -- Verify data consistency across layers
-SELECT 
+SELECT
     'Bronze' AS layer,
     COUNT(*) AS record_count,
     SUM(AMOUNT) AS total_amount
 FROM bronze_orders
 UNION ALL
-SELECT 
+SELECT
     'Silver' AS layer,
     COUNT(*) AS record_count,
     SUM(AMOUNT) AS total_amount
 FROM silver_orders
 WHERE NOT IS_DELETED
 UNION ALL
-SELECT 
+SELECT
     'Gold (Aggregated)' AS layer,
     SUM(TOTAL_ORDERS) AS record_count,
     SUM(TOTAL_REVENUE) AS total_amount
 FROM gold_daily_sales;
 
 -- Check gold aggregations accuracy
-SELECT 
+SELECT
     SALE_DATE,
     TOTAL_ORDERS,
     TOTAL_REVENUE,
@@ -546,31 +546,31 @@ LIMIT 10;
 -- ============================================================================
 -- Summary Report
 -- ============================================================================
-SELECT 
+SELECT
     '=== CDC Pipeline Summary ===' AS report_section;
 
-SELECT 
+SELECT
     'Stream Status' AS metric,
     SYSTEM$STREAM_HAS_DATA('orders_stream') AS value
 UNION ALL
-SELECT 
+SELECT
     'Bronze Orders',
     COUNT(*)::VARCHAR
 FROM bronze_orders
 UNION ALL
-SELECT 
+SELECT
     'Silver Orders (Active)',
     COUNT(*)::VARCHAR
 FROM silver_orders
 WHERE NOT IS_DELETED
 UNION ALL
-SELECT 
+SELECT
     'Silver Orders (Deleted)',
     COUNT(*)::VARCHAR
 FROM silver_orders
 WHERE IS_DELETED
 UNION ALL
-SELECT 
+SELECT
     'Gold Daily Aggregates',
     COUNT(*)::VARCHAR
 FROM gold_daily_sales;

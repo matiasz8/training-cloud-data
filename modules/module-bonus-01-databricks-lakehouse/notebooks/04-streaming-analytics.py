@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Notebook 04: Streaming Analytics with Delta Lake
-# MAGIC 
+# MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC - Structured Streaming fundamentals
 # MAGIC - Real-time data ingestion with Auto Loader
@@ -9,16 +9,15 @@
 # MAGIC - Windowed aggregations
 # MAGIC - Watermarking for late data
 # MAGIC - Stream-to-batch joins
-# MAGIC 
+# MAGIC
 # MAGIC ## Prerequisites
 # MAGIC - Databricks Runtime 14.3 LTS or higher
 # MAGIC - Understanding of Delta Lake basics
-# MAGIC 
+# MAGIC
 # MAGIC ## Estimated Time: 60-75 minutes
 
 # COMMAND ----------
 
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from delta.tables import DeltaTable
@@ -44,7 +43,7 @@ print("✅ Streaming environment ready")
 
 # MAGIC %md
 # MAGIC ## Part 1: Structured Streaming Basics
-# MAGIC 
+# MAGIC
 # MAGIC Structured Streaming treats stream as unbounded table:
 # MAGIC - **Input**: Append-only DataFrame
 # MAGIC - **Query**: Same transformations as batch
@@ -59,7 +58,7 @@ def generate_event_batch(batch_id, num_events=100):
     """Generate a batch of events."""
     base_time = datetime.now()
     events = []
-    
+
     for i in range(num_events):
         event_time = (base_time - timedelta(seconds=random.randint(0, 300))).isoformat()
         events.append({
@@ -72,7 +71,7 @@ def generate_event_batch(batch_id, num_events=100):
             "revenue": round(random.uniform(10, 200), 2) if random.random() > 0.8 else None,
             "device_type": random.choice(["mobile", "desktop", "tablet"])
         })
-    
+
     return events
 
 # Create initial batch
@@ -216,7 +215,7 @@ display(spark.table("silver_events").limit(10))
 
 # MAGIC %md
 # MAGIC ## Part 4: Windowed Aggregations
-# MAGIC 
+# MAGIC
 # MAGIC Window types:
 # MAGIC - **Tumbling**: Fixed, non-overlapping (e.g., 5-minute buckets)
 # MAGIC - **Sliding**: Overlapping (e.g., 5-minute window, slide every 1 minute)
@@ -293,7 +292,7 @@ display(
 
 # MAGIC %md
 # MAGIC ## Part 5: Watermarking for Late Data
-# MAGIC 
+# MAGIC
 # MAGIC Watermark defines how long to wait for late data:
 # MAGIC - Events arriving after watermark are dropped
 # MAGIC - Balance between latency and completeness
@@ -329,7 +328,7 @@ print("- Events between 11:50-12:00 will be processed")
 
 # MAGIC %md
 # MAGIC ## Part 6: MERGE with Streaming (Upserts)
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake supports streaming MERGE for:
 # MAGIC - Deduplication
 # MAGIC - Change Data Capture (CDC)
@@ -381,10 +380,10 @@ def merge_user_updates(micro_batch_df, batch_id):
         .agg(
             count("*").alias("new_events")
         )
-    
+
     # Load Delta table
     target_table = DeltaTable.forPath(spark, f"{gold_path}/user_profiles")
-    
+
     # MERGE logic
     target_table.alias("target").merge(
         updates.alias("source"),
@@ -399,7 +398,7 @@ def merge_user_updates(micro_batch_df, batch_id):
         "total_events": "source.new_events",
         "last_updated": "current_timestamp()"
     }).execute()
-    
+
     print(f"   Batch {batch_id}: Merged {updates.count()} user updates")
 
 # Apply streaming MERGE
@@ -431,7 +430,7 @@ display(
 
 # MAGIC %md
 # MAGIC ## Part 7: Stream-to-Batch Joins
-# MAGIC 
+# MAGIC
 # MAGIC Join streaming data with static reference tables.
 
 # COMMAND ----------
@@ -553,7 +552,7 @@ print(f"Is Trigger Active: {status['isTriggerActive']}")
 recent_progress = metrics_query.recentProgress
 if recent_progress:
     latest = recent_progress[-1]
-    print(f"\nLatest Progress:")
+    print("\nLatest Progress:")
     print(f"  Batch ID: {latest['batchId']}")
     print(f"  Num Input Rows: {latest['numInputRows']}")
     print(f"  Input Rows/Sec: {latest['inputRowsPerSecond']}")
@@ -573,11 +572,11 @@ def start_production_stream(source_path, target_path, checkpoint_path, trigger_i
     """
     Production streaming pattern with error handling and monitoring.
     """
-    print(f"🚀 Starting production stream...")
+    print("🚀 Starting production stream...")
     print(f"   Source: {source_path}")
     print(f"   Target: {target_path}")
     print(f"   Checkpoint: {checkpoint_path}")
-    
+
     try:
         query = spark.readStream \
             .format("delta") \
@@ -591,11 +590,11 @@ def start_production_stream(source_path, target_path, checkpoint_path, trigger_i
             .option("optimizeWrite", "true") \
             .option("autoCompact", "true") \
             .start(target_path)
-        
+
         print(f"✅ Stream started successfully (ID: {query.id})")
-        
+
         return query
-    
+
     except Exception as e:
         print(f"❌ Stream failed to start: {e}")
         # In production: Send alert, log to monitoring
@@ -612,35 +611,35 @@ def start_production_stream(source_path, target_path, checkpoint_path, trigger_i
 
 # MAGIC %md
 # MAGIC ## Summary & Key Takeaways
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Structured Streaming**
 # MAGIC - Treat streams as unbounded tables
 # MAGIC - Same DataFrame API as batch
 # MAGIC - Exactly-once processing guarantees
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Delta Lake Integration**
 # MAGIC - Append streams to Delta tables
 # MAGIC - Streaming MERGE for upserts
 # MAGIC - Read streams from Delta tables
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Windowed Aggregations**
 # MAGIC - Tumbling windows (fixed intervals)
 # MAGIC - Sliding windows (overlapping)
 # MAGIC - Watermarking for late data handling
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Advanced Patterns**
 # MAGIC - Stream-to-batch joins
 # MAGIC - Deduplication
 # MAGIC - Change Data Capture (CDC)
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Production Best Practices**
 # MAGIC - Checkpoint locations for fault tolerance
 # MAGIC - Trigger intervals for cost control
 # MAGIC - Monitoring with query metrics
 # MAGIC - Auto-compaction for performance
-# MAGIC 
+# MAGIC
 # MAGIC ## Next Steps
-# MAGIC 
+# MAGIC
 # MAGIC Continue to Notebook 05: **SQL Analytics & Dashboards**
 
 # COMMAND ----------

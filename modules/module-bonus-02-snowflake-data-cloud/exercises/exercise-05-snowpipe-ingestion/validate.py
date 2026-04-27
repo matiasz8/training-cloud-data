@@ -6,15 +6,13 @@ Validates the implementation of Snowpipe for automated data ingestion.
 
 import os
 import sys
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
 import snowflake.connector
 from snowflake.connector import DictCursor
 
 
 class SnowpipeValidator:
     """Validator for Snowpipe Ingestion exercise."""
-    
+
     def __init__(self):
         """Initialize validator with Snowflake connection."""
         self.conn = None
@@ -22,7 +20,7 @@ class SnowpipeValidator:
         self.score = 0
         self.max_score = 100
         self.results = []
-        
+
     def connect(self) -> bool:
         """Establish Snowflake connection."""
         try:
@@ -40,14 +38,14 @@ class SnowpipeValidator:
         except Exception as e:
             print(f"✗ Failed to connect to Snowflake: {e}")
             return False
-    
+
     def close(self):
         """Close Snowflake connection."""
         if self.cursor:
             self.cursor.close()
         if self.conn:
             self.conn.close()
-    
+
     def add_result(self, test_name: str, passed: bool, points: int, message: str):
         """Add test result."""
         self.results.append({
@@ -58,11 +56,11 @@ class SnowpipeValidator:
         })
         if passed:
             self.score += points
-    
+
     def validate_stage_setup(self) -> None:
         """Validate external stage configuration (20 points)."""
         print("\n=== Validating External Stage Setup ===")
-        
+
         # Check stage exists (10 points)
         try:
             self.cursor.execute("""
@@ -82,7 +80,7 @@ class SnowpipeValidator:
         except Exception as e:
             self.add_result('stage_exists', False, 10, f'Error: {e}')
             return
-        
+
         # Check stage configuration (10 points)
         try:
             self.cursor.execute("SHOW STAGES LIKE 's3_stage'")
@@ -91,7 +89,7 @@ class SnowpipeValidator:
                 url = stage_info.get('url', '').lower()
                 if 's3://' in url:
                     self.add_result('stage_config', True, 10,
-                                  f'Stage configured with S3 URL')
+                                  'Stage configured with S3 URL')
                 else:
                     self.add_result('stage_config', False, 10,
                                   'Stage not configured for S3')
@@ -100,11 +98,11 @@ class SnowpipeValidator:
                               'Cannot retrieve stage configuration')
         except Exception as e:
             self.add_result('stage_config', False, 10, f'Error: {e}')
-    
+
     def validate_file_format(self) -> None:
         """Validate file format configuration (15 points)."""
         print("\n=== Validating File Format ===")
-        
+
         # Check file format exists (10 points)
         try:
             self.cursor.execute("""
@@ -124,7 +122,7 @@ class SnowpipeValidator:
         except Exception as e:
             self.add_result('file_format_exists', False, 10, f'Error: {e}')
             return
-        
+
         # Check file format type (5 points)
         try:
             self.cursor.execute("SHOW FILE FORMATS LIKE 'json_format'")
@@ -137,11 +135,11 @@ class SnowpipeValidator:
                               'File format type is not JSON')
         except Exception as e:
             self.add_result('file_format_type', False, 5, f'Error: {e}')
-    
+
     def validate_target_table(self) -> None:
         """Validate target table structure (15 points)."""
         print("\n=== Validating Target Table ===")
-        
+
         # Check table exists (5 points)
         try:
             self.cursor.execute("""
@@ -161,12 +159,12 @@ class SnowpipeValidator:
         except Exception as e:
             self.add_result('table_exists', False, 5, f'Error: {e}')
             return
-        
+
         # Check table schema (5 points)
         try:
             self.cursor.execute("DESC TABLE sensor_data")
             columns = {row['name'].upper() for row in self.cursor.fetchall()}
-            required = {'SENSOR_ID', 'TIMESTAMP', 'TEMPERATURE', 
+            required = {'SENSOR_ID', 'TIMESTAMP', 'TEMPERATURE',
                        'HUMIDITY', 'LOCATION'}
             if required.issubset(columns):
                 self.add_result('table_schema', True, 5,
@@ -177,7 +175,7 @@ class SnowpipeValidator:
                               f'Missing columns: {missing}')
         except Exception as e:
             self.add_result('table_schema', False, 5, f'Error: {e}')
-        
+
         # Check data loaded (5 points)
         try:
             self.cursor.execute("SELECT COUNT(*) as cnt FROM sensor_data")
@@ -191,11 +189,11 @@ class SnowpipeValidator:
                               'Table is empty - no data ingested')
         except Exception as e:
             self.add_result('data_loaded', False, 5, f'Error: {e}')
-    
+
     def validate_pipe_setup(self) -> None:
         """Validate Snowpipe configuration (25 points)."""
         print("\n=== Validating Snowpipe Setup ===")
-        
+
         # Check pipe exists (10 points)
         try:
             self.cursor.execute("""
@@ -215,7 +213,7 @@ class SnowpipeValidator:
         except Exception as e:
             self.add_result('pipe_exists', False, 10, f'Error: {e}')
             return
-        
+
         # Check auto_ingest enabled (10 points)
         try:
             self.cursor.execute("SHOW PIPES LIKE 'sensor_pipe'")
@@ -234,7 +232,7 @@ class SnowpipeValidator:
                               'Cannot retrieve pipe configuration')
         except Exception as e:
             self.add_result('auto_ingest', False, 10, f'Error: {e}')
-        
+
         # Check pipe status queryable (5 points)
         try:
             self.cursor.execute("SELECT SYSTEM$PIPE_STATUS('sensor_pipe') as status")
@@ -247,11 +245,11 @@ class SnowpipeValidator:
                               'Cannot query pipe status')
         except Exception as e:
             self.add_result('pipe_status', False, 5, f'Error: {e}')
-    
+
     def validate_monitoring(self) -> None:
         """Validate monitoring and cost tracking (15 points)."""
         print("\n=== Validating Monitoring ===")
-        
+
         # Check copy history accessible (5 points)
         try:
             self.cursor.execute("""
@@ -270,7 +268,7 @@ class SnowpipeValidator:
                               'Copy history query failed')
         except Exception as e:
             self.add_result('copy_history', False, 5, f'Error: {e}')
-        
+
         # Check pipe usage history (5 points)
         try:
             # Note: PIPE_USAGE_HISTORY requires ACCOUNT_USAGE which may have delay
@@ -283,20 +281,20 @@ class SnowpipeValidator:
             result = self.cursor.fetchone()
             if result['CNT'] >= 0:
                 self.add_result('pipe_usage', True, 5,
-                              f'Pipe usage history accessible')
+                              'Pipe usage history accessible')
             else:
                 self.add_result('pipe_usage', False, 5,
                               'Pipe usage history unavailable')
-        except Exception as e:
+        except Exception:
             # Account usage may not be accessible in all environments
             self.add_result('pipe_usage', True, 5,
                           'Pipe usage query attempted (may require permissions)')
-        
+
         # Check cost calculation logic (5 points)
         try:
             # Verify student understands cost model (0.06 credits per 1K files)
             self.cursor.execute("""
-                SELECT 
+                SELECT
                     100 AS sample_files,
                     ROUND(100 / 1000.0 * 0.06, 4) AS calculated_credits
             """)
@@ -310,15 +308,15 @@ class SnowpipeValidator:
                               'Cost calculation logic incorrect')
         except Exception as e:
             self.add_result('cost_calculation', False, 5, f'Error: {e}')
-    
+
     def validate_error_tracking(self) -> None:
         """Validate error tracking and data quality (10 points)."""
         print("\n=== Validating Error Tracking ===")
-        
+
         # Check error tracking query (5 points)
         try:
             self.cursor.execute("""
-                SELECT 
+                SELECT
                     COUNT(*) AS total_loads,
                     SUM(CASE WHEN STATUS = 'LOAD_FAILED' THEN 1 ELSE 0 END) AS failed_loads
                 FROM TABLE(INFORMATION_SCHEMA.COPY_HISTORY(
@@ -337,11 +335,11 @@ class SnowpipeValidator:
                               'Error tracking query failed')
         except Exception as e:
             self.add_result('error_tracking', False, 5, f'Error: {e}')
-        
+
         # Check data quality validation (5 points)
         try:
             self.cursor.execute("""
-                SELECT 
+                SELECT
                     COUNT(*) AS total_records,
                     SUM(CASE WHEN SENSOR_ID IS NULL THEN 1 ELSE 0 END) AS null_sensor_id,
                     SUM(CASE WHEN TIMESTAMP IS NULL THEN 1 ELSE 0 END) AS null_timestamp
@@ -361,22 +359,22 @@ class SnowpipeValidator:
                               'No data to validate')
         except Exception as e:
             self.add_result('data_quality', False, 5, f'Error: {e}')
-    
+
     def print_summary(self):
         """Print validation summary."""
         print("\n" + "="*70)
         print("VALIDATION SUMMARY")
         print("="*70)
-        
+
         for result in self.results:
             status = "✓" if result['passed'] else "✗"
             print(f"{status} {result['test']}: {result['message']} "
                   f"({result['points']} points)")
-        
+
         print("="*70)
         print(f"TOTAL SCORE: {self.score}/{self.max_score}")
         print("="*70)
-        
+
         if self.score >= 90:
             print("🎉 Excellent! Snowpipe configured correctly!")
         elif self.score >= 70:
@@ -385,12 +383,12 @@ class SnowpipeValidator:
             print("📚 Keep going! Review the solution for guidance.")
         else:
             print("🔧 Needs work. Check the solution and try again.")
-    
+
     def run_all_validations(self):
         """Run all validation tests."""
         if not self.connect():
             return False
-        
+
         try:
             self.validate_stage_setup()
             self.validate_file_format()
@@ -412,10 +410,10 @@ def main():
     print("="*70)
     print("Exercise 05: Snowpipe Automated Ingestion - Validation")
     print("="*70)
-    
+
     validator = SnowpipeValidator()
     success = validator.run_all_validations()
-    
+
     sys.exit(0 if success and validator.score >= 70 else 1)
 
 

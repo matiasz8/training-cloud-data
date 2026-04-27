@@ -3,8 +3,8 @@
 ## Overview
 Build an end-to-end machine learning pipeline with MLflow for experiment tracking, hyperparameter tuning, model registry, deployment, and monitoring for a customer churn prediction system.
 
-**Estimated Time**: 2.5 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2.5 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Exercise 02 (ETL Pipelines), Python/ML basics, Module 04 (Python for Data)
 
 ---
@@ -66,7 +66,7 @@ Create these derived features:
 
 1. **Engagement Score** (0-100):
    ```
-   (num_logins_30d * 2 + total_purchases * 5) / 
+   (num_logins_30d * 2 + total_purchases * 5) /
    (days_since_last_login + 1)
    ```
 
@@ -150,30 +150,30 @@ with mlflow.start_run(run_name="logistic_regression_baseline"):
     mlflow.log_param("model_type", "LogisticRegression")
     mlflow.log_param("penalty", "l2")
     mlflow.log_param("C", 1.0)
-    
+
     # Train model
     model = LogisticRegression(random_state=42)
     model.fit(X_train, y_train)
-    
+
     # Predictions
     y_pred = model.predict(X_val)
     y_pred_proba = model.predict_proba(X_val)[:, 1]
-    
+
     # Log metrics
     mlflow.log_metric("accuracy", accuracy_score(y_val, y_pred))
     mlflow.log_metric("precision", precision_score(y_val, y_pred))
     mlflow.log_metric("recall", recall_score(y_val, y_pred))
     mlflow.log_metric("f1_score", f1_score(y_val, y_pred))
     mlflow.log_metric("roc_auc", roc_auc_score(y_val, y_pred_proba))
-    
+
     # Log model
     mlflow.sklearn.log_model(model, "model")
-    
+
     # Log confusion matrix as artifact
     from sklearn.metrics import confusion_matrix
     import matplotlib.pyplot as plt
     import seaborn as sns
-    
+
     cm = confusion_matrix(y_val, y_pred)
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
@@ -191,15 +191,15 @@ with mlflow.start_run(run_name="random_forest"):
     mlflow.log_param("n_estimators", 100)
     mlflow.log_param("max_depth", 10)
     mlflow.log_param("min_samples_split", 5)
-    
+
     model = RandomForestClassifier(
-        n_estimators=100, 
-        max_depth=10, 
+        n_estimators=100,
+        max_depth=10,
         min_samples_split=5,
         random_state=42
     )
     model.fit(X_train, y_train)
-    
+
     # Same prediction and logging logic...
 ```
 
@@ -214,10 +214,10 @@ with mlflow.start_run(run_name="xgboost"):
         "objective": "binary:logistic"
     }
     mlflow.log_params(params)
-    
+
     model = XGBClassifier(**params, random_state=42)
     model.fit(X_train, y_train)
-    
+
     # Same prediction and logging logic...
 ```
 
@@ -228,7 +228,7 @@ experiment = mlflow.get_experiment_by_name("/Users/yourname/churn-prediction")
 runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
 
 # Compare key metrics
-print(runs[["run_id", "params.model_type", "metrics.f1_score", 
+print(runs[["run_id", "params.model_type", "metrics.f1_score",
             "metrics.roc_auc", "metrics.recall"]].sort_values("metrics.f1_score", ascending=False))
 ```
 
@@ -268,37 +268,37 @@ with mlflow.start_run(run_name="random_forest_grid_search") as parent_run:
     best_f1 = 0
     best_model = None
     best_params = None
-    
+
     for i, params in enumerate(grid):
         with mlflow.start_run(nested=True, run_name=f"rf_config_{i}"):
             # Log parameters
             mlflow.log_params(params)
-            
+
             # Train model
             model = RandomForestClassifier(**params, random_state=42)
             model.fit(X_train, y_train)
-            
+
             # Evaluate
             y_pred = model.predict(X_val)
             y_pred_proba = model.predict_proba(X_val)[:, 1]
-            
+
             f1 = f1_score(y_val, y_pred)
             roc_auc = roc_auc_score(y_val, y_pred_proba)
-            
+
             mlflow.log_metric("f1_score", f1)
             mlflow.log_metric("roc_auc", roc_auc)
-            
+
             # Track best model
             if f1 > best_f1:
                 best_f1 = f1
                 best_model = model
                 best_params = params
-    
+
     # Log best result in parent run
     mlflow.log_params(best_params)
     mlflow.log_metric("best_f1_score", best_f1)
     mlflow.sklearn.log_model(best_model, "best_model")
-    
+
     print(f"Best F1: {best_f1:.4f}")
     print(f"Best params: {best_params}")
 ```
@@ -483,7 +483,7 @@ os.system(f"mlflow models serve -m models:/{model_name}/Production -p 5000")
 
 # Test API with curl
 # curl -X POST -H "Content-Type:application/json" \
-#   --data '{"columns":["age","monthly_fee","num_logins_30d",...], 
+#   --data '{"columns":["age","monthly_fee","num_logins_30d",...],
 #            "data":[[35,50.0,15,...]]}' \
 #   http://localhost:5000/invocations
 ```
@@ -494,14 +494,14 @@ def predict_churn(customer_data):
     """Real-time churn prediction endpoint"""
     # Load model
     model = mlflow.sklearn.load_model(f"models:/{model_name}/Production")
-    
+
     # Prepare features
     features = prepare_features_from_api_request(customer_data)
-    
+
     # Predict
     probability = model.predict_proba([features])[0][1]
     prediction = probability > 0.5
-    
+
     return {
         "customer_id": customer_data["customer_id"],
         "churn_prediction": bool(prediction),
@@ -520,7 +520,7 @@ test_customer = {
 
 result = predict_churn(test_customer)
 print(result)
-# Output: {'customer_id': 'CUST_12345', 'churn_prediction': True, 
+# Output: {'customer_id': 'CUST_12345', 'churn_prediction': True,
 #          'churn_probability': 0.78, 'risk_level': 'High'}
 ```
 
@@ -536,13 +536,13 @@ import dlt
 def churn_predictions():
     # Load model
     model = mlflow.sklearn.load_model(f"models:/churn_prediction_model/Production")
-    
+
     # Get active customers
     customers_df = dlt.read("active_customers")
-    
+
     # Score in batches
     predictions = score_batch(customers_df, model)
-    
+
     return predictions
 ```
 
@@ -576,23 +576,23 @@ base_date = datetime.now() - timedelta(days=30)
 
 for day in range(30):
     current_date = base_date + timedelta(days=day)
-    
+
     # Score customers for that day
     daily_customers = get_customers_for_date(current_date)  # Simulate
     X_daily = prepare_features(daily_customers)
     y_pred = model.predict(X_daily)
     y_pred_proba = model.predict_proba(X_daily)[:, 1]
-    
+
     # Get actual churn (after 30 days)
     y_actual = get_actual_churn(daily_customers, current_date)  # Simulate
-    
+
     # Calculate metrics
     accuracy = accuracy_score(y_actual, y_pred)
     precision = precision_score(y_actual, y_pred)
     recall = recall_score(y_actual, y_pred)
     f1 = f1_score(y_actual, y_pred)
     roc_auc = roc_auc_score(y_actual, y_pred_proba)
-    
+
     monitoring_data.append({
         "date": current_date,
         "accuracy": accuracy,
@@ -616,16 +616,16 @@ from scipy.stats import ks_2samp
 def detect_feature_drift(training_data, production_data, features, threshold=0.05):
     """Detect drift using Kolmogorov-Smirnov test"""
     drift_results = []
-    
+
     for feature in features:
         train_values = training_data[feature]
         prod_values = production_data[feature]
-        
+
         # KS test
         statistic, p_value = ks_2samp(train_values, prod_values)
-        
+
         drift_detected = p_value < threshold
-        
+
         drift_results.append({
             "feature": feature,
             "ks_statistic": statistic,
@@ -633,10 +633,10 @@ def detect_feature_drift(training_data, production_data, features, threshold=0.0
             "drift_detected": drift_detected,
             "train_mean": train_values.mean(),
             "prod_mean": prod_values.mean(),
-            "mean_change_pct": ((prod_values.mean() - train_values.mean()) / 
+            "mean_change_pct": ((prod_values.mean() - train_values.mean()) /
                                 train_values.mean() * 100)
         })
-    
+
     return pd.DataFrame(drift_results)
 
 # Run drift detection
@@ -644,8 +644,8 @@ training_features = X_train
 production_features = X_new  # Recent production data
 
 drift_report = detect_feature_drift(
-    training_features, 
-    production_features, 
+    training_features,
+    production_features,
     features=X_train.columns.tolist()
 )
 
@@ -658,15 +658,15 @@ print(drift_report[drift_report['drift_detected']])
 # Compare prediction distribution over time
 def monitor_prediction_drift():
     monitoring_df = spark.table("model_performance_monitoring")
-    
+
     # Get baseline (first week)
     baseline = monitoring_df.filter("date < current_date() - 23").select("predicted_churn_rate").avg()
-    
+
     # Get current (last week)
     current = monitoring_df.filter("date >= current_date() - 7").select("predicted_churn_rate").avg()
-    
+
     drift_pct = (current - baseline) / baseline * 100
-    
+
     if abs(drift_pct) > 5:
         print(f"⚠️ ALERT: Prediction drift detected! {drift_pct:+.1f}% change")
         # Trigger retraining or investigation
@@ -688,14 +688,14 @@ monitoring_df.plot(x='date', y='f1_score', ax=axes[0, 0], title='F1 Score Trend'
 axes[0, 0].axhline(y=0.70, color='r', linestyle='--', label='Threshold')
 
 # Churn rate: predicted vs actual
-monitoring_df.plot(x='date', y=['predicted_churn_rate', 'actual_churn_rate'], 
+monitoring_df.plot(x='date', y=['predicted_churn_rate', 'actual_churn_rate'],
                    ax=axes[0, 1], title='Predicted vs Actual Churn Rate')
 
 # Feature drift heatmap
 # axes[1, 0] - feature drift visualization
 
 # Prediction volume
-monitoring_df.plot(x='date', y='num_predictions', ax=axes[1, 1], 
+monitoring_df.plot(x='date', y='num_predictions', ax=axes[1, 1],
                    title='Daily Prediction Volume')
 
 plt.tight_layout()
@@ -724,31 +724,31 @@ from pyspark.sql.types import DoubleType
 
 def engineer_features(df):
     """Apply all feature engineering transformations"""
-    
+
     # Engagement score
-    engagement = ((col("num_logins_30d") * 2 + col("total_purchases") * 5) / 
+    engagement = ((col("num_logins_30d") * 2 + col("total_purchases") * 5) /
                   (col("days_since_last_login") + 1))
-    
+
     # Payment risk
     payment_risk = col("num_failed_payments") / (col("total_purchases") + 1)
-    
+
     # Activity level
     activity_level = when(col("num_logins_30d") > 20, "High") \
                      .when(col("num_logins_30d") > 10, "Medium") \
                      .otherwise("Low")
-    
+
     # Tenure
     tenure_months = datediff(current_date(), col("signup_date")) / 30
-    
+
     # Apply transformations
     features_df = df.withColumn("engagement_score", engagement) \
                     .withColumn("payment_risk", payment_risk) \
                     .withColumn("activity_level", activity_level) \
                     .withColumn("tenure_months", tenure_months)
-    
+
     # One-hot encoding
     features_df = features_df.fillna(0)  # Handle nulls
-    
+
     return features_df
 ```
 </details>
@@ -767,19 +767,19 @@ with mlflow.start_run(run_name="experiment_1"):
     # Log parameters (hyperparameters)
     mlflow.log_param("model_type", "RandomForest")
     mlflow.log_param("n_estimators", 100)
-    
+
     # Train model
     model = RandomForestClassifier(n_estimators=100)
     model.fit(X_train, y_train)
-    
+
     # Log metrics
     f1 = f1_score(y_val, y_pred)
     mlflow.log_metric("f1_score", f1)
     mlflow.log_metric("accuracy", accuracy_score(y_val, y_pred))
-    
+
     # Log model
     mlflow.sklearn.log_model(model, "model")
-    
+
     # Log artifacts (plots, files)
     plt.savefig("feature_importance.png")
     mlflow.log_artifact("feature_importance.png")
@@ -830,25 +830,25 @@ import pandas as pd
 def check_drift(baseline_data, current_data, features, threshold=0.05):
     """Check for data drift using KS test"""
     results = []
-    
+
     for feature in features:
         # Extract feature values
         baseline_values = baseline_data[feature].dropna()
         current_values = current_data[feature].dropna()
-        
+
         # Perform KS test
         statistic, p_value = ks_2samp(baseline_values, current_values)
-        
+
         # Drift detected if p-value < threshold
         drift = p_value < threshold
-        
+
         results.append({
             'feature': feature,
             'ks_statistic': statistic,
             'p_value': p_value,
             'drift_detected': drift
         })
-    
+
     return pd.DataFrame(results)
 
 # Run drift check

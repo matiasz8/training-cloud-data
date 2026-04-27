@@ -1,19 +1,19 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Notebook 03: Unity Catalog - Data Governance
-# MAGIC 
+# MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC - Understand Unity Catalog's three-level namespace
 # MAGIC - Implement fine-grained access control
 # MAGIC - Configure row-level and column-level security
 # MAGIC - Track data lineage
 # MAGIC - Manage data discovery and metadata
-# MAGIC 
+# MAGIC
 # MAGIC ## Prerequisites
 # MAGIC - **Databricks Trial Account or Enterprise plan** (Unity Catalog not available in Community Edition)
 # MAGIC - Unity Catalog metastore enabled
 # MAGIC - Admin permissions to create catalogs
-# MAGIC 
+# MAGIC
 # MAGIC ## Estimated Time: 45-60 minutes
 
 # COMMAND ----------
@@ -25,7 +25,6 @@
 
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
-import json
 
 print("Unity Catalog Environment Check:")
 print(f"✅ Current User: {spark.sql('SELECT current_user()').collect()[0][0]}")
@@ -36,11 +35,11 @@ print(f"✅ Current Schema: {spark.sql('SELECT current_schema()').collect()[0][0
 
 # MAGIC %md
 # MAGIC ## Part 1: Three-Level Namespace
-# MAGIC 
+# MAGIC
 # MAGIC Unity Catalog uses: **catalog.schema.table**
-# MAGIC 
+# MAGIC
 # MAGIC Traditional: **database.table**
-# MAGIC 
+# MAGIC
 # MAGIC Benefits:
 # MAGIC - Environment isolation (dev/staging/prod in same workspace)
 # MAGIC - Multi-tenant data sharing
@@ -51,7 +50,7 @@ print(f"✅ Current Schema: {spark.sql('SELECT current_schema()').collect()[0][0
 # MAGIC %sql
 # MAGIC -- Create training catalog
 # MAGIC CREATE CATALOG IF NOT EXISTS training_uc;
-# MAGIC 
+# MAGIC
 # MAGIC -- Show all catalogs
 # MAGIC SHOW CATALOGS;
 
@@ -60,12 +59,12 @@ print(f"✅ Current Schema: {spark.sql('SELECT current_schema()').collect()[0][0
 # MAGIC %sql
 # MAGIC -- Use the training catalog
 # MAGIC USE CATALOG training_uc;
-# MAGIC 
+# MAGIC
 # MAGIC -- Create schemas for different environments
 # MAGIC CREATE SCHEMA IF NOT EXISTS dev COMMENT 'Development environment';
 # MAGIC CREATE SCHEMA IF NOT EXISTS staging COMMENT 'Staging environment';
 # MAGIC CREATE SCHEMA IF NOT EXISTS prod COMMENT 'Production environment';
-# MAGIC 
+# MAGIC
 # MAGIC -- Show schemas
 # MAGIC SHOW SCHEMAS;
 
@@ -129,7 +128,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 
 # MAGIC %md
 # MAGIC ## Part 2: Access Control - Permissions Model
-# MAGIC 
+# MAGIC
 # MAGIC Unity Catalog permissions hierarchy:
 # MAGIC ```
 # MAGIC Metastore (root)
@@ -144,10 +143,10 @@ print("✅ Tables created in dev, staging, and prod schemas")
 # MAGIC %sql
 # MAGIC -- Grant catalog permissions
 # MAGIC -- Note: You need to be catalog owner or admin
-# MAGIC 
+# MAGIC
 # MAGIC -- Allow all users to use the catalog
 # MAGIC GRANT USE CATALOG ON CATALOG training_uc TO `account users`;
-# MAGIC 
+# MAGIC
 # MAGIC -- Allow developers to use dev schema
 # MAGIC GRANT USE SCHEMA ON SCHEMA training_uc.dev TO `account users`;
 # MAGIC GRANT SELECT ON SCHEMA training_uc.dev TO `account users`;
@@ -156,13 +155,13 @@ print("✅ Tables created in dev, staging, and prod schemas")
 
 # MAGIC %sql
 # MAGIC -- Grant table-level permissions
-# MAGIC 
+# MAGIC
 # MAGIC -- Analysts can read from staging
 # MAGIC GRANT SELECT ON TABLE training_uc.staging.customers TO `account users`;
-# MAGIC 
+# MAGIC
 # MAGIC -- Only specific group can access prod
 # MAGIC -- GRANT SELECT ON TABLE training_uc.prod.customers TO `data_engineers`;
-# MAGIC 
+# MAGIC
 # MAGIC -- Show grants
 # MAGIC SHOW GRANTS ON TABLE training_uc.dev.customers;
 
@@ -170,7 +169,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 
 # MAGIC %md
 # MAGIC ## Part 3: Row-Level Security
-# MAGIC 
+# MAGIC
 # MAGIC Filter which rows users can see based on:
 # MAGIC - User identity
 # MAGIC - Group membership
@@ -181,7 +180,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 # MAGIC %sql
 # MAGIC -- Create row filter function
 # MAGIC CREATE OR REPLACE FUNCTION training_uc.dev.customer_region_filter(country STRING)
-# MAGIC RETURN 
+# MAGIC RETURN
 # MAGIC   CASE
 # MAGIC     -- Admins see all rows
 # MAGIC     WHEN is_account_group_member('admins') THEN TRUE
@@ -198,7 +197,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 # MAGIC %sql
 # MAGIC -- Apply row filter to table
 # MAGIC ALTER TABLE training_uc.dev.customers SET ROW FILTER training_uc.dev.customer_region_filter ON (country);
-# MAGIC 
+# MAGIC
 # MAGIC -- Now queries automatically filter rows based on user's group
 # MAGIC -- Users in 'us_team' will only see USA customers
 # MAGIC SELECT * FROM training_uc.dev.customers;
@@ -213,7 +212,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 
 # MAGIC %md
 # MAGIC ## Part 4: Column-Level Security (Dynamic Views)
-# MAGIC 
+# MAGIC
 # MAGIC Mask or hide sensitive columns based on user permissions.
 
 # COMMAND ----------
@@ -252,7 +251,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 # MAGIC -- Column-level grants
 # MAGIC -- Grant SELECT on specific columns only
 # MAGIC GRANT SELECT (customer_id, name, country) ON TABLE training_uc.dev.customers TO `account users`;
-# MAGIC 
+# MAGIC
 # MAGIC -- Revoke access to sensitive columns (email, revenue)
 # MAGIC -- Users can query table but won't see email/revenue columns
 
@@ -260,7 +259,7 @@ print("✅ Tables created in dev, staging, and prod schemas")
 
 # MAGIC %md
 # MAGIC ## Part 5: Data Lineage
-# MAGIC 
+# MAGIC
 # MAGIC Unity Catalog automatically tracks:
 # MAGIC - Table-level lineage (which tables created from which)
 # MAGIC - Column-level lineage (how columns are computed)
@@ -328,7 +327,7 @@ except Exception as e:
 
 # MAGIC %md
 # MAGIC ## Part 6: Data Discovery & Metadata
-# MAGIC 
+# MAGIC
 # MAGIC Unity Catalog provides rich metadata:
 # MAGIC - Table comments and descriptions
 # MAGIC - Column comments
@@ -340,7 +339,7 @@ except Exception as e:
 # MAGIC %sql
 # MAGIC -- Add table metadata
 # MAGIC COMMENT ON TABLE training_uc.dev.customers IS 'Customer dimension table containing PII data. Updated daily via ETL pipeline.';
-# MAGIC 
+# MAGIC
 # MAGIC -- Add column comments
 # MAGIC ALTER TABLE training_uc.dev.customers ALTER COLUMN email COMMENT 'Customer email address (PII - restricted access)';
 # MAGIC ALTER TABLE training_uc.dev.customers ALTER COLUMN revenue COMMENT 'Annual revenue in USD (Sensitive - Finance team only)';
@@ -357,7 +356,7 @@ except Exception as e:
 # MAGIC %sql
 # MAGIC -- Search for tables (full-text search)
 # MAGIC -- In Data Explorer UI, you can search for "customer" and it will find all related tables
-# MAGIC 
+# MAGIC
 # MAGIC -- Programmatically list tables with metadata
 # MAGIC SELECT
 # MAGIC     table_catalog,
@@ -373,7 +372,7 @@ except Exception as e:
 
 # MAGIC %md
 # MAGIC ## Part 7: Data Sharing (Delta Sharing)
-# MAGIC 
+# MAGIC
 # MAGIC Unity Catalog enables secure data sharing:
 # MAGIC - Share tables with external organizations
 # MAGIC - No data duplication
@@ -384,13 +383,13 @@ except Exception as e:
 # MAGIC %sql
 # MAGIC -- Create a share (requires account admin)
 # MAGIC -- CREATE SHARE IF NOT EXISTS customer_share;
-# MAGIC 
+# MAGIC
 # MAGIC -- Add table to share
 # MAGIC -- ALTER SHARE customer_share ADD TABLE training_uc.prod.customers;
-# MAGIC 
+# MAGIC
 # MAGIC -- Grant access to recipient
 # MAGIC -- GRANT SELECT ON SHARE customer_share TO RECIPIENT external_partner;
-# MAGIC 
+# MAGIC
 # MAGIC -- Show shares
 # MAGIC -- SHOW SHARES;
 
@@ -406,12 +405,12 @@ except Exception as e:
 # MAGIC -- catalog: {environment}_catalog  (e.g., prod_catalog, dev_catalog)
 # MAGIC -- schema: {domain}_schema  (e.g., sales_schema, marketing_schema)
 # MAGIC -- table: {entity}_table  (e.g., customers_table, orders_table)
-# MAGIC 
+# MAGIC
 # MAGIC -- 2. Default permissions (least privilege)
 # MAGIC -- GRANT USE CATALOG ON CATALOG training_uc TO `account users`;
 # MAGIC -- GRANT USAGE ON SCHEMA training_uc.prod TO `analysts`;
 # MAGIC -- GRANT SELECT ON TABLE training_uc.prod.customers TO `analysts`;
-# MAGIC 
+# MAGIC
 # MAGIC -- 3. Audit access
 # MAGIC SELECT * FROM system.access.audit
 # MAGIC WHERE action_name = 'select'
@@ -427,28 +426,28 @@ def setup_data_governance(catalog_name, schema_name, table_name):
     Automated governance setup for new tables.
     """
     print(f"Setting up governance for {catalog_name}.{schema_name}.{table_name}...")
-    
+
     # 1. Add table documentation
     spark.sql(f"""
         COMMENT ON TABLE {catalog_name}.{schema_name}.{table_name}
         IS 'Auto-generated at {datetime.now()}. Contact: data-team@company.com'
     """)
-    
+
     # 2. Grant default read access to analysts
     spark.sql(f"""
         GRANT SELECT ON TABLE {catalog_name}.{schema_name}.{table_name}
         TO `account users`
     """)
-    
+
     # 3. Add tags for classification
     # (This would use Unity Catalog tagging API when available)
-    
+
     # 4. Enable audit logging
     spark.sql(f"""
         ALTER TABLE {catalog_name}.{schema_name}.{table_name}
         SET TBLPROPERTIES ('audit.enabled' = 'true')
     """)
-    
+
     print("✅ Governance setup complete")
 
 # Example usage
@@ -499,33 +498,33 @@ def setup_data_governance(catalog_name, schema_name, table_name):
 
 # MAGIC %md
 # MAGIC ## Summary & Key Takeaways
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Three-Level Namespace**
 # MAGIC - catalog.schema.table enables environment isolation
 # MAGIC - Better multi-tenancy and governance
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Access Control**
 # MAGIC - Fine-grained permissions (catalog → schema → table → column)
 # MAGIC - Row-level security with filter functions
 # MAGIC - Column-level security with dynamic views
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Data Lineage**
 # MAGIC - Automatic tracking of table dependencies
 # MAGIC - Column-level lineage
 # MAGIC - Visual lineage graphs in UI
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Data Discovery**
 # MAGIC - Rich metadata (comments, tags)
 # MAGIC - Full-text search
 # MAGIC - Data classification
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Compliance**
 # MAGIC - Audit logging (who accessed what, when)
 # MAGIC - Data sharing with external partners
 # MAGIC - GDPR/CCPA compliance support
-# MAGIC 
+# MAGIC
 # MAGIC ## Next Steps
-# MAGIC 
+# MAGIC
 # MAGIC Continue to Notebook 04: **Streaming Analytics**
 
 # COMMAND ----------

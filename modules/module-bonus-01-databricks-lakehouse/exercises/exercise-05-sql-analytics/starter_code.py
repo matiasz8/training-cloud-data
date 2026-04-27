@@ -17,9 +17,6 @@ Estimated Time: 1.5 hours
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
-from pyspark.sql.window import Window
-from datetime import datetime, timedelta
-import random
 
 # Initialize Spark
 spark = SparkSession.builder \
@@ -39,7 +36,7 @@ print("-" * 70)
 def generate_sales_data(num_records=10000):
     """
     Generate realistic sales data for analysis.
-    
+
     TODO: Implement data generation with:
     - 10,000 transactions
     - 50 products across 5 categories
@@ -48,38 +45,38 @@ def generate_sales_data(num_records=10000):
     - Date range: Last 12 months
     - Pareto distribution (60% sales from top 20% products)
     - Seasonal trends (Dec +20%, Aug -10%)
-    
+
     Schema:
     - transaction_id, transaction_date, product_id, product_name,
     - product_category, quantity, unit_price, total_amount,
-    - region, salesperson_id, salesperson_name, 
+    - region, salesperson_id, salesperson_name,
     - customer_id, customer_signup_date
     """
-    
+
     # TODO: Define categories
     categories = []  # ["Electronics", "Clothing", "Home", "Beauty", "Sports"]
-    
+
     # TODO: Define regions
     regions = []  # ["Northeast", "Southeast", "Midwest", "West", ...]
-    
+
     # TODO: Generate 50 products with base prices
     products = []
-    
+
     # TODO: Generate 20 salespeople
     salespeople = []
-    
+
     # TODO: Generate 10,000 transactions with:
     # - Pareto distribution for products
     # - Seasonal trends
     # - Random dates over 12 months
     # - Customer data for cohort analysis
-    
+
     transactions = []
-    
+
     # TODO: Create DataFrame and save as Delta table
     # df = spark.createDataFrame(transactions)
     # df.write.format("delta").mode("overwrite").saveAsTable("sales_transactions")
-    
+
     print("✅ TODO: Implement generate_sales_data()")
     return None
 
@@ -121,7 +118,7 @@ query_monthly_trends = """
 print("\n3. Top 10 Products:")
 query_top_products = """
 -- TODO: Write SQL query to show top 10 products by revenue
--- Include: product_name, product_category, times_sold, 
+-- Include: product_name, product_category, times_sold,
 --          units_sold, total_revenue, avg_price
 """
 # spark.sql(query_top_products).display()
@@ -147,7 +144,7 @@ print("\n1. Running Totals (Cumulative Revenue):")
 query_running_totals = """
 -- TODO: Use SUM() OVER() for cumulative revenue
 -- TODO: Use AVG() OVER() for 7-day moving average
--- OVER (ORDER BY transaction_date 
+-- OVER (ORDER BY transaction_date
 --       ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
 """
 # spark.sql(query_running_totals).display()
@@ -198,7 +195,7 @@ query_cohort_retention = """
 print("\n2. Cohort Retention Matrix (PIVOT):")
 query_cohort_matrix = """
 -- TODO: Use PIVOT to reshape retention data
--- PIVOT (MAX(retention_rate_pct) 
+-- PIVOT (MAX(retention_rate_pct)
 --        FOR months_since_signup IN (0, 1, 2, ..., 11))
 """
 # spark.sql(query_cohort_matrix).display()
@@ -213,7 +210,7 @@ print("-" * 70)
 print("\nCreating parameter widgets...")
 # dbutils.widgets.text("start_date", "2025-01-01", "Start Date")
 # dbutils.widgets.text("end_date", "2025-12-31", "End Date")
-# dbutils.widgets.multiselect("regions", "All", 
+# dbutils.widgets.multiselect("regions", "All",
 #     ["All", "Northeast", "Southeast", "Midwest", "West", "Southwest"],
 #     "Region")
 # dbutils.widgets.dropdown("category", "All",

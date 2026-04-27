@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Notebook 02: ETL Pipeline with Medallion Architecture
-# MAGIC 
+# MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC By the end of this notebook, you will understand:
 # MAGIC - Medallion Architecture (Bronze → Silver → Gold)
@@ -9,9 +9,9 @@
 # MAGIC - Incremental processing
 # MAGIC - Data quality checks
 # MAGIC - Error handling strategies
-# MAGIC 
+# MAGIC
 # MAGIC ## Architecture Overview
-# MAGIC 
+# MAGIC
 # MAGIC ```
 # MAGIC Bronze (Raw)           Silver (Cleaned)         Gold (Aggregated)
 # MAGIC ┌──────────┐          ┌───────────┐            ┌──────────┐
@@ -20,7 +20,7 @@
 # MAGIC │  Parquet │          │ Deduped   │            │ Reports  │
 # MAGIC └──────────┘          └───────────┘            └──────────┘
 # MAGIC ```
-# MAGIC 
+# MAGIC
 # MAGIC ## Estimated Time: 60-75 minutes
 
 # COMMAND ----------
@@ -30,7 +30,6 @@
 
 # COMMAND ----------
 
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql.window import Window
@@ -49,7 +48,7 @@ checkpoint_path = f"/tmp/{database_name}/checkpoints"
 spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
 spark.sql(f"USE {database_name}")
 
-print(f"✅ Environment ready")
+print("✅ Environment ready")
 print(f"   Database: {database_name}")
 print(f"   Bronze: {bronze_path}")
 print(f"   Silver: {silver_path}")
@@ -59,7 +58,7 @@ print(f"   Gold: {gold_path}")
 
 # MAGIC %md
 # MAGIC ## Part 1: Bronze Layer - Raw Data Ingestion
-# MAGIC 
+# MAGIC
 # MAGIC The Bronze layer stores raw data exactly as received:
 # MAGIC - Append-only (immutable)
 # MAGIC - Minimal transformations
@@ -75,18 +74,18 @@ def generate_raw_events(num_events=1000):
     """Simulate raw event data from web application."""
     events = []
     base_time = datetime.now() - timedelta(hours=24)
-    
+
     event_types = ["page_view", "add_to_cart", "purchase", "search", "logout"]
     pages = ["/home", "/products", "/cart", "/checkout", "/account"]
     devices = ["desktop", "mobile", "tablet"]
-    
+
     for i in range(num_events):
         event_time = base_time + timedelta(seconds=i * 86)  # ~86 seconds apart
-        
+
         # Introduce some data quality issues intentionally
         user_id = None if i % 100 == 0 else i % 500 + 1  # Some missing user_ids
         event_type = event_types[i % len(event_types)]
-        
+
         event = {
             "event_id": f"evt_{i}",
             "user_id": user_id,
@@ -101,7 +100,7 @@ def generate_raw_events(num_events=1000):
             "duplicate_marker": i % 20  # Will create duplicates
         }
         events.append(event)
-    
+
     return events
 
 raw_events = generate_raw_events(1000)
@@ -175,7 +174,7 @@ display(bronze_quality)
 
 # MAGIC %md
 # MAGIC ## Part 2: Silver Layer - Cleaned & Validated Data
-# MAGIC 
+# MAGIC
 # MAGIC The Silver layer applies:
 # MAGIC - Data validation and filtering
 # MAGIC - Deduplication
@@ -254,9 +253,9 @@ comparison = spark.sql("""
         COUNT(DISTINCT event_id) as unique_events,
         SUM(CASE WHEN user_id IS NULL THEN 1 ELSE 0 END) as null_user_ids
     FROM bronze_events
-    
+
     UNION ALL
-    
+
     SELECT
         'Silver' as layer,
         COUNT(*) as record_count,
@@ -270,7 +269,7 @@ display(comparison)
 
 # MAGIC %md
 # MAGIC ## Part 3: Gold Layer - Business Aggregations
-# MAGIC 
+# MAGIC
 # MAGIC The Gold layer contains:
 # MAGIC - Aggregated metrics
 # MAGIC - Denormalized tables for analytics
@@ -326,12 +325,12 @@ gold_funnel_df = spark.sql("""
         SUM(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) as purchases,
         -- Conversion rates
         ROUND(
-            SUM(CASE WHEN event_type = 'add_to_cart' THEN 1 ELSE 0 END) * 100.0 / 
+            SUM(CASE WHEN event_type = 'add_to_cart' THEN 1 ELSE 0 END) * 100.0 /
             NULLIF(SUM(CASE WHEN event_type = 'page_view' THEN 1 ELSE 0 END), 0),
             2
         ) as view_to_cart_rate,
         ROUND(
-            SUM(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) * 100.0 / 
+            SUM(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) * 100.0 /
             NULLIF(SUM(CASE WHEN event_type = 'add_to_cart' THEN 1 ELSE 0 END), 0),
             2
         ) as cart_to_purchase_rate,
@@ -394,7 +393,7 @@ display(spark.table("gold_revenue_summary"))
 
 # MAGIC %md
 # MAGIC ## Part 4: Incremental Processing
-# MAGIC 
+# MAGIC
 # MAGIC Production ETL should be incremental:
 # MAGIC - Process only new data
 # MAGIC - Use watermarks for late-arriving data
@@ -473,7 +472,7 @@ print("✅ Incremental Silver processing complete")
 
 # MAGIC %md
 # MAGIC ## Part 5: Error Handling & Data Quality
-# MAGIC 
+# MAGIC
 # MAGIC Production pipelines need robust error handling:
 # MAGIC - Quarantine bad records
 # MAGIC - Data quality metrics
@@ -517,7 +516,7 @@ for rule in quality_rules:
     passed = silver_df_check.filter(rule["condition"]).count()
     failed = total_records - passed
     pass_rate = round(passed * 100.0 / total_records, 2)
-    
+
     quality_results.append({
         "rule_name": rule["rule_name"],
         "severity": rule["severity"],
@@ -548,13 +547,13 @@ if quarantine_count > 0:
         .format("delta") \
         .mode("append") \
         .save(f"{silver_path}/quarantine")
-    
+
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS silver_quarantine
         USING DELTA
         LOCATION '{silver_path}/quarantine'
     """)
-    
+
     print("✅ Quarantine table created")
     display(quarantine_df.limit(10))
 
@@ -562,7 +561,7 @@ if quarantine_count > 0:
 
 # MAGIC %md
 # MAGIC ## Part 6: Pipeline Orchestration Pattern
-# MAGIC 
+# MAGIC
 # MAGIC Production pipelines follow this pattern:
 
 # COMMAND ----------
@@ -570,40 +569,40 @@ if quarantine_count > 0:
 def run_etl_pipeline(incremental=True):
     """
     Production ETL pipeline function.
-    
+
     Can be called from Databricks Workflows or scheduled jobs.
     """
     pipeline_start = datetime.now()
     print(f"🚀 Pipeline started at {pipeline_start}")
-    
+
     try:
         # Step 1: Bronze ingestion
         print("\n[1/4] Bronze ingestion...")
         # Code would read from actual source (S3, Kafka, API)
         bronze_count = spark.table("bronze_events").count()
         print(f"   Bronze records: {bronze_count}")
-        
+
         # Step 2: Silver transformation
         print("\n[2/4] Silver transformation...")
         # Incremental processing logic
         silver_count = spark.table("silver_events").count()
         print(f"   Silver records: {silver_count}")
-        
+
         # Step 3: Data quality checks
         print("\n[3/4] Data quality validation...")
         # Run quality checks
         print("   Quality checks passed")
-        
+
         # Step 4: Gold aggregations
         print("\n[4/4] Gold aggregations...")
         gold_count = spark.table("gold_daily_active_users").count()
         print(f"   Gold records: {gold_count}")
-        
+
         pipeline_end = datetime.now()
         duration = (pipeline_end - pipeline_start).total_seconds()
-        
+
         print(f"\n✅ Pipeline completed successfully in {duration:.2f} seconds")
-        
+
         return {
             "status": "success",
             "duration_seconds": duration,
@@ -611,7 +610,7 @@ def run_etl_pipeline(incremental=True):
             "silver_count": silver_count,
             "gold_count": gold_count
         }
-        
+
     except Exception as e:
         print(f"\n❌ Pipeline failed: {str(e)}")
         # In production: Send alert, log to monitoring system
@@ -628,26 +627,26 @@ print(f"\nPipeline Result: {pipeline_result}")
 
 # MAGIC %md
 # MAGIC ## Summary & Key Takeaways
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Medallion Architecture**
 # MAGIC - **Bronze**: Raw, immutable, append-only
 # MAGIC - **Silver**: Cleaned, validated, deduplicated
 # MAGIC - **Gold**: Aggregated, business-ready metrics
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Production Patterns**
 # MAGIC - Incremental processing with watermarks
 # MAGIC - MERGE for idempotent updates
 # MAGIC - Data quality checks with quarantine
 # MAGIC - Error handling and monitoring
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Best Practices**
 # MAGIC - Add audit columns (timestamps, source)
 # MAGIC - Maintain data lineage
 # MAGIC - Design for reprocessing
 # MAGIC - Separate concerns by layer
-# MAGIC 
+# MAGIC
 # MAGIC ## Next Steps
-# MAGIC 
+# MAGIC
 # MAGIC Continue to Notebook 03: **Unity Catalog Governance**
 
 # COMMAND ----------

@@ -3,8 +3,8 @@
 ## Overview
 Build a production-grade real-time streaming pipeline using Structured Streaming to process events from Bronze to Gold layers with windowed aggregations, late data handling, and streaming UPSERT operations.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Exercise 02 (ETL Pipelines), Module 08 (Streaming basics)
 
 ---
@@ -288,10 +288,10 @@ def upsert_profiles(batch_df, batch_id):
             count("*").alias("rides_in_batch"),
             sum("fare").alias("amount_in_batch")
         )
-    
+
     # MERGE into profiles table
     target = DeltaTable.forName(spark, "gold_user_profiles")
-    
+
     target.alias("target").merge(
         profiles_update.alias("source"),
         "target.user_id = source.user_id"
@@ -496,7 +496,7 @@ stream_with_watermark = df \
 
 # Monitor late events
 late_events_df = bronze_stream \
-    .withColumn("latency_seconds", 
+    .withColumn("latency_seconds",
                 (current_timestamp().cast("long") - col("timestamp").cast("long"))) \
     .withColumn("is_late", col("latency_seconds") > 60)
 
@@ -520,7 +520,7 @@ from datetime import datetime
 def log_stream_metrics(query, query_name):
     """Log streaming query metrics to table"""
     progress = query.lastProgress
-    
+
     if progress:
         metrics = {
             "query_id": query.id,
@@ -532,7 +532,7 @@ def log_stream_metrics(query, query_name):
             "num_input_rows": progress.get("numInputRows", 0),
             "watermark": progress.get("eventTime", {}).get("watermark", None)
         }
-        
+
         # Write to metrics table
         spark.createDataFrame([metrics]).write \
             .format("delta") \

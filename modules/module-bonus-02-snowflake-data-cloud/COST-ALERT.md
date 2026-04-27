@@ -208,7 +208,7 @@ Streaming:       X-Small to Small (1-2 credits/hour)
 | -        | Storage (50GB compressed)      | -         | 30 days  | -       | $0.50     |
 | -        | Cloud Services                 | -         | -        | -       | $0 (free) |
 
-**Total Estimated Cost**: $15-25 USD (Standard Edition)  
+**Total Estimated Cost**: $15-25 USD (Standard Edition)
 **With Trial**: **$0** (covered by $400 credits)
 
 \* Range: Standard ($2/credit) to Business Critical ($4/credit)
@@ -393,7 +393,7 @@ CREATE DATABASE dev_database CLONE prod_database;
 CREATE TABLE experiments.customer_test CLONE prod.customers;
 
 -- Clone at historical point (Time Travel)
-CREATE TABLE analysis.orders_backup 
+CREATE TABLE analysis.orders_backup
     CLONE prod.orders AT (TIMESTAMP => '2024-01-01 00:00:00'::timestamp);
 ```
 
@@ -863,6 +863,6 @@ Before starting exercises, ensure:
 
 ---
 
-**Last Updated**: March 2026  
-**Module**: Bonus 02 - Snowflake Data Cloud  
+**Last Updated**: March 2026
+**Module**: Bonus 02 - Snowflake Data Cloud
 **Estimated Time**: 2-3 days (well within trial)

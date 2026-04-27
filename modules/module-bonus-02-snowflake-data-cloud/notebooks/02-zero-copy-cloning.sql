@@ -5,7 +5,7 @@
 -- Description: Master Snowflake's zero-copy cloning feature to create instant
 --              database, schema, and table copies without duplicating storage.
 --              Learn dev/test workflows, time-travel cloning, and cost tracking.
--- 
+--
 -- Prerequisites:
 --   - Snowflake account with CREATE DATABASE privilege
 --   - Understanding of Snowflake storage architecture
@@ -61,11 +61,11 @@ INSERT INTO customers
 SELECT
     SEQ4() AS customer_id,
     CONCAT('user', SEQ4(), '@example.com') AS email,
-    ARRAY_GET(PARSE_JSON('["John","Jane","Michael","Emily","David","Sarah","James","Emma","Robert","Lisa"]'), 
+    ARRAY_GET(PARSE_JSON('["John","Jane","Michael","Emily","David","Sarah","James","Emma","Robert","Lisa"]'),
               UNIFORM(0, 9, RANDOM())) AS first_name,
     ARRAY_GET(PARSE_JSON('["Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Rodriguez","Martinez"]'),
               UNIFORM(0, 9, RANDOM())) AS last_name,
-    CONCAT('555-', LPAD(UNIFORM(100, 999, RANDOM())::VARCHAR, 3, '0'), '-', 
+    CONCAT('555-', LPAD(UNIFORM(100, 999, RANDOM())::VARCHAR, 3, '0'), '-',
            LPAD(UNIFORM(1000, 9999, RANDOM())::VARCHAR, 4, '0')) AS phone,
     CONCAT(UNIFORM(100, 9999, RANDOM()), ' Main St') AS address,
     ARRAY_GET(PARSE_JSON('["New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Jose"]'),

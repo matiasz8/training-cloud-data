@@ -69,7 +69,7 @@ CREATE OR REPLACE FILE FORMAT json_format
     COMMENT = 'JSON format for IoT sensor data';
 
 -- Test file format by querying sample file
-SELECT 
+SELECT
     $1:sensor_id::VARCHAR AS sensor_id,
     $1:timestamp::TIMESTAMP_NTZ AS timestamp,
     $1:temperature::DOUBLE AS temperature,
@@ -115,7 +115,7 @@ COPY INTO sensor_data (
     SOURCE_FILE
 )
 FROM (
-    SELECT 
+    SELECT
         $1:sensor_id::VARCHAR,
         $1:timestamp::TIMESTAMP_NTZ,
         $1:temperature::DOUBLE,
@@ -143,12 +143,12 @@ ALTER PIPE sensor_pipe REFRESH;
 SELECT SYSTEM$PIPE_STATUS('sensor_pipe') AS pipe_status;
 
 -- Parse the JSON result for better readability
-SELECT 
+SELECT
     PARSE_JSON(SYSTEM$PIPE_STATUS('sensor_pipe')):executionState::VARCHAR AS execution_state,
     PARSE_JSON(SYSTEM$PIPE_STATUS('sensor_pipe')):pendingFileCount::INTEGER AS pending_files;
 
 -- Verify data loaded into sensor_data table
-SELECT 
+SELECT
     COUNT(*) AS total_records,
     COUNT(DISTINCT SENSOR_ID) AS unique_sensors,
     MIN(TIMESTAMP) AS earliest_reading,
@@ -162,7 +162,7 @@ SELECT * FROM sensor_data LIMIT 10;
 -- Step 7: Monitor Pipe Activity
 -- ============================================================================
 -- Query pipe usage history (last 7 days)
-SELECT 
+SELECT
     PIPE_NAME,
     TO_DATE(START_TIME) AS load_date,
     SUM(FILES_INSERTED) AS total_files,
@@ -177,7 +177,7 @@ GROUP BY PIPE_NAME, TO_DATE(START_TIME)
 ORDER BY load_date DESC;
 
 -- Query copy history for detailed file-level information
-SELECT 
+SELECT
     FILE_NAME,
     TABLE_NAME,
     STATUS,
@@ -195,7 +195,7 @@ ORDER BY LAST_LOAD_TIME DESC
 LIMIT 100;
 
 -- Check for any load errors
-SELECT 
+SELECT
     FILE_NAME,
     ERROR_COUNT,
     FIRST_ERROR_MESSAGE,
@@ -210,12 +210,12 @@ ORDER BY LAST_LOAD_TIME DESC;
 -- Step 8: Cost Analysis
 -- ============================================================================
 -- Calculate Snowpipe costs (0.06 credits per 1,000 files)
-SELECT 
+SELECT
     'Snowpipe Cost Analysis' AS report_title,
     SUM(FILES_INSERTED) AS total_files_loaded,
     ROUND(SUM(FILES_INSERTED) / 1000.0 * 0.06, 4) AS snowpipe_credits,
     ROUND(SUM(BYTES_INSERTED) / 1024 / 1024 / 1024, 2) AS total_gb_ingested,
-    ROUND((SUM(FILES_INSERTED) / 1000.0 * 0.06) / 
+    ROUND((SUM(FILES_INSERTED) / 1000.0 * 0.06) /
           NULLIF(SUM(BYTES_INSERTED) / 1024 / 1024 / 1024, 0), 6) AS credits_per_gb,
     ROUND(SUM(FILES_INSERTED) / 1000.0 * 0.06 * 3.00, 2) AS estimated_cost_usd
 FROM SNOWFLAKE.ACCOUNT_USAGE.PIPE_USAGE_HISTORY
@@ -223,7 +223,7 @@ WHERE PIPE_NAME = 'SENSOR_PIPE'
     AND START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP());
 
 -- Detailed cost breakdown by day
-SELECT 
+SELECT
     TO_DATE(START_TIME) AS load_date,
     SUM(FILES_INSERTED) AS files_loaded,
     ROUND(SUM(BYTES_INSERTED) / 1024 / 1024 / 1024, 3) AS gb_loaded,
@@ -236,7 +236,7 @@ GROUP BY TO_DATE(START_TIME)
 ORDER BY load_date DESC;
 
 -- Compare Snowpipe vs Warehouse costs
-SELECT 
+SELECT
     'Cost Comparison' AS analysis,
     ROUND(SUM(FILES_INSERTED) / 1000.0 * 0.06, 4) AS snowpipe_credits,
     '0.20 - 0.50' AS estimated_warehouse_credits_range,
@@ -248,19 +248,19 @@ WHERE PIPE_NAME = 'SENSOR_PIPE'
 -- Step 9: Data Quality Validation
 -- ============================================================================
 -- Use VALIDATE function to check files without loading
-SELECT 
+SELECT
     METADATA$FILENAME AS file_name,
     METADATA$FILE_ROW_NUMBER AS row_number,
     $1 AS json_content
 FROM @s3_stage
 (FILE_FORMAT => json_format)
-WHERE $1:sensor_id IS NULL 
+WHERE $1:sensor_id IS NULL
    OR $1:timestamp IS NULL
    OR $1:temperature IS NULL
 LIMIT 100;
 
 -- Query sensor_data for basic statistics
-SELECT 
+SELECT
     SENSOR_ID,
     COUNT(*) AS reading_count,
     MIN(TIMESTAMP) AS first_reading,
@@ -274,7 +274,7 @@ GROUP BY SENSOR_ID
 ORDER BY reading_count DESC;
 
 -- Data completeness check
-SELECT 
+SELECT
     TO_DATE(TIMESTAMP) AS reading_date,
     COUNT(*) AS total_readings,
     COUNT(DISTINCT SENSOR_ID) AS active_sensors,
@@ -287,7 +287,7 @@ ORDER BY reading_date DESC
 LIMIT 30;
 
 -- Check for duplicate records
-SELECT 
+SELECT
     SENSOR_ID,
     TIMESTAMP,
     COUNT(*) AS duplicate_count
@@ -298,12 +298,12 @@ ORDER BY duplicate_count DESC;
 
 -- Identify anomalies (outlier detection)
 WITH stats AS (
-    SELECT 
+    SELECT
         AVG(TEMPERATURE) AS avg_temp,
         STDDEV(TEMPERATURE) AS stddev_temp
     FROM sensor_data
 )
-SELECT 
+SELECT
     sd.SENSOR_ID,
     sd.TIMESTAMP,
     sd.TEMPERATURE,
@@ -317,12 +317,12 @@ LIMIT 50;
 -- ============================================================================
 -- Create view for pipe monitoring dashboard
 CREATE OR REPLACE VIEW pipe_monitoring_dashboard AS
-SELECT 
+SELECT
     TO_DATE(START_TIME) AS load_date,
     PIPE_NAME,
     SUM(FILES_INSERTED) AS files_loaded,
     SUM(CASE WHEN ERROR_SEEN THEN 1 ELSE 0 END) AS files_with_errors,
-    ROUND(100.0 * SUM(CASE WHEN ERROR_SEEN THEN 1 ELSE 0 END) / 
+    ROUND(100.0 * SUM(CASE WHEN ERROR_SEEN THEN 1 ELSE 0 END) /
           NULLIF(SUM(FILES_INSERTED), 0), 2) AS error_rate_pct,
     ROUND(SUM(BYTES_INSERTED) / 1024 / 1024, 2) AS mb_loaded,
     ROUND(SUM(CREDITS_USED), 4) AS credits_used,
@@ -336,7 +336,7 @@ GROUP BY TO_DATE(START_TIME), PIPE_NAME;
 SELECT * FROM pipe_monitoring_dashboard ORDER BY load_date DESC;
 
 -- Query to identify slow-loading files
-SELECT 
+SELECT
     FILE_NAME,
     ROW_COUNT,
     FILE_SIZE,
@@ -354,11 +354,11 @@ LIMIT 20;
 
 -- Alert query for high error rate (> 5%)
 WITH error_summary AS (
-    SELECT 
+    SELECT
         TO_DATE(LAST_LOAD_TIME) AS load_date,
         COUNT(*) AS total_files,
         SUM(CASE WHEN STATUS = 'LOAD_FAILED' OR ERROR_COUNT > 0 THEN 1 ELSE 0 END) AS failed_files,
-        ROUND(100.0 * SUM(CASE WHEN STATUS = 'LOAD_FAILED' OR ERROR_COUNT > 0 THEN 1 ELSE 0 END) / 
+        ROUND(100.0 * SUM(CASE WHEN STATUS = 'LOAD_FAILED' OR ERROR_COUNT > 0 THEN 1 ELSE 0 END) /
               COUNT(*), 2) AS error_rate_pct
     FROM TABLE(INFORMATION_SCHEMA.COPY_HISTORY(
         TABLE_NAME => 'SENSOR_DATA',
@@ -366,12 +366,12 @@ WITH error_summary AS (
     ))
     GROUP BY TO_DATE(LAST_LOAD_TIME)
 )
-SELECT 
+SELECT
     load_date,
     total_files,
     failed_files,
     error_rate_pct,
-    CASE 
+    CASE
         WHEN error_rate_pct > 5 THEN '🚨 ALERT: High error rate!'
         WHEN error_rate_pct > 2 THEN '⚠️  WARNING: Elevated errors'
         ELSE '✓ OK'
@@ -381,14 +381,14 @@ WHERE error_rate_pct > 0
 ORDER BY load_date DESC;
 
 -- Ingestion lag monitoring
-SELECT 
+SELECT
     SENSOR_ID,
     MAX(TIMESTAMP) AS last_reading_time,
     MAX(INGESTION_TIME) AS last_ingestion_time,
     DATEDIFF(MINUTE, MAX(TIMESTAMP), CURRENT_TIMESTAMP()) AS minutes_since_reading,
     DATEDIFF(MINUTE, MAX(INGESTION_TIME), CURRENT_TIMESTAMP()) AS minutes_since_ingestion,
-    CASE 
-        WHEN DATEDIFF(MINUTE, MAX(INGESTION_TIME), CURRENT_TIMESTAMP()) > 60 
+    CASE
+        WHEN DATEDIFF(MINUTE, MAX(INGESTION_TIME), CURRENT_TIMESTAMP()) > 60
         THEN '⚠️  Ingestion delayed'
         ELSE '✓ Current'
     END AS ingestion_status

@@ -120,7 +120,7 @@ Curated list of official documentation, courses, certifications, books, and comm
    - URL: https://www.coursera.org/specializations/data-engineering-databricks
 
 2. **Apache Spark Programming for Data Engineering**
-   - Provider: Databricks  
+   - Provider: Databricks
    - Duration: 4 weeks
    - Topics: Spark core, DataFrames, optimization
    - URL: https://www.coursera.org/learn/apache-spark-databricks
@@ -521,6 +521,6 @@ display(dbutils.fs.ls("/databricks-datasets/"))
 
 ---
 
-**Resource Guide Version:** 1.0  
-**Last Updated:** March 2026  
+**Resource Guide Version:** 1.0
+**Last Updated:** March 2026
 **Curated by:** Data Engineering Training Team

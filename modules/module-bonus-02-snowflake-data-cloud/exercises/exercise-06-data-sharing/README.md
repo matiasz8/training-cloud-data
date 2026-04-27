@@ -3,8 +3,8 @@
 ## Overview
 Master Snowflake's Data Sharing capabilities to securely distribute data to partners and consumers without copying data, implementing row-level security, and exploring the Snowflake Data Marketplace.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐ Intermediate  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐ Intermediate
 **Prerequisites**: Module 03 (SQL basics), understanding of data security concepts, Snowflake account (Standard or higher)
 
 ---
@@ -61,11 +61,11 @@ CREATE OR REPLACE TABLE customer_metrics (
     metric_value FLOAT,
     metric_date DATE,
     category VARCHAR(50),
-    
+
     -- Sensitive fields
     customer_email VARCHAR(200),
     revenue_usd DECIMAL(15,2),
-    
+
     created_at TIMESTAMP DEFAULT current_timestamp()
 );
 ```
@@ -105,7 +105,7 @@ FROM table(generator(rowcount => 10000));
 **Verify Data Distribution**:
 ```sql
 -- Check data by customer
-SELECT 
+SELECT
     customer_id,
     customer_name,
     COUNT(*) as metric_count,
@@ -136,7 +136,7 @@ FROM customer_metrics
 GROUP BY customer_id, customer_name, month, metric_name;
 
 -- Query summary
-SELECT * FROM customer_monthly_summary 
+SELECT * FROM customer_monthly_summary
 WHERE customer_id = 'CUST_001'
 ORDER BY month DESC, metric_name
 LIMIT 10;
@@ -172,11 +172,11 @@ DESC SHARE client_analytics;
 **Grant Database Access**:
 ```sql
 -- Grant usage on database
-GRANT USAGE ON DATABASE shared_analytics 
+GRANT USAGE ON DATABASE shared_analytics
 TO SHARE client_analytics;
 
 -- Grant usage on schema
-GRANT USAGE ON SCHEMA shared_analytics.public 
+GRANT USAGE ON SCHEMA shared_analytics.public
 TO SHARE client_analytics;
 
 -- Show what's in share (should be empty - no tables/views yet)
@@ -192,7 +192,7 @@ SHOW GRANTS TO SHARE client_analytics;
 -- We'll create secure view in next task
 
 -- For now, share the monthly summary view
-GRANT SELECT ON VIEW shared_analytics.public.customer_monthly_summary 
+GRANT SELECT ON VIEW shared_analytics.public.customer_monthly_summary
 TO SHARE client_analytics;
 
 -- Verify grants
@@ -202,7 +202,7 @@ SHOW GRANTS TO SHARE client_analytics;
 **Share Metadata**:
 ```sql
 -- View share details
-SELECT 
+SELECT
     'client_analytics' as share_name,
     CURRENT_ACCOUNT() as provider_account,
     DATABASE_NAME,
@@ -259,24 +259,24 @@ SELECT
     metric_value,
     metric_date,
     category,
-    
+
     -- Mask sensitive email field
-    CASE 
+    CASE
         WHEN CURRENT_ROLE() IN ('ACCOUNTADMIN', 'SYSADMIN') THEN customer_email
         ELSE REGEXP_REPLACE(customer_email, '^(.{3}).*(@.*)$', '\\1***\\2')  -- m***@example.com
     END as customer_email,
-    
+
     -- Mask revenue (show range only)
     CASE
         WHEN CURRENT_ROLE() IN ('ACCOUNTADMIN', 'SYSADMIN') THEN revenue_usd
         ELSE FLOOR(revenue_usd / 10000) * 10000  -- Round to nearest $10K
     END as revenue_usd_range,
-    
+
     created_at
 FROM customer_metrics
 WHERE customer_id IN (
     -- Row-level filter: only show data for consumer's customer_id
-    SELECT customer_id 
+    SELECT customer_id
     FROM customer_account_mapping
     WHERE snowflake_account = CURRENT_ACCOUNT()
        OR account_locator = CURRENT_ACCOUNT()
@@ -310,7 +310,7 @@ SELECT COUNT(*) FROM customer_001_metrics;
 **Grant Secure View to Share**:
 ```sql
 -- Add secure view to share
-GRANT SELECT ON VIEW shared_analytics.public.customer_metrics_filtered 
+GRANT SELECT ON VIEW shared_analytics.public.customer_metrics_filtered
 TO SHARE client_analytics;
 
 -- Verify share contents
@@ -346,14 +346,14 @@ Add consumer accounts to the share and document access setup.
 **Add Consumer Accounts**:
 ```sql
 -- Add consumer accounts to share
-ALTER SHARE client_analytics 
+ALTER SHARE client_analytics
 ADD ACCOUNTS = ABC12345;  -- Acme Corp
 
-ALTER SHARE client_analytics 
+ALTER SHARE client_analytics
 ADD ACCOUNTS = XYZ67890;  -- TechStart Inc
 
 -- Add multiple at once
-ALTER SHARE client_analytics 
+ALTER SHARE client_analytics
 ADD ACCOUNTS = DEF11111, GHI22222, JKL33333;
 
 -- View consumers
@@ -376,16 +376,16 @@ Create `consumer-setup-guide.md`:
 ```sql
 USE ROLE ACCOUNTADMIN;
 
-CREATE DATABASE client_analytics_db 
+CREATE DATABASE client_analytics_db
 FROM SHARE <provider_account>.client_analytics;
 ```
 
 ### 2. Grant Access to Roles
 ```sql
-GRANT IMPORTED PRIVILEGES ON DATABASE client_analytics_db 
+GRANT IMPORTED PRIVILEGES ON DATABASE client_analytics_db
 TO ROLE SYSADMIN;
 
-GRANT IMPORTED PRIVILEGES ON DATABASE client_analytics_db 
+GRANT IMPORTED PRIVILEGES ON DATABASE client_analytics_db
 TO ROLE analyst_role;
 ```
 
@@ -403,7 +403,7 @@ SELECT * FROM customer_metrics_filtered
 LIMIT 10;
 
 -- Verify you only see your data
-SELECT DISTINCT customer_id, customer_name 
+SELECT DISTINCT customer_id, customer_name
 FROM customer_metrics_filtered;
 ```
 
@@ -411,7 +411,7 @@ FROM customer_metrics_filtered;
 ```sql
 -- Note: Consumers pay for compute (warehouse credits)
 CREATE WAREHOUSE consumer_wh
-WITH 
+WITH
     WAREHOUSE_SIZE = 'XSMALL'
     AUTO_SUSPEND = 60
     AUTO_RESUME = TRUE;
@@ -437,7 +437,7 @@ SELECT
     object_name,
     consumer_accounts
 FROM (
-    SELECT 
+    SELECT
         DATABASE_NAME,
         NAME as object_name,
         ARRAY_AGG(DISTINCT grantee_name) as consumer_accounts
@@ -452,7 +452,7 @@ FROM (
 **Remove Consumer** (if needed):
 ```sql
 -- Remove access for specific account
-ALTER SHARE client_analytics 
+ALTER SHARE client_analytics
 REMOVE ACCOUNTS = ABC12345;
 
 -- Consumer's database becomes inaccessible but not deleted
@@ -480,7 +480,7 @@ CREATE DATABASE client_analytics_shared
 FROM SHARE <provider_account>.client_analytics;
 
 -- Grant access
-GRANT IMPORTED PRIVILEGES ON DATABASE client_analytics_shared 
+GRANT IMPORTED PRIVILEGES ON DATABASE client_analytics_shared
 TO ROLE SYSADMIN;
 
 USE ROLE SYSADMIN;
@@ -495,7 +495,7 @@ SHOW VIEWS;
 SELECT * FROM customer_metrics_filtered LIMIT 10;
 
 -- Verify row-level security
-SELECT 
+SELECT
     customer_id,
     customer_name,
     COUNT(*) as my_metrics
@@ -522,7 +522,7 @@ GET_DDL('VIEW', 'customer_metrics_filtered');
 -- Returns: Definition hidden for SECURE views
 
 -- 3. See data for other customers
-SELECT * FROM customer_metrics_filtered 
+SELECT * FROM customer_metrics_filtered
 WHERE customer_id = 'CUST_999';
 -- Returns: 0 rows (filtered out)
 
@@ -535,14 +535,14 @@ SELECT COUNT(*) FROM customer_metrics_filtered;
 -- 2. Create views in their own database referencing shared data
 USE DATABASE my_analytics;
 CREATE VIEW my_analysis AS
-SELECT 
+SELECT
     metric_date,
     AVG(metric_value) as avg_daily_value
 FROM client_analytics_shared.public.customer_metrics_filtered
 GROUP BY metric_date;
 
 -- 3. Join shared data with their own data
-SELECT 
+SELECT
     a.metric_date,
     a.metric_value,
     b.internal_notes
@@ -651,7 +651,7 @@ WHERE share_name = 'CLIENT_ANALYTICS'
 ORDER BY granted_on DESC;
 
 -- Active shares
-SELECT 
+SELECT
     name as share_name,
     owner,
     kind,
@@ -668,33 +668,33 @@ WHERE name = 'CLIENT_ANALYTICS';
 CREATE OR REPLACE VIEW v_share_usage_dashboard AS
 SELECT
     'client_analytics' as share_name,
-    
+
     -- Consumer count
-    (SELECT COUNT(DISTINCT target_account_name) 
-     FROM snowflake.account_usage.data_transfer_history 
+    (SELECT COUNT(DISTINCT target_account_name)
+     FROM snowflake.account_usage.data_transfer_history
      WHERE source_database = 'SHARED_ANALYTICS'
        AND start_time >= DATEADD(day, -30, current_timestamp())) as active_consumers_30d,
-    
+
     -- Data transferred (last 30 days)
-    (SELECT SUM(bytes_transferred) / (1024*1024*1024) 
-     FROM snowflake.account_usage.data_transfer_history 
+    (SELECT SUM(bytes_transferred) / (1024*1024*1024)
+     FROM snowflake.account_usage.data_transfer_history
      WHERE source_database = 'SHARED_ANALYTICS'
        AND start_time >= DATEADD(day, -30, current_timestamp())) as gb_transferred_30d,
-    
+
     -- Most active consumer
-    (SELECT target_account_name 
-     FROM snowflake.account_usage.data_transfer_history 
+    (SELECT target_account_name
+     FROM snowflake.account_usage.data_transfer_history
      WHERE source_database = 'SHARED_ANALYTICS'
        AND start_time >= DATEADD(day, -30, current_timestamp())
-     GROUP BY target_account_name 
-     ORDER BY SUM(bytes_transferred) DESC 
+     GROUP BY target_account_name
+     ORDER BY SUM(bytes_transferred) DESC
      LIMIT 1) as top_consumer,
-    
+
     -- Last access
-    (SELECT MAX(start_time) 
-     FROM snowflake.account_usage.data_transfer_history 
+    (SELECT MAX(start_time)
+     FROM snowflake.account_usage.data_transfer_history
      WHERE source_database = 'SHARED_ANALYTICS') as last_access_time,
-    
+
     current_timestamp() as report_time;
 
 -- Query dashboard
@@ -819,15 +819,15 @@ DROP SHARE my_share;
 ```sql
 -- Create secure view (definition hidden from consumers)
 CREATE SECURE VIEW secure_customer_view AS
-SELECT 
+SELECT
     customer_id,
     metric_name,
     metric_value
 FROM customer_metrics
 WHERE customer_id = (
     -- Row-level security: filter by consumer account
-    SELECT customer_id 
-    FROM account_mapping 
+    SELECT customer_id
+    FROM account_mapping
     WHERE snowflake_account = CURRENT_ACCOUNT()
 );
 
@@ -848,35 +848,35 @@ GET_DDL('VIEW', 'secure_customer_view');  -- Hidden for SECURE views
 
 ```sql
 -- Email masking
-SELECT 
+SELECT
     customer_email,
     REGEXP_REPLACE(customer_email, '^(.{3}).*(@.*)$', '\\1***\\2') as masked_email
     -- abc@example.com -> abc***@example.com
 FROM customers;
 
 -- Phone masking
-SELECT 
+SELECT
     phone,
     CONCAT('***-***-', RIGHT(phone, 4)) as masked_phone
     -- 555-123-4567 -> ***-***-4567
 FROM customers;
 
 -- Credit card masking
-SELECT 
+SELECT
     card_number,
     CONCAT('****-****-****-', RIGHT(card_number, 4)) as masked_card
 FROM payments;
 
 -- Value bucketing
-SELECT 
+SELECT
     revenue,
     FLOOR(revenue / 10000) * 10000 as revenue_bucket
     -- $23,456 -> $20,000
 FROM customers;
 
 -- Role-based unmasking
-SELECT 
-    CASE 
+SELECT
+    CASE
         WHEN CURRENT_ROLE() IN ('ADMIN', 'FINANCE') THEN revenue
         ELSE NULL
     END as revenue
@@ -935,7 +935,7 @@ GROUP BY date, source_cloud, source_region, target_account_name
 ORDER BY date DESC;
 
 -- Shares and consumers
-SELECT 
+SELECT
     name as share_name,
     kind,  -- 'OUTBOUND' or 'INBOUND'
     database_name,

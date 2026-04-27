@@ -532,6 +532,6 @@ Once setup is complete:
 
 ---
 
-**Setup Guide Version:** 1.0  
-**Last Updated:** March 2026  
+**Setup Guide Version:** 1.0
+**Last Updated:** March 2026
 **Tested On:** Databricks Runtime 14.3 LTS

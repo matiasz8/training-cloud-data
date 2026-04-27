@@ -48,14 +48,14 @@ SELECT
         WHEN 6 THEN 'churn_risk_score'
         ELSE 'active_users'
     END AS METRIC_NAME,
-    CASE 
-        WHEN METRIC_NAME IN ('revenue', 'avg_order_value', 'customer_lifetime_value') 
+    CASE
+        WHEN METRIC_NAME IN ('revenue', 'avg_order_value', 'customer_lifetime_value')
         THEN ROUND(UNIFORM(1000, 50000, RANDOM()), 2)
-        WHEN METRIC_NAME IN ('orders', 'sessions', 'active_users') 
+        WHEN METRIC_NAME IN ('orders', 'sessions', 'active_users')
         THEN ROUND(UNIFORM(50, 5000, RANDOM()), 0)
-        WHEN METRIC_NAME = 'conversion_rate' 
+        WHEN METRIC_NAME = 'conversion_rate'
         THEN ROUND(UNIFORM(0.01, 0.15, RANDOM()), 4)
-        WHEN METRIC_NAME = 'churn_risk_score' 
+        WHEN METRIC_NAME = 'churn_risk_score'
         THEN ROUND(UNIFORM(0, 1, RANDOM()), 3)
         ELSE ROUND(UNIFORM(100, 10000, RANDOM()), 2)
     END AS VALUE,
@@ -74,7 +74,7 @@ SELECT
 FROM TABLE(GENERATOR(ROWCOUNT => 10000));
 
 -- Verify data distribution
-SELECT 
+SELECT
     CUSTOMER_ID,
     COUNT(*) AS metric_count,
     COUNT(DISTINCT METRIC_NAME) AS unique_metrics,
@@ -86,17 +86,17 @@ GROUP BY CUSTOMER_ID
 ORDER BY CUSTOMER_ID;
 
 -- Summary statistics
-SELECT 
+SELECT
     'Total Records' AS metric,
     COUNT(*)::VARCHAR AS value
 FROM customer_metrics
 UNION ALL
-SELECT 
+SELECT
     'Unique Customers',
     COUNT(DISTINCT CUSTOMER_ID)::VARCHAR
 FROM customer_metrics
 UNION ALL
-SELECT 
+SELECT
     'Date Range (Days)',
     DATEDIFF(DAY, MIN(DATE), MAX(DATE))::VARCHAR
 FROM customer_metrics;
@@ -113,7 +113,7 @@ CREATE OR REPLACE TABLE customer_account_mapping (
 
 -- Insert sample mappings (in production, this would be managed dynamically)
 INSERT INTO customer_account_mapping (SNOWFLAKE_ACCOUNT, CUSTOMER_ID)
-VALUES 
+VALUES
     ('ABC12345', 'CUST_001'),
     ('DEF67890', 'CUST_002'),
     ('GHI11111', 'CUST_003'),
@@ -124,7 +124,7 @@ VALUES
 CREATE OR REPLACE SECURE VIEW customer_metrics_filtered
     COMMENT = 'Customer metrics filtered by account access'
 AS
-SELECT 
+SELECT
     cm.CUSTOMER_ID,
     cm.METRIC_NAME,
     cm.VALUE,
@@ -138,7 +138,7 @@ WHERE cam.SNOWFLAKE_ACCOUNT = CURRENT_ACCOUNT()
     OR CURRENT_ROLE() = 'ACCOUNTADMIN';  -- Allow full access for admins
 
 -- Test secure view (as provider, you'll see all data if ACCOUNTADMIN)
-SELECT 
+SELECT
     CUSTOMER_ID,
     COUNT(*) AS record_count,
     COUNT(DISTINCT METRIC_NAME) AS unique_metrics
@@ -173,7 +173,7 @@ VALUES
 CREATE OR REPLACE SECURE VIEW customer_details_masked
     COMMENT = 'Customer details with PII masking'
 AS
-SELECT 
+SELECT
     CUSTOMER_ID,
     NAME,
     -- Mask email - show only domain
@@ -207,14 +207,14 @@ GRANT USAGE ON DATABASE SHARED_ANALYTICS TO SHARE client_analytics;
 GRANT USAGE ON SCHEMA SHARED_ANALYTICS.CUSTOMER_DATA TO SHARE client_analytics;
 
 -- Grant SELECT on secure views to share
-GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_metrics_filtered 
+GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_metrics_filtered
     TO SHARE client_analytics;
 
-GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_details_masked 
+GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_details_masked
     TO SHARE client_analytics;
 
 -- Also grant on mapping table (needed for view to work)
-GRANT SELECT ON TABLE SHARED_ANALYTICS.CUSTOMER_DATA.customer_account_mapping 
+GRANT SELECT ON TABLE SHARED_ANALYTICS.CUSTOMER_DATA.customer_account_mapping
     TO SHARE client_analytics;
 
 -- Show share configuration
@@ -240,7 +240,7 @@ ALTER SHARE client_analytics ADD ACCOUNTS = ABC12345, DEF67890, GHI11111;
 SHOW SHARES LIKE 'client_analytics';
 
 -- Query share details
-SELECT 
+SELECT
     "name" AS share_name,
     "kind" AS share_type,
     "database_name",
@@ -254,7 +254,7 @@ FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()));
 -- Consumer would execute these commands in their account:
 /*
 -- Consumer side (in consumer's Snowflake account):
-CREATE DATABASE client_analytics_data 
+CREATE DATABASE client_analytics_data
 FROM SHARE <provider_account>.client_analytics;
 
 USE DATABASE client_analytics_data;
@@ -268,7 +268,7 @@ SELECT * FROM customer_details_masked;
 */
 
 -- Provider can query what's available in the share
-SELECT 
+SELECT
     TABLE_CATALOG AS database_name,
     TABLE_SCHEMA AS schema_name,
     TABLE_NAME,
@@ -282,7 +282,7 @@ ORDER BY TABLE_NAME;
 -- Step 8: Monitor Data Transfer and Usage
 -- ============================================================================
 -- Query data transfer history
-SELECT 
+SELECT
     TARGET_ACCOUNT_NAME AS consumer_account,
     TARGET_REGION AS consumer_region,
     SOURCE_REGION AS provider_region,
@@ -300,12 +300,12 @@ ORDER BY transfer_date DESC, consumer_account;
 -- Note: Same-region transfers are typically free
 -- Cross-region costs vary by cloud provider
 WITH transfer_summary AS (
-    SELECT 
+    SELECT
         TARGET_ACCOUNT_NAME AS consumer_account,
         SOURCE_REGION,
         TARGET_REGION,
         SUM(BYTES_TRANSFERRED) / 1024 / 1024 / 1024 AS total_gb,
-        CASE 
+        CASE
             WHEN SOURCE_REGION = TARGET_REGION THEN 0
             WHEN SOURCE_REGION LIKE 'AWS%' AND TARGET_REGION LIKE 'AWS%' THEN 0.02  -- $0.02/GB cross-region AWS
             WHEN SOURCE_REGION LIKE 'AZURE%' AND TARGET_REGION LIKE 'AZURE%' THEN 0.02
@@ -316,14 +316,14 @@ WITH transfer_summary AS (
         AND START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP())
     GROUP BY consumer_account, SOURCE_REGION, TARGET_REGION
 )
-SELECT 
+SELECT
     consumer_account,
     SOURCE_REGION,
     TARGET_REGION,
     ROUND(total_gb, 3) AS total_gb_transferred,
     cost_per_gb,
     ROUND(total_gb * cost_per_gb, 2) AS estimated_cost_usd,
-    CASE 
+    CASE
         WHEN cost_per_gb = 0 THEN 'Same Region (Free)'
         WHEN cost_per_gb < 0.05 THEN 'Same Cloud (Low Cost)'
         ELSE 'Cross Cloud (Higher Cost)'
@@ -332,7 +332,7 @@ FROM transfer_summary
 ORDER BY estimated_cost_usd DESC;
 
 -- Query access history to see query patterns
-SELECT 
+SELECT
     USER_NAME,
     QUERY_TYPE,
     DATABASE_NAME,
@@ -411,7 +411,7 @@ SELECT 'Snowflake Data Marketplace' AS note,
 CREATE OR REPLACE SECURE VIEW customer_metrics_weekly_agg
     COMMENT = 'Weekly aggregated metrics - less granular for broader sharing'
 AS
-SELECT 
+SELECT
     cm.CUSTOMER_ID,
     DATE_TRUNC('WEEK', cm.DATE) AS WEEK_START,
     cm.METRIC_NAME,
@@ -426,7 +426,7 @@ INNER JOIN customer_account_mapping cam
     ON cm.CUSTOMER_ID = cam.CUSTOMER_ID
 WHERE cam.SNOWFLAKE_ACCOUNT = CURRENT_ACCOUNT()
     OR CURRENT_ROLE() = 'ACCOUNTADMIN'
-GROUP BY 
+GROUP BY
     cm.CUSTOMER_ID,
     DATE_TRUNC('WEEK', cm.DATE),
     cm.METRIC_NAME,
@@ -434,14 +434,14 @@ GROUP BY
     cm.REGION;
 
 -- Grant to share
-GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_metrics_weekly_agg 
+GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_metrics_weekly_agg
     TO SHARE client_analytics;
 
 -- Create time-limited view (only recent data)
 CREATE OR REPLACE SECURE VIEW customer_metrics_recent_30d
     COMMENT = 'Customer metrics - last 30 days only'
 AS
-SELECT 
+SELECT
     CUSTOMER_ID,
     METRIC_NAME,
     VALUE,
@@ -453,30 +453,30 @@ FROM customer_metrics_filtered
 WHERE DATE >= DATEADD(DAY, -30, CURRENT_DATE());
 
 -- Grant to share
-GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_metrics_recent_30d 
+GRANT SELECT ON VIEW SHARED_ANALYTICS.CUSTOMER_DATA.customer_metrics_recent_30d
     TO SHARE client_analytics;
 
 -- Create comprehensive share documentation view
 CREATE OR REPLACE VIEW share_documentation AS
-SELECT 
+SELECT
     'client_analytics' AS share_name,
     'customer_metrics_filtered' AS view_name,
     'Detailed daily metrics with row-level security by customer' AS description,
     'All historical data' AS time_range
 UNION ALL
-SELECT 
+SELECT
     'client_analytics',
     'customer_details_masked',
     'Customer PII with email, phone, address, credit card masking',
     'Current data'
 UNION ALL
-SELECT 
+SELECT
     'client_analytics',
     'customer_metrics_weekly_agg',
     'Weekly aggregated metrics - less granular',
     'All historical data'
 UNION ALL
-SELECT 
+SELECT
     'client_analytics',
     'customer_metrics_recent_30d',
     'Daily metrics limited to last 30 days',
@@ -495,7 +495,7 @@ SHOW SHARES;
 SHOW GRANTS TO SHARE client_analytics;
 
 -- Check share usage statistics
-SELECT 
+SELECT
     SHARE_NAME,
     TO_ACCOUNT_LOCATOR AS consumer_account,
     COUNT(*) AS access_count,
@@ -512,7 +512,7 @@ ORDER BY access_count DESC;
 -- ============================================================================
 
 -- Final verification
-SELECT 
+SELECT
     '=== Data Sharing Summary ===' AS section
 UNION ALL
 SELECT 'Share Name: client_analytics'

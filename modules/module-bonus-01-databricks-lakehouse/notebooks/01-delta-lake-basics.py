@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Notebook 01: Delta Lake Basics
-# MAGIC 
+# MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC By the end of this notebook, you will understand:
 # MAGIC - How to create and query Delta Lake tables
@@ -10,28 +10,26 @@
 # MAGIC - Schema evolution
 # MAGIC - MERGE operations for UPSERT
 # MAGIC - Delta Lake optimization techniques
-# MAGIC 
+# MAGIC
 # MAGIC ## Prerequisites
 # MAGIC - Databricks Runtime 14.3 LTS or higher
 # MAGIC - Basic SQL and Python knowledge
-# MAGIC 
+# MAGIC
 # MAGIC ## Estimated Time: 45-60 minutes
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## Setup
-# MAGIC 
+# MAGIC
 # MAGIC First, let's set up our environment and create a database for our work.
 
 # COMMAND ----------
 
 # Import required libraries
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from delta.tables import DeltaTable
-import datetime
 
 # COMMAND ----------
 
@@ -50,12 +48,12 @@ print(f"✅ Tables will be stored at: {table_path}")
 
 # MAGIC %md
 # MAGIC ## Part 1: Creating Your First Delta Lake Table
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake tables can be created in several ways:
 # MAGIC 1. From a DataFrame
 # MAGIC 2. Using SQL DDL
 # MAGIC 3. Converting existing Parquet files
-# MAGIC 
+# MAGIC
 # MAGIC Let's explore each method.
 
 # COMMAND ----------
@@ -107,13 +105,13 @@ display(spark.table("customers"))
 
 # MAGIC %md
 # MAGIC ## Part 2: ACID Transactions
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake provides ACID guarantees:
 # MAGIC - **Atomicity**: All changes succeed or fail together
 # MAGIC - **Consistency**: Data is always in a valid state
 # MAGIC - **Isolation**: Concurrent operations don't interfere
 # MAGIC - **Durability**: Committed changes are permanent
-# MAGIC 
+# MAGIC
 # MAGIC Let's demonstrate this with concurrent writes.
 
 # COMMAND ----------
@@ -145,19 +143,19 @@ print(f"Total customers: {customer_count}")
 
 # MAGIC %md
 # MAGIC ## Part 3: Time Travel
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake maintains a transaction log that allows you to:
 # MAGIC - Query previous versions of data
 # MAGIC - Audit changes over time
 # MAGIC - Rollback mistakes
-# MAGIC 
+# MAGIC
 # MAGIC This is called "Time Travel"
 
 # COMMAND ----------
 
 # View version history
 print("📜 Table History:")
-history_df = spark.sql(f"DESCRIBE HISTORY customers")
+history_df = spark.sql("DESCRIBE HISTORY customers")
 display(history_df.select("version", "timestamp", "operation", "operationMetrics"))
 
 # COMMAND ----------
@@ -191,7 +189,7 @@ display(timestamp_df)
 
 # MAGIC %md
 # MAGIC ## Part 4: Schema Evolution
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake can automatically handle schema changes:
 # MAGIC - Add new columns
 # MAGIC - Change column types (with restrictions)
@@ -243,12 +241,12 @@ display(spark.table("customers").orderBy("customer_id"))
 
 # MAGIC %md
 # MAGIC ## Part 5: MERGE Operations (UPSERT)
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake supports MERGE (UPSERT) operations:
 # MAGIC - Update existing records
 # MAGIC - Insert new records
 # MAGIC - Delete records (optional)
-# MAGIC 
+# MAGIC
 # MAGIC This is critical for Change Data Capture (CDC) scenarios.
 
 # COMMAND ----------
@@ -273,7 +271,6 @@ display(updates_df)
 # COMMAND ----------
 
 # Perform MERGE operation
-from delta.tables import DeltaTable
 
 delta_table = DeltaTable.forPath(spark, f"{table_path}/customers")
 
@@ -322,7 +319,7 @@ display(result_df.filter("customer_id = 10"))
 
 # MAGIC %md
 # MAGIC ## Part 6: Delta Lake Optimization
-# MAGIC 
+# MAGIC
 # MAGIC Delta Lake provides several optimization commands:
 # MAGIC - **OPTIMIZE**: Compacts small files
 # MAGIC - **ZORDER**: Co-locates data for faster queries
@@ -332,7 +329,7 @@ display(result_df.filter("customer_id = 10"))
 
 # Check current file stats
 print("📊 Current file statistics:")
-file_stats = spark.sql(f"""
+file_stats = spark.sql("""
     DESCRIBE DETAIL customers
 """)
 display(file_stats.select("format", "numFiles", "sizeInBytes"))
@@ -342,7 +339,7 @@ display(file_stats.select("format", "numFiles", "sizeInBytes"))
 # OPTIMIZE: Compact small files into larger ones
 print("🔧 Running OPTIMIZE...")
 
-optimize_result = spark.sql(f"""
+optimize_result = spark.sql("""
     OPTIMIZE customers
     ZORDER BY (customer_id, tier)
 """)
@@ -353,7 +350,7 @@ display(optimize_result)
 
 # Check file stats after optimization
 print("\n📊 After OPTIMIZE:")
-file_stats_after = spark.sql(f"""
+file_stats_after = spark.sql("""
     DESCRIBE DETAIL customers
 """)
 display(file_stats_after.select("format", "numFiles", "sizeInBytes"))
@@ -366,7 +363,7 @@ print("🧹 Preparing VACUUM...")
 # First, check what would be deleted (dry run)
 spark.conf.set("spark.databricks.delta.retentionDurationCheck.enabled", "false")
 
-vacuum_preview = spark.sql(f"""
+vacuum_preview = spark.sql("""
     VACUUM customers RETAIN 0 HOURS DRY RUN
 """)
 
@@ -377,7 +374,7 @@ display(vacuum_preview)
 
 # MAGIC %md
 # MAGIC ⚠️ **Warning**: VACUUM permanently deletes files!
-# MAGIC 
+# MAGIC
 # MAGIC In production:
 # MAGIC - Keep default 7-day retention for time travel
 # MAGIC - Only reduce retention if you're sure you don't need history
@@ -425,7 +422,7 @@ print("📊 Data Skipping Statistics:")
 # Delta Lake maintains min/max statistics for each file
 # This enables "data skipping" - avoiding reads of irrelevant files
 
-stats_df = spark.sql(f"""
+stats_df = spark.sql("""
     DESCRIBE DETAIL customers
 """)
 
@@ -451,37 +448,37 @@ display(properties)
 
 # MAGIC %md
 # MAGIC ## Summary & Key Takeaways
-# MAGIC 
+# MAGIC
 # MAGIC In this notebook, you learned:
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Delta Lake Basics**
 # MAGIC - Creating Delta tables from DataFrames
 # MAGIC - Reading and writing Delta format
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **ACID Transactions**
 # MAGIC - Atomic writes guarantee data consistency
 # MAGIC - Concurrent operations are isolated
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Time Travel**
 # MAGIC - Query historical versions with `versionAsOf` or `timestampAsOf`
 # MAGIC - Audit changes with `DESCRIBE HISTORY`
 # MAGIC - Rollback with `RESTORE`
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Schema Evolution**
 # MAGIC - Add new columns with `mergeSchema` option
 # MAGIC - Maintain backward compatibility
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **MERGE Operations**
 # MAGIC - Efficient UPSERT (update + insert)
 # MAGIC - Critical for CDC pipelines
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Optimization**
 # MAGIC - `OPTIMIZE` for file compaction
 # MAGIC - `ZORDER` for data co-location
 # MAGIC - `VACUUM` for cleanup
-# MAGIC 
+# MAGIC
 # MAGIC ## Next Steps
-# MAGIC 
+# MAGIC
 # MAGIC Continue to Notebook 02: **ETL Pipeline with Medallion Architecture**
 
 # COMMAND ----------

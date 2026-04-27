@@ -88,7 +88,7 @@ USE SCHEMA CDC_LAB.PIPELINE;
 -- Step 5: Manual Stream Consumption
 -- ============================================================================
 -- TODO: Create silver_orders table (transformed layer)
--- Include columns: ORDER_ID, CUSTOMER_ID, PRODUCT, AMOUNT, STATUS, 
+-- Include columns: ORDER_ID, CUSTOMER_ID, PRODUCT, AMOUNT, STATUS,
 --                  CREATED_AT, UPDATED_AT, IS_DELETED
 -- YOUR CODE HERE:
 

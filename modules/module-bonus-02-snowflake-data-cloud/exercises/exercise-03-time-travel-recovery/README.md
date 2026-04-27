@@ -3,8 +3,8 @@
 ## Overview
 Implement disaster recovery strategies using Time Travel and Fail-safe to protect against data loss, corruption, and accidental deletions.
 
-**Estimated Time**: 2.5 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2.5 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Exercise 02 (Cloning), understanding of disaster recovery concepts
 
 ---
@@ -129,8 +129,8 @@ FROM table(generator(rowcount => 100));
 SET snapshot1_time = CURRENT_TIMESTAMP();
 
 -- Wait a moment, then Snapshot 2: Update 50 orders
-UPDATE orders 
-SET status = 'delivered', 
+UPDATE orders
+SET status = 'delivered',
     order_total = order_total * 1.1
 WHERE order_id <= 50;
 
@@ -157,19 +157,19 @@ SELECT COUNT(*) as count_at_snapshot1
 FROM orders AT(TIMESTAMP => $snapshot1_time);
 
 -- Compare changes over time
-SELECT 
+SELECT
     'Current' as timepoint,
     COUNT(*) as row_count,
     SUM(order_total) as revenue
 FROM orders
 UNION ALL
-SELECT 
+SELECT
     '1 hour ago' as timepoint,
     COUNT(*) as row_count,
     SUM(order_total) as revenue
 FROM orders AT(OFFSET => -3600)
 UNION ALL
-SELECT 
+SELECT
     'Snapshot 1' as timepoint,
     COUNT(*) as row_count,
     SUM(order_total) as revenue
@@ -179,15 +179,15 @@ FROM orders AT(TIMESTAMP => $snapshot1_time);
 **Query 3: Track Specific Row Changes**:
 ```sql
 -- See how order_id=10 changed over time
-SELECT 
+SELECT
     order_id,
     status,
     order_total,
     'Current' as version
-FROM orders 
+FROM orders
 WHERE order_id = 10
 UNION ALL
-SELECT 
+SELECT
     order_id,
     status,
     order_total,
@@ -195,7 +195,7 @@ SELECT
 FROM orders AT(TIMESTAMP => $snapshot1_time)
 WHERE order_id = 10
 UNION ALL
-SELECT 
+SELECT
     order_id,
     status,
     order_total,
@@ -207,7 +207,7 @@ WHERE order_id = 10;
 **Use DESCRIBE HISTORY**:
 ```sql
 -- View complete history of changes
-SELECT 
+SELECT
     query_id,
     query_text,
     rows_inserted,
@@ -235,18 +235,18 @@ Simulate and recover from accidental data deletion.
 
 **The Accident**:
 ```sql
--- Developer meant to run: 
+-- Developer meant to run:
 -- DELETE FROM dev.orders WHERE status = 'cancelled';
 
 -- But accidentally ran against production:
 DELETE FROM orders WHERE status = 'cancelled';
 
 -- Panic! How many rows deleted?
-SELECT 
+SELECT
     'Rows before delete' as description,
     (SELECT COUNT(*) FROM orders AT(OFFSET => -60)) as count
 UNION ALL
-SELECT 
+SELECT
     'Rows after delete' as description,
     COUNT(*) as count
 FROM orders;
@@ -272,11 +272,11 @@ SELECT COUNT(*) FROM orders;
 ```sql
 -- If data deleted but table still exists:
 -- Strategy 1: Create backup from before delete
-CREATE TABLE orders_backup CLONE orders 
+CREATE TABLE orders_backup CLONE orders
 AT(OFFSET => -300);  -- 5 minutes ago
 
 -- Strategy 2: Replace current with historical
-CREATE OR REPLACE TABLE orders CLONE orders 
+CREATE OR REPLACE TABLE orders CLONE orders
 AT(OFFSET => -300);
 
 -- Or more surgically, insert deleted rows back
@@ -319,7 +319,7 @@ CREATE TABLE orders_0945 CLONE orders AT(OFFSET => -7200);
 
 -- 10:00 AM: Data corruption begins
 -- Bad ETL pipeline multiplies all order totals by 100
-UPDATE orders 
+UPDATE orders
 SET order_total = order_total * 100
 WHERE order_id <= 500;
 
@@ -338,7 +338,7 @@ WHERE order_id BETWEEN 501 AND 750;
 1. **Identify Corruption Scope**:
    ```sql
    -- Find affected rows
-   SELECT 
+   SELECT
        COUNT(*) as corrupted_count,
        AVG(order_total) as avg_total,
        COUNT(DISTINCT status) as status_count
@@ -350,7 +350,7 @@ WHERE order_id BETWEEN 501 AND 750;
 2. **Get Query ID of Corruption**:
    ```sql
    -- Find the problematic UPDATE
-   SELECT 
+   SELECT
        query_id,
        query_text,
        start_time,
@@ -359,7 +359,7 @@ WHERE order_id BETWEEN 501 AND 750;
    WHERE query_text LIKE '%order_total = order_total * 100%'
    ORDER BY start_time DESC
    LIMIT 1;
-   
+
    SET corruption_query_id = 'query_id_here';
    ```
 
@@ -369,7 +369,7 @@ WHERE order_id BETWEEN 501 AND 750;
    CREATE OR REPLACE TABLE orders_recovered
    CLONE orders
    AT(TIMESTAMP => '2026-03-09 09:45:00'::TIMESTAMP);
-   
+
    -- Option 2: Clone before corrupting statement
    CREATE OR REPLACE TABLE orders_recovered
    CLONE orders
@@ -401,7 +401,7 @@ WHERE order_id BETWEEN 501 AND 750;
    -- Swap recovered table with current (atomic operation)
    ALTER TABLE orders RENAME TO orders_corrupted_backup;
    ALTER TABLE orders_recovered RENAME TO orders;
-   
+
    -- Verify
    SELECT COUNT(*) FROM orders;  -- Should match baseline
    ```
@@ -430,7 +430,7 @@ SHOW PARAMETERS LIKE 'DATA_RETENTION_TIME_IN_DAYS' IN ACCOUNT;
 **Configure Table-Level Retention**:
 ```sql
 -- Set extended retention for critical table
-ALTER TABLE orders 
+ALTER TABLE orders
 SET DATA_RETENTION_TIME_IN_DAYS = 7;
 
 -- Verify retention setting
@@ -451,12 +451,12 @@ SET DATA_RETENTION_TIME_IN_DAYS = 14;
 ```sql
 -- Try to query beyond retention period
 -- This will fail if data is outside retention window
-SELECT COUNT(*) 
-FROM orders 
+SELECT COUNT(*)
+FROM orders
 AT(OFFSET => -172800);  -- 2 days ago (fails if retention is 1 day)
 
 -- Check retention limit
-SELECT 
+SELECT
     table_catalog,
     table_schema,
     table_name,
@@ -533,7 +533,7 @@ WHERE ...
 
 -- Step 2: Clone from before deletion
 CREATE TABLE critical_table_backup CLONE critical_table;
-CREATE OR REPLACE TABLE critical_table 
+CREATE OR REPLACE TABLE critical_table
 CLONE critical_table AT(OFFSET => -300);
 
 -- Step 3: Validate recovery
@@ -553,8 +553,8 @@ WHERE query_text LIKE '%UPDATE critical_table%'
 ORDER BY start_time DESC;
 
 -- Step 2: Clone before corruption
-CREATE TABLE clean_data 
-CLONE critical_table 
+CREATE TABLE clean_data
+CLONE critical_table
 BEFORE(STATEMENT => 'query_id');
 
 -- Step 3: Validate clean data
@@ -594,8 +594,8 @@ CREATE TABLE critical_table CLONE critical_table_old_schema;
 -- Recovery Procedure
 -- Step 1: Assess scope (entire database)
 -- Step 2: Clone entire database
-CREATE DATABASE PROD_DB_RECOVERY 
-CLONE PROD_DB 
+CREATE DATABASE PROD_DB_RECOVERY
+CLONE PROD_DB
 AT(TIMESTAMP => '2026-03-09 09:00:00'::TIMESTAMP);
 
 -- Step 3: Validate all schemas and tables
@@ -656,14 +656,14 @@ $$
 BEGIN
     -- Create backup of current state
     LET backup_name := table_name || '_corrupted_backup';
-    CREATE OR REPLACE TABLE IDENTIFIER(:backup_name) 
+    CREATE OR REPLACE TABLE IDENTIFIER(:backup_name)
     CLONE IDENTIFIER(:table_name);
-    
+
     -- Restore from history
     CREATE OR REPLACE TABLE IDENTIFIER(:table_name)
     CLONE IDENTIFIER(:table_name)
     AT(OFFSET => (:minutes_back * -60));
-    
+
     RETURN 'Recovery complete: ' || table_name || ' restored to ' || minutes_back || ' minutes ago';
 END;
 $$;

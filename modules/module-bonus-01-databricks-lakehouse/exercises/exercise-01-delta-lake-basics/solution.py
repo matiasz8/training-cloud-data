@@ -18,7 +18,7 @@ Module: Bonus 01 - Databricks Lakehouse
 
 # MAGIC %md
 # MAGIC # Exercise 01: Delta Lake Fundamentals
-# MAGIC 
+# MAGIC
 # MAGIC This exercise covers:
 # MAGIC 1. Creating Delta tables
 # MAGIC 2. ACID transaction properties
@@ -30,7 +30,6 @@ Module: Bonus 01 - Databricks Lakehouse
 # COMMAND ----------
 
 # Import required libraries
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from delta.tables import DeltaTable
@@ -62,9 +61,9 @@ print("✅ Database created: exercise_01_db")
 
 # MAGIC %md
 # MAGIC # Task 1: Create Delta Table (15 min)
-# MAGIC 
+# MAGIC
 # MAGIC Create a Delta table with 1,000 customer records.
-# MAGIC 
+# MAGIC
 # MAGIC **Schema**:
 # MAGIC - customer_id (INT)
 # MAGIC - name (STRING)
@@ -78,20 +77,20 @@ print("✅ Database created: exercise_01_db")
 def generate_customers(start_id, count):
     """
     Generate sample customer data.
-    
+
     Args:
         start_id: Starting customer ID
         count: Number of customers to generate
-    
+
     Returns:
         DataFrame with customer data
     """
     # Countries for realistic distribution
     countries = ["USA", "UK", "Canada", "Germany", "France", "Spain", "Italy", "Japan", "Australia", "Brazil"]
-    
+
     # Generate date range for signups (last 2 years)
     base_date = datetime(2024, 1, 1)
-    
+
     # Create customer records
     customers_data = []
     for i in range(count):
@@ -103,7 +102,7 @@ def generate_customers(start_id, count):
         signup_date = base_date - timedelta(days=random.randint(0, 730))
         # Random purchase total between 0 and 10000
         total_purchases = round(random.uniform(0, 10000), 2)
-        
+
         customers_data.append({
             "customer_id": customer_id,
             "name": name,
@@ -112,7 +111,7 @@ def generate_customers(start_id, count):
             "signup_date": signup_date.date(),
             "total_purchases": total_purchases
         })
-    
+
     # Define schema explicitly
     schema = StructType([
         StructField("customer_id", IntegerType(), False),
@@ -122,7 +121,7 @@ def generate_customers(start_id, count):
         StructField("signup_date", DateType(), False),
         StructField("total_purchases", DoubleType(), False)
     ])
-    
+
     return spark.createDataFrame(customers_data, schema)
 
 # COMMAND ----------
@@ -157,7 +156,7 @@ print(f"Number of Files: {table_info['numFiles']}")
 
 # MAGIC %md
 # MAGIC # Task 2: ACID Transactions (20 min)
-# MAGIC 
+# MAGIC
 # MAGIC Demonstrate all four ACID properties:
 # MAGIC - **A**tomicity: All-or-nothing transactions
 # MAGIC - **C**onsistency: Data integrity constraints
@@ -224,7 +223,7 @@ invalid_df = spark.createDataFrame(invalid_data, schema=customers_df.schema)
 try:
     # Check for negative values
     negative_count = invalid_df.filter(col("total_purchases") < 0).count()
-    
+
     if negative_count > 0:
         print(f"❌ Found {negative_count} records with negative total_purchases")
         print("✅ Consistency maintained: Invalid data rejected")
@@ -232,7 +231,7 @@ try:
     else:
         invalid_df.write.format("delta").mode("append").saveAsTable("customers")
         print("✅ Valid data written")
-        
+
 except Exception as e:
     print(f"❌ Error prevented inconsistent data: {e}")
     print("✅ Consistency maintained")
@@ -311,7 +310,7 @@ print("\n✅ Task 2 Complete: All ACID properties demonstrated")
 
 # MAGIC %md
 # MAGIC # Task 3: Time Travel (20 min)
-# MAGIC 
+# MAGIC
 # MAGIC Demonstrate Delta Lake time travel capabilities:
 # MAGIC - Query historical versions
 # MAGIC - Show DESCRIBE HISTORY
@@ -350,11 +349,10 @@ print("-" * 60)
 print("Updating 100 customers...")
 
 # Get 100 random customer IDs
-sample_ids = [row.customer_id for row in 
+sample_ids = [row.customer_id for row in
               spark.table("customers").select("customer_id").limit(100).collect()]
 
 # Perform update
-from delta.tables import DeltaTable
 delta_table = DeltaTable.forName(spark, "customers")
 
 delta_table.update(
@@ -363,7 +361,7 @@ delta_table.update(
 )
 
 v1_count = spark.table("customers").count()
-print(f"✅ Version 1 created: Updated 100 customers")
+print("✅ Version 1 created: Updated 100 customers")
 print(f"   Row count: {v1_count} (unchanged)")
 
 # COMMAND ----------
@@ -380,13 +378,13 @@ print("-" * 60)
 print("Deleting 50 customers...")
 
 # Get 50 customer IDs to delete
-delete_ids = [row.customer_id for row in 
+delete_ids = [row.customer_id for row in
               spark.table("customers").select("customer_id").limit(50).collect()]
 
 delta_table.delete(condition = col("customer_id").isin(delete_ids))
 
 v2_count = spark.table("customers").count()
-print(f"✅ Version 2 created: Deleted 50 customers")
+print("✅ Version 2 created: Deleted 50 customers")
 print(f"   Row count: {v2_count} (reduced by 50)")
 
 # COMMAND ----------
@@ -405,7 +403,7 @@ new_batch_df = generate_customers(5000, 200)
 new_batch_df.write.format("delta").mode("append").saveAsTable("customers")
 
 v3_count = spark.table("customers").count()
-print(f"✅ Version 3 created: Added 200 customers")
+print("✅ Version 3 created: Added 200 customers")
 print(f"   Row count: {v3_count} (increased by 200)")
 
 # COMMAND ----------
@@ -477,7 +475,7 @@ print("\n✅ Task 3 Complete: Time travel and restore operations successful")
 
 # MAGIC %md
 # MAGIC # Task 4: Schema Evolution (15 min)
-# MAGIC 
+# MAGIC
 # MAGIC Demonstrate schema evolution by adding new columns:
 # MAGIC - loyalty_tier (STRING)
 # MAGIC - last_purchase_date (DATE)
@@ -503,11 +501,11 @@ for i in range(100):
     country = random.choice(["USA", "UK", "Canada", "Germany", "France"])
     signup_date = datetime(2024, 3, 1).date()
     total_purchases = round(random.uniform(1000, 5000), 2)
-    
+
     # NEW COLUMNS
     loyalty_tier = random.choice(["Bronze", "Silver", "Gold", "Platinum"])
     last_purchase_date = datetime(2024, 3, 1) - timedelta(days=random.randint(0, 30))
-    
+
     new_schema_data.append({
         "customer_id": customer_id,
         "name": name,
@@ -576,7 +574,7 @@ print("\n✅ Task 4 Complete: Schema evolution successful")
 
 # MAGIC %md
 # MAGIC # Task 5: MERGE Operations (25 min)
-# MAGIC 
+# MAGIC
 # MAGIC Implement UPSERT pattern using MERGE:
 # MAGIC - Update 100 existing customers
 # MAGIC - Insert 50 new customers
@@ -599,7 +597,7 @@ print(f"Count before MERGE: {before_merge_count}")
 # COMMAND ----------
 
 # Get 100 existing customer IDs
-existing_ids = [row.customer_id for row in 
+existing_ids = [row.customer_id for row in
                 spark.table("customers").select("customer_id").limit(100).collect()]
 
 print(f"\nPreparing updates for {len(existing_ids)} existing customers...")
@@ -609,7 +607,7 @@ updates_data = []
 for cid in existing_ids:
     # Get existing customer data
     existing = spark.table("customers").filter(col("customer_id") == cid).first()
-    
+
     updates_data.append({
         "customer_id": cid,
         "name": existing["name"],
@@ -671,7 +669,7 @@ merge_result = delta_table.alias("target").merge(
  .execute()
 
 after_merge_count = spark.table("customers").count()
-print(f"\n✅ MERGE completed")
+print("\n✅ MERGE completed")
 print(f"Count after MERGE: {after_merge_count}")
 print(f"Net new rows: {after_merge_count - before_merge_count}")
 
@@ -712,14 +710,14 @@ if duplicate_count == 0:
 else:
     print(f"❌ Found {duplicate_count} duplicate customer_ids")
 
-print(f"\n✅ Task 5 Complete: MERGE operations successful")
+print("\n✅ Task 5 Complete: MERGE operations successful")
 print(f"   Final row count: {after_second_merge}")
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC # Task 6: Optimize Performance (25 min)
-# MAGIC 
+# MAGIC
 # MAGIC Optimize table using:
 # MAGIC - OPTIMIZE: Compact small files
 # MAGIC - ZORDER: Optimize for specific columns
@@ -754,7 +752,7 @@ start_time = time.time()
 result = spark.table("customers").filter(col("country") == "USA").count()
 baseline_time = time.time() - start_time
 
-print(f"Query: SELECT COUNT(*) WHERE country = 'USA'")
+print("Query: SELECT COUNT(*) WHERE country = 'USA'")
 print(f"  Result: {result} customers")
 print(f"  Execution time: {baseline_time:.3f} seconds")
 
@@ -777,7 +775,7 @@ details_after_optimize = spark.sql("DESCRIBE DETAIL customers").collect()[0]
 files_after_optimize = details_after_optimize["numFiles"]
 size_after_optimize = details_after_optimize["sizeInBytes"]
 
-print(f"\nAfter OPTIMIZE:")
+print("\nAfter OPTIMIZE:")
 print(f"  Files: {files_before} → {files_after_optimize} ({100 * (files_before - files_after_optimize) / files_before:.1f}% reduction)")
 print(f"  Size: {size_before:,} → {size_after_optimize:,} bytes")
 
@@ -801,7 +799,7 @@ start_time = time.time()
 result_after = spark.table("customers").filter(col("country") == "USA").count()
 optimized_time = time.time() - start_time
 
-print(f"Query: SELECT COUNT(*) WHERE country = 'USA'")
+print("Query: SELECT COUNT(*) WHERE country = 'USA'")
 print(f"  Result: {result_after} customers")
 print(f"  Execution time: {optimized_time:.3f} seconds")
 
@@ -812,7 +810,7 @@ if baseline_time > 0:
     if improvement > 0:
         print(f"✅ Query is {improvement:.1f}% faster after ZORDER")
     else:
-        print(f"⚠️  Query time similar (may need more data to see impact)")
+        print("⚠️  Query time similar (may need more data to see impact)")
 
 # COMMAND ----------
 
@@ -844,7 +842,7 @@ details_final = spark.sql("DESCRIBE DETAIL customers").collect()[0]
 files_final = details_final["numFiles"]
 size_final = details_final["sizeInBytes"]
 
-print(f"\nFinal state after all optimizations:")
+print("\nFinal state after all optimizations:")
 print(f"  Files: {files_before} → {files_final} ({100 * (files_before - files_final) / files_before:.1f}% reduction)")
 print(f"  Size: {size_before / 1024 / 1024:.2f} MB → {size_final / 1024 / 1024:.2f} MB")
 
@@ -858,18 +856,18 @@ print(f"  Size: {size_before / 1024 / 1024:.2f} MB → {size_final / 1024 / 1024
 print("\n6.5 Optimization Summary")
 print("=" * 60)
 
-print(f"\nFile Reduction:")
+print("\nFile Reduction:")
 print(f"  Before: {files_before} files")
 print(f"  After:  {files_final} files")
 print(f"  Reduction: {100 * (files_before - files_final) / files_before:.1f}%")
 
-print(f"\nQuery Performance:")
+print("\nQuery Performance:")
 print(f"  Before ZORDER: {baseline_time:.3f}s")
 print(f"  After ZORDER:  {optimized_time:.3f}s")
 if baseline_time > 0:
     print(f"  Improvement:   {100 * (baseline_time - optimized_time) / baseline_time:.1f}%")
 
-print(f"\n✅ Task 6 Complete: All optimizations applied")
+print("\n✅ Task 6 Complete: All optimizations applied")
 
 # COMMAND ----------
 
@@ -886,21 +884,21 @@ print("=" * 60)
 final_count = spark.table("customers").count()
 final_details = spark.sql("DESCRIBE DETAIL customers").collect()[0]
 
-print(f"\n📊 Final Table Statistics:")
+print("\n📊 Final Table Statistics:")
 print(f"   Total customers: {final_count:,}")
 print(f"   Number of files: {final_details['numFiles']}")
 print(f"   Table size: {final_details['sizeInBytes'] / 1024 / 1024:.2f} MB")
 print(f"   Format: {final_details['format']}")
 
-print(f"\n✅ All 6 Tasks Completed:")
-print(f"   ✅ Task 1: Delta table created")
-print(f"   ✅ Task 2: ACID properties demonstrated")
-print(f"   ✅ Task 3: Time travel and restore operations")
-print(f"   ✅ Task 4: Schema evolution with new columns")
-print(f"   ✅ Task 5: MERGE operations (UPSERT)")
-print(f"   ✅ Task 6: Performance optimizations applied")
+print("\n✅ All 6 Tasks Completed:")
+print("   ✅ Task 1: Delta table created")
+print("   ✅ Task 2: ACID properties demonstrated")
+print("   ✅ Task 3: Time travel and restore operations")
+print("   ✅ Task 4: Schema evolution with new columns")
+print("   ✅ Task 5: MERGE operations (UPSERT)")
+print("   ✅ Task 6: Performance optimizations applied")
 
-print(f"\n🎉 Ready for validation! Run validate.py to verify your solution.")
+print("\n🎉 Ready for validation! Run validate.py to verify your solution.")
 
 # Show final schema
 print("\n📋 Final Schema:")

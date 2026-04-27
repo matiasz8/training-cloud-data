@@ -3,8 +3,8 @@
 ## Overview
 Build a production-grade ETL pipeline implementing the Medallion Architecture (Bronze → Silver → Gold) with data quality checks, incremental processing, and comprehensive monitoring.
 
-**Estimated Time**: 2.5 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2.5 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Exercise 01 (Delta Lake basics)
 
 ---

@@ -29,7 +29,7 @@
    ├─ Amazon Web Services (AWS)     ← Most common, recommended
    ├─ Microsoft Azure
    └─ Google Cloud Platform (GCP)
-   
+
    Recommendation: Choose AWS (us-east-1 or nearest region)
    ```
 
@@ -41,7 +41,7 @@
    ├─ Europe (Ireland)             eu-west-1
    ├─ Europe (Frankfurt)           eu-central-1
    └─ Asia Pacific (Singapore)     ap-southeast-1
-   
+
    💡 Choose nearest region for best performance
    ```
 
@@ -62,7 +62,7 @@
    ├─ Standard Edition           $2/credit   (basic features)
    ├─ Enterprise Edition         $3/credit   ← Recommended (90-day Time Travel)
    └─ Business Critical          $4/credit   (enhanced security)
-   
+
    Recommendation: Enterprise Edition (best learning experience)
    ```
 
@@ -92,7 +92,7 @@
    ```bash
    # Example URL format
    https://<account_identifier>.snowflakecomputing.com
-   
+
    # Specific example
    https://abc12345.snowflakecomputing.com
    ```
@@ -519,7 +519,7 @@ snowsql -a abc12345 -u your-email@example.com
 **Sample SnowSQL Session**:
 ```bash
 $ snowsql -c training
-Password: 
+Password:
 * SnowSQL * v1.3.1
 Type SQL queries and press Enter to execute.
 Type !help to see available commands.
@@ -1092,5 +1092,5 @@ Now that your environment is set up:
 
 ---
 
-**Last Updated**: March 2026  
+**Last Updated**: March 2026
 **Module**: Bonus 02 - Snowflake Data Cloud

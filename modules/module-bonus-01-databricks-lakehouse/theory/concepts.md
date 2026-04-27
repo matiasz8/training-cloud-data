@@ -75,7 +75,7 @@ spark.sql("""
 """)
 ```
 
-**Without Delta Lake:** 
+**Without Delta Lake:**
 - Corrupted data if multiple writers
 - No isolation between reads and writes
 - Failed jobs leave partial data
@@ -332,7 +332,7 @@ CREATE VIEW prod.sales.customers_masked AS
 SELECT
   customer_id,
   name,
-  CASE 
+  CASE
     WHEN is_account_group_member('pii-access') THEN email
     ELSE 'REDACTED'
   END AS email,
@@ -356,7 +356,7 @@ Unity Catalog automatically tracks:
 
 **Example:**
 ```
-S3 raw data 
+S3 raw data
   → Bronze table (ingestion notebook)
     → Silver table (transformation job)
       → Gold table (aggregation notebook)
@@ -580,7 +580,7 @@ tasks:
     notebook_task:
       notebook_path: /Repos/project/ingest_bronze
     new_cluster: {...}
-  
+
   - task_key: silver_transformation
     depends_on:
       - task_key: bronze_ingestion
@@ -621,13 +621,13 @@ import mlflow
 with mlflow.start_run():
     # Log parameters
     mlflow.log_param("learning_rate", 0.01)
-    
+
     # Train model
     model = train_model(data)
-    
+
     # Log metrics
     mlflow.log_metric("accuracy", 0.95)
-    
+
     # Log model
     mlflow.sklearn.log_model(model, "model")
 ```
@@ -753,6 +753,6 @@ spark.sql("VACUUM customers RETAIN 168 HOURS")  # 7 days = 168 hours
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** March 2026  
+**Document Version:** 1.0
+**Last Updated:** March 2026
 **Databricks Runtime:** 14.3 LTS (Spark 3.5.x)

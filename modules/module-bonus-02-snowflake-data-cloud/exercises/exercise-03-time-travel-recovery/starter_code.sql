@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Exercise 03: Time Travel and Data Recovery
 -- ============================================================================
--- 
+--
 -- Learning Objectives:
 -- - Use Time Travel to query historical data states
 -- - Recover dropped tables with UNDROP command
@@ -264,21 +264,21 @@ USE SCHEMA recovery;
 -- ============================================================================
 -- IMPORTANT NOTES ON TIME TRAVEL
 -- ============================================================================
--- 
+--
 -- 1. Time Travel Retention Periods:
 --    - Standard Edition: 1 day (default, max)
 --    - Enterprise Edition: 0-90 days (configurable)
---    
+--
 -- 2. Fail-safe Period:
 --    - Additional 7 days after Time Travel
 --    - Only recoverable by Snowflake Support
 --    - Automatic, non-configurable
---    
+--
 -- 3. Storage Costs:
 --    - Time Travel data is stored and billed
 --    - Monitor using TABLE_STORAGE_METRICS
 --    - Balance retention needs vs costs
---    
+--
 -- 4. Query Performance:
 --    - Historical queries may be slower
 --    - Depend on data change volume

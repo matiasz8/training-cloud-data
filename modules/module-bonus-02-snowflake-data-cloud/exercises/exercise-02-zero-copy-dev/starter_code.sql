@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Exercise 02: Zero-Copy Cloning for Development
 -- ============================================================================
--- 
+--
 -- Learning Objectives:
 -- - Understand Snowflake's zero-copy cloning architecture
 -- - Clone databases, schemas, and tables instantly

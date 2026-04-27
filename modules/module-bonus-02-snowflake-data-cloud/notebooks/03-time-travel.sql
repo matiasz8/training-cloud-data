@@ -5,7 +5,7 @@
 -- Description: Master Snowflake's Time Travel feature to query historical data,
 --              recover from accidental changes, and implement audit trails.
 --              Learn retention periods, UNDROP operations, and Fail-safe recovery.
--- 
+--
 -- Prerequisites:
 --   - Snowflake account with CREATE DATABASE privilege
 --   - Understanding of Snowflake architecture
@@ -104,7 +104,7 @@ SELECT
     SEQ4() AS customer_id,
     CONCAT('Customer ', SEQ4()) AS customer_name,
     CONCAT('customer', SEQ4(), '@example.com') AS email,
-    CONCAT('555-', LPAD(UNIFORM(100, 999, RANDOM())::VARCHAR, 3, '0'), '-', 
+    CONCAT('555-', LPAD(UNIFORM(100, 999, RANDOM())::VARCHAR, 3, '0'), '-',
            LPAD(UNIFORM(1000, 9999, RANDOM())::VARCHAR, 4, '0')) AS phone,
     DATEADD(DAY, -UNIFORM(0, 730, RANDOM()), CURRENT_DATE()) AS registration_date,
     CASE UNIFORM(1, 3, RANDOM())
@@ -652,8 +652,8 @@ SELECT
     execution_status
 FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
 WHERE query_text LIKE '%orders%'
-  AND (query_text LIKE '%CREATE%' 
-       OR query_text LIKE '%ALTER%' 
+  AND (query_text LIKE '%CREATE%'
+       OR query_text LIKE '%ALTER%'
        OR query_text LIKE '%DROP%')
   AND database_name = 'TIMETRAVEL_LAB'
 ORDER BY start_time DESC
@@ -671,8 +671,8 @@ SELECT
     rows_deleted
 FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
 WHERE query_text LIKE '%orders%'
-  AND (query_text LIKE '%INSERT%' 
-       OR query_text LIKE '%UPDATE%' 
+  AND (query_text LIKE '%INSERT%'
+       OR query_text LIKE '%UPDATE%'
        OR query_text LIKE '%DELETE%')
   AND database_name = 'TIMETRAVEL_LAB'
   AND execution_status = 'SUCCESS'
@@ -711,7 +711,7 @@ SELECT * FROM data_modification_audit LIMIT 10;
 -- ============================================================================
 
 -- Understanding the data protection timeline:
--- 
+--
 -- |<-------- Time Travel -------->|<------ Fail-safe ------>|
 -- |  (1-90 days user-queryable)   |   (7 days Snowflake)   |
 -- |                               |                         |
@@ -733,7 +733,7 @@ SHOW PARAMETERS LIKE 'DATA_RETENTION_TIME_IN_DAYS' FOR TABLE orders;
 
 
 -- Example Fail-safe scenario:
--- 
+--
 -- Day 0: Table accidentally dropped
 -- Day 0-1: Can UNDROP table or query AT(TIMESTAMP)  [Time Travel]
 -- Day 1: Time Travel retention expires (Standard Edition)

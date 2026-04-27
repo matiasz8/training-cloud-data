@@ -3,8 +3,8 @@
 ## Overview
 Build an automated Change Data Capture (CDC) pipeline using Snowflake Streams and Tasks to process data changes in real-time and maintain a multi-layer analytics architecture.
 
-**Estimated Time**: 2.5 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2.5 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Module 03 (SQL basics), Exercise 01 (Virtual Warehouses), understanding of ETL concepts
 
 ---
@@ -132,7 +132,7 @@ LIMIT 10;
 **Query Stream with Metadata**:
 ```sql
 -- View stream contents
-SELECT 
+SELECT
     order_id,
     customer_id,
     product,
@@ -146,7 +146,7 @@ ORDER BY METADATA$ACTION, order_id
 LIMIT 100;
 
 -- Count changes by type
-SELECT 
+SELECT
     METADATA$ACTION as action,
     METADATA$ISUPDATE as is_update,
     COUNT(*) as change_count
@@ -187,7 +187,7 @@ CREATE OR REPLACE TABLE silver_orders (
 ```sql
 -- Process only COMPLETED orders from stream
 INSERT INTO silver_orders (order_id, customer_id, product, amount, created_at, completed_at)
-SELECT 
+SELECT
     order_id,
     customer_id,
     product,
@@ -235,7 +235,7 @@ Create a Task to automatically process the stream every 5 minutes.
 ```sql
 -- Create warehouse for tasks
 CREATE WAREHOUSE IF NOT EXISTS WH_TASK_SMALL
-WITH 
+WITH
     WAREHOUSE_SIZE = 'XSMALL'
     AUTO_SUSPEND = 60
     AUTO_RESUME = TRUE;
@@ -247,7 +247,7 @@ CREATE OR REPLACE TASK process_orders_task
     WHEN SYSTEM$STREAM_HAS_DATA('orders_stream')
     AS
 INSERT INTO silver_orders (order_id, customer_id, product, amount, created_at, completed_at)
-SELECT 
+SELECT
     order_id,
     customer_id,
     product,
@@ -283,7 +283,7 @@ SELECT
 FROM table(generator(rowcount => 25));
 
 -- Wait 5+ minutes, then check if task processed the data
-SELECT 
+SELECT
     name,
     state,
     scheduled_time,
@@ -339,7 +339,7 @@ CREATE OR REPLACE TASK bronze_to_silver_task
     WHEN SYSTEM$STREAM_HAS_DATA('orders_stream')
     AS
 INSERT INTO silver_orders (order_id, customer_id, product, amount, created_at, completed_at)
-SELECT 
+SELECT
     order_id, customer_id, product, amount, created_at, updated_at
 FROM orders_stream
 WHERE status = 'COMPLETED'
@@ -416,7 +416,7 @@ SHOW TASKS;
 **Monitor Task Execution**:
 ```sql
 -- View task hierarchy and execution history
-SELECT 
+SELECT
     name,
     state,
     predecessors,
@@ -459,17 +459,17 @@ CREATE OR REPLACE TASK bronze_to_silver_task
 BEGIN
     -- Insert valid orders
     INSERT INTO silver_orders (order_id, customer_id, product, amount, created_at, completed_at)
-    SELECT 
+    SELECT
         order_id, customer_id, product, amount, created_at, updated_at
     FROM orders_stream
     WHERE status = 'COMPLETED'
         AND METADATA$ACTION = 'INSERT'
         AND METADATA$ISUPDATE = FALSE
         AND amount > 0;  -- Validation
-    
+
     -- Log rejected orders
     INSERT INTO rejected_orders (order_id, rejection_reason, rejected_at)
-    SELECT 
+    SELECT
         order_id,
         'Invalid amount: ' || amount::VARCHAR,
         current_timestamp()
@@ -491,7 +491,7 @@ CREATE OR REPLACE TABLE rejected_orders (
 **Monitor Task Health**:
 ```sql
 -- Query task execution history
-SELECT 
+SELECT
     name,
     state,
     scheduled_time,
@@ -504,7 +504,7 @@ WHERE scheduled_time >= DATEADD(day, -7, current_timestamp())
 ORDER BY scheduled_time DESC;
 
 -- Failed tasks only
-SELECT 
+SELECT
     name,
     scheduled_time,
     error_code,
@@ -515,7 +515,7 @@ WHERE state = 'FAILED'
 ORDER BY scheduled_time DESC;
 
 -- Task success rate
-SELECT 
+SELECT
     name,
     COUNT(*) as total_runs,
     SUM(CASE WHEN state = 'SUCCEEDED' THEN 1 ELSE 0 END) as successful_runs,
@@ -529,7 +529,7 @@ GROUP BY name;
 **Stream Monitoring**:
 ```sql
 -- Check stream lag
-SELECT 
+SELECT
     'orders_stream' as stream_name,
     COUNT(*) as pending_records,
     current_timestamp() as check_time
@@ -542,7 +542,7 @@ SHOW STREAMS LIKE 'orders_stream';
 **Create Alert Query** (run periodically):
 ```sql
 -- Alert if tasks haven't run in 30 minutes
-SELECT 
+SELECT
     name,
     MAX(scheduled_time) as last_run,
     TIMESTAMPDIFF(minute, MAX(scheduled_time), current_timestamp()) as minutes_since_run
@@ -690,7 +690,7 @@ FROM table(information_schema.task_history(
 ORDER BY scheduled_time DESC;
 
 -- Current task state
-SELECT 
+SELECT
     name,
     database_name,
     schema_name,
@@ -702,7 +702,7 @@ FROM table(information_schema.tasks)
 WHERE name LIKE '%TASK%';
 
 -- Credits consumed by tasks
-SELECT 
+SELECT
     name,
     SUM(TIMESTAMPDIFF(second, query_start_time, completed_time)) as total_seconds,
     COUNT(*) as execution_count

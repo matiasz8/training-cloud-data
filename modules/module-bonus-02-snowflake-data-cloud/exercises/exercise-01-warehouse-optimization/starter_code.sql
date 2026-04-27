@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Exercise 01: Warehouse Optimization
 -- ============================================================================
--- 
+--
 -- Learning Objectives:
 -- - Create and configure virtual warehouses with different sizes
 -- - Test performance characteristics across warehouse sizes
@@ -32,7 +32,7 @@ USE SCHEMA performance_testing;
 --
 -- Requirements:
 -- - Create COMPUTE_WH_XSMALL (X-Small size)
--- - Create COMPUTE_WH_MEDIUM (Medium size)  
+-- - Create COMPUTE_WH_MEDIUM (Medium size)
 -- - Create COMPUTE_WH_LARGE (Large size)
 -- - Set appropriate auto-suspend times
 -- - Configure auto-resume

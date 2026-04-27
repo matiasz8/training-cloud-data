@@ -5,7 +5,7 @@
 -- Description: Master Snowflake's Data Sharing capabilities to securely share
 --              data with partners, customers, or across business units. Learn
 --              secure views, reader accounts, and Snowflake Data Marketplace.
--- 
+--
 -- Prerequisites:
 --   - Snowflake account with ACCOUNTADMIN role
 --   - Understanding of Snowflake security model
@@ -64,7 +64,7 @@ SELECT
     ARRAY_GET(PARSE_JSON('["John Smith","Jane Doe","Mike Johnson","Sarah Williams","David Brown"]'),
               UNIFORM(0, 4, RANDOM())) AS contact_name,
     CONCAT('contact', SEQ4(), '@company', UNIFORM(1, 100, RANDOM()), '.com') AS email,
-    CONCAT('555-', LPAD(UNIFORM(100, 999, RANDOM())::VARCHAR, 3, '0'), '-', 
+    CONCAT('555-', LPAD(UNIFORM(100, 999, RANDOM())::VARCHAR, 3, '0'), '-',
            LPAD(UNIFORM(1000, 9999, RANDOM())::VARCHAR, 4, '0')) AS phone,
     CASE UNIFORM(1, 6, RANDOM())
         WHEN 1 THEN 'Technology'
@@ -163,7 +163,7 @@ SELECT
         WHEN 3 THEN 'Net 90'
         ELSE 'Prepaid'
     END AS payment_terms,
-    DATEADD(DAY, UNIFORM(1, 30, RANDOM()), 
+    DATEADD(DAY, UNIFORM(1, 30, RANDOM()),
             DATEADD(DAY, -UNIFORM(0, 730, RANDOM()), CURRENT_DATE())) AS delivery_date,
     DATEADD(DAY, -UNIFORM(0, 730, RANDOM()), CURRENT_TIMESTAMP()) AS created_at
 FROM TABLE(GENERATOR(ROWCOUNT => 20000));
@@ -254,7 +254,7 @@ SELECT
 FROM customers;
 
 -- Share the view instead of base table
-GRANT SELECT ON VIEW provider_data.public_data.customer_summary 
+GRANT SELECT ON VIEW provider_data.public_data.customer_summary
     TO SHARE customer_summary_share;
 
 
@@ -303,7 +303,7 @@ SHOW GRANTS TO SHARE customer_summary_share;
 
 -- View example of adding accounts (commented as it requires real account IDs)
 /*
-ALTER SHARE customer_analytics_share 
+ALTER SHARE customer_analytics_share
     ADD ACCOUNTS = 'PARTNER_ORG.PARTNER_ACCOUNT';
 */
 

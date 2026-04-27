@@ -3,8 +3,8 @@
 ## Overview
 Implement comprehensive data governance using Unity Catalog with three-level namespaces, fine-grained access control, row and column-level security, lineage tracking, and audit logging.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Exercise 02 (ETL Pipelines)
 
 > **⚠️ IMPORTANT**: This exercise requires **Databricks Trial, Premium, or Enterprise** edition. Unity Catalog is **NOT available** in Databricks Community Edition. You can sign up for a 14-day trial at [databricks.com/try-databricks](https://databricks.com/try-databricks).
@@ -119,7 +119,7 @@ GRANT SELECT ON SCHEMA dev_catalog.gold_schema TO data_scientists;
 **Analysts** (limited to specific columns):
 ```sql
 GRANT USAGE ON CATALOG dev_catalog TO analysts;
-GRANT SELECT (patient_id, region, age, diagnosis_code) 
+GRANT SELECT (patient_id, region, age, diagnosis_code)
   ON TABLE dev_catalog.silver_schema.patients_clean TO analysts;
 -- Note: email and ssn excluded
 ```
@@ -228,7 +228,7 @@ GRANT SELECT (patient_id, region, age, treatment_cost, admission_date)
   ON dev_catalog.silver_schema.patients_clean TO analysts;
 
 -- Deny access to PII columns explicitly
-DENY SELECT (email, ssn) 
+DENY SELECT (email, ssn)
   ON dev_catalog.silver_schema.patients_clean TO analysts;
 ```
 
@@ -270,7 +270,7 @@ WHERE target_table_full_name = 'dev_catalog.gold_schema.patient_analytics'
 ```python
 # Get upstream dependencies
 lineage = spark.sql("""
-    SELECT 
+    SELECT
       source_table_full_name,
       target_table_full_name,
       source_type,
@@ -321,7 +321,7 @@ SELECT
   request_params.columns_accessed,
   COUNT(*) as access_count
 FROM system.access.audit
-WHERE 
+WHERE
   event_date >= current_date() - 30
   AND request_params.table_full_name = 'dev_catalog.silver_schema.patients_clean'
   AND array_contains(request_params.columns_accessed, 'email')
@@ -339,7 +339,7 @@ SELECT
   response.status_code,
   response.error_message
 FROM system.access.audit
-WHERE 
+WHERE
   event_date >= current_date() - 7
   AND response.status_code != '200'
   AND action_name IN ('getTable', 'readTable', 'createTable')
@@ -356,7 +356,7 @@ SELECT
   request_params.principal,
   request_params.privileges
 FROM system.access.audit
-WHERE 
+WHERE
   event_date >= current_date() - 30
   AND action_name IN ('grantPrivileges', 'revokePrivileges')
 ORDER BY event_date DESC;
@@ -371,7 +371,7 @@ SELECT
   request_params.target_location,
   request_params.row_count
 FROM system.access.audit
-WHERE 
+WHERE
   event_date >= current_date() - 30
   AND action_name IN ('createExternalTable', 'exportData')
 ORDER BY event_date DESC;
@@ -437,8 +437,8 @@ GRANT USE SCHEMA ON SCHEMA dev_catalog.silver_schema TO `data_scientists`;
 GRANT SELECT ON SCHEMA dev_catalog.silver_schema TO `data_scientists`;
 
 -- Column-level grants
-GRANT SELECT (patient_id, region, age) 
-  ON TABLE dev_catalog.silver_schema.patients_clean 
+GRANT SELECT (patient_id, region, age)
+  ON TABLE dev_catalog.silver_schema.patients_clean
   TO `analysts`;
 
 -- View current permissions
@@ -490,7 +490,7 @@ pii_access = spark.sql("""
       user_identity.email as user,
       event_date,
       request_params.table_full_name,
-      size(filter(request_params.columns_accessed, 
+      size(filter(request_params.columns_accessed,
                   x -> x IN ('email', 'ssn'))) as pii_column_count,
       COUNT(*) as access_count
     FROM system.access.audit

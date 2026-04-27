@@ -6,9 +6,9 @@ Welcome to the **Snowflake Data Cloud** training module! Learn to build modern d
 
 Snowflake is a fully-managed platform built for the cloud with three-layer architecture separating storage, compute, and services. This enables elastic scaling, zero-copy cloning, Time Travel up to 90 days, and secure data sharing without moving data.
 
-🎁 **Type:** Optional Bonus Module  
-☁️ **Platform:** Cloud-Managed (AWS/Azure/GCP)  
-⏱️ **Estimated Time:** 12-15 hours  
+🎁 **Type:** Optional Bonus Module
+☁️ **Platform:** Cloud-Managed (AWS/Azure/GCP)
+⏱️ **Estimated Time:** 12-15 hours
 ⭐ **Difficulty:** Advanced
 
 ---
@@ -32,7 +32,7 @@ By completing this module, you will:
 
 ### Required Modules
 - ✅ **Module 03**: SQL Foundations
-- ✅ **Module 05**: Data Lakehouse Architecture  
+- ✅ **Module 05**: Data Lakehouse Architecture
 - ✅ **Module 06**: ETL Fundamentals (recommended)
 
 ### Technical Requirements
@@ -258,6 +258,24 @@ Practice with 6 hands-on labs:
 
 ### Community
 - [Snowflake Community](https://community.snowflake.com/)
+
+---
+
+## Validation
+
+Use this section as module success criteria:
+
+1. Complete all six notebooks in `notebooks/`.
+2. Complete all six exercise folders in `exercises/`.
+3. Document cost controls and results in your notes.
+4. Verify output artifacts and expected query behavior.
+
+For repository contract checks, run from project root:
+
+```bash
+PYTHON=/media/nquiroga/SSDedo/Documents/projects/NanLabs/labs/.venv/bin/python
+$PYTHON scripts/validate_learning_labs.py --module module-bonus-02-snowflake-data-cloud
+```
 - [Snowflake University](https://learn.snowflake.com/) (free courses)
 - [Quick Starts](https://quickstarts.snowflake.com/)
 

@@ -13,30 +13,15 @@ Tasks:
 Estimated Time: 2.5 hours
 """
 
-import os
 import random
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when, datediff, current_date, lit, current_timestamp
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, BooleanType, DateType
 
 # ML Libraries
-from sklearn.model_selection import train_test_split, ParameterGrid
-from sklearn.preprocessing import LabelEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
 
 # MLflow
-import mlflow
-import mlflow.sklearn
-from mlflow.tracking import MlflowClient
 
 # Visualization
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Initialize Spark
 spark = SparkSession.builder \
@@ -57,7 +42,7 @@ np.random.seed(42)
 def generate_churn_data(num_customers=5000):
     """
     Generate synthetic customer data for churn prediction.
-    
+
     TODO: Implement data generation with the following schema:
     - customer_id: STRING
     - signup_date: DATE (last 24 months)
@@ -72,7 +57,7 @@ def generate_churn_data(num_customers=5000):
     - days_since_last_login: INT (0-60)
     - total_purchases: INT (0-50)
     - churned: BOOLEAN (target variable, 15% churn rate)
-    
+
     Returns:
         Spark DataFrame with customer data
     """
@@ -83,14 +68,14 @@ def generate_churn_data(num_customers=5000):
 def engineer_features(df):
     """
     Apply feature engineering transformations.
-    
+
     TODO: Create derived features:
     1. engagement_score: (num_logins_30d * 2 + total_purchases * 5) / (days_since_last_login + 1)
     2. payment_risk: num_failed_payments / (total_purchases + 1)
     3. activity_level: High (>20 logins), Medium (>10), Low (<=10)
     4. tenure_months: Months since signup_date
     5. One-hot encoding: subscription_type, country, activity_level
-    
+
     Returns:
         DataFrame with engineered features
     """
@@ -101,13 +86,13 @@ def engineer_features(df):
 def prepare_ml_datasets():
     """
     Prepare train/validation/test splits.
-    
-    TODO: 
+
+    TODO:
     - Generate customer data (5,000 records)
     - Apply feature engineering
     - Split into train (70%), val (15%), test (15%) with stratification
     - Return pandas DataFrames ready for sklearn
-    
+
     Returns:
         X_train, X_val, X_test, y_train, y_val, y_test
     """
@@ -179,19 +164,19 @@ def compare_experiments():
 def hyperparameter_tuning(X_train, y_train, X_val, y_val):
     """
     TODO: Perform grid search for Random Forest hyperparameters.
-    
+
     Grid:
     - n_estimators: [50, 100, 200]
     - max_depth: [5, 10, 15]
     - min_samples_split: [2, 5, 10]
-    
+
     Total combinations: 3 × 3 × 3 = 27
-    
+
     - Create parent MLflow run for grid search
     - Log each combination as nested run
     - Track best model and parameters
     - Log parameter importance plots
-    
+
     Returns:
         best_model, best_params, best_f1_score
     """
@@ -210,7 +195,7 @@ def register_best_model(experiment_name, model_name="churn_prediction_model"):
     - Register model with name
     - Add model description and metadata tags
     - Transition to Staging, then Production
-    
+
     Returns:
         model_version
     """
@@ -241,7 +226,7 @@ def batch_inference(model_name, num_customers=100):
     - Make predictions
     - Save results to Delta table 'churn_predictions'
     - Include: customer_id, churn_prediction, churn_probability, risk_level, scored_at
-    
+
     Risk levels:
     - High: probability > 0.7
     - Medium: probability > 0.4
@@ -254,10 +239,10 @@ def batch_inference(model_name, num_customers=100):
 def predict_churn_realtime(customer_data, model_name="churn_prediction_model"):
     """
     TODO: Real-time prediction function (REST API simulation).
-    
+
     Args:
         customer_data: Dictionary with customer features
-        
+
     Returns:
         Dictionary with prediction results
     """
@@ -275,7 +260,7 @@ def simulate_monitoring_data(model, X_val, y_val, days=30):
     - For each day, calculate metrics
     - Simulate gradual performance degradation
     - Save to 'model_performance_monitoring' Delta table
-    
+
     Returns:
         monitoring_df with daily metrics
     """
@@ -286,12 +271,12 @@ def simulate_monitoring_data(model, X_val, y_val, days=30):
 def detect_feature_drift(X_train, X_production, threshold=0.05):
     """
     TODO: Detect feature drift using Kolmogorov-Smirnov test.
-    
+
     Args:
         X_train: Training data features
         X_production: Recent production data features
         threshold: p-value threshold for drift detection
-        
+
     Returns:
         DataFrame with drift results per feature
     """
@@ -319,31 +304,31 @@ def main():
     print("=" * 60)
     print("Exercise 06: ML with MLflow - Customer Churn Prediction")
     print("=" * 60)
-    
+
     # Task 1: Data Preparation
     print("\n[Task 1] Preparing data and engineering features...")
     # TODO: Call prepare_ml_datasets()
-    
+
     # Task 2: Experiment Tracking
     print("\n[Task 2] Training models with MLflow experiment tracking...")
     # TODO: Set up experiment and train 3 models
-    
+
     # Task 3: Hyperparameter Tuning
     print("\n[Task 3] Performing hyperparameter tuning...")
     # TODO: Run grid search
-    
+
     # Task 4: Model Registry
     print("\n[Task 4] Registering best model...")
     # TODO: Register and transition model stages
-    
+
     # Task 5: Deployment
     print("\n[Task 5] Deploying model for inference...")
     # TODO: Run batch inference and test real-time API
-    
+
     # Task 6: Monitoring
     print("\n[Task 6] Setting up monitoring and drift detection...")
     # TODO: Simulate monitoring and detect drift
-    
+
     print("\n" + "=" * 60)
     print("✅ All tasks complete! Run validate.py to check your work.")
     print("=" * 60)

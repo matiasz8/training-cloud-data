@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Exercise 03: Time Travel and Data Recovery - SOLUTION
 -- ============================================================================
--- 
+--
 -- This solution demonstrates Snowflake's Time Travel and UNDROP capabilities
 -- for data recovery, auditing, and disaster recovery scenarios.
 -- ============================================================================
@@ -87,14 +87,14 @@ FROM orders;
 -- ============================================================================
 
 -- Query orders at initial creation time (T0)
-SELECT 
+SELECT
     'T0 - Initial State' as time_point,
     COUNT(*) as row_count,
     COUNT(DISTINCT status) as status_types
 FROM orders AT(TIMESTAMP => $timestamp_t0::TIMESTAMP_NTZ);
 
 -- Query orders after first insert (T1) - should have 1200 rows
-SELECT 
+SELECT
     'T1 - After First Insert' as time_point,
     COUNT(*) as row_count,
     MIN(order_id) as min_order_id,
@@ -102,7 +102,7 @@ SELECT
 FROM orders AT(TIMESTAMP => $timestamp_t1::TIMESTAMP_NTZ);
 
 -- Query orders after updates (T2) - should have shipped orders
-SELECT 
+SELECT
     'T2 - After Status Update' as time_point,
     COUNT(*) as total_orders,
     COUNT(CASE WHEN status = 'shipped' THEN 1 END) as shipped_orders,
@@ -110,23 +110,23 @@ SELECT
 FROM orders AT(TIMESTAMP => $timestamp_t2::TIMESTAMP_NTZ);
 
 -- Compare row counts across all time points
-SELECT 
+SELECT
     'T0 - Initial' as checkpoint,
     (SELECT COUNT(*) FROM orders AT(TIMESTAMP => $timestamp_t0::TIMESTAMP_NTZ)) as row_count
 UNION ALL
-SELECT 
+SELECT
     'T1 - After Insert',
     (SELECT COUNT(*) FROM orders AT(TIMESTAMP => $timestamp_t1::TIMESTAMP_NTZ))
 UNION ALL
-SELECT 
+SELECT
     'T2 - After Update',
     (SELECT COUNT(*) FROM orders AT(TIMESTAMP => $timestamp_t2::TIMESTAMP_NTZ))
 UNION ALL
-SELECT 
+SELECT
     'T3 - After Delete',
     (SELECT COUNT(*) FROM orders AT(TIMESTAMP => $timestamp_t3::TIMESTAMP_NTZ))
 UNION ALL
-SELECT 
+SELECT
     'Current State',
     (SELECT COUNT(*) FROM orders);
 
@@ -138,21 +138,21 @@ SELECT
     shipped_count,
     ROUND(shipped_count / row_count * 100, 2) as shipped_percentage
 FROM (
-    SELECT 
+    SELECT
         'T1' as checkpoint,
         COUNT(*) as row_count,
         COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
         COUNT(CASE WHEN status = 'shipped' THEN 1 END) as shipped_count
     FROM orders AT(TIMESTAMP => $timestamp_t1::TIMESTAMP_NTZ)
     UNION ALL
-    SELECT 
+    SELECT
         'T2',
         COUNT(*),
         COUNT(CASE WHEN status = 'pending' THEN 1 END),
         COUNT(CASE WHEN status = 'shipped' THEN 1 END)
     FROM orders AT(TIMESTAMP => $timestamp_t2::TIMESTAMP_NTZ)
     UNION ALL
-    SELECT 
+    SELECT
         'Current',
         COUNT(*),
         COUNT(CASE WHEN status = 'pending' THEN 1 END),
@@ -161,7 +161,7 @@ FROM (
 );
 
 -- Query using OFFSET (seconds ago) - 30 seconds ago
-SELECT 
+SELECT
     'Using OFFSET' as method,
     COUNT(*) as row_count
 FROM orders AT(OFFSET => -30);
@@ -187,7 +187,7 @@ SELECT
 FROM TABLE(GENERATOR(ROWCOUNT => 500));
 
 -- Verify the table exists and has data
-SELECT 
+SELECT
     'customer_data before drop' as status,
     COUNT(*) as row_count,
     SUM(account_balance) as total_balance,
@@ -210,7 +210,7 @@ SHOW TABLES LIKE 'customer_data';
 UNDROP TABLE customer_data;
 
 -- Verify data was recovered completely
-SELECT 
+SELECT
     'customer_data after UNDROP' as status,
     COUNT(*) as row_count,
     COUNT(*) = $original_row_count as data_intact
@@ -255,7 +255,7 @@ SELECT
 FROM TABLE(GENERATOR(ROWCOUNT => 500));
 
 -- Verify initial state
-SELECT 
+SELECT
     'Initial State' as checkpoint,
     COUNT(*) as transaction_count,
     SUM(amount) as total_amount,
@@ -287,7 +287,7 @@ DELETE FROM financial_transactions
 WHERE transaction_id % 5 = 0;
 
 -- Verify corruption occurred
-SELECT 
+SELECT
     'Corrupted State' as checkpoint,
     COUNT(*) as transaction_count,
     SUM(amount) as total_amount,
@@ -301,7 +301,7 @@ CREATE OR REPLACE TABLE financial_transactions_recovered CLONE financial_transac
     AT(TIMESTAMP => $recovery_checkpoint::TIMESTAMP_NTZ);
 
 -- Verify recovery was successful
-SELECT 
+SELECT
     'Recovered State' as checkpoint,
     COUNT(*) as transaction_count,
     SUM(amount) as total_amount,
@@ -314,7 +314,7 @@ DROP TABLE financial_transactions;
 ALTER TABLE financial_transactions_recovered RENAME TO financial_transactions;
 
 -- Final verification
-SELECT 
+SELECT
     'Final Verification' as status,
     COUNT(*) as transaction_count,
     SUM(amount) as total_amount,
@@ -328,7 +328,7 @@ FROM financial_transactions;
 -- ============================================================================
 
 -- Check default retention period
-SELECT 
+SELECT
     table_catalog,
     table_schema,
     table_name,
@@ -339,7 +339,7 @@ WHERE table_schema = 'RECOVERY'
 
 -- Set extended retention for critical financial data
 -- Note: Requires Enterprise Edition or higher
-ALTER TABLE financial_transactions 
+ALTER TABLE financial_transactions
 SET DATA_RETENTION_TIME_IN_DAYS = 90;
 
 -- For staging/temporary tables, use minimal retention
@@ -350,10 +350,10 @@ ALTER TABLE staging_temp_data
 SET DATA_RETENTION_TIME_IN_DAYS = 0;
 
 -- View retention settings for all tables
-SELECT 
+SELECT
     table_name,
     retention_time as retention_days,
-    CASE 
+    CASE
         WHEN retention_time >= 90 THEN 'Critical - Extended Retention'
         WHEN retention_time >= 7 THEN 'Standard Retention'
         WHEN retention_time >= 1 THEN 'Minimal Retention'
@@ -368,8 +368,8 @@ ORDER BY retention_time DESC, table_name;
 SELECT
     table_name,
     retention_time,
-    CASE 
-        WHEN retention_time > 0 
+    CASE
+        WHEN retention_time > 0
         THEN DATEADD(day, -retention_time, CURRENT_TIMESTAMP())
         ELSE NULL
     END as oldest_recoverable_timestamp
@@ -387,24 +387,24 @@ COMPREHENSIVE DISASTER RECOVERY SCENARIOS AND SOLUTIONS
 ===========================================================================
 SCENARIO 1: Accidental Table Drop
 ===========================================================================
-Problem: 
-    A developer or analyst accidentally drops a production table during 
+Problem:
+    A developer or analyst accidentally drops a production table during
     routine maintenance or cleanup operations.
 
-Solution: 
+Solution:
     Use UNDROP TABLE command to recover the dropped table instantly.
     All data and structure are preserved within the retention period.
 
 SQL Example:
     -- Immediate recovery
     UNDROP TABLE critical_customer_data;
-    
+
     -- Verify recovery
     SELECT COUNT(*) FROM critical_customer_data;
 
-Recovery Time: 
+Recovery Time:
     < 1 second (instant metadata operation)
-    
+
 Best Practices:
     - Document table drops in change logs
     - Use separate dev/prod environments
@@ -415,7 +415,7 @@ Best Practices:
 SCENARIO 2: Bulk Data Corruption
 ===========================================================================
 Problem:
-    A batch job or ETL process corrupts large amounts of data with 
+    A batch job or ETL process corrupts large amounts of data with
     incorrect values, affecting business operations and reporting.
 
 Solution:
@@ -425,21 +425,21 @@ Solution:
 SQL Example:
     -- Identify corruption time (e.g., 2 hours ago)
     SET corruption_time = DATEADD(hour, -2, CURRENT_TIMESTAMP());
-    
+
     -- Create clean copy from before corruption
-    CREATE TABLE sales_clean CLONE sales 
+    CREATE TABLE sales_clean CLONE sales
         AT(TIMESTAMP => $corruption_time);
-    
+
     -- Verify clean data
     SELECT COUNT(*), SUM(amount) FROM sales_clean;
-    
+
     -- Replace corrupted table
     DROP TABLE sales;
     ALTER TABLE sales_clean RENAME TO sales;
 
 Recovery Time:
     1-5 minutes (depends on table size and metadata)
-    
+
 Best Practices:
     - Implement data validation checks
     - Use staging tables for transformations
@@ -450,7 +450,7 @@ Best Practices:
 SCENARIO 3: Malicious Data Deletion
 ===========================================================================
 Problem:
-    Unauthorized user or compromised account deletes critical business 
+    Unauthorized user or compromised account deletes critical business
     data, causing immediate operational impact.
 
 Solution:
@@ -464,18 +464,18 @@ SQL Example:
     WHERE query_text ILIKE '%DELETE FROM customer_orders%'
         AND start_time >= DATEADD(hour, -24, CURRENT_TIMESTAMP())
     ORDER BY start_time DESC;
-    
+
     -- Recover using BEFORE(STATEMENT)
     CREATE TABLE customer_orders_recovery CLONE customer_orders
         BEFORE(STATEMENT => '<query_id_from_above>');
-    
+
     -- Verify and restore
     SELECT COUNT(*) FROM customer_orders_recovery;
     ALTER TABLE customer_orders SWAP WITH customer_orders_recovery;
 
 Recovery Time:
     2-10 minutes (including investigation and verification)
-    
+
 Best Practices:
     - Enable query history monitoring
     - Implement row-level security
@@ -497,23 +497,23 @@ Solution:
 SQL Example:
     -- Set recovery point (last known good state)
     SET recovery_point = '2024-03-09 14:30:00'::TIMESTAMP_NTZ;
-    
+
     -- Recover multiple related tables
     CREATE TABLE orders_restored CLONE orders
         AT(TIMESTAMP => $recovery_point);
-    
+
     CREATE TABLE order_items_restored CLONE order_items
         AT(TIMESTAMP => $recovery_point);
-    
+
     CREATE TABLE payments_restored CLONE payments
         AT(TIMESTAMP => $recovery_point);
-    
+
     -- Verify referential integrity
-    SELECT 
+    SELECT
         (SELECT COUNT(*) FROM orders_restored) as orders,
         (SELECT COUNT(*) FROM order_items_restored) as items,
         (SELECT COUNT(DISTINCT order_id) FROM order_items_restored) as orders_with_items;
-    
+
     -- Coordinated restoration
     BEGIN TRANSACTION;
         DROP TABLE orders;
@@ -526,7 +526,7 @@ SQL Example:
 
 Recovery Time:
     5-15 minutes (multiple table coordination)
-    
+
 Best Practices:
     - Thorough application testing before production
     - Implement application-level data validation
@@ -547,7 +547,7 @@ Solution:
 
 SQL Example:
     -- Find the transaction start time
-    SELECT 
+    SELECT
         query_id,
         query_text,
         start_time,
@@ -558,19 +558,19 @@ SQL Example:
         AND start_time >= DATEADD(hour, -2, CURRENT_TIMESTAMP())
         AND session_id = <problematic_session_id>
     ORDER BY start_time DESC;
-    
+
     -- Restore to before transaction
     CREATE TABLE inventory_pre_transaction CLONE inventory
         BEFORE(STATEMENT => '<transaction_query_id>');
-    
+
     -- Verify consistency
-    SELECT 
+    SELECT
         product_id,
         quantity,
         last_update
     FROM inventory_pre_transaction
     WHERE last_update < '<transaction_start_time>';
-    
+
     -- Restore if verification passes
     BEGIN TRANSACTION;
         TRUNCATE TABLE inventory;
@@ -579,7 +579,7 @@ SQL Example:
 
 Recovery Time:
     3-8 minutes (depends on transaction complexity)
-    
+
 Best Practices:
     - Use explicit transactions with proper error handling
     - Implement savepoints for complex operations

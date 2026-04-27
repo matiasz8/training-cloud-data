@@ -3,8 +3,8 @@
 ## Overview
 Implement event-driven, near real-time data loading with Snowpipe to automatically ingest files from cloud storage as they arrive, eliminating the need for scheduled batch loads.
 
-**Estimated Time**: 2 hours  
-**Difficulty**: ⭐⭐⭐⭐ Advanced  
+**Estimated Time**: 2 hours
+**Difficulty**: ⭐⭐⭐⭐ Advanced
 **Prerequisites**: Module 02 (Storage basics), Exercise 01 (Virtual Warehouses), AWS/Azure/GCP account with S3 bucket
 
 ---
@@ -112,7 +112,7 @@ SHOW FILE FORMATS LIKE '%sensor%';
 -- {"sensor_id": "SENSOR_001", "timestamp": "2024-03-09T10:30:00Z", "temperature": 22.5, "humidity": 65.2, "location": {"lat": 40.7128, "lon": -74.0060}}
 
 -- Test reading from stage (manually upload test file first)
-SELECT 
+SELECT
     $1:sensor_id::VARCHAR as sensor_id,
     $1:timestamp::TIMESTAMP as reading_time,
     $1:temperature::FLOAT as temperature,
@@ -142,15 +142,15 @@ CREATE OR REPLACE TABLE sensor_data (
     reading_timestamp TIMESTAMP NOT NULL,
     temperature FLOAT,
     humidity FLOAT,
-    
+
     -- Semi-structured location data
     location VARIANT,
-    
+
     -- Metadata columns
     file_name VARCHAR(500),
     file_row_number INT,
     load_timestamp TIMESTAMP DEFAULT current_timestamp(),
-    
+
     -- Constraints
     PRIMARY KEY (sensor_id, reading_timestamp)
 );
@@ -170,7 +170,7 @@ CREATE OR REPLACE TABLE sensor_data_raw (
 -- Copy from stage to table (to verify schema mapping)
 COPY INTO sensor_data (sensor_id, reading_timestamp, temperature, humidity, location, file_name)
 FROM (
-    SELECT 
+    SELECT
         $1:sensor_id::VARCHAR,
         $1:timestamp::TIMESTAMP,
         $1:temperature::FLOAT,
@@ -186,7 +186,7 @@ PATTERN = '.*test.*';
 SELECT * FROM sensor_data LIMIT 10;
 
 -- Query location data
-SELECT 
+SELECT
     sensor_id,
     reading_timestamp,
     temperature,
@@ -217,7 +217,7 @@ CREATE OR REPLACE PIPE sensor_data_pipe
 AS
 COPY INTO sensor_data (sensor_id, reading_timestamp, temperature, humidity, location, file_name)
 FROM (
-    SELECT 
+    SELECT
         $1:sensor_id::VARCHAR,
         $1:timestamp::TIMESTAMP,
         $1:temperature::FLOAT,
@@ -381,10 +381,10 @@ for i in range(10):
     sensor_id = f"SENSOR_{random.randint(1, 5):03d}"
     timestamp = base_time + timedelta(minutes=i)
     filename = f"sensor-data/sensor_{sensor_id}_{timestamp.strftime('%Y%m%d_%H%M%S')}.json"
-    
+
     with open(filename, 'w') as f:
         json.dump(generate_sensor_file(sensor_id, timestamp), f)
-    
+
     print(f"Generated: {filename}")
 ```
 
@@ -403,7 +403,7 @@ aws s3 ls s3://your-iot-bucket/sensor-data/
 ALTER PIPE sensor_data_pipe REFRESH;
 
 -- Wait 10-30 seconds, then check load status
-SELECT 
+SELECT
     *
 FROM table(information_schema.copy_history(
     TABLE_NAME => 'SENSOR_DATA',
@@ -418,7 +418,7 @@ ORDER BY last_load_time DESC;
 SELECT COUNT(*) as total_records FROM sensor_data;
 
 -- View recent loads
-SELECT 
+SELECT
     sensor_id,
     reading_timestamp,
     temperature,
@@ -430,7 +430,7 @@ ORDER BY load_timestamp DESC
 LIMIT 20;
 
 -- Verify file metadata
-SELECT 
+SELECT
     file_name,
     COUNT(*) as records_per_file,
     MIN(load_timestamp) as load_time
@@ -452,7 +452,7 @@ SELECT
     first_error_character,
     first_error_column_name,
     error_count,
-    CASE 
+    CASE
         WHEN status = 'LOADED' THEN '✅'
         WHEN status = 'LOAD_FAILED' THEN '❌'
         ELSE status
@@ -494,7 +494,7 @@ GROUP BY pipe_name, usage_date
 ORDER BY usage_date DESC;
 
 -- Files processed by pipe
-SELECT 
+SELECT
     DATE(last_load_time) as load_date,
     COUNT(*) as files_loaded,
     SUM(row_count) as total_rows,
@@ -528,13 +528,13 @@ SELECT
     total_credits,
     total_credits * 2.00 as cost_usd,  -- Adjust for your pricing tier
     (total_files / 1000.0 * 0.06) as expected_file_cost_credits,
-    
+
     -- Cost per file
     (total_credits / total_files) as credits_per_file,
-    
+
     -- Cost per GB
     (total_credits / total_gb) as credits_per_gb,
-    
+
     -- Monthly projection
     total_credits as monthly_credits,
     (total_credits * 2.00) as monthly_cost_usd
@@ -559,7 +559,7 @@ WHERE status = 'LOAD_FAILED'
 ORDER BY last_load_time DESC;
 
 -- Pipe error summary
-SELECT 
+SELECT
     DATE(last_load_time) as error_date,
     COUNT(*) as failed_files,
     array_agg(DISTINCT first_error_message) as error_types
@@ -575,7 +575,7 @@ ORDER BY error_date DESC;
 **Validate Data Quality**:
 ```sql
 -- Use VALIDATE function to check files without loading
-SELECT 
+SELECT
     file_name,
     file_size,
     row_count,
@@ -586,7 +586,7 @@ FROM table(
 );
 
 -- Check for duplicate loads (same file loaded twice)
-SELECT 
+SELECT
     file_name,
     COUNT(*) as load_count,
     array_agg(load_timestamp) as load_times
@@ -601,22 +601,22 @@ ORDER BY load_count DESC;
 CREATE OR REPLACE VIEW v_snowpipe_dashboard AS
 SELECT
     'sensor_data_pipe' as pipe_name,
-    
+
     -- Today's stats
     (SELECT COUNT(*) FROM sensor_data WHERE DATE(load_timestamp) = CURRENT_DATE()) as files_today,
     (SELECT COUNT(DISTINCT sensor_id) FROM sensor_data WHERE DATE(load_timestamp) = CURRENT_DATE()) as sensors_today,
-    
+
     -- Last load
     (SELECT MAX(load_timestamp) FROM sensor_data) as last_load_time,
     TIMESTAMPDIFF(minute, (SELECT MAX(load_timestamp) FROM sensor_data), current_timestamp()) as minutes_since_last_load,
-    
+
     -- Errors (last 24h)
-    (SELECT COUNT(*) 
+    (SELECT COUNT(*)
      FROM table(information_schema.copy_history(TABLE_NAME => 'SENSOR_DATA', START_TIME => DATEADD(hour, -24, current_timestamp())))
      WHERE status = 'LOAD_FAILED') as errors_24h,
-    
+
     -- Status
-    CASE 
+    CASE
         WHEN minutes_since_last_load < 10 THEN '🟢 Healthy'
         WHEN minutes_since_last_load < 60 THEN '🟡 Delayed'
         ELSE '🔴 Stale'
@@ -629,7 +629,7 @@ SELECT * FROM v_snowpipe_dashboard;
 **Set Up Alerts** (document as SQL, implement with scheduler):
 ```sql
 -- Alert: No data loaded in 30 minutes
-SELECT 
+SELECT
     'ALERT: Snowpipe stale' as alert_type,
     MAX(load_timestamp) as last_load,
     TIMESTAMPDIFF(minute, MAX(load_timestamp), current_timestamp()) as minutes_stale
@@ -720,7 +720,7 @@ ALTER PIPE test_pipe SET PIPE_EXECUTION_PAUSED = FALSE;
 
 ```sql
 -- Query JSON directly from stage
-SELECT 
+SELECT
     $1:field_name::VARCHAR as field,
     $1:nested.property::FLOAT as nested_field,
     $1 as full_json
@@ -728,14 +728,14 @@ FROM @stage_name/file.json
 (FILE_FORMAT => json_format);
 
 -- Flatten arrays
-SELECT 
+SELECT
     value:id::INT as id,
     value:name::VARCHAR as name
 FROM @stage_name/file.json,
 LATERAL FLATTEN(input => $1:array_field);
 
 -- Handle missing fields
-SELECT 
+SELECT
     $1:sensor_id::VARCHAR as sensor_id,
     COALESCE($1:temperature::FLOAT, -999.0) as temperature,  -- Default for nulls
     TRY_CAST($1:humidity AS FLOAT) as humidity  -- NULL if cast fails

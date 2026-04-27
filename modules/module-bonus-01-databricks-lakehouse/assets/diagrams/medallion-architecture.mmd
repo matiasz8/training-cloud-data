@@ -6,71 +6,71 @@ graph LR
         Files[Files<br/>CSV, Parquet]
         Stream[Event Streams<br/>Kafka, Kinesis]
     end
-    
+
     subgraph "Bronze Layer: Raw Ingestion"
         BronzeIngest[Ingest Raw Data<br/>Minimal Transformation]
         BronzeTable[(Bronze Table<br/>delta.bronze_events<br/>Append-Only<br/>Immutable)]
         BronzeAudit[Audit Columns:<br/>- ingestion_timestamp<br/>- source_file<br/>- _bronze_created_at]
-        
+
         BronzeIngest --> BronzeTable
         BronzeIngest --> BronzeAudit
     end
-    
+
     subgraph "Silver Layer: Cleaned & Validated"
         SilverTransform[Data Transformation:<br/>- Validate schema<br/>- Remove duplicates<br/>- Standardize formats<br/>- Apply business rules]
         SilverQuality[Data Quality Checks:<br/>- NOT NULL constraints<br/>- Value ranges<br/>- Referential integrity<br/>- Quarantine bad records]
         SilverTable[(Silver Table<br/>delta.silver_events<br/>Deduplicated<br/>Idempotent)]
-        
+
         SilverTransform --> SilverQuality
         SilverQuality --> SilverTable
     end
-    
+
     subgraph "Gold Layer: Business Aggregations"
         GoldAgg1[Aggregation:<br/>Daily Active Users]
         GoldAgg2[Aggregation:<br/>Revenue by Region]
         GoldAgg3[Aggregation:<br/>Conversion Funnel]
-        
+
         GoldTable1[(Gold Table<br/>delta.gold_dau<br/>Pre-Aggregated)]
         GoldTable2[(Gold Table<br/>delta.gold_revenue<br/>Optimized for BI)]
         GoldTable3[(Gold Table<br/>delta.gold_funnel<br/>Denormalized)]
-        
+
         GoldAgg1 --> GoldTable1
         GoldAgg2 --> GoldTable2
         GoldAgg3 --> GoldTable3
     end
-    
+
     subgraph "Data Quality & Monitoring"
         DQ[Data Quality Metrics:<br/>- Completeness<br/>- Timeliness<br/>- Accuracy]
         Monitor[Monitoring:<br/>- Record counts<br/>- Processing time<br/>- Error rates]
         Alert[Alerts:<br/>- SLA breaches<br/>- Quality failures]
-        
+
         DQ --> Monitor
         Monitor --> Alert
     end
-    
+
     subgraph "Consumption Layer"
         BI[BI Tools<br/>Tableau, Power BI]
         Analytics[Data Science<br/>ML Models]
         API2[APIs<br/>Applications]
         Reports[Reports<br/>Dashboards]
     end
-    
+
     %% Data Flow
     API --> BronzeIngest
     DB --> BronzeIngest
     Files --> BronzeIngest
     Stream --> BronzeIngest
-    
+
     BronzeTable -->|Read Stream<br/>or Batch| SilverTransform
     SilverTable -->|Aggregations| GoldAgg1
     SilverTable -->|Aggregations| GoldAgg2
     SilverTable -->|Aggregations| GoldAgg3
-    
+
     %% Quality Monitoring
     BronzeTable -.->|Monitor| DQ
     SilverTable -.->|Monitor| DQ
     GoldTable1 -.->|Monitor| DQ
-    
+
     %% Consumption
     GoldTable1 --> BI
     GoldTable2 --> BI
@@ -78,23 +78,23 @@ graph LR
     SilverTable --> Analytics
     GoldTable1 --> API2
     GoldTable2 --> Reports
-    
+
     %% Styling
     style BronzeTable fill:#8d6e63
     style BronzeIngest fill:#a1887f
     style BronzeAudit fill:#a1887f
-    
+
     style SilverTable fill:#5c6bc0
     style SilverTransform fill:#7986cb
     style SilverQuality fill:#7986cb
-    
+
     style GoldTable1 fill:#ffd54f
     style GoldTable2 fill:#ffd54f
     style GoldTable3 fill:#ffd54f
     style GoldAgg1 fill:#ffecb3
     style GoldAgg2 fill:#ffecb3
     style GoldAgg3 fill:#ffecb3
-    
+
     style DQ fill:#81c784
     style Monitor fill:#81c784
     style Alert fill:#ef5350

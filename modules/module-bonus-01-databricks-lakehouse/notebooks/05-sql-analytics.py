@@ -1,18 +1,18 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Notebook 05: SQL Analytics & Dashboards
-# MAGIC 
+# MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC - Use Databricks SQL for analytics
 # MAGIC - Create parameterized queries
 # MAGIC - Build visualizations
 # MAGIC - Design dashboards
 # MAGIC - Schedule queries and alerts
-# MAGIC 
+# MAGIC
 # MAGIC ## Prerequisites
 # MAGIC - SQL Warehouse created
 # MAGIC - Data from previous notebooks
-# MAGIC 
+# MAGIC
 # MAGIC ## Estimated Time: 45-60 minutes
 
 # COMMAND ----------
@@ -43,16 +43,16 @@ def generate_sales_data(num_records=10000):
     """Generate realistic sales data."""
     sales = []
     base_date = datetime(2024, 1, 1)
-    
+
     products = ["Laptop", "Phone", "Tablet", "Monitor", "Keyboard", "Mouse", "Headphones", "Webcam"]
     categories = ["Electronics", "Electronics", "Electronics", "Electronics", "Accessories", "Accessories", "Accessories", "Accessories"]
     regions = ["North", "South", "East", "West"]
     salespeople = ["Alice", "Bob", "Carol", "David", "Emma", "Frank"]
-    
+
     for i in range(num_records):
         sale_date = base_date + timedelta(days=random.randint(0, 365))
         product_idx = random.randint(0, len(products) - 1)
-        
+
         sales.append({
             "sale_id": i + 1,
             "sale_date": sale_date.strftime("%Y-%m-%d"),
@@ -66,7 +66,7 @@ def generate_sales_data(num_records=10000):
             "customer_segment": random.choice(["Enterprise", "SMB", "Consumer"]),
             "discount_pct": round(random.uniform(0, 0.3), 2)
         })
-    
+
     return sales
 
 sales_data = generate_sales_data(10000)
@@ -273,7 +273,7 @@ display(summary)
 
 # MAGIC %md
 # MAGIC ## Part 4: Visualization Examples
-# MAGIC 
+# MAGIC
 # MAGIC Databricks supports multiple visualization types:
 # MAGIC - Line charts (trends)
 # MAGIC - Bar charts (comparisons)
@@ -330,30 +330,30 @@ display(summary)
 # MAGIC   'Total Revenue' as metric,
 # MAGIC   CONCAT('$', FORMAT_NUMBER(SUM(net_revenue), 2)) as value
 # MAGIC FROM sales_fact
-# MAGIC 
+# MAGIC
 # MAGIC UNION ALL
-# MAGIC 
+# MAGIC
 # MAGIC SELECT
 # MAGIC   'Total Sales',
 # MAGIC   FORMAT_NUMBER(COUNT(*), 0)
 # MAGIC FROM sales_fact
-# MAGIC 
+# MAGIC
 # MAGIC UNION ALL
-# MAGIC 
+# MAGIC
 # MAGIC SELECT
 # MAGIC   'Average Sale Value',
 # MAGIC   CONCAT('$', FORMAT_NUMBER(AVG(net_revenue), 2))
 # MAGIC FROM sales_fact
-# MAGIC 
+# MAGIC
 # MAGIC UNION ALL
-# MAGIC 
+# MAGIC
 # MAGIC SELECT
 # MAGIC   'Active Salespeople',
 # MAGIC   FORMAT_NUMBER(COUNT(DISTINCT salesperson), 0)
 # MAGIC FROM sales_fact
-# MAGIC 
+# MAGIC
 # MAGIC UNION ALL
-# MAGIC 
+# MAGIC
 # MAGIC SELECT
 # MAGIC   'Average Discount',
 # MAGIC   CONCAT(FORMAT_NUMBER(AVG(discount_pct) * 100, 2), '%')
@@ -510,9 +510,9 @@ display(spark.table("daily_metrics").limit(10))
 
 # MAGIC %md
 # MAGIC ## Part 8: Query Scheduling & Alerts
-# MAGIC 
+# MAGIC
 # MAGIC **To schedule queries in Databricks SQL:**
-# MAGIC 
+# MAGIC
 # MAGIC 1. **Create Query** in Databricks SQL Editor
 # MAGIC 2. **Save Query** with descriptive name
 # MAGIC 3. **Schedule**:
@@ -559,35 +559,35 @@ display(spark.table("daily_metrics").limit(10))
 
 # MAGIC %md
 # MAGIC ## Summary & Key Takeaways
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **SQL Analytics**
 # MAGIC - Standard SQL with Delta Lake tables
 # MAGIC - Window functions for advanced analysis
 # MAGIC - Pivot tables and cohort analysis
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Parameterized Queries**
 # MAGIC - Widgets for interactive parameters
 # MAGIC - Dynamic filtering and aggregation
 # MAGIC - Reusable query templates
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Visualizations**
 # MAGIC - Line charts for trends
 # MAGIC - Bar charts for comparisons
 # MAGIC - Pie charts for proportions
 # MAGIC - Built-in Databricks visualizations
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Performance Optimization**
 # MAGIC - Materialized aggregate tables
 # MAGIC - OPTIMIZE and ZORDER
 # MAGIC - Views for common patterns
-# MAGIC 
+# MAGIC
 # MAGIC ✅ **Production Patterns**
 # MAGIC - Scheduled queries
 # MAGIC - Alerts and monitoring
 # MAGIC - Dashboard design principles
-# MAGIC 
+# MAGIC
 # MAGIC ## Next Steps
-# MAGIC 
+# MAGIC
 # MAGIC Continue to Notebook 06: **Machine Learning with MLflow**
 
 # COMMAND ----------

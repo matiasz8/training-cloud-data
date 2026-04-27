@@ -314,7 +314,7 @@ CREATE WAREHOUSE bi_wh WITH
    - Starts new cluster when query queued
    - Aggressive scaling for performance
    - Higher cost during spikes
-   
+
 2. **ECONOMY**:
    - Waits for existing clusters to fill
    - Favors cost over immediate performance
@@ -472,8 +472,8 @@ SELECT
     DATEDIFF('day', MIN(sale_date), MAX(sale_date)) AS customer_lifetime_days,
     -- Complex window functions
     AVG(amount) OVER (
-        PARTITION BY customer_id 
-        ORDER BY sale_date 
+        PARTITION BY customer_id
+        ORDER BY sale_date
         ROWS BETWEEN 10 PRECEDING AND CURRENT ROW
     ) AS moving_avg_10_orders
 FROM analytics.sales
@@ -642,7 +642,7 @@ CREATE DATABASE prod_database CLONE backup_pre_migration;
 **4. Experimentation**:
 ```sql
 -- Clone for data science experiment
-CREATE TABLE ds_experiment.customer_features 
+CREATE TABLE ds_experiment.customer_features
     CLONE prod.customers;
 
 -- Try different feature engineering approaches
@@ -808,7 +808,7 @@ ALTER TABLE customers_new RENAME TO customers;
 ```sql
 -- Clone table from 7 days ago
 CREATE TABLE analytics.customers_last_week
-    CLONE prod.customers 
+    CLONE prod.customers
     AT (TIMESTAMP => DATEADD('day', -7, CURRENT_TIMESTAMP()));
 
 -- Clone database from before migration
@@ -832,19 +832,19 @@ CREATE TABLE important_data (
 ) DATA_RETENTION_TIME_IN_DAYS = 90;  -- Enterprise+ only
 
 -- Modify retention for existing table
-ALTER TABLE customers 
+ALTER TABLE customers
     SET DATA_RETENTION_TIME_IN_DAYS = 30;
 
 -- Set retention at schema level (applied to new tables)
-ALTER SCHEMA prod_schema 
+ALTER SCHEMA prod_schema
     SET DATA_RETENTION_TIME_IN_DAYS = 60;
 
 -- Set retention at database level
-ALTER DATABASE prod_database 
+ALTER DATABASE prod_database
     SET DATA_RETENTION_TIME_IN_DAYS = 45;
 
 -- Disable Time Travel (reduce storage costs)
-ALTER TABLE temp_staging_table 
+ALTER TABLE temp_staging_table
     SET DATA_RETENTION_TIME_IN_DAYS = 0;  -- No historical versions kept
 ```
 
@@ -955,14 +955,14 @@ GRANT USAGE ON DATABASE prod_database TO SHARE sales_data_share;
 GRANT USAGE ON SCHEMA prod_database.analytics TO SHARE sales_data_share;
 
 -- Step 4: Grant table access
-GRANT SELECT ON TABLE prod_database.analytics.sales 
+GRANT SELECT ON TABLE prod_database.analytics.sales
     TO SHARE sales_data_share;
 
-GRANT SELECT ON TABLE prod_database.analytics.customers 
+GRANT SELECT ON TABLE prod_database.analytics.customers
     TO SHARE sales_data_share;
 
 -- Step 5: Add consumer accounts
-ALTER SHARE sales_data_share 
+ALTER SHARE sales_data_share
     ADD ACCOUNTS = ABC12345, XYZ67890;  -- Consumer account identifiers
 
 -- View share details
@@ -1000,7 +1000,7 @@ CREATE ROW ACCESS POLICY regional_access AS (region VARCHAR) RETURNS BOOLEAN ->
     END;
 
 -- Apply policy to shared table
-ALTER TABLE analytics.sales 
+ALTER TABLE analytics.sales
     ADD ROW ACCESS POLICY regional_access ON (region);
 
 -- Share table (each consumer sees only their region)
@@ -1056,7 +1056,7 @@ Isolation:
 -- 1. Create share with sample data
 CREATE SHARE marketplace_weather_data;
 GRANT USAGE ON DATABASE weather_db TO SHARE marketplace_weather_data;
-GRANT SELECT ON TABLE weather_db.public.forecasts 
+GRANT SELECT ON TABLE weather_db.public.forecasts
     TO SHARE marketplace_weather_data;
 
 -- 2. Submit to Snowflake Marketplace
@@ -1070,7 +1070,7 @@ GRANT SELECT ON TABLE weather_db.public.forecasts
 -- Install free or paid datasets
 
 -- Example: Install free COVID-19 dataset
-CREATE DATABASE covid19_data 
+CREATE DATABASE covid19_data
     FROM SHARE <marketplace_provider>.covid19_share;
 
 -- Query instantly
@@ -1751,5 +1751,5 @@ SELECT * FROM large_customers WHERE name LIKE '%Smith%';         -- Substring se
 2. Follow exercises to practice each concept
 3. Explore [best-practices.md](best-practices.md) for production guidance
 
-**Last Updated**: March 2026  
+**Last Updated**: March 2026
 **Module**: Bonus 02 - Snowflake Data Cloud

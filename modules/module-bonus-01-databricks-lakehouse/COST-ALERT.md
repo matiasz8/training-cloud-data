@@ -161,7 +161,7 @@ Jobs Compute: Scheduled ETL, batch processing (60% cheaper)
 ```python
 # Check cluster usage
 %sql
-SELECT 
+SELECT
   cluster_name,
   SUM(total_time_sec) / 3600 as hours_used,
   hours_used * 0.67 as estimated_cost_usd
@@ -188,7 +188,7 @@ ORDER BY estimated_cost_usd DESC;
 - Better developer experience
 - Built-in ML and governance
 
-**Break-Even:** 
+**Break-Even:**
 - If team spends >20 hours/month on Spark management → Databricks cheaper (TCO)
 - If <20 hours → AWS Glue/EMR cheaper (sticker price)
 
@@ -267,22 +267,22 @@ If you see unexpected costs:
 
 ## ❓ FAQ
 
-**Q: Will I be charged after the 14-day trial?**  
+**Q: Will I be charged after the 14-day trial?**
 A: Modern Databricks trials auto-cancel. However, always verify in Account Settings.
 
-**Q: Can I use Community Edition for this entire module?**  
+**Q: Can I use Community Edition for this entire module?**
 A: Almost! You'll miss Exercise 03 (Unity Catalog) but complete 5 out of 6 exercises.
 
-**Q: What if I run out of trial credits?**  
+**Q: What if I run out of trial credits?**
 A: Trial credits are generous (~$400). This module uses ~$20. Unlikely to run out.
 
-**Q: Are cloud provider costs (EC2) included?**  
+**Q: Are cloud provider costs (EC2) included?**
 A: On trial/Community Edition: Yes. On paid: You pay EC2 + DBU separately.
 
-**Q: Can I get a student discount?**  
+**Q: Can I get a student discount?**
 A: Databricks Academy offers free lab environments for students. No personal account needed.
 
-**Q: Is Databricks more expensive than AWS Glue?**  
+**Q: Is Databricks more expensive than AWS Glue?**
 A: Sticker price: Yes (2-3x). Total Cost of Ownership (TCO): Often lower (faster development, less debugging, better performance).
 
 ## 📞 Getting Help

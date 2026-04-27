@@ -212,7 +212,7 @@ You can extend any diagram by adding new sections:
 graph TB
     %% Your custom nodes here
     CustomNode[My Addition]
-    
+
     %% Link to existing structure
     ExistingNode --> CustomNode
 ```
@@ -271,8 +271,8 @@ Use this checklist to track your understanding of each diagram:
 
 ## 📚 Diagram Maintenance
 
-**Last Updated**: March 2026  
-**Snowflake Version**: Current with Q1 2026 features  
+**Last Updated**: March 2026
+**Snowflake Version**: Current with Q1 2026 features
 **Maintainer**: Training Cloud Data Team
 
 ### Version History

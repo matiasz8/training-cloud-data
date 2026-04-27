@@ -3,8 +3,8 @@
 ## Overview
 Build interactive SQL dashboards using Databricks SQL for business intelligence, featuring parameterized queries, advanced window functions, cohort analysis, and rich visualizations.
 
-**Estimated Time**: 1.5 hours  
-**Difficulty**: ⭐⭐⭐ Intermediate  
+**Estimated Time**: 1.5 hours
+**Difficulty**: ⭐⭐⭐ Intermediate
 **Prerequisites**: Basic SQL knowledge, Exercise 02 (ETL Pipelines)
 
 ---
@@ -172,11 +172,11 @@ SELECT
   product_name,
   SUM(total_amount) as category_revenue,
   RANK() OVER (
-    PARTITION BY product_category 
+    PARTITION BY product_category
     ORDER BY SUM(total_amount) DESC
   ) as rank_in_category,
   PERCENT_RANK() OVER (
-    PARTITION BY product_category 
+    PARTITION BY product_category
     ORDER BY SUM(total_amount) DESC
   ) as percentile_in_category
 FROM sales_transactions
@@ -199,8 +199,8 @@ SELECT
   LAG(revenue) OVER (ORDER BY month) as prev_month_revenue,
   revenue - LAG(revenue) OVER (ORDER BY month) as mom_change,
   ROUND(
-    (revenue - LAG(revenue) OVER (ORDER BY month)) / 
-    LAG(revenue) OVER (ORDER BY month) * 100, 
+    (revenue - LAG(revenue) OVER (ORDER BY month)) /
+    LAG(revenue) OVER (ORDER BY month) * 100,
     2
   ) as mom_growth_pct
 FROM monthly_sales
@@ -334,9 +334,9 @@ Create dynamic queries that respond to user input.
 # Create widgets
 dbutils.widgets.text("start_date", "2025-01-01", "Start Date")
 dbutils.widgets.text("end_date", "2025-12-31", "End Date")
-dbutils.widgets.multiselect("regions", "All", 
+dbutils.widgets.multiselect("regions", "All",
   ["All", "Northeast", "Southeast", "Midwest", "West", "Southwest"], "Region")
-dbutils.widgets.dropdown("category", "All", 
+dbutils.widgets.dropdown("category", "All",
   ["All", "Electronics", "Clothing", "Home", "Beauty", "Sports"], "Category")
 dbutils.widgets.text("min_amount", "0", "Min Transaction ($)")
 
@@ -357,14 +357,14 @@ SELECT
   SUM(total_amount) as revenue,
   AVG(total_amount) as avg_transaction
 FROM sales_transactions
-WHERE 
+WHERE
   transaction_date BETWEEN '${start_date}' AND '${end_date}'
   AND (
-    '${regions}' = 'All' 
+    '${regions}' = 'All'
     OR region IN (${regions})  -- Handle multi-select
   )
   AND (
-    '${category}' = 'All' 
+    '${category}' = 'All'
     OR product_category = '${category}'
   )
   AND total_amount >= ${min_amount}
@@ -470,7 +470,7 @@ from datetime import datetime, timedelta
 import random
 
 # Products with Pareto distribution
-products = [(f"Product_{i}", random.choice(["Electronics", "Clothing", "Home", "Beauty", "Sports"]), 
+products = [(f"Product_{i}", random.choice(["Electronics", "Clothing", "Home", "Beauty", "Sports"]),
              random.uniform(10, 500)) for i in range(50)]
 
 # Generate 10,000 transactions
@@ -481,13 +481,13 @@ for i in range(10000):
     # Weighted random product (top 20% products get 60% of sales)
     product_idx = random.choices(range(50), weights=[100]*10 + [20]*40)[0]
     product_name, category, base_price = products[product_idx]
-    
+
     # Random date with seasonal trend
     days_offset = random.randint(0, 365)
     trans_date = base_date + timedelta(days=days_offset)
     month = trans_date.month
     seasonal_multiplier = 1.2 if month == 12 else (0.9 if month == 8 else 1.0)
-    
+
     transactions.append({
         "transaction_id": f"TXN_{i:05d}",
         "transaction_date": trans_date,
@@ -533,7 +533,7 @@ QUALIFY rank_in_category <= 10;
 dbutils.widgets.removeAll()  # Clear existing
 dbutils.widgets.text("start_date", "2025-01-01")
 dbutils.widgets.text("end_date", "2025-12-31")
-dbutils.widgets.multiselect("regions", "All", 
+dbutils.widgets.multiselect("regions", "All",
     ["All", "Northeast", "Southeast", "Midwest", "West"])
 
 # Get values
@@ -568,7 +568,7 @@ SELECT
   DATE_TRUNC('month', t.transaction_date) as activity_month,
   DATEDIFF(MONTH, c.cohort_month, DATE_TRUNC('month', t.transaction_date)) as period,
   COUNT(DISTINCT t.customer_id) as customers,
-  COUNT(DISTINCT t.customer_id) / 
+  COUNT(DISTINCT t.customer_id) /
     MAX(COUNT(DISTINCT c.customer_id)) OVER (PARTITION BY c.cohort_month) * 100 as retention_pct
 FROM cohorts c
 JOIN sales_transactions t ON c.customer_id = t.customer_id

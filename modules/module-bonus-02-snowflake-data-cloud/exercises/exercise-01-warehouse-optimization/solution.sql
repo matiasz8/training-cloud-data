@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Exercise 01: Warehouse Optimization - SOLUTION
 -- ============================================================================
--- 
+--
 -- This solution demonstrates best practices for warehouse configuration,
 -- performance testing, and cost optimization in Snowflake.
 -- ============================================================================
@@ -47,7 +47,7 @@ CREATE OR REPLACE WAREHOUSE COMPUTE_WH_LARGE
 SHOW WAREHOUSES LIKE 'COMPUTE_WH_%';
 
 -- Check warehouse configuration details
-SELECT 
+SELECT
     "name" as warehouse_name,
     "size" as warehouse_size,
     "auto_suspend" as auto_suspend_seconds,
@@ -220,7 +220,7 @@ INSERT INTO performance_results (warehouse_size, query_description, execution_ti
 VALUES ('LARGE', 'Complex analytical query with joins and aggregations', $duration_large);
 
 -- Display performance comparison
-SELECT 
+SELECT
     warehouse_size,
     execution_time_ms,
     execution_time_ms / 1000.0 as execution_time_seconds,
@@ -261,7 +261,7 @@ SELECT 'Testing auto-suspend - warehouse should suspend after 60 seconds of inac
 -- Check warehouse status
 SHOW WAREHOUSES LIKE 'COMPUTE_WH_%';
 
-SELECT 
+SELECT
     "name" as warehouse_name,
     "state" as current_state,
     "auto_suspend" / 60.0 as auto_suspend_minutes,
@@ -291,7 +291,7 @@ ALTER WAREHOUSE COMPUTE_WH_MULTI SET
 -- Verify multi-cluster configuration
 SHOW WAREHOUSES LIKE 'COMPUTE_WH_MULTI';
 
-SELECT 
+SELECT
     "name" as warehouse_name,
     "size" as warehouse_size,
     "min_cluster_count",

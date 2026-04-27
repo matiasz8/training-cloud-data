@@ -2,7 +2,7 @@
 graph TB
     subgraph "Feature Comparison"
         direction LR
-        
+
         Feature1[Compute<br/>Processing Engine]
         Feature2[Storage<br/>Data Lake Format]
         Feature3[Data Warehouse<br/>SQL Analytics]
@@ -10,69 +10,69 @@ graph TB
         Feature5[Governance<br/>Data Catalog]
         Feature6[ML Platform<br/>Training & Deployment]
     end
-    
+
     subgraph "Databricks Solutions"
         DB_Compute[Databricks Clusters<br/>- Unified Spark runtime<br/>- Auto-scaling<br/>- Photon Engine 10-50x faster<br/>- Serverless compute<br/>Cost: $0.40/DBU All-Purpose]
-        
+
         DB_Storage[Delta Lake<br/>- ACID transactions<br/>- Time travel<br/>- MERGE/UPSERT<br/>- Schema evolution<br/>- Z-ordering<br/>Cost: S3 storage only]
-        
+
         DB_Warehouse[Databricks SQL<br/>- Photon-powered<br/>- SQL Warehouses<br/>- Built-in visualization<br/>- Serverless SQL<br/>Cost: $0.22-0.88/DBU]
-        
+
         DB_Orchestration[Databricks Workflows<br/>- Multi-task DAGs<br/>- Job clusters auto-created<br/>- Integrated monitoring<br/>- Parameterized jobs<br/>Cost: $0.15/DBU Jobs Compute]
-        
+
         DB_Governance[Unity Catalog<br/>- 3-level namespace<br/>- Central metastore<br/>- Fine-grained ACLs<br/>- Data lineage<br/>- Delta Sharing<br/>Cost: Included]
-        
+
         DB_ML[Databricks ML<br/>- MLflow built-in<br/>- AutoML<br/>- Managed MLflow<br/>- Model serving<br/>- Feature Store<br/>Cost: Standard compute]
     end
-    
+
     subgraph "AWS Native Solutions"
         AWS_Compute1[Amazon EMR<br/>- Managed Hadoop/Spark<br/>- Manual scaling<br/>- No Photon<br/>- Custom AMI support<br/>Cost: EC2 + $0.05-0.27/hr]
-        
+
         AWS_Compute2[AWS Glue<br/>- Serverless ETL<br/>- Python/Scala<br/>- Auto-scaling<br/>- Limited Spark features<br/>Cost: $0.44/DPU-hour]
-        
+
         AWS_Storage1[Apache Parquet<br/>- Columnar format<br/>- No ACID<br/>- No time travel<br/>- Manual compaction<br/>Cost: S3 storage]
-        
+
         AWS_Storage2[Apache Iceberg/Hudi<br/>- ACID transactions<br/>- Time travel<br/>- Complex setup<br/>- Manual optimization<br/>Cost: S3 storage]
-        
+
         AWS_Warehouse1[Amazon Redshift<br/>- Columnar warehouse<br/>- Separate from lake<br/>- Data duplication cost<br/>- Pause/resume<br/>Cost: $0.25-6.80/hr]
-        
+
         AWS_Warehouse2[Amazon Athena<br/>- Serverless SQL<br/>- Query S3 directly<br/>- Pay per query<br/>- Limited optimization<br/>Cost: $5/TB scanned]
-        
+
         AWS_Orchestration1[AWS Step Functions<br/>- State machines<br/>- Complex setup<br/>- JSON definitions<br/>- Good integrations<br/>Cost: $25/1M transitions]
-        
+
         AWS_Orchestration2[Apache Airflow MWAA<br/>- Managed Airflow<br/>- Python DAGs<br/>- Requires setup<br/>- Good for complex flows<br/>Cost: $0.49/hr small]
-        
+
         AWS_Governance1[AWS Lake Formation<br/>- Centralized permissions<br/>- Table/column security<br/>- Limited lineage<br/>- AWS-only<br/>Cost: Included]
-        
+
         AWS_Governance2[AWS Glue Catalog<br/>- Metadata store<br/>- Basic cataloging<br/>- No Unity features<br/>- Regional<br/>Cost: $1/100K requests]
-        
+
         AWS_ML[Amazon SageMaker<br/>- Managed Jupyter<br/>- Training jobs<br/>- Model registry<br/>- Endpoints for serving<br/>- Separate from data pipeline<br/>Cost: $0.05-24.48/hr]
     end
-    
+
     %% Connections
     Feature1 --> DB_Compute
     Feature1 --> AWS_Compute1
     Feature1 --> AWS_Compute2
-    
+
     Feature2 --> DB_Storage
     Feature2 --> AWS_Storage1
     Feature2 --> AWS_Storage2
-    
+
     Feature3 --> DB_Warehouse
     Feature3 --> AWS_Warehouse1
     Feature3 --> AWS_Warehouse2
-    
+
     Feature4 --> DB_Orchestration
     Feature4 --> AWS_Orchestration1
     Feature4 --> AWS_Orchestration2
-    
+
     Feature5 --> DB_Governance
     Feature5 --> AWS_Governance1
     Feature5 --> AWS_Governance2
-    
+
     Feature6 --> DB_ML
     Feature6 --> AWS_ML
-    
+
     %% Styling
     style DB_Compute fill:#2196f3
     style DB_Storage fill:#2196f3
@@ -80,7 +80,7 @@ graph TB
     style DB_Orchestration fill:#2196f3
     style DB_Governance fill:#2196f3
     style DB_ML fill:#2196f3
-    
+
     style AWS_Compute1 fill:#ff9800
     style AWS_Compute2 fill:#ff9800
     style AWS_Storage1 fill:#ff9800

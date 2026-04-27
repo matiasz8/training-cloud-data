@@ -5,7 +5,7 @@
 -- Description: Master Snowpipe for serverless, continuous data ingestion from
 --              cloud storage (S3/Azure/GCS). Learn auto-ingest, manual refresh,
 --              error handling, and cost optimization.
--- 
+--
 -- Prerequisites:
 --   - Snowflake account with CREATE PIPE privilege
 --   - Access to S3, Azure Blob, or GCS bucket
@@ -437,7 +437,7 @@ SELECT
     DATEADD(MINUTE, -UNIFORM(1, 10080, RANDOM()), CURRENT_TIMESTAMP()) AS transaction_date,
     CONCAT('PROD-', UNIFORM(1, 100, RANDOM())) AS product_id,
     CONCAT('Product ', UNIFORM(1, 100, RANDOM())) AS product_name,
-    ARRAY_GET(PARSE_JSON('["Electronics","Clothing","Food","Books","Home"]'), 
+    ARRAY_GET(PARSE_JSON('["Electronics","Clothing","Food","Books","Home"]'),
               UNIFORM(0, 4, RANDOM())) AS category,
     CONCAT('CUST-', UNIFORM(1, 500, RANDOM())) AS customer_id,
     CONCAT('Customer ', UNIFORM(1, 500, RANDOM())) AS customer_name,
@@ -638,7 +638,7 @@ SELECT
     file_name,
     last_load_time,
     LAG(last_load_time) OVER (PARTITION BY pipe_name ORDER BY last_load_time) AS previous_load_time,
-    DATEDIFF(SECOND, 
+    DATEDIFF(SECOND,
              LAG(last_load_time) OVER (PARTITION BY pipe_name ORDER BY last_load_time),
              last_load_time) AS seconds_between_loads
 FROM SNOWFLAKE.ACCOUNT_USAGE.COPY_HISTORY
@@ -938,7 +938,7 @@ SELECT
     ROUND(total_credits, 2) AS total_credits,
     ROUND(total_credits * 4, 2) AS cost_usd,
     ROUND(LAG(total_credits) OVER (ORDER BY month), 2) AS prev_month_credits,
-    ROUND(((total_credits - LAG(total_credits) OVER (ORDER BY month)) / 
+    ROUND(((total_credits - LAG(total_credits) OVER (ORDER BY month)) /
            NULLIF(LAG(total_credits) OVER (ORDER BY month), 0)) * 100, 1) AS growth_pct
 FROM monthly_usage
 ORDER BY month DESC;

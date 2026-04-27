@@ -5,7 +5,7 @@
 -- Description: Master Snowflake's compute layer with virtual warehouses.
 --              Learn sizing, auto-suspend/resume, multi-cluster warehouses,
 --              and credit optimization strategies.
--- 
+--
 -- Prerequisites:
 --   - Snowflake account with ACCOUNTADMIN role
 --   - Basic understanding of SQL

@@ -5,7 +5,7 @@
 -- Description: Master Snowflake Streams for Change Data Capture (CDC) and
 --              Tasks for automated data pipeline orchestration. Build
 --              incremental processing workflows with Bronze-Silver-Gold pattern.
--- 
+--
 -- Prerequisites:
 --   - Snowflake account with CREATE TASK privilege
 --   - Understanding of SQL DML operations
@@ -148,7 +148,7 @@ SELECT SYSTEM$STREAM_HAS_DATA('employees_stream') AS has_data;
 -- METADATA$ACTION: Type of change (INSERT, DELETE)
 -- METADATA$ISUPDATE: TRUE if row modified (appears as DELETE + INSERT)
 -- METADATA$ROW_ID: Unique identifier for the row
--- 
+--
 -- For UPDATE operations:
 --   - Old version: METADATA$ACTION = 'DELETE', METADATA$ISUPDATE = TRUE
 --   - New version: METADATA$ACTION = 'INSERT', METADATA$ISUPDATE = TRUE

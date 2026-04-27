@@ -16,7 +16,6 @@ Run: python validate.py
 """
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count
 import sys
 
 # Initialize Spark
@@ -46,78 +45,78 @@ try:
     # Check catalogs exist
     catalogs = spark.sql("SHOW CATALOGS").collect()
     catalog_names = [row.catalog for row in catalogs]
-    
+
     required_catalogs = ['dev_catalog', 'staging_catalog', 'prod_catalog']
     catalogs_found = [c for c in required_catalogs if c in catalog_names]
-    
+
     if len(catalogs_found) == 3:
         print(f"  ✅ All 3 catalogs exist: {', '.join(catalogs_found)}")
         task1_score += 5
     else:
         missing = set(required_catalogs) - set(catalogs_found)
         print(f"  ❌ Missing catalogs: {', '.join(missing)}")
-    
+
     # Check schemas in dev_catalog
     schemas = spark.sql("SHOW SCHEMAS IN dev_catalog").collect()
     schema_names = [row.databaseName for row in schemas]
-    
+
     required_schemas = ['bronze_schema', 'silver_schema', 'gold_schema']
     schemas_found = [s for s in required_schemas if s in schema_names]
-    
+
     if len(schemas_found) == 3:
         print(f"  ✅ All 3 schemas exist in dev_catalog: {', '.join(schemas_found)}")
         task1_score += 5
     else:
         missing = set(required_schemas) - set(schemas_found)
         print(f"  ❌ Missing schemas: {', '.join(missing)}")
-    
+
     # Check tables exist in dev_catalog
     try:
         bronze_count = spark.sql("""
-            SELECT COUNT(*) as cnt 
+            SELECT COUNT(*) as cnt
             FROM dev_catalog.bronze_schema.patients_raw
         """).first().cnt
-        
+
         if bronze_count >= 5000:
             print(f"  ✅ Bronze table has {bronze_count} records (expected 5,000)")
             task1_score += 3
         else:
             print(f"  ⚠️  Bronze table has only {bronze_count} records (expected 5,000)")
             task1_score += 1
-            
+
     except Exception as e:
         print(f"  ❌ Bronze table not found or error: {e}")
-    
+
     try:
         silver_count = spark.sql("""
-            SELECT COUNT(*) as cnt 
+            SELECT COUNT(*) as cnt
             FROM dev_catalog.silver_schema.patients_clean
         """).first().cnt
-        
+
         if silver_count > 0:
             print(f"  ✅ Silver table has {silver_count} records")
             task1_score += 4
         else:
-            print(f"  ❌ Silver table is empty")
-            
+            print("  ❌ Silver table is empty")
+
     except Exception as e:
         print(f"  ❌ Silver table not found or error: {e}")
-    
+
     try:
         gold_count = spark.sql("""
-            SELECT COUNT(*) as cnt 
+            SELECT COUNT(*) as cnt
             FROM dev_catalog.gold_schema.patient_analytics
         """).first().cnt
-        
+
         if gold_count > 0:
             print(f"  ✅ Gold table has {gold_count} aggregated records")
             task1_score += 3
         else:
-            print(f"  ❌ Gold table is empty")
-            
+            print("  ❌ Gold table is empty")
+
     except Exception as e:
         print(f"  ❌ Gold table not found or error: {e}")
-    
+
 except Exception as e:
     print(f"  ❌ Task 1 validation error: {e}")
 
@@ -136,36 +135,36 @@ try:
     # Check grants on dev_catalog
     try:
         grants = spark.sql("SHOW GRANTS ON CATALOG dev_catalog").collect()
-        
+
         if grants:
             print(f"  ✅ Permissions configured on dev_catalog ({len(grants)} grants)")
             task2_score += 10
-            
+
             # Check for specific groups
             grant_principals = [row.principal for row in grants]
-            
+
             if 'data_engineers' in str(grant_principals):
-                print(f"  ✅ data_engineers group has grants")
+                print("  ✅ data_engineers group has grants")
                 task2_score += 5
-            
+
             if 'data_scientists' in str(grant_principals):
-                print(f"  ✅ data_scientists group has grants")
+                print("  ✅ data_scientists group has grants")
                 task2_score += 5
-            
+
             if 'analysts' in str(grant_principals):
-                print(f"  ✅ analysts group has grants")
+                print("  ✅ analysts group has grants")
                 task2_score += 5
-            
+
         else:
-            print(f"  ⚠️  No grants found on dev_catalog")
-            print(f"  ℹ️  Note: Grants may require admin permissions to view")
+            print("  ⚠️  No grants found on dev_catalog")
+            print("  ℹ️  Note: Grants may require admin permissions to view")
             task2_score += 10  # Partial credit if cannot verify
-            
+
     except Exception as e:
         print(f"  ℹ️  Cannot verify grants: {e}")
-        print(f"  ℹ️  This may be due to permission restrictions")
+        print("  ℹ️  This may be due to permission restrictions")
         task2_score += 10  # Partial credit if cannot verify
-        
+
 except Exception as e:
     print(f"  ❌ Task 2 validation error: {e}")
 
@@ -186,39 +185,39 @@ try:
         functions = spark.sql("""
             SHOW USER FUNCTIONS IN dev_catalog.silver_schema
         """).collect()
-        
+
         function_names = [row.function for row in functions]
-        
+
         if 'region_filter' in str(function_names):
-            print(f"  ✅ region_filter function exists")
+            print("  ✅ region_filter function exists")
             task3_score += 10
         else:
-            print(f"  ❌ region_filter function not found")
-            
+            print("  ❌ region_filter function not found")
+
     except Exception as e:
         print(f"  ℹ️  Cannot verify filter function: {e}")
         task3_score += 5  # Partial credit
-    
+
     # Check if row filter is applied
     try:
         # Query table properties or history to check for row filter
         describe = spark.sql("""
             DESCRIBE TABLE EXTENDED dev_catalog.silver_schema.patients_clean
         """).collect()
-        
+
         table_props = [str(row) for row in describe]
-        
+
         if 'row_filter' in str(table_props).lower() or 'region_filter' in str(table_props).lower():
-            print(f"  ✅ Row filter appears to be applied to patients_clean")
+            print("  ✅ Row filter appears to be applied to patients_clean")
             task3_score += 15
         else:
-            print(f"  ⚠️  Row filter may not be applied (check manually)")
+            print("  ⚠️  Row filter may not be applied (check manually)")
             task3_score += 8  # Partial credit
-            
+
     except Exception as e:
         print(f"  ℹ️  Cannot verify row filter application: {e}")
         task3_score += 8  # Partial credit
-        
+
 except Exception as e:
     print(f"  ❌ Task 3 validation error: {e}")
 
@@ -239,40 +238,40 @@ try:
         masked_data = spark.sql("""
             SELECT * FROM dev_catalog.silver_schema.patients_masked LIMIT 5
         """).collect()
-        
+
         if masked_data:
-            print(f"  ✅ patients_masked view exists and is queryable")
+            print("  ✅ patients_masked view exists and is queryable")
             task4_score += 8
-            
+
             # Check if view has expected columns
             columns = spark.sql("""
                 SELECT * FROM dev_catalog.silver_schema.patients_masked LIMIT 1
             """).columns
-            
+
             expected_cols = ['patient_id', 'email', 'ssn', 'region']
             if all(col in columns for col in expected_cols):
-                print(f"  ✅ Masked view has expected columns")
+                print("  ✅ Masked view has expected columns")
                 task4_score += 4
-            
+
         else:
-            print(f"  ❌ patients_masked view is empty")
-            
+            print("  ❌ patients_masked view is empty")
+
     except Exception as e:
         print(f"  ❌ patients_masked view not found: {e}")
-    
+
     # Check if hashed view exists (bonus)
     try:
         hashed = spark.sql("""
             SELECT * FROM dev_catalog.silver_schema.patients_hashed LIMIT 1
         """).collect()
-        
+
         if hashed:
-            print(f"  ✅ patients_hashed view exists (bonus)")
+            print("  ✅ patients_hashed view exists (bonus)")
             task4_score += 3
-            
-    except Exception as e:
-        print(f"  ℹ️  patients_hashed view not found (optional)")
-        
+
+    except Exception:
+        print("  ℹ️  patients_hashed view not found (optional)")
+
 except Exception as e:
     print(f"  ❌ Task 4 validation error: {e}")
 
@@ -295,19 +294,19 @@ try:
             FROM system.access.table_lineage
             WHERE target_table_full_name LIKE 'dev_catalog.%'
         """).first()
-        
+
         if lineage and lineage.cnt > 0:
             print(f"  ✅ Table lineage tracked ({lineage.cnt} lineage records)")
             task5_score += 10
         else:
-            print(f"  ⚠️  No lineage records found yet (may take time to populate)")
+            print("  ⚠️  No lineage records found yet (may take time to populate)")
             task5_score += 5  # Partial credit
-            
+
     except Exception as e:
         print(f"  ℹ️  Cannot access system.access.table_lineage: {e}")
-        print(f"  ℹ️  Lineage tracking may require time to populate")
+        print("  ℹ️  Lineage tracking may require time to populate")
         task5_score += 5  # Partial credit
-        
+
 except Exception as e:
     print(f"  ❌ Task 5 validation error: {e}")
 
@@ -331,19 +330,19 @@ try:
             WHERE event_date >= current_date() - 30
             LIMIT 1
         """).first()
-        
+
         if audit:
-            print(f"  ✅ Audit logs accessible (system.access.audit)")
+            print("  ✅ Audit logs accessible (system.access.audit)")
             task6_score += 5
         else:
-            print(f"  ⚠️  No audit records found")
+            print("  ⚠️  No audit records found")
             task6_score += 2
-            
+
     except Exception as e:
         print(f"  ℹ️  Cannot access system.access.audit: {e}")
-        print(f"  ℹ️  Audit access may require elevated permissions")
+        print("  ℹ️  Audit access may require elevated permissions")
         task6_score += 2  # Partial credit
-        
+
 except Exception as e:
     print(f"  ❌ Task 6 validation error: {e}")
 
@@ -357,14 +356,14 @@ print("\n" + "=" * 80)
 print("VALIDATION RESULTS")
 print("=" * 80)
 
-print(f"\n📊 Score Breakdown:")
+print("\n📊 Score Breakdown:")
 print(f"  Task 1 (Namespace):        {task1_score}/{task1_max} points")
 print(f"  Task 2 (Access Control):   {task2_score}/{task2_max} points")
 print(f"  Task 3 (Row Security):     {task3_score}/{task3_max} points")
 print(f"  Task 4 (Column Masking):   {task4_score}/{task4_max} points")
 print(f"  Task 5 (Lineage):          {task5_score}/{task5_max} points")
 print(f"  Task 6 (Audit Logging):    {task6_score}/{task6_max} points")
-print(f"  " + "-" * 40)
+print("  " + "-" * 40)
 print(f"  Total Score:               {total_score}/{max_score} points")
 
 # Grade calculation
