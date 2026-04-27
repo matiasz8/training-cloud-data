@@ -200,7 +200,7 @@ athena = boto3.client(
 
 # Query the resource link (transparently accesses producer data)
 query = """
-SELECT 
+SELECT
     date,
     region,
     category,
@@ -231,7 +231,7 @@ while True:
         QueryExecutionId=query_execution_id
     )
     status = status_response['QueryExecution']['Status']['State']
-    
+
     if status in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
         break
     time.sleep(2)
@@ -241,7 +241,7 @@ if status == 'SUCCEEDED':
     results = athena.get_query_results(
         QueryExecutionId=query_execution_id
     )
-    
+
     print("\n=== Query Results ===")
     for row in results['ResultSet']['Rows'][:10]:
         values = [col.get('VarCharValue', '') for col in row['Data']]
@@ -337,9 +337,9 @@ cloudtrail = boto3.client('cloudtrail')
 
 def audit_cross_account_access(days=7):
     """Audit cross-account Lake Formation access"""
-    
+
     start_time = datetime.now() - timedelta(days=days)
-    
+
     # Query CloudTrail for Lake Formation events
     response = cloudtrail.lookup_events(
         LookupAttributes=[
@@ -348,39 +348,39 @@ def audit_cross_account_access(days=7):
         ],
         StartTime=start_time
     )
-    
+
     print(f"\n=== Cross-Account Access Audit (Last {days} days) ===\n")
-    
+
     access_summary = {}
-    
+
     for event in response['Events']:
         event_name = event['EventName']
         username = event.get('Username', 'Unknown')
         event_time = event['EventTime']
-        
+
         # Parse event details
         import json
         details = json.loads(event['CloudTrailEvent'])
-        
+
         # Check if cross-account
         caller_account = details.get('userIdentity', {}).get('accountId')
         resource_account = details.get('recipientAccountId')
-        
+
         if caller_account != resource_account:
             key = f"{caller_account} → {resource_account}"
             if key not in access_summary:
                 access_summary[key] = {'count': 0, 'users': set(), 'resources': set()}
-            
+
             access_summary[key]['count'] += 1
             access_summary[key]['users'].add(username)
-            
+
             # Extract resource info
             if 'requestParameters' in details:
                 params = details['requestParameters']
                 if 'databaseName' in params and 'tableName' in params:
                     resource = f"{params['databaseName']}.{params['tableName']}"
                     access_summary[key]['resources'].add(resource)
-    
+
     # Display summary
     for accounts, stats in access_summary.items():
         print(f"\n{accounts}")

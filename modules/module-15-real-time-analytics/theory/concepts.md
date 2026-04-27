@@ -186,7 +186,7 @@ SELECT STREAM
     STEP(stock_trades.ROWTIME BY INTERVAL '1' MINUTE) + INTERVAL '1' MINUTE AS window_end
 FROM "SOURCE_STREAM_001"
 WHERE stock_symbol IS NOT NULL
-GROUP BY 
+GROUP BY
     stock_symbol,
     STEP(ROWTIME BY INTERVAL '1' MINUTE);
 ```
@@ -277,7 +277,7 @@ env.execute("Stock Analysis")
 **2. Auto-Scaling**
 ```
 Events/sec:
-│     
+│
 │     ┌───┐                              ← Scale out to 4 KPUs
 │     │   │   ┌───┐
 │     │   │   │   │                      ← Scale out to 3 KPUs
@@ -697,7 +697,7 @@ MATCH_RECOGNIZE (
     PATTERN (A B+ C)
     DEFINE
         B AS B.price < PREV(B.price, 1),
-        C AS C.price < PREV(C.price, 1) 
+        C AS C.price < PREV(C.price, 1)
              AND C.price < FIRST(A.price) * 0.9
 );
 ```
@@ -712,8 +712,8 @@ pattern = Pattern.begin("first", AfterMatchSkipStrategy.skip_to_last("first")) \
     .next("second") \
     .where(SimpleCondition(lambda x: x['price'] < x.prev('price'))) \
     .next("third") \
-    .where(SimpleCondition(lambda x: 
-        x['price'] < x.prev('price') and 
+    .where(SimpleCondition(lambda x:
+        x['price'] < x.prev('price') and
         x['price'] < x.first('price') * 0.9
     )) \
     .within(Time.minutes(5))
@@ -775,34 +775,34 @@ class RunningAverageFunction(KeyedProcessFunction):
     def __init__(self):
         self.sum_state = None
         self.count_state = None
-    
+
     def open(self, runtime_context: RuntimeContext):
         # Initialize state
         from pyflink.datastream.state import ValueStateDescriptor
         from pyflink.common.typeinfo import Types
-        
+
         self.sum_state = runtime_context.get_state(
             ValueStateDescriptor("sum", Types.DOUBLE())
         )
         self.count_state = runtime_context.get_state(
             ValueStateDescriptor("count", Types.LONG())
         )
-    
+
     def process_element(self, value, ctx):
         # Get current state
         current_sum = self.sum_state.value() or 0.0
         current_count = self.count_state.value() or 0
-        
+
         # Update state
         new_sum = current_sum + value['price']
         new_count = current_count + 1
-        
+
         self.sum_state.update(new_sum)
         self.count_state.update(new_count)
-        
+
         # Calculate average
         avg = new_sum / new_count
-        
+
         yield {
             'stock_symbol': value['stock_symbol'],
             'timestamp': value['timestamp'],
@@ -1039,7 +1039,7 @@ MATCH_RECOGNIZE (
         -- Pump: price increases
         B AS B.price > PREV(B.price),
         -- Dump: price decreases rapidly
-        C AS C.price < PREV(C.price) 
+        C AS C.price < PREV(C.price)
              AND LAST(C.price, 1) < MAX(B.price) * 0.8
 );
 ```
@@ -1059,15 +1059,15 @@ class ModelScorer(MapFunction):
     def __init__(self, model_path):
         self.model = None
         self.model_path = model_path
-    
+
     def open(self, runtime_context):
         # Load model once
         self.model = joblib.load(self.model_path)
-    
+
     def map(self, value):
         features = extract_features(value)
         score = self.model.predict_proba([features])[0][1]
-        
+
         return {
             **value,
             'fraud_score': score,
@@ -1086,19 +1086,19 @@ class ModelServerScorer(AsyncFunction):
     def __init__(self, model_endpoint):
         self.endpoint = model_endpoint
         self.session = None
-    
+
     async def open(self):
         self.session = aiohttp.ClientSession()
-    
+
     async def async_invoke(self, value, result_future):
         features = extract_features(value)
-        
+
         async with self.session.post(
             self.endpoint,
             json={'features': features}
         ) as response:
             result = await response.json()
-            
+
             result_future.complete({
                 **value,
                 'fraud_score': result['score'],
@@ -1122,22 +1122,22 @@ class SageMakerScorer(MapFunction):
     def __init__(self, endpoint_name):
         self.endpoint_name = endpoint_name
         self.client = None
-    
+
     def open(self, runtime_context):
         self.client = boto3.client('sagemaker-runtime')
-    
+
     def map(self, value):
         features = extract_features(value)
-        
+
         response = self.client.invoke_endpoint(
             EndpointName=self.endpoint_name,
             ContentType='application/json',
             Body=json.dumps({'instances': [features]})
         )
-        
+
         prediction = json.loads(response['Body'].read())
         score = prediction['predictions'][0]['score']
-        
+
         return {
             **value,
             'fraud_score': score,
@@ -1158,35 +1158,35 @@ class FeatureEngineer(KeyedProcessFunction):
         self.velocity_state = runtime_context.get_value_state(
             ValueStateDescriptor("velocity", Types.MAP(Types.STRING(), Types.INT()))
         )
-    
+
     def process_element(self, transaction, ctx):
         user_id = transaction['user_id']
-        
+
         # Get transaction history
         history = list(self.transaction_history.get())
-        
+
         # Feature 1: Transaction count in last 1 hour
         one_hour_ago = ctx.timestamp() - 3600000
         recent_count = sum(1 for t in history if t['timestamp'] > one_hour_ago)
-        
+
         # Feature 2: Average transaction amount
         avg_amount = sum(t['amount'] for t in history) / len(history) if history else 0
-        
+
         # Feature 3: Transaction velocity (transactions per minute)
         velocity = self.velocity_state.value() or {}
         current_minute = ctx.timestamp() // 60000
         velocity[str(current_minute)] = velocity.get(str(current_minute), 0) + 1
-        
+
         # Clean old velocity data
         velocity = {k: v for k, v in velocity.items() if int(k) > current_minute - 60}
         self.velocity_state.update(velocity)
-        
+
         # Feature 4: Deviation from user's average
         amount_deviation = abs(transaction['amount'] - avg_amount) / avg_amount if avg_amount > 0 else 0
-        
+
         # Feature 5: Time since last transaction
         time_since_last = (ctx.timestamp() - history[-1]['timestamp']) if history else 0
-        
+
         # Update history (keep last 100 transactions)
         history.append(transaction)
         if len(history) > 100:
@@ -1194,7 +1194,7 @@ class FeatureEngineer(KeyedProcessFunction):
         self.transaction_history.clear()
         for t in history:
             self.transaction_history.add(t)
-        
+
         # Yield enriched transaction
         yield {
             **transaction,
@@ -1218,27 +1218,27 @@ class OnlineLearner(KeyedProcessFunction):
     def __init__(self):
         self.model = None
         self.metric = None
-    
+
     def open(self, runtime_context):
         # Initialize online learning model
         self.model = preprocessing.StandardScaler() | linear_model.LogisticRegression()
         self.metric = metrics.ROCAUC()
-    
+
     def process_element(self, event, ctx):
         # Extract features and label
         x = event['features']
         y = event['label']  # Ground truth (if available)
-        
+
         # Predict
         y_pred = self.model.predict_proba_one(x)
-        
+
         # Evaluate (if label available)
         if y is not None:
             self.metric.update(y, y_pred[True])
-            
+
             # Learn from this example
             self.model.learn_one(x, y)
-        
+
         yield {
             **event,
             'prediction': y_pred[True],
@@ -1293,5 +1293,5 @@ class OnlineLearner(KeyedProcessFunction):
 
 ---
 
-**Previous**: [README.md](../README.md) - Module Overview  
+**Previous**: [README.md](../README.md) - Module Overview
 **Next**: [architecture.md](./architecture.md) - AWS Real-Time Analytics Architectures

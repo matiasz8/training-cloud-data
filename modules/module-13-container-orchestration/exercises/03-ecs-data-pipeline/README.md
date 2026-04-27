@@ -4,7 +4,7 @@
 
 - **Nivel**: Intermedio-Avanzado
 - **Duración estimada**: 3-4 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicios 01 y 02 completados
   - Conocimiento de Step Functions
 
@@ -96,11 +96,11 @@ def extract_from_s3():
     """Extract CSV files from S3"""
     bucket = os.environ['DATA_BUCKET']
     prefix = 'raw/sales/'
-    
+
     response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
-    
+
     files = [obj['Key'] for obj in response.get('Contents', [])]
-    
+
     return {
         's3_files': files,
         'total_files': len(files)
@@ -116,15 +116,15 @@ def extract_from_api():
 
 def main():
     print("Starting extraction...")
-    
+
     # Extract from S3
     s3_data = extract_from_s3()
     print(f"Extracted {s3_data['total_files']} files from S3")
-    
+
     # Extract from API
     api_data = extract_from_api()
     print(f"Extracted {api_data['api_records']} records from API")
-    
+
     # Write metadata for next step
     output = {
         'extraction_timestamp': datetime.utcnow().isoformat(),
@@ -132,14 +132,14 @@ def main():
         'api_records': api_data['api_records'],
         'status': 'success'
     }
-    
+
     # Write to S3 for Step Functions
     s3.put_object(
         Bucket=os.environ['DATA_BUCKET'],
         Key='metadata/extract_output.json',
         Body=json.dumps(output)
     )
-    
+
     print("Extraction completed successfully")
     return output
 
@@ -180,39 +180,39 @@ s3 = boto3.client('s3')
 
 def main():
     bucket = os.environ['DATA_BUCKET']
-    
+
     # Read raw sales data
     obj = s3.get_object(Bucket=bucket, Key='raw/sales.csv')
     df = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')))
-    
+
     print(f"Transforming {len(df)} sales records")
-    
+
     # Transformations
     df['order_date'] = pd.to_datetime(df['order_date'])
     df['revenue'] = df['quantity'] * df['price']
     df['year'] = df['order_date'].dt.year
     df['month'] = df['order_date'].dt.month
-    
+
     # Aggregate
     monthly_sales = df.groupby(['year', 'month']).agg({
         'revenue': 'sum',
         'order_id': 'count'
     }).reset_index()
-    
+
     monthly_sales.columns = ['year', 'month', 'total_revenue', 'total_orders']
-    
+
     # Write to S3
     csv_buffer = StringIO()
     monthly_sales.to_csv(csv_buffer, index=False)
-    
+
     s3.put_object(
         Bucket=bucket,
         Key='processed/sales/monthly_sales.csv',
         Body=csv_buffer.getvalue()
     )
-    
+
     print(f"Transformed and wrote {len(monthly_sales)} monthly summaries")
-    
+
     return {
         'status': 'success',
         'records_processed': len(df),
@@ -246,9 +246,9 @@ def validate_sales(bucket, key):
     """Validate sales data"""
     obj = s3.get_object(Bucket=bucket, Key=key)
     df = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')))
-    
+
     issues = []
-    
+
     # Check for nulls
     null_counts = df.isnull().sum()
     if null_counts.any():
@@ -256,14 +256,14 @@ def validate_sales(bucket, key):
             'type': 'null_values',
             'columns': null_counts[null_counts > 0].to_dict()
         })
-    
+
     # Check for negative revenue
     if (df['total_revenue'] < 0).any():
         issues.append({
             'type': 'negative_revenue',
             'count': (df['total_revenue'] < 0).sum()
         })
-    
+
     # Check date range
     if df['year'].min() < 2020 or df['year'].max() > 2025:
         issues.append({
@@ -271,7 +271,7 @@ def validate_sales(bucket, key):
             'min_year': int(df['year'].min()),
             'max_year': int(df['year'].max())
         })
-    
+
     return {
         'file': key,
         'valid': len(issues) == 0,
@@ -281,39 +281,39 @@ def validate_sales(bucket, key):
 
 def main():
     bucket = os.environ['DATA_BUCKET']
-    
+
     # Validate all processed files
     files_to_validate = [
         'processed/sales/monthly_sales.csv',
         'processed/customers/customer_summary.csv',
         'processed/products/product_metrics.csv'
     ]
-    
+
     results = []
     for file in files_to_validate:
         print(f"Validating {file}")
         validation_result = validate_sales(bucket, file)
         results.append(validation_result)
-    
+
     # Overall validation
     all_valid = all(r['valid'] for r in results)
-    
+
     output = {
         'overall_valid': all_valid,
         'files_validated': len(results),
         'validation_details': results,
         'timestamp': datetime.utcnow().isoformat()
     }
-    
+
     # Write validation report
     s3.put_object(
         Bucket=bucket,
         Key='metadata/validation_report.json',
         Body=json.dumps(output, indent=2)
     )
-    
+
     print(f"Validation complete. Overall valid: {all_valid}")
-    
+
     return output
 
 if __name__ == '__main__':
@@ -353,7 +353,7 @@ def load_to_redshift(bucket, file_key, table_name):
     """Load CSV from S3 to Redshift using COPY command"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    
+
     # COPY command (más eficiente que INSERT row-by-row)
     copy_query = f"""
         COPY {table_name}
@@ -363,27 +363,27 @@ def load_to_redshift(bucket, file_key, table_name):
         IGNOREHEADER 1
         REGION 'us-east-1'
     """
-    
+
     cursor.execute(copy_query)
     conn.commit()
-    
+
     cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
     count = cursor.fetchone()[0]
-    
+
     cursor.close()
     conn.close()
-    
+
     return count
 
 def main():
     bucket = os.environ['DATA_BUCKET']
-    
+
     loads = [
         ('processed/sales/monthly_sales.csv', 'fact_sales'),
         ('processed/customers/customer_summary.csv', 'dim_customers'),
         ('processed/products/product_metrics.csv', 'dim_products')
     ]
-    
+
     results = []
     for file_key, table_name in loads:
         print(f"Loading {file_key} to {table_name}")
@@ -394,21 +394,21 @@ def main():
             'rows_loaded': row_count
         })
         print(f"Loaded {row_count} rows to {table_name}")
-    
+
     output = {
         'status': 'success',
         'tables_loaded': len(results),
         'load_details': results,
         'timestamp': datetime.utcnow().isoformat()
     }
-    
+
     # Write load report
     s3.put_object(
         Bucket=bucket,
         Key='metadata/load_report.json',
         Body=json.dumps(output, indent=2)
     )
-    
+
     return output
 
 if __name__ == '__main__':
@@ -463,7 +463,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
         }
       ]
     },
-    
+
     "Parallel Transform": {
       "Type": "Parallel",
       "Branches": [
@@ -534,7 +534,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       "ResultPath": "$.transformResults",
       "Next": "Validate Data"
     },
-    
+
     "Validate Data": {
       "Type": "Task",
       "Resource": "arn:aws:states:::ecs:runTask.sync",
@@ -552,7 +552,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       "ResultPath": "$.validationResult",
       "Next": "Check Validation"
     },
-    
+
     "Check Validation": {
       "Type": "Choice",
       "Choices": [
@@ -564,7 +564,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       ],
       "Default": "Move to Quarantine"
     },
-    
+
     "Load to Redshift": {
       "Type": "Task",
       "Resource": "arn:aws:states:::ecs:runTask.sync",
@@ -582,7 +582,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       "ResultPath": "$.loadResult",
       "Next": "Send Success Notification"
     },
-    
+
     "Move to Quarantine": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
@@ -594,7 +594,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       },
       "Next": "Send Failure Notification"
     },
-    
+
     "Send Success Notification": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
@@ -605,7 +605,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       },
       "End": true
     },
-    
+
     "Send Failure Notification": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
@@ -616,7 +616,7 @@ Crea `stepfunctions/etl_pipeline.asl.json`:
       },
       "End": true
     },
-    
+
     "Extraction Failed": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",

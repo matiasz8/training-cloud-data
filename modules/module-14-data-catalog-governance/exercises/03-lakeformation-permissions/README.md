@@ -452,14 +452,14 @@ lf = boto3.client(
 
 def audit_all_permissions():
     """Comprehensive permission audit"""
-    
+
     print("=" * 80)
     print("LAKE FORMATION PERMISSIONS AUDIT")
     print("=" * 80)
-    
+
     # Group by principal
     permissions_by_principal = defaultdict(list)
-    
+
     # Get all permissions (iterate through different resource types)
     for resource_type in ['CATALOG', 'DATABASE', 'TABLE', 'DATA_LOCATION']:
         try:
@@ -469,17 +469,17 @@ def audit_all_permissions():
                 permissions_by_principal[principal].append(perm)
         except Exception as e:
             print(f"Error listing {resource_type}: {e}")
-    
+
     # Display by principal
     for principal, perms in permissions_by_principal.items():
         role_name = principal.split('/')[-1] if '/' in principal else principal
         print(f"\n{'='*80}")
         print(f"Principal: {role_name}")
         print(f"{'='*80}")
-        
+
         for perm in perms:
             resource = perm['Resource']
-            
+
             if 'Database' in resource:
                 print(f"\n  Resource: Database")
                 print(f"  Name: {resource['Database']['Name']}")
@@ -510,11 +510,11 @@ def audit_all_permissions():
                 print(f"  Tag Expression:")
                 for expr in policy['Expression']:
                     print(f"    {expr['TagKey']} IN {expr['TagValues']}")
-            
+
             print(f"  Permissions: {', '.join(perm['Permissions'])}")
             if perm.get('PermissionsWithGrantOption'):
                 print(f"  Grant Options: {', '.join(perm['PermissionsWithGrantOption'])}")
-    
+
     # Summary statistics
     print(f"\n{'='*80}")
     print("SUMMARY")
@@ -543,7 +543,7 @@ from botocore.exceptions import ClientError
 
 def test_permissions(role_arn, database, table, query):
     """Test if a role can execute a specific query"""
-    
+
     # Assume the role
     sts = boto3.client(
         'sts',
@@ -551,14 +551,14 @@ def test_permissions(role_arn, database, table, query):
         aws_access_key_id='test',
         aws_secret_access_key='test'
     )
-    
+
     try:
         # In real AWS, you would assume role
         # credentials = sts.assume_role(
         #     RoleArn=role_arn,
         #     RoleSessionName='test-session'
         # )
-        
+
         athena = boto3.client(
             'athena',
             endpoint_url='http://localhost:4566',
@@ -566,16 +566,16 @@ def test_permissions(role_arn, database, table, query):
             aws_access_key_id='test',
             aws_secret_access_key='test'
         )
-        
+
         # Execute query
         response = athena.start_query_execution(
             QueryString=query,
             ResultConfiguration={'OutputLocation': 's3://athena-results/'}
         )
-        
+
         print(f"✅ SUCCESS: {role_arn.split('/')[-1]} can execute query")
         return True
-        
+
     except ClientError as e:
         error_code = e.response['Error']['Code']
         if error_code == 'AccessDeniedException':

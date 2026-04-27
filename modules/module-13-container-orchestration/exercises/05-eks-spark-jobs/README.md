@@ -4,7 +4,7 @@
 
 - **Nivel**: Avanzado
 - **Duración estimada**: 4-5 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicio 04 completado
   - Cluster EKS funcionando
   - Conocimiento básico de Spark
@@ -236,13 +236,13 @@ def main():
     # Get parameters
     input_path = sys.argv[1]  # s3a://bucket/raw/sales/
     output_path = sys.argv[2]  # s3a://bucket/processed/sales_summary/
-    
+
     print(f"Starting ETL: {input_path} -> {output_path}")
-    
+
     # Create Spark session
     spark = create_spark_session("Large Scale ETL")
     spark.sparkContext.setLogLevel("INFO")
-    
+
     # Define schema
     schema = StructType([
         StructField("order_id", StringType(), True),
@@ -253,28 +253,28 @@ def main():
         StructField("order_date", TimestampType(), True),
         StructField("region", StringType(), True)
     ])
-    
+
     # Read data
     print("Reading data from S3...")
     df = spark.read \
         .schema(schema) \
         .option("header", "true") \
         .csv(input_path)
-    
+
     input_count = df.count()
     print(f"Input records: {input_count:,}")
-    
+
     # Transformations
     print("Applying transformations...")
-    
+
     # Calculate revenue
     df_with_revenue = df.withColumn("revenue", col("quantity") * col("price"))
-    
+
     # Extract date parts
     df_with_date = df_with_revenue \
         .withColumn("year", year(col("order_date"))) \
         .withColumn("month", month(col("order_date")))
-    
+
     # Aggregate by year, month, region
     sales_summary = df_with_date.groupBy("year", "month", "region") \
         .agg(
@@ -283,30 +283,30 @@ def main():
             avg("revenue").alias("avg_order_value")
         ) \
         .orderBy("year", "month", "region")
-    
+
     output_count = sales_summary.count()
     print(f"Output records: {output_count:,}")
-    
+
     # Write results
     print("Writing results to S3...")
     sales_summary.write \
         .mode("overwrite") \
         .partitionBy("year", "month") \
         .parquet(output_path)
-    
+
     print("ETL completed successfully!")
-    
+
     # Show sample
     print("\nSample output:")
     sales_summary.show(20, truncate=False)
-    
+
     spark.stop()
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: etl_large_dataset.py <input_path> <output_path>")
         sys.exit(1)
-    
+
     main()
 ```
 
@@ -368,16 +368,16 @@ spec:
   arguments:
     - "s3a://YOUR_BUCKET/raw/sales/"
     - "s3a://YOUR_BUCKET/processed/sales_summary/"
-  
+
   sparkVersion: "3.4.1"
-  
+
   restartPolicy:
     type: OnFailure
     onFailureRetries: 3
     onFailureRetryInterval: 10
     onSubmissionFailureRetries: 5
     onSubmissionFailureRetryInterval: 20
-  
+
   driver:
     cores: 1
     coreLimit: "1200m"
@@ -392,7 +392,7 @@ spec:
     volumeMounts:
       - name: spark-local-dir
         mountPath: /tmp/spark-local
-  
+
   executor:
     cores: 2
     instances: 3
@@ -407,18 +407,18 @@ spec:
     volumeMounts:
       - name: spark-local-dir
         mountPath: /tmp/spark-local
-  
+
   volumes:
     - name: spark-local-dir
       emptyDir: {}
-  
+
   dynamicAllocation:
     enabled: true
     initialExecutors: 2
     minExecutors: 2
     maxExecutors: 10
     shuffleTrackingTimeout: 60
-  
+
   monitoring:
     exposeDriverMetrics: true
     exposeExecutorMetrics: true
@@ -464,7 +464,7 @@ import io
 def generate_chunk(chunk_size, start_date, regions):
     """Generate a chunk of data"""
     np.random.seed()
-    
+
     data = {
         'order_id': [f'ORD-{i:010d}' for i in range(chunk_size)],
         'customer_id': [f'CUST-{np.random.randint(1, 100000):06d}' for _ in range(chunk_size)],
@@ -474,7 +474,7 @@ def generate_chunk(chunk_size, start_date, regions):
         'order_date': [start_date + timedelta(days=np.random.randint(0, 365*3)) for _ in range(chunk_size)],
         'region': np.random.choice(regions, chunk_size)
     }
-    
+
     return pd.DataFrame(data)
 
 def upload_to_s3(df, bucket, key):
@@ -489,23 +489,23 @@ def main():
     total_rows = 100_000_000  # 100M rows
     chunk_size = 1_000_000    # 1M rows per file
     num_chunks = total_rows // chunk_size
-    
+
     regions = ['US-East', 'US-West', 'EU', 'APAC', 'LATAM']
     start_date = datetime(2021, 1, 1)
-    
+
     print(f"Generating {total_rows:,} rows in {num_chunks} chunks...")
-    
+
     for i in range(num_chunks):
         print(f"Generating chunk {i+1}/{num_chunks}...", end=' ')
-        
+
         df = generate_chunk(chunk_size, start_date, regions)
-        
+
         # Upload to S3
         key = f'raw/sales/part-{i:04d}.csv'
         upload_to_s3(df, bucket, key)
-        
+
         print(f"Uploaded to s3://{bucket}/{key}")
-    
+
     print(f"\nGenerated {total_rows:,} rows successfully!")
 
 if __name__ == '__main__':

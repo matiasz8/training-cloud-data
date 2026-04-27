@@ -86,10 +86,10 @@ echo ""
 # Step 4: Build and push Docker images (if ECR exists)
 if [ -n "$ECR_URL" ]; then
     echo -e "${GREEN}[4/5] Building and pushing Docker images...${NC}"
-    
+
     # Login to ECR
     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
-    
+
     # Build sample API image (if exists)
     if [ -f "../exercises/01-docker-basics/Dockerfile" ]; then
         echo "Building data-api image..."

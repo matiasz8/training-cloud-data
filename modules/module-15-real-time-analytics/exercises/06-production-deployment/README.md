@@ -3,8 +3,8 @@
 ## Overview
 Deploy Flink applications to production with blue/green deployments, auto-scaling, comprehensive monitoring, disaster recovery, and cost optimization strategies.
 
-**Difficulty**: ⭐⭐⭐⭐ Expert  
-**Duration**: ~3 hours  
+**Difficulty**: ⭐⭐⭐⭐ Expert
+**Duration**: ~3 hours
 **Prerequisites**: Exercises 01-05, DevOps experience, AWS knowledge
 
 ## Learning Objectives
@@ -94,19 +94,19 @@ log_error() {
 # Step 1: Validate prerequisites
 validate_prerequisites() {
     log_info "Validating prerequisites..."
-    
+
     # Check AWS CLI
     if ! command -v aws &> /dev/null; then
         log_error "AWS CLI not found"
         exit 1
     fi
-    
+
     # Check new version exists
     if [ ! -f "$NEW_VERSION_CODE" ]; then
         log_error "New version file not found: $NEW_VERSION_CODE"
         exit 1
     fi
-    
+
     # Check application exists
     if ! aws kinesisanalyticsv2 describe-application \
         --application-name "$APPLICATION_NAME" \
@@ -114,25 +114,25 @@ validate_prerequisites() {
         log_error "Application not found: $APPLICATION_NAME"
         exit 1
     fi
-    
+
     log_info "✓ Prerequisites validated"
 }
 
 # Step 2: Create application snapshot (backup)
 create_snapshot() {
     log_info "Creating snapshot for rollback..."
-    
+
     SNAPSHOT_NAME="${APPLICATION_NAME}-snapshot-$(date +%Y%m%d-%H%M%S)"
-    
+
     aws kinesisanalyticsv2 create-application-snapshot \
         --application-name "$APPLICATION_NAME" \
         --snapshot-name "$SNAPSHOT_NAME" \
         --region "$AWS_REGION"
-    
+
     # Wait for snapshot completion
     log_info "Waiting for snapshot to complete..."
     sleep 30
-    
+
     log_info "✓ Snapshot created: $SNAPSHOT_NAME"
     echo "$SNAPSHOT_NAME" > /tmp/last_snapshot.txt
 }
@@ -140,16 +140,16 @@ create_snapshot() {
 # Step 3: Deploy new version (GREEN)
 deploy_green_environment() {
     log_info "Deploying GREEN environment..."
-    
+
     # Upload new code to S3
     S3_BUCKET="${APPLICATION_NAME}-artifacts"
     S3_KEY="versions/$(basename $NEW_VERSION_CODE)"
-    
+
     aws s3 cp "$NEW_VERSION_CODE" "s3://${S3_BUCKET}/${S3_KEY}" \
         --region "$AWS_REGION"
-    
+
     log_info "✓ Code uploaded to S3"
-    
+
     # Update application configuration
     aws kinesisanalyticsv2 update-application \
         --application-name "$APPLICATION_NAME" \
@@ -165,14 +165,14 @@ deploy_green_environment() {
             }
         }' \
         --region "$AWS_REGION"
-    
+
     log_info "✓ Application updated with new code"
 }
 
 # Step 4: Start GREEN environment
 start_green_environment() {
     log_info "Starting GREEN environment..."
-    
+
     # Start application with new version
     aws kinesisanalyticsv2 start-application \
         --application-name "$APPLICATION_NAME" \
@@ -182,26 +182,26 @@ start_green_environment() {
             }
         }' \
         --region "$AWS_REGION" || true  # May already be running
-    
+
     # Wait for application to be running
     log_info "Waiting for application to start..."
-    
+
     for i in {1..30}; do
         STATUS=$(aws kinesisanalyticsv2 describe-application \
             --application-name "$APPLICATION_NAME" \
             --region "$AWS_REGION" \
             --query 'ApplicationDetail.ApplicationStatus' \
             --output text)
-        
+
         if [ "$STATUS" == "RUNNING" ]; then
             log_info "✓ GREEN environment is running"
             return 0
         fi
-        
+
         log_info "  Status: $STATUS (attempt $i/30)"
         sleep 10
     done
-    
+
     log_error "GREEN environment failed to start"
     exit 1
 }
@@ -209,18 +209,18 @@ start_green_environment() {
 # Step 5: Smoke tests
 run_smoke_tests() {
     log_info "Running smoke tests for $SMOKE_TEST_DURATION seconds..."
-    
+
     START_TIME=$(date +%s)
     ERROR_COUNT=0
-    
+
     while [ $(($(date +%s) - START_TIME)) -lt $SMOKE_TEST_DURATION ]; do
         # Check application health
         HEALTH=$(check_application_health)
-        
+
         if [ "$HEALTH" != "healthy" ]; then
             ((ERROR_COUNT++))
             log_warn "Health check failed (errors: $ERROR_COUNT/$ERROR_THRESHOLD)"
-            
+
             if [ $ERROR_COUNT -ge $ERROR_THRESHOLD ]; then
                 log_error "Too many errors, initiating rollback"
                 return 1
@@ -228,19 +228,19 @@ run_smoke_tests() {
         else
             ERROR_COUNT=0  # Reset on success
         fi
-        
+
         # Check error rate
         ERROR_RATE=$(get_error_rate)
         log_info "  Error rate: ${ERROR_RATE}% ($(( $(date +%s) - START_TIME ))s elapsed)"
-        
+
         if (( $(echo "$ERROR_RATE > 5.0" | bc -l) )); then
             log_error "Error rate too high: ${ERROR_RATE}%"
             return 1
         fi
-        
+
         sleep 30
     done
-    
+
     log_info "✓ Smoke tests passed"
     return 0
 }
@@ -248,36 +248,36 @@ run_smoke_tests() {
 # Step 6: Cutover (switch traffic)
 cutover_to_green() {
     log_info "Cutting over to GREEN environment..."
-    
+
     # In Kinesis Analytics, cutover is automatic after update
     # For multi-region or complex setups, update Route 53 here
-    
+
     log_info "✓ Cutover completed"
 }
 
 # Step 7: Monitor GREEN
 monitor_green_environment() {
     log_info "Monitoring GREEN environment for 10 minutes..."
-    
+
     MONITOR_DURATION=600  # 10 minutes
     START_TIME=$(date +%s)
-    
+
     while [ $(($(date +%s) - START_TIME)) -lt $MONITOR_DURATION ]; do
         # Check key metrics
         THROUGHPUT=$(get_throughput_metric)
         LATENCY=$(get_latency_metric)
         ERROR_RATE=$(get_error_rate)
-        
+
         log_info "  Throughput: $THROUGHPUT rec/s | Latency: ${LATENCY}ms | Errors: ${ERROR_RATE}%"
-        
+
         # Alert if issues
         if (( $(echo "$ERROR_RATE > 3.0" | bc -l) )); then
             log_warn "Error rate elevated: ${ERROR_RATE}%"
         fi
-        
+
         sleep 60
     done
-    
+
     log_info "✓ Monitoring completed successfully"
 }
 
@@ -303,7 +303,7 @@ check_application_health() {
         --region "$AWS_REGION" \
         --query 'ApplicationDetail.ApplicationStatus' \
         --output text)
-    
+
     if [ "$STATUS" == "RUNNING" ]; then
         echo "healthy"
     else
@@ -359,18 +359,18 @@ get_latency_metric() {
 # Rollback function
 rollback() {
     log_error "ROLLBACK INITIATED"
-    
+
     SNAPSHOT_NAME=$(cat /tmp/last_snapshot.txt)
-    
+
     log_info "Restoring from snapshot: $SNAPSHOT_NAME"
-    
+
     # Stop application
     aws kinesisanalyticsv2 stop-application \
         --application-name "$APPLICATION_NAME" \
         --region "$AWS_REGION" || true
-    
+
     sleep 30
-    
+
     # Restore from snapshot
     aws kinesisanalyticsv2 start-application \
         --application-name "$APPLICATION_NAME" \
@@ -381,7 +381,7 @@ rollback() {
             }
         }' \
         --region "$AWS_REGION"
-    
+
     log_info "✓ Rollback completed"
     exit 1
 }
@@ -394,22 +394,22 @@ main() {
     log_info "Application: $APPLICATION_NAME"
     log_info "New Version: $NEW_VERSION_CODE"
     log_info "=========================================="
-    
+
     # Execute deployment steps
     validate_prerequisites
     create_snapshot
     deploy_green_environment
     start_green_environment
-    
+
     # Run smoke tests with rollback on failure
     if ! run_smoke_tests; then
         rollback
     fi
-    
+
     cutover_to_green
     monitor_green_environment
     cleanup_blue_environment
-    
+
     log_info "=========================================="
     log_info "✓ DEPLOYMENT SUCCESSFUL"
     log_info "=========================================="
@@ -484,9 +484,9 @@ cloudwatch = boto3.client('cloudwatch',
 
 def register_scalable_target(application_name):
     """Register application for auto-scaling"""
-    
+
     resource_id = f"application/{application_name}"
-    
+
     response = autoscaling.register_scalable_target(
         ServiceNamespace='kinesisanalytics',
         ResourceId=resource_id,
@@ -495,18 +495,18 @@ def register_scalable_target(application_name):
         MaxCapacity=8,
         RoleARN='arn:aws:iam::000000000000:role/AutoScalingRole'
     )
-    
+
     print(f"✓ Scalable target registered: {resource_id}")
     print(f"  Min: 1 KPU, Max: 8 KPU")
-    
+
     return resource_id
 
 
 def create_scaling_policy_cpu(resource_id):
     """Scale based on CPU utilization"""
-    
+
     policy_name = 'cpu-based-scaling'
-    
+
     response = autoscaling.put_scaling_policy(
         PolicyName=policy_name,
         ServiceNamespace='kinesisanalytics',
@@ -522,7 +522,7 @@ def create_scaling_policy_cpu(resource_id):
             'ScaleOutCooldown': 60    # 1 minute
         }
     )
-    
+
     print(f"✓ Scaling policy created: {policy_name}")
     print(f"  Target: 70% CPU")
     print(f"  Scale-out cooldown: 60s")
@@ -531,7 +531,7 @@ def create_scaling_policy_cpu(resource_id):
 
 def create_scaling_policy_backlog(resource_id):
     """Scale based on input backlog"""
-    
+
     # Create custom metric for backlog
     metric_spec = {
         'CustomizedMetricSpecification': {
@@ -546,9 +546,9 @@ def create_scaling_policy_backlog(resource_id):
         },
         'TargetValue': 5000.0  # Target 5 seconds behind
     }
-    
+
     policy_name = 'backlog-based-scaling'
-    
+
     autoscaling.put_scaling_policy(
         PolicyName=policy_name,
         ServiceNamespace='kinesisanalytics',
@@ -560,14 +560,14 @@ def create_scaling_policy_backlog(resource_id):
             'ScaleOutCooldown': 60    # 1 minute
         }
     )
-    
+
     print(f"✓ Scaling policy created: {policy_name}")
     print(f"  Target: 5000ms backlog")
 
 
 def create_scheduled_scaling(resource_id):
     """Scale up during peak hours"""
-    
+
     # Scale up at 8 AM UTC (business hours)
     autoscaling.put_scheduled_action(
         ServiceNamespace='kinesisanalytics',
@@ -580,7 +580,7 @@ def create_scheduled_scaling(resource_id):
             'MaxCapacity': 8
         }
     )
-    
+
     # Scale down at 6 PM UTC
     autoscaling.put_scheduled_action(
         ServiceNamespace='kinesisanalytics',
@@ -593,7 +593,7 @@ def create_scheduled_scaling(resource_id):
             'MaxCapacity': 4
         }
     )
-    
+
     print("✓ Scheduled scaling configured")
     print("  8 AM UTC: Scale to 4-8 KPUs")
     print("  6 PM UTC: Scale to 1-4 KPUs")
@@ -601,20 +601,20 @@ def create_scheduled_scaling(resource_id):
 
 def configure_autoscaling(application_name='fraud-detection-app'):
     """Configure complete auto-scaling setup"""
-    
+
     print("="*50)
     print("CONFIGURING AUTO-SCALING")
     print("="*50)
-    
+
     resource_id = register_scalable_target(application_name)
-    
+
     print("\nCreating scaling policies...")
     create_scaling_policy_cpu(resource_id)
     create_scaling_policy_backlog(resource_id)
-    
+
     print("\nConfiguring scheduled scaling...")
     create_scheduled_scaling(resource_id)
-    
+
     print("\n" + "="*50)
     print("✓ AUTO-SCALING CONFIGURED")
     print("="*50)
@@ -622,12 +622,12 @@ def configure_autoscaling(application_name='fraud-detection-app'):
 
 if __name__ == '__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--app', default='fraud-detection-app',
                        help='Application name')
     args = parser.parse_args()
-    
+
     configure_autoscaling(args.app)
 ```
 
@@ -657,28 +657,28 @@ def create_alarm_topic():
     """Create SNS topic for alarms"""
     response = sns.create_topic(Name='production-alarms')
     topic_arn = response['TopicArn']
-    
+
     # Subscribe email (for real AWS)
     # sns.subscribe(
     #     TopicArn=topic_arn,
     #     Protocol='email',
     #     Endpoint='oncall@example.com'
     # )
-    
+
     # Subscribe SMS for critical (for real AWS)
     # sns.subscribe(
     #     TopicArn=topic_arn,
     #     Protocol='sms',
     #     Endpoint='+1234567890'
     # )
-    
+
     print(f"✓ Alarm topic: {topic_arn}")
     return topic_arn
 
 
 def create_application_down_alarm(app_name, topic_arn):
     """Critical: Application stopped"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName=f'{app_name}-application-down',
         ComparisonOperator='LessThanThreshold',
@@ -697,13 +697,13 @@ def create_application_down_alarm(app_name, topic_arn):
         }],
         TreatMissingData='breaching'
     )
-    
+
     print(f"✓ Alarm: {app_name}-application-down (CRITICAL)")
 
 
 def create_high_backlog_alarm(app_name, topic_arn):
     """Warning: Processing lag"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName=f'{app_name}-high-backlog',
         ComparisonOperator='GreaterThanThreshold',
@@ -721,13 +721,13 @@ def create_high_backlog_alarm(app_name, topic_arn):
             'Value': app_name
         }]
     )
-    
+
     print(f"✓ Alarm: {app_name}-high-backlog (WARNING)")
 
 
 def create_high_error_rate_alarm(app_name, topic_arn):
     """Critical: Too many errors"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName=f'{app_name}-high-errors',
         ComparisonOperator='GreaterThanThreshold',
@@ -745,13 +745,13 @@ def create_high_error_rate_alarm(app_name, topic_arn):
             'Value': app_name
         }]
     )
-    
+
     print(f"✓ Alarm: {app_name}-high-errors (CRITICAL)")
 
 
 def create_checkpoint_failure_alarm(app_name, topic_arn):
     """Critical: Checkpoints failing"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName=f'{app_name}-checkpoint-failures',
         ComparisonOperator='GreaterThanThreshold',
@@ -769,13 +769,13 @@ def create_checkpoint_failure_alarm(app_name, topic_arn):
             'Value': app_name
         }]
     )
-    
+
     print(f"✓ Alarm: {app_name}-checkpoint-failures (CRITICAL)")
 
 
 def create_production_dashboard(app_name):
     """Create production monitoring dashboard"""
-    
+
     dashboard_body = {
         "widgets": [
             {
@@ -847,36 +847,36 @@ def create_production_dashboard(app_name):
             }
         ]
     }
-    
+
     cloudwatch.put_dashboard(
         DashboardName=f'{app_name}-production',
         DashboardBody=json.dumps(dashboard_body)
     )
-    
+
     print(f"✓ Dashboard: {app_name}-production")
 
 
 def setup_monitoring(app_name='fraud-detection-app'):
     """Setup complete monitoring"""
-    
+
     print("="*50)
     print("SETTING UP MONITORING")
     print("="*50)
-    
+
     # Create alarm topic
     topic_arn = create_alarm_topic()
-    
+
     # Create alarms
     print("\nCreating alarms...")
     create_application_down_alarm(app_name, topic_arn)
     create_high_backlog_alarm(app_name, topic_arn)
     create_high_error_rate_alarm(app_name, topic_arn)
     create_checkpoint_failure_alarm(app_name, topic_arn)
-    
+
     # Create dashboard
     print("\nCreating dashboard...")
     create_production_dashboard(app_name)
-    
+
     print("\n" + "="*50)
     print("✓ MONITORING CONFIGURED")
     print("="*50)
@@ -884,11 +884,11 @@ def setup_monitoring(app_name='fraud-detection-app'):
 
 if __name__ == '__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--app', default='fraud-detection-app')
     args = parser.parse_args()
-    
+
     setup_monitoring(args.app)
 ```
 
@@ -957,12 +957,12 @@ for i in {1..20}; do
         --region "$AWS_REGION" \
         --query 'ApplicationDetail.ApplicationStatus' \
         --output text)
-    
+
     if [ "$STATUS" == "RUNNING" ]; then
         echo "  ✓ Application recovered (${i}0 seconds)"
         break
     fi
-    
+
     sleep 10
 done
 
@@ -1028,27 +1028,27 @@ import boto3
 
 def optimize_kinesis_streams():
     """Optimize Kinesis stream costs"""
-    
+
     print("KINESIS OPTIMIZATION:")
     print("- Use on-demand mode for variable traffic")
     print("- Switch to provisioned for predictable load")
     print("- Reduce retention from 7 days to 24 hours")
     print("- Use enhanced fan-out only when needed")
-    
+
     # Example: Convert to on-demand
     kinesis = boto3.client('kinesis', region_name='us-east-1')
-    
+
     kinesis.update_stream_mode(
         StreamARN='arn:aws:kinesis:us-east-1:123456789012:stream/events-stream',
         StreamModeDetails={'StreamMode': 'ON_DEMAND'}
     )
-    
+
     print("✓ Converted to on-demand mode")
 
 
 def optimize_dynamodb_tables():
     """Optimize DynamoDB costs"""
-    
+
     print("\nDYNAMODB OPTIMIZATION:")
     print("- Use on-demand for unpredictable workloads")
     print("- Enable auto-scaling for provisioned")
@@ -1058,14 +1058,14 @@ def optimize_dynamodb_tables():
 
 def optimize_s3_storage():
     """Optimize S3 costs"""
-    
+
     print("\nS3 OPTIMIZATION:")
     print("- Lifecycle policy: IA after 30 days")
     print("- Glacier after 90 days")
     print("- Delete old checkpoints after 7 days")
-    
+
     s3 = boto3.client('s3', region_name='us-east-1')
-    
+
     lifecycle_policy = {
         'Rules': [
             {
@@ -1088,18 +1088,18 @@ def optimize_s3_storage():
             }
         ]
     }
-    
+
     # s3.put_bucket_lifecycle_configuration(
     #     Bucket='flink-checkpoints',
     #     LifecycleConfiguration=lifecycle_policy
     # )
-    
+
     print("✓ S3 lifecycle policies configured")
 
 
 def cost_monitoring():
     """Setup cost monitoring"""
-    
+
     print("\nCOST MONITORING:")
     print("- Tag all resources: Environment=prod, Project=fraud-detection")
     print("- Enable Cost Explorer")
@@ -1111,12 +1111,12 @@ if __name__ == '__main__':
     print("="*50)
     print("COST OPTIMIZATION")
     print("="*50)
-    
+
     optimize_kinesis_streams()
     optimize_dynamodb_tables()
     optimize_s3_storage()
     cost_monitoring()
-    
+
     print("\n" + "="*50)
     print("✓ OPTIMIZATION COMPLETE")
     print("Expected savings: 30-40%")

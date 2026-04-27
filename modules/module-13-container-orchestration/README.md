@@ -13,7 +13,7 @@
 
 Master container orchestration with Docker, Amazon ECS, and Kubernetes. Build production-ready data platforms using containers, from simple Docker applications to complex Kubernetes deployments with Spark, Airflow, and Kafka.
 
-## Learning Objectives  
+## Learning Objectives
 
 By the end of this module, you will be able to:
 

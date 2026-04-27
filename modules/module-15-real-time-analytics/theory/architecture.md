@@ -260,7 +260,7 @@ import boto3
 class MetricsPublisher(ProcessFunction):
     def open(self, runtime_context):
         self.cloudwatch = boto3.client('cloudwatch')
-    
+
     def process_element(self, value, ctx):
         # Publish to CloudWatch
         self.cloudwatch.put_metric_data(
@@ -275,7 +275,7 @@ class MetricsPublisher(ProcessFunction):
                 ]
             }]
         )
-        
+
         yield value
 ```
 
@@ -663,5 +663,5 @@ Total                    | $588/month
 
 ---
 
-**Previous**: [concepts.md](./concepts.md) - Core Concepts  
+**Previous**: [concepts.md](./concepts.md) - Core Concepts
 **Next**: [best-practices.md](./best-practices.md) - Production Best Practices

@@ -247,14 +247,14 @@ glue = boto3.client('glue')
 
 def lambda_handler(event, context):
     """Validate S3 event and determine processing needs"""
-    
+
     # Extract S3 details from event
     bucket = event['detail']['bucket']['name']
     key = event['detail']['object']['key']
     size = event['detail']['object']['size']
-    
+
     print(f"Validating: s3://{bucket}/{key}")
-    
+
     # Determine layer and crawler
     if 'bronze/' in key:
         layer = 'bronze'
@@ -273,19 +273,19 @@ def lambda_handler(event, context):
         needs_crawler = False
     else:
         raise ValueError(f"Unknown data layer for path: {key}")
-    
+
     # Extract table name from path
     path_parts = key.split('/')
     table_name = path_parts[2] if len(path_parts) > 2 else 'unknown'
-    
+
     # Check file size
     if size == 0:
         raise ValueError("Empty file detected")
-    
+
     # Check if too large for immediate processing
     if size > 1073741824:  # 1 GB
         print("Large file detected, may need batch processing")
-    
+
     return {
         'bucket': bucket,
         'key': key,
@@ -308,12 +308,12 @@ glue = boto3.client('glue')
 
 def lambda_handler(event, context):
     """Execute data quality evaluation"""
-    
+
     database = event['database']
     table = event['table']
-    
+
     print(f"Running quality check: {database}.{table}")
-    
+
     # Get ruleset for table
     rulesets = glue.list_data_quality_rulesets(
         Filter={'TargetTable': {
@@ -321,13 +321,13 @@ def lambda_handler(event, context):
             'TableName': table
         }}
     )
-    
+
     if not rulesets.get('Rulesets'):
         print("No ruleset found, using default rules")
         score = 90.0  # Default passing score
     else:
         ruleset_name = rulesets['Rulesets'][0]['Name']
-        
+
         # Start quality evaluation
         response = glue.start_data_quality_ruleset_evaluation_run(
             DataSource={
@@ -339,19 +339,19 @@ def lambda_handler(event, context):
             Role='arn:aws:iam::000000000000:role/AWSGlueServiceRole-DataLake',
             RulesetNames=[ruleset_name]
         )
-        
+
         # Wait for completion (in real scenario, use Step Functions wait)
         import time
         run_id = response['RunId']
-        
+
         for _ in range(30):  # 5 minutes max
             result = glue.get_data_quality_ruleset_evaluation_run(RunId=run_id)
             status = result['Status']
-            
+
             if status in ['SUCCEEDED', 'FAILED']:
                 break
             time.sleep(10)
-        
+
         # Get score
         if status == 'SUCCEEDED':
             score = result.get('Score', 0)
@@ -361,7 +361,7 @@ def lambda_handler(event, context):
             score = 0
             rules_passed = 0
             rules_failed = 999
-    
+
     return {
         'database': database,
         'table': table,
@@ -381,19 +381,19 @@ lakeformation = boto3.client('lakeformation')
 
 def lambda_handler(event, context):
     """Apply Lake Formation tags to resources"""
-    
+
     database = event['database']
     table = event['table']
     tags = event['tags']
-    
+
     print(f"Applying tags to {database}.{table}")
-    
+
     # Convert tags to LF-Tag format
     lf_tags = [
         {'TagKey': k, 'TagValues': [v]}
         for k, v in tags.items()
     ]
-    
+
     # Apply to table
     lakeformation.add_lf_tags_to_resource(
         Resource={
@@ -404,9 +404,9 @@ def lambda_handler(event, context):
         },
         LFTags=lf_tags
     )
-    
+
     print(f"Applied {len(lf_tags)} tags")
-    
+
     return {
         'database': database,
         'table': table,
@@ -423,14 +423,14 @@ lakeformation = boto3.client('lakeformation')
 
 def lambda_handler(event, context):
     """Grant Lake Formation permissions"""
-    
+
     database = event['resource'].get('database')
     table = event['resource'].get('table')
     principals = event['principals']
     permissions = event['permissions']
-    
+
     print(f"Granting permissions to {len(principals)} principals")
-    
+
     for principal_arn in principals:
         try:
             lakeformation.grant_permissions(
@@ -446,7 +446,7 @@ def lambda_handler(event, context):
             print(f"✅ Granted to {principal_arn}")
         except Exception as e:
             print(f"❌ Failed for {principal_arn}: {e}")
-    
+
     return {
         'database': database,
         'table': table,
@@ -464,10 +464,10 @@ cloudwatch = boto3.client('cloudwatch')
 
 def lambda_handler(event, context):
     """Publish governance workflow metrics"""
-    
+
     namespace = 'DataGovernance'
     timestamp = datetime.utcnow()
-    
+
     metrics = [
         {
             'MetricName': 'WorkflowExecutions',
@@ -495,12 +495,12 @@ def lambda_handler(event, context):
             'Timestamp': timestamp
         }
     ]
-    
+
     cloudwatch.put_metric_data(
         Namespace=namespace,
         MetricData=metrics
     )
-    
+
     return {'metricsPublished': len(metrics)}
 ```
 
@@ -641,11 +641,11 @@ import json
 
 def generate_governance_report(days=7):
     """Generate comprehensive governance status report"""
-    
+
     glue = boto3.client('glue')
     lakeformation = boto3.client('lakeformation')
     cloudwatch = boto3.client('cloudwatch')
-    
+
     report = {
         'period': f"Last {days} days",
         'generated_at': datetime.now().isoformat(),
@@ -654,31 +654,31 @@ def generate_governance_report(days=7):
         'permissions': {},
         'workflows': {}
     }
-    
+
     # 1. Catalog Statistics
     databases = glue.get_databases()
     total_tables = 0
     for db in databases['DatabaseList']:
         tables = glue.get_tables(DatabaseName=db['Name'])
         total_tables += len(tables['TableList'])
-    
+
     report['catalog'] = {
         'databases': len(databases['DatabaseList']),
         'tables': total_tables
     }
-    
+
     # 2. Quality Scores
     # (Aggregate quality metrics from CloudWatch)
-    
+
     # 3. Permission Grants
     permissions = lakeformation.list_permissions()
     report['permissions'] = {
         'total_grants': len(permissions.get('PrincipalResourcePermissions', []))
     }
-    
+
     # 4. Workflow Executions
     # (Aggregate Step Functions metrics)
-    
+
     return report
 
 # Generate and display report

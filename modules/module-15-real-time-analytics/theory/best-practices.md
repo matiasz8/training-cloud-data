@@ -38,10 +38,10 @@ import boto3
 
 def auto_scale_kinesis(stream_name, target_util=0.7):
     client = boto3.client('kinesis')
-    
+
     # Get metrics from CloudWatch
     metrics = get_shard_metrics(stream_name)
-    
+
     for shard_id, utilization in metrics.items():
         if utilization > target_util:
             # Split hot shard
@@ -170,7 +170,7 @@ taskmanager.memory.network.min: 256m
 class BadFunction(KeyedProcessFunction):
     def __init__(self):
         self.cache = {}  # ❌ Unbounded cache, memory leak!
-    
+
     def process_element(self, value, ctx):
         self.cache[value['key']] = value  # Never cleared
         yield value
@@ -181,16 +181,16 @@ class GoodFunction(KeyedProcessFunction):
         self.cache_state = runtime_context.get_map_state(
             MapStateDescriptor("cache", Types.STRING(), Types.PICKLED_BYTE_ARRAY())
         )
-    
+
     def process_element(self, value, ctx):
         self.cache_state.put(value['key'], value)
-        
+
         # Register timer to clean old entries
         ctx.timer_service().register_event_time_timer(
             ctx.timestamp() + 3600000  # 1 hour TTL
         )
         yield value
-    
+
     def on_timer(self, timestamp, ctx):
         # Clean expired entries
         self.cache_state.remove(ctx.get_current_key())
@@ -310,7 +310,7 @@ import boto3
 
 def create_budget_alert():
     budgets = boto3.client('budgets')
-    
+
     response = budgets.create_budget(
         AccountId='123456789012',
         Budget={
@@ -380,14 +380,14 @@ class MetricsCollector(ProcessFunction):
         self.cloudwatch = boto3.client('cloudwatch')
         self.counter = 0
         self.errors = 0
-    
+
     def process_element(self, value, ctx):
         self.counter += 1
-        
+
         # Publish every 100 records
         if self.counter % 100 == 0:
             self.publish_metrics()
-        
+
         try:
             result = process(value)
             yield result
@@ -395,7 +395,7 @@ class MetricsCollector(ProcessFunction):
             self.errors += 1
             self.publish_error_metric()
             raise
-    
+
     def publish_metrics(self):
         self.cloudwatch.put_metric_data(
             Namespace='RealTimeAnalytics/Custom',
@@ -534,17 +534,17 @@ from pyflink.datastream.functions import ProcessFunction
 class ErrorHandlingProcessor(ProcessFunction):
     def __init__(self):
         self.dlq_stream = None
-    
+
     def open(self, runtime_context):
         # Initialize DLQ sink (Kinesis or S3)
         self.dlq_sink = create_dlq_sink()
-    
+
     def process_element(self, value, ctx):
         try:
             # Process record
             result = transform(value)
             yield result
-        
+
         except ValidationError as e:
             # Send to DLQ with error details
             self.dlq_sink.send({
@@ -554,7 +554,7 @@ class ErrorHandlingProcessor(ProcessFunction):
                 'timestamp': ctx.timestamp(),
                 'processing_time': int(time.time() * 1000)
             })
-        
+
         except Exception as e:
             # Log unexpected errors
             logger.error(f"Unexpected error processing record: {e}")
@@ -586,7 +586,7 @@ class ResilientProcessor(ProcessFunction):
         response = requests.post('https://api.example.com/process', json=data)
         response.raise_for_status()
         return response.json()
-    
+
     def process_element(self, value, ctx):
         try:
             result = self.external_api_call(value)
@@ -636,36 +636,36 @@ class CircuitBreaker:
         self.timeout = timeout
         self.last_failure_time = None
         self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
-    
+
     def call(self, func, *args, **kwargs):
         if self.state == 'OPEN':
             if time.time() - self.last_failure_time > self.timeout:
                 self.state = 'HALF_OPEN'
             else:
                 raise Exception("Circuit breaker is OPEN")
-        
+
         try:
             result = func(*args, **kwargs)
-            
+
             if self.state == 'HALF_OPEN':
                 self.state = 'CLOSED'
                 self.failure_count = 0
-            
+
             return result
-        
+
         except Exception as e:
             self.failure_count += 1
             self.last_failure_time = time.time()
-            
+
             if self.failure_count >= self.failure_threshold:
                 self.state = 'OPEN'
-            
+
             raise
 
 class ResilientAPIProcessor(ProcessFunction):
     def open(self, runtime_context):
         self.circuit_breaker = CircuitBreaker(failure_threshold=5, timeout=60)
-    
+
     def process_element(self, value, ctx):
         try:
             result = self.circuit_breaker.call(
@@ -692,14 +692,14 @@ from pyflink.table import StreamTableEnvironment
 def test_transformation_function():
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_parallelism(1)
-    
+
     # Create test data
     test_data = [
         {'user_id': 1, 'amount': 100},
         {'user_id': 2, 'amount': 200},
         {'user_id': 1, 'amount': 150}
     ]
-    
+
     # Apply transformation
     stream = env.from_collection(test_data)
     result = stream.key_by(lambda x: x['user_id']) \
@@ -707,13 +707,13 @@ def test_transformation_function():
                        'user_id': a['user_id'],
                        'amount': a['amount'] + b['amount']
                    })
-    
+
     # Collect results
     results = []
     result.add_sink(lambda x: results.append(x))
-    
+
     env.execute("Test")
-    
+
     # Assertions
     assert len(results) == 2
     assert any(r['user_id'] == 1 and r['amount'] == 250 for r in results)
@@ -728,7 +728,7 @@ import time
 
 def test_end_to_end_pipeline():
     kinesis = boto3.client('kinesis')
-    
+
     # 1. Write test data to Kinesis
     test_event = {
         'user_id': 'test-123',
@@ -736,22 +736,22 @@ def test_end_to_end_pipeline():
         'amount': 99.99,
         'timestamp': int(time.time() * 1000)
     }
-    
+
     kinesis.put_record(
         StreamName='input-stream',
         Data=json.dumps(test_event),
         PartitionKey='test-123'
     )
-    
+
     # 2. Wait for processing
     time.sleep(10)
-    
+
     # 3. Verify output in DynamoDB
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('analytics-results')
-    
+
     response = table.get_item(Key={'user_id': 'test-123'})
-    
+
     assert 'Item' in response
     assert response['Item']['total_purchases'] >= 99.99
 ```
@@ -769,7 +769,7 @@ def send_event(kinesis, stream_name, i):
         'event_type': random.choice(['page_view', 'click', 'purchase']),
         'timestamp': int(time.time() * 1000) + i
     }
-    
+
     kinesis.put_record(
         StreamName=stream_name,
         Data=json.dumps(event),
@@ -778,24 +778,24 @@ def send_event(kinesis, stream_name, i):
 
 def load_test(events_per_second=1000, duration_seconds=60):
     kinesis = boto3.client('kinesis')
-    
+
     total_events = events_per_second * duration_seconds
-    
+
     with ThreadPoolExecutor(max_workers=100) as executor:
         futures = []
-        
+
         for i in range(total_events):
             future = executor.submit(send_event, kinesis, 'test-stream', i)
             futures.append(future)
-            
+
             # Pace requests
             if (i + 1) % events_per_second == 0:
                 time.sleep(1)
-        
+
         # Wait for completion
         for future in futures:
             future.result()
-    
+
     print(f"Sent {total_events} events in {duration_seconds} seconds")
     print(f"Throughput: {events_per_second} events/sec")
 
@@ -1097,5 +1097,5 @@ Level 4: Management escalation (SLA breach)
 
 ---
 
-**Previous**: [architecture.md](./architecture.md) - AWS Architectures  
+**Previous**: [architecture.md](./architecture.md) - AWS Architectures
 ** Next**: [resources.md](./resources.md) - Learning Resources

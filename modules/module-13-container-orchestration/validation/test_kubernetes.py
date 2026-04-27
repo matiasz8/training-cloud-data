@@ -8,7 +8,7 @@ import yaml
 @pytest.mark.kubernetes
 class TestKubernetesManifests:
     """Test Kubernetes manifest validations"""
-    
+
     def test_deployment_manifest(self):
         """Test Deployment manifest structure"""
         deployment = """
@@ -40,15 +40,15 @@ spec:
             cpu: "500m"
             memory: "512Mi"
         """
-        
+
         manifest = yaml.safe_load(deployment)
-        
+
         assert manifest['apiVersion'] == 'apps/v1'
         assert manifest['kind'] == 'Deployment'
         assert 'spec' in manifest
         assert 'replicas' in manifest['spec']
         assert manifest['spec']['replicas'] >= 1
-    
+
     def test_service_manifest(self):
         """Test Service manifest structure"""
         service = """
@@ -66,15 +66,15 @@ spec:
     targetPort: 8000
   type: ClusterIP
         """
-        
+
         manifest = yaml.safe_load(service)
-        
+
         assert manifest['apiVersion'] == 'v1'
         assert manifest['kind'] == 'Service'
         assert 'spec' in manifest
         assert 'selector' in manifest['spec']
         assert len(manifest['spec']['ports']) > 0
-    
+
     def test_resources_defined(self):
         """Test container has resource requests and limits"""
         container = {
@@ -91,13 +91,13 @@ spec:
                 }
             }
         }
-        
+
         assert 'resources' in container
         assert 'requests' in container['resources']
         assert 'limits' in container['resources']
         assert 'cpu' in container['resources']['requests']
         assert 'memory' in container['resources']['requests']
-    
+
     def test_health_probes(self):
         """Test container has liveness and readiness probes"""
         container = {
@@ -120,7 +120,7 @@ spec:
                 "periodSeconds": 5
             }
         }
-        
+
         assert 'livenessProbe' in container
         assert 'readinessProbe' in container
         assert 'httpGet' in container['livenessProbe']
@@ -129,7 +129,7 @@ spec:
 @pytest.mark.kubernetes
 class TestKubernetesStatefulSet:
     """Test StatefulSet configurations"""
-    
+
     def test_statefulset_manifest(self):
         """Test StatefulSet structure"""
         statefulset = """
@@ -160,13 +160,13 @@ spec:
         requests:
           storage: 10Gi
         """
-        
+
         manifest = yaml.safe_load(statefulset)
-        
+
         assert manifest['kind'] == 'StatefulSet'
         assert 'serviceName' in manifest['spec']
         assert 'volumeClaimTemplates' in manifest['spec']
-    
+
     def test_pvc_storage_class(self):
         """Test PVC uses proper storage class"""
         pvc = {
@@ -183,7 +183,7 @@ spec:
                 }
             }
         }
-        
+
         assert 'storageClassName' in pvc['spec']
         assert pvc['spec']['storageClassName'] in ['gp2', 'gp3', 'ebs-gp3']
 
@@ -191,7 +191,7 @@ spec:
 @pytest.mark.kubernetes
 class TestKubernetesIngress:
     """Test Ingress configurations"""
-    
+
     def test_ingress_alb_annotations(self):
         """Test Ingress has proper ALB annotations"""
         ingress = """
@@ -216,9 +216,9 @@ spec:
             port:
               number: 80
         """
-        
+
         manifest = yaml.safe_load(ingress)
-        
+
         assert 'annotations' in manifest['metadata']
         annotations = manifest['metadata']['annotations']
         assert 'alb.ingress.kubernetes.io/scheme' in annotations
@@ -228,7 +228,7 @@ spec:
 @pytest.mark.kubernetes
 class TestKubernetesHPA:
     """Test HorizontalPodAutoscaler configurations"""
-    
+
     def test_hpa_manifest(self):
         """Test HPA configuration"""
         hpa = """
@@ -251,9 +251,9 @@ spec:
         type: Utilization
         averageUtilization: 70
         """
-        
+
         manifest = yaml.safe_load(hpa)
-        
+
         assert manifest['kind'] == 'HorizontalPodAutoscaler'
         assert 'minReplicas' in manifest['spec']
         assert 'maxReplicas' in manifest['spec']

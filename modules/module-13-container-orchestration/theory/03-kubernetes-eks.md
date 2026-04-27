@@ -473,7 +473,7 @@ data:
     db.host=postgres.data-engineering.svc.cluster.local
     db.port=5432
     db.name=analytics
-  
+
   spark.conf: |
     spark.executor.memory=4g
     spark.executor.cores=2
@@ -580,9 +580,9 @@ spec:
   image: "123456789.dkr.ecr.us-east-1.amazonaws.com/spark:3.5.0-python3.11"
   imagePullPolicy: Always
   mainApplicationFile: "s3a://my-bucket/etl/sales_etl.py"
-  
+
   sparkVersion: "3.5.0"
-  
+
   driver:
     cores: 2
     memory: "4g"
@@ -592,7 +592,7 @@ spec:
     volumeMounts:
     - name: spark-data
       mountPath: /data
-  
+
   executor:
     cores: 4
     instances: 10
@@ -602,24 +602,24 @@ spec:
     volumeMounts:
     - name: spark-data
       mountPath: /data
-  
+
   volumes:
   - name: spark-data
     persistentVolumeClaim:
       claimName: efs-shared-data
-  
+
   sparkConf:
     "spark.kubernetes.allocation.batch.size": "10"
     "spark.sql.adaptive.enabled": "true"
     "spark.sql.adaptive.coalescePartitions.enabled": "true"
     "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
     "spark.hadoop.fs.s3a.aws.credentials.provider": "com.amazonaws.auth.WebIdentityTokenCredentialsProvider"
-  
+
   deps:
     packages:
     - "org.apache.hadoop:hadoop-aws:3.3.4"
     - "com.amazonaws:aws-java-sdk-bundle:1.12.262"
-  
+
   restartPolicy:
     type: OnFailure
     onFailureRetries: 3
@@ -762,7 +762,7 @@ spec:
       requests:
         memory: "2Gi"
         cpu: "1000m"  # 1 CPU core
-      
+
       # Limits: Maximum allowed
       limits:
         memory: "4Gi"

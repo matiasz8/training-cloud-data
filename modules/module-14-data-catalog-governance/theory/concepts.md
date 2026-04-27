@@ -423,19 +423,19 @@ response = glue.search_tables(
 **Federated Query Example:**
 ```sql
 -- Query across catalogs
-SELECT 
+SELECT
     glue.sales.transaction_id,
     redshift.customers.customer_name,
     glue.products.product_name
-FROM 
+FROM
     glue_catalog.sales_db.transactions AS glue.sales
-JOIN 
+JOIN
     redshift_catalog.public.customers AS redshift.customers
     ON glue.sales.customer_id = redshift.customers.customer_id
-JOIN 
+JOIN
     glue_catalog.product_db.products AS glue.products
     ON glue.sales.product_id = glue.products.product_id
-WHERE 
+WHERE
     glue.sales.transaction_date >= CURRENT_DATE - INTERVAL '30' DAY;
 ```
 
@@ -560,20 +560,20 @@ glue.start_crawler(
 
 **Example Audit Query:**
 ```sql
-SELECT 
+SELECT
     eventTime,
     userIdentity.principalId,
     eventName,
     requestParameters.databaseName,
     requestParameters.tableName,
     sourceIPAddress
-FROM 
+FROM
     cloudtrail_logs
-WHERE 
+WHERE
     eventSource = 'glue.amazonaws.com'
     AND eventName IN ('GetTable', 'GetTables', 'GetDatabase')
     AND eventTime > CURRENT_TIMESTAMP - INTERVAL '24' HOUR
-ORDER BY 
+ORDER BY
     eventTime DESC;
 ```
 

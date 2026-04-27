@@ -579,5 +579,5 @@ Week 8: Practice Exams
 
 ---
 
-**Previous**: [best-practices.md](./best-practices.md) - Production Best Practices  
+**Previous**: [best-practices.md](./best-practices.md) - Production Best Practices
 **Next**: [exercises/01-kinesis-analytics-sql/](../exercises/01-kinesis-analytics-sql/) - Start Hands-On Learning!

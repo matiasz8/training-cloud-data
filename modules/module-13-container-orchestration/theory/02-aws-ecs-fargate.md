@@ -405,7 +405,7 @@ resource "aws_service_discovery_service" "etl" {
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.main.id
-    
+
     dns_records {
       ttl  = 10
       type = "A"
@@ -573,7 +573,7 @@ resource "aws_cloudwatch_event_target" "ecs_task" {
     task_count          = 1
     task_definition_arn = aws_ecs_task_definition.etl.arn
     launch_type         = "FARGATE"
-    
+
     network_configuration {
       subnets          = aws_subnet.private[*].id
       security_groups  = [aws_security_group.ecs_tasks.id]

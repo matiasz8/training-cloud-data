@@ -5,7 +5,7 @@ import pytest
 import boto3
 import docker
 from kubernetes import client, config
-from moto import mock_ecs, mock_ec2, mock_s3
+from moto import mock_ecs, mock_s3
 
 @pytest.fixture
 def docker_client():

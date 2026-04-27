@@ -4,7 +4,7 @@
 
 - **Nivel**: Básico
 - **Duración estimada**: 2-3 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Docker instalado
   - Conocimientos básicos de Python
   - Cuenta AWS (opcional)
@@ -100,7 +100,7 @@ def get_db_connection():
 def create_tables(conn):
     """Create necessary tables"""
     cursor = conn.cursor()
-    
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS sales_summary (
             id SERIAL PRIMARY KEY,
@@ -112,7 +112,7 @@ def create_tables(conn):
             UNIQUE(date)
         )
     """)
-    
+
     conn.commit()
     cursor.close()
     logger.info("Tables created successfully")
@@ -121,60 +121,60 @@ def create_tables(conn):
 def extract_data(input_path='/data/input'):
     """Extract CSV files"""
     logger.info(f"Extracting data from {input_path}")
-    
+
     csv_files = [f for f in os.listdir(input_path) if f.endswith('.csv')]
-    
+
     if not csv_files:
         logger.warning(f"No CSV files found in {input_path}")
         return None
-    
+
     dfs = []
     for csv_file in csv_files:
         file_path = os.path.join(input_path, csv_file)
         logger.info(f"Reading {csv_file}")
         df = pd.read_csv(file_path)
         dfs.append(df)
-    
+
     result = pd.concat(dfs, ignore_index=True)
     logger.info(f"Extracted {len(result)} rows from {len(csv_files)} files")
-    
+
     return result
 
 
 def transform_data(df):
     """Transform and aggregate data"""
     logger.info("Transforming data")
-    
+
     # Convert date column
     df['order_date'] = pd.to_datetime(df['order_date'])
-    
+
     # Calculate order value
     df['order_value'] = df['quantity'] * df['price']
-    
+
     # Remove invalid data
     df = df[df['order_value'] > 0]
     df = df.dropna()
-    
+
     # Aggregate by date
     summary = df.groupby(df['order_date'].dt.date).agg({
         'order_value': 'sum',
         'order_id': 'count',
     }).reset_index()
-    
+
     summary.columns = ['date', 'total_sales', 'total_orders']
     summary['avg_order_value'] = summary['total_sales'] / summary['total_orders']
-    
+
     logger.info(f"Transformed to {len(summary)} daily summaries")
-    
+
     return summary
 
 
 def load_data(df, conn):
     """Load data to PostgreSQL"""
     logger.info("Loading data to database")
-    
+
     cursor = conn.cursor()
-    
+
     for _, row in df.iterrows():
         cursor.execute("""
             INSERT INTO sales_summary (date, total_sales, total_orders, avg_order_value)
@@ -190,10 +190,10 @@ def load_data(df, conn):
             row['total_orders'],
             row['avg_order_value']
         ))
-    
+
     conn.commit()
     cursor.close()
-    
+
     logger.info(f"Loaded {len(df)} rows to database")
 
 
@@ -202,31 +202,31 @@ def main():
     logger.info("="*50)
     logger.info("Starting ETL Pipeline")
     logger.info("="*50)
-    
+
     try:
         # Extract
         df = extract_data()
-        
+
         if df is None or len(df) == 0:
             logger.warning("No data to process")
             return
-        
+
         # Transform
         summary = transform_data(df)
-        
+
         # Connect to database
         conn = get_db_connection()
         create_tables(conn)
-        
+
         # Load
         load_data(summary, conn)
-        
+
         conn.close()
-        
+
         logger.info("="*50)
         logger.info("ETL Pipeline completed successfully!")
         logger.info("="*50)
-        
+
     except Exception as e:
         logger.error(f"ETL Pipeline failed: {e}")
         sys.exit(1)

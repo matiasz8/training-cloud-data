@@ -26,9 +26,9 @@ FAILED=0
 test_check() {
     local description=$1
     local command=$2
-    
+
     echo -n "Testing: $description... "
-    
+
     if eval "$command" > /dev/null 2>&1; then
         echo -e "${GREEN}✓ PASS${NC}"
         ((PASSED++))

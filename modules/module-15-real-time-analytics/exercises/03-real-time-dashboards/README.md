@@ -3,8 +3,8 @@
 ## Overview
 Build interactive real-time dashboards using Amazon QuickSight, CloudWatch, and Grafana to visualize streaming analytics with sub-second updates.
 
-**Difficulty**: ⭐⭐ Intermediate  
-**Duration**: ~2 hours  
+**Difficulty**: ⭐⭐ Intermediate
+**Duration**: ~2 hours
 **Prerequisites**: Exercise 01 or 02, DynamoDB tables created
 
 ## Learning Objectives
@@ -31,19 +31,19 @@ Build interactive real-time dashboards using Amazon QuickSight, CloudWatch, and 
 │ Analytics    │─────>│  realtime-       │<────>│   Dashboard     │
 │              │      │  aggregates      │      │  (1s refresh)   │
 └──────────────┘      └──────────────────┘      └─────────────────┘
-       │                                                    
-       │ put_metric_data                                   
-       v                                                    
-┌──────────────┐      ┌──────────────────┐                
-│  CloudWatch  │<────>│   CloudWatch     │                
-│   Metrics    │      │    Dashboard     │                
-└──────────────┘      └──────────────────┘                
-                                │                          
-                                v                          
-                      ┌──────────────────┐                
-                      │     Grafana      │                
-                      │  (Multi-source)  │                
-                      └──────────────────┘                
+       │
+       │ put_metric_data
+       v
+┌──────────────┐      ┌──────────────────┐
+│  CloudWatch  │<────>│   CloudWatch     │
+│   Metrics    │      │    Dashboard     │
+└──────────────┘      └──────────────────┘
+                                │
+                                v
+                      ┌──────────────────┐
+                      │     Grafana      │
+                      │  (Multi-source)  │
+                      └──────────────────┘
 ```
 
 ## Setup
@@ -89,10 +89,10 @@ table = dynamodb.Table('realtime-aggregates')
 
 def generate_metrics():
     """Generate realistic dashboard metrics"""
-    
+
     now = datetime.now(timezone.utc)
     timestamp = int(now.timestamp())
-    
+
     metrics = [
         {
             'metric_name': 'events_per_second',
@@ -140,7 +140,7 @@ def generate_metrics():
             })
         }
     ]
-    
+
     return metrics
 
 
@@ -158,41 +158,41 @@ def write_metrics_batch(metrics):
 
 def continuous_metrics_generator(duration_seconds=3600):
     """Generate metrics continuously"""
-    
+
     print(f"Generating dashboard metrics for {duration_seconds} seconds...")
     print("Press Ctrl+C to stop")
-    
+
     start_time = time.time()
     iteration = 0
-    
+
     try:
         while (time.time() - start_time) < duration_seconds:
             metrics = generate_metrics()
-            
+
             if write_metrics_batch(metrics):
                 iteration += 1
                 if iteration % 10 == 0:
                     elapsed = time.time() - start_time
                     rate = iteration / elapsed
                     print(f"  Wrote {iteration} batches ({rate:.1f} batches/sec)")
-            
+
             time.sleep(1)  # Update every second
-    
+
     except KeyboardInterrupt:
         print("\nStopped by user")
-    
+
     total_time = time.time() - start_time
     print(f"\n✓ Generated {iteration} metric batches in {total_time:.1f}s")
 
 
 if __name__ == '__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--duration', type=int, default=3600,
                        help='Duration in seconds (default: 1 hour)')
     args = parser.parse_args()
-    
+
     continuous_metrics_generator(args.duration)
 ```
 
@@ -226,7 +226,7 @@ cloudwatch = boto3.client('cloudwatch',
 
 def create_analytics_dashboard():
     """Create comprehensive analytics dashboard"""
-    
+
     dashboard_body = {
         "widgets": [
             # Events per second - Line chart
@@ -248,7 +248,7 @@ def create_analytics_dashboard():
                     }
                 }
             },
-            
+
             # Revenue - Number widget
             {
                 "type": "metric",
@@ -270,7 +270,7 @@ def create_analytics_dashboard():
                     }
                 }
             },
-            
+
             # Active users - Number widget
             {
                 "type": "metric",
@@ -289,7 +289,7 @@ def create_analytics_dashboard():
                     "view": "singleValue"
                 }
             },
-            
+
             # Stacked area chart - Events by type
             {
                 "type": "metric",
@@ -313,7 +313,7 @@ def create_analytics_dashboard():
                     "stacked": True
                 }
             },
-            
+
             # Conversion rate - Line chart
             {
                 "type": "metric",
@@ -342,7 +342,7 @@ def create_analytics_dashboard():
                     }
                 }
             },
-            
+
             # Performance metrics - Bar chart
             {
                 "type": "metric",
@@ -364,7 +364,7 @@ def create_analytics_dashboard():
                     }
                 }
             },
-            
+
             # Error rate - Line chart with alarm annotation
             {
                 "type": "metric",
@@ -399,7 +399,7 @@ def create_analytics_dashboard():
                     }
                 }
             },
-            
+
             # Top products table
             {
                 "type": "log",
@@ -414,20 +414,20 @@ def create_analytics_dashboard():
             }
         ]
     }
-    
+
     # Create dashboard
     try:
         response = cloudwatch.put_dashboard(
             DashboardName='RealTimeAnalytics',
             DashboardBody=json.dumps(dashboard_body)
         )
-        
+
         print("✓ CloudWatch dashboard created successfully")
         print(f"  Dashboard ARN: {response.get('DashboardValidationMessages', [])}")
         print("  View at: https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=RealTimeAnalytics")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"✗ Error creating dashboard: {e}")
         return False
@@ -435,13 +435,13 @@ def create_analytics_dashboard():
 
 def publish_custom_metrics():
     """Publish custom metrics to CloudWatch"""
-    
+
     import time
     import random
     from datetime import datetime
-    
+
     print("Publishing custom metrics to CloudWatch...")
-    
+
     for i in range(60):  # Publish for 1 minute
         try:
             cloudwatch.put_metric_data(
@@ -473,29 +473,29 @@ def publish_custom_metrics():
                     }
                 ]
             )
-            
+
             if (i + 1) % 10 == 0:
                 print(f"  Published {i + 1}/60 metric batches")
-            
+
             time.sleep(1)
-            
+
         except Exception as e:
             print(f"Error publishing metrics: {e}")
-    
+
     print("✓ Metrics published successfully")
 
 
 if __name__ == '__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--publish', action='store_true',
                        help='Publish test metrics')
     args = parser.parse_args()
-    
+
     # Create dashboard
     create_analytics_dashboard()
-    
+
     # Optionally publish test data
     if args.publish:
         publish_custom_metrics()
@@ -656,13 +656,13 @@ datasources:
       defaultRegion: us-east-1
       endpoint: http://localstack:4566
     isDefault: true
-  
+
   - name: Prometheus
     type: prometheus
     access: proxy
     url: http://prometheus:9090
     isDefault: false
-  
+
   - name: DynamoDB
     type: grafana-simple-json-datasource
     access: proxy
@@ -719,21 +719,21 @@ def create_sns_topic():
     """Create SNS topic for alarms"""
     response = sns.create_topic(Name='analytics-alarms')
     topic_arn = response['TopicArn']
-    
+
     # Subscribe email (for real AWS, not LocalStack)
     # sns.subscribe(
     #     TopicArn=topic_arn,
     #     Protocol='email',
     #     Endpoint='alerts@example.com'
     # )
-    
+
     print(f"✓ SNS topic created: {topic_arn}")
     return topic_arn
 
 
 def create_high_error_rate_alarm(topic_arn):
     """Alarm when error rate exceeds 5%"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName='HighErrorRate',
         ComparisonOperator='GreaterThanThreshold',
@@ -749,13 +749,13 @@ def create_high_error_rate_alarm(topic_arn):
         Dimensions=[],
         Unit='Percent'
     )
-    
+
     print("✓ High error rate alarm created")
 
 
 def create_low_revenue_alarm(topic_arn):
     """Alarm when revenue drops below threshold"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName='LowRevenue',
         ComparisonOperator='LessThanThreshold',
@@ -770,13 +770,13 @@ def create_low_revenue_alarm(topic_arn):
         AlarmDescription='Revenue below $500 in 5 minutes',
         TreatMissingData='notBreaching'
     )
-    
+
     print("✓ Low revenue alarm created")
 
 
 def create_high_latency_alarm(topic_arn):
     """Alarm when latency p99 exceeds 1 second"""
-    
+
     cloudwatch.put_metric_alarm(
         AlarmName='HighLatency',
         ComparisonOperator='GreaterThanThreshold',
@@ -790,13 +790,13 @@ def create_high_latency_alarm(topic_arn):
         AlarmActions=[topic_arn],
         AlarmDescription='p99 latency exceeded 1 second'
     )
-    
+
     print("✓ High latency alarm created")
 
 
 def create_composite_alarm(topic_arn):
     """Composite alarm - trigger if multiple conditions met"""
-    
+
     cloudwatch.put_composite_alarm(
         ActionsEnabled=True,
         AlarmActions=[topic_arn],
@@ -804,22 +804,22 @@ def create_composite_alarm(topic_arn):
         AlarmDescription='Multiple performance indicators degraded',
         AlarmRule='(ALARM(HighErrorRate) OR ALARM(HighLatency)) AND ALARM(LowRevenue)'
     )
-    
+
     print("✓ Composite alarm created")
 
 
 if __name__ == '__main__':
     print("Creating CloudWatch alarms...")
-    
+
     # Create SNS topic
     topic_arn = create_sns_topic()
-    
+
     # Create alarms
     create_high_error_rate_alarm(topic_arn)
     create_low_revenue_alarm(topic_arn)
     create_high_latency_alarm(topic_arn)
     create_composite_alarm(topic_arn)
-    
+
     print("\n✓ All alarms configured")
     print(f"  Topic ARN: {topic_arn}")
 ```

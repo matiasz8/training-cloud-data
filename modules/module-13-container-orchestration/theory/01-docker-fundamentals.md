@@ -163,15 +163,15 @@ def extract_data():
         user="etl_user",
         password="secret"
     )
-    
+
     query = """
-    SELECT * FROM orders 
+    SELECT * FROM orders
     WHERE created_at >= CURRENT_DATE - INTERVAL '1 day'
     """
-    
+
     df = pd.read_sql(query, conn)
     conn.close()
-    
+
     print(f"Extracted {len(df)} rows")
     return df
 
@@ -180,11 +180,11 @@ def transform_data(df):
     # Agregar columnas
     df['total_amount'] = df['quantity'] * df['price']
     df['processed_at'] = datetime.utcnow()
-    
+
     # Limpiar datos
     df = df.dropna()
     df = df[df['total_amount'] > 0]
-    
+
     print(f"Transformed to {len(df)} rows")
     return df
 
@@ -524,7 +524,7 @@ services:
 
   # ETL Service
   etl:
-    build: 
+    build:
       context: ./etl
       dockerfile: Dockerfile
     container_name: etl_service

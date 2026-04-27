@@ -184,22 +184,22 @@ while True:
     run = glue.get_data_quality_rule_recommendation_run(RunId=run_id)
     status = run['Status']
     print(f"Status: {status}")
-    
+
     if status in ['SUCCEEDED', 'FAILED', 'STOPPED']:
         break
-    
+
     time.sleep(10)
 
 # Get results
 if status == 'SUCCEEDED':
     results = glue.get_data_quality_result(ResultId=run_id)
-    
+
     print("\n=== Quality Results ===")
     print(f"Score: {results['Score']}")
     print(f"Evaluated Rules: {results['EvaluatedRuleCount']}")
     print(f"Passed Rules: {results['RulesPassed']}")
     print(f"Failed Rules: {results['RulesFailed']}")
-    
+
     # Rule-level details
     for rule_result in results.get('RuleResults', []):
         status_icon = "✅" if rule_result['Result'] == 'PASS' else "❌"
@@ -290,7 +290,7 @@ if quarantine_df.count() > 0:
         connection_options={"path": "s3://training-data-lake/quarantine/sales/"},
         format="parquet"
     )
-    
+
     # Send alert
     print(f"⚠️  {quarantine_df.count()} rows quarantined due to quality issues")
 
@@ -321,10 +321,10 @@ cloudwatch = boto3.client(
 
 def publish_quality_metrics(database, table, quality_score, rules_passed, rules_failed):
     """Publish quality metrics to CloudWatch"""
-    
+
     namespace = f"DataQuality/{database}"
     timestamp = datetime.utcnow()
-    
+
     metrics = [
         {
             'MetricName': 'QualityScore',
@@ -355,12 +355,12 @@ def publish_quality_metrics(database, table, quality_score, rules_passed, rules_
             ]
         }
     ]
-    
+
     cloudwatch.put_metric_data(
         Namespace=namespace,
         MetricData=metrics
     )
-    
+
     print(f"Published metrics for {database}.{table}")
 
 # Example usage
@@ -425,7 +425,7 @@ glue = boto3.client(
 
 def generate_quality_report(start_date, end_date):
     """Generate comprehensive quality report"""
-    
+
     report = {
         'tables': [],
         'overall_score': 0,
@@ -433,17 +433,17 @@ def generate_quality_report(start_date, end_date):
         'total_passed': 0,
         'total_failed': 0
     }
-    
+
     # Get all quality rulesets
     rulesets = glue.list_data_quality_rulesets()
-    
+
     for ruleset_info in rulesets.get('Rulesets', []):
         ruleset_name = ruleset_info['Name']
-        
+
         # Get ruleset details
         ruleset = glue.get_data_quality_ruleset(Name=ruleset_name)
         target = ruleset['TargetTable']
-        
+
         # Get recent results
         results = glue.list_data_quality_results(
             Filter={
@@ -456,7 +456,7 @@ def generate_quality_report(start_date, end_date):
                 'StartedAfter': start_date
             }
         )
-        
+
         # Aggregate results
         table_stats = {
             'database': target['DatabaseName'],
@@ -466,11 +466,11 @@ def generate_quality_report(start_date, end_date):
             'avg_score': 0,
             'trend': 'stable'
         }
-        
+
         if results.get('Results'):
             scores = [r.get('Score', 0) for r in results['Results']]
             table_stats['avg_score'] = sum(scores) / len(scores)
-            
+
             # Calculate trend
             if len(scores) >= 2:
                 recent_avg = sum(scores[-3:]) / min(3, len(scores))
@@ -479,13 +479,13 @@ def generate_quality_report(start_date, end_date):
                     table_stats['trend'] = 'improving ↑'
                 elif recent_avg < older_avg - 5:
                     table_stats['trend'] = 'declining ↓'
-        
+
         report['tables'].append(table_stats)
-    
+
     # Calculate overall metrics
     if report['tables']:
         report['overall_score'] = sum(t['avg_score'] for t in report['tables']) / len(report['tables'])
-    
+
     return report
 
 # Generate report

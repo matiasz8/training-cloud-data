@@ -4,7 +4,7 @@
 
 - **Nivel**: Intermedio
 - **Duración estimada**: 3-4 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicios 01-03 completados
   - Docker fundamentals
   - AWS account con permisos EKS
@@ -283,7 +283,7 @@ def list_data():
     results = cursor.fetchall()
     cursor.close()
     conn.close()
-    
+
     return {
         "count": len(results),
         "records": [
@@ -581,7 +581,7 @@ spec:
             echo "Waiting for postgres..."
             sleep 2
           done
-          
+
           psql -h postgres-service -U dataeng -d dataeng <<EOF
           CREATE TABLE IF NOT EXISTS data_records (
             id SERIAL PRIMARY KEY,

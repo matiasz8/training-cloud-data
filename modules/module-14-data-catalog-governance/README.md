@@ -33,22 +33,22 @@ By the end of this module, you will be able to:
   - `architecture.md`: AWS service architectures with ASCII diagrams
   - `best-practices.md`: Implementation guidelines and optimization patterns
   - `resources.md`: AWS documentation, workshops, certifications
-  
+
 - **assets/diagrams/**: Visual architecture and workflow diagrams (3 files)
   - `architecture-diagrams.md`: 10 core architectural diagrams
   - `workflow-diagrams.md`: 10 operational workflow diagrams
   - `pattern-diagrams.md`: 10 advanced pattern diagrams
-  
+
 - **exercises/**: Hands-on practice exercises (6 exercises)
-  
+
 - **infrastructure/**: LocalStack/Docker setup for this module
-  
+
 - **data/**: Sample datasets and JSON schemas
   - `sample/`: Sales transaction CSV, catalog metadata, quality rules
   - `schemas/`: Glue table schema, Lake Formation permission schema
-  
+
 - **validation/**: Automated tests to validate your learning
-  
+
 - **scripts/**: Helper scripts for setup, validation, cleanup
 
 ## Getting Started

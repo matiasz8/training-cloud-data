@@ -192,7 +192,7 @@ graph LR
     A[Kinesis Stream]:::source --> B[Flink SQL]:::process
     B --> C[DynamoDB]:::sink
     C --> D[QuickSight]:::viz
-    
+
     classDef source fill:#4A90E2,stroke:#333,stroke-width:2px,color:#fff
     classDef process fill:#7ED321,stroke:#333,stroke-width:2px,color:#fff
     classDef sink fill:#F5A623,stroke:#333,stroke-width:2px,color:#fff

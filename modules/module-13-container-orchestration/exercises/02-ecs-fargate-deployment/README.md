@@ -4,7 +4,7 @@
 
 - **Nivel**: Intermedio
 - **Duración estimada**: 3-4 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicio 01 completado
   - Cuenta AWS activa
   - AWS CLI configurado
@@ -94,7 +94,7 @@ resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.${count.index + 1}.0/24"
   availability_zone = data.aws_availability_zones.available.names[count.index]
-  
+
   map_public_ip_on_launch = true
 
   tags = {
@@ -284,20 +284,20 @@ resource "aws_db_instance" "postgres" {
   allocated_storage      = 20
   storage_type           = "gp3"
   storage_encrypted      = true
-  
+
   db_name  = "analytics"
   username = "dataeng"
   password = random_password.db_password.result
-  
+
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
-  
+
   backup_retention_period = 7
   backup_window          = "03:00-04:00"
   maintenance_window     = "sun:04:00-sun:05:00"
-  
+
   skip_final_snapshot = true
-  
+
   tags = {
     Name = "ecs-analytics-db"
   }
@@ -453,7 +453,7 @@ resource "aws_ecs_task_definition" "api" {
   container_definitions = jsonencode([{
     name  = "api"
     image = "${aws_ecr_repository.app.repository_url}:latest"
-    
+
     portMappings = [{
       containerPort = 8080
       protocol      = "tcp"
@@ -637,7 +637,7 @@ resource "aws_cloudwatch_event_target" "ecs_task" {
     task_count          = 1
     task_definition_arn = aws_ecs_task_definition.etl.arn
     launch_type         = "FARGATE"
-    
+
     network_configuration {
       subnets          = aws_subnet.private[*].id
       security_groups  = [aws_security_group.ecs_tasks.id]
@@ -702,7 +702,7 @@ resource "aws_ecs_task_definition" "etl" {
   container_definitions = jsonencode([{
     name  = "etl"
     image = "${aws_ecr_repository.app.repository_url}:latest"
-    
+
     command = ["python", "etl.py"]
 
     secrets = [{

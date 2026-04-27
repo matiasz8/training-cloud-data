@@ -10,38 +10,38 @@ services:
     environment:
       # Core services
       - SERVICES=s3,glue,lakeformation,iam,sts,athena,sns,cloudwatch,events,stepfunctions,lambda
-      
+
       # Configuration
       - DEBUG=1
       - PERSISTENCE=1
       - LAMBDA_EXECUTOR=docker-reuse
       - DOCKER_HOST=unix:///var/run/docker.sock
-      
+
       # AWS configuration
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      
+
       # Feature flags
       - GLUE_KINESIS_STARTING_POSITION=TRIM_HORIZON
       - DISABLE_CORS_CHECKS=1
-      
+
       # Data directory
       - DATA_DIR=/tmp/localstack/data
-    
+
     volumes:
       # Mount Docker socket for Lambda execution
       - "/var/run/docker.sock:/var/run/docker.sock"
-      
+
       # Persist data between restarts
       - "./infrastructure/localstack-data:/tmp/localstack"
-      
+
       # Mount initialization scripts
       - "./infrastructure/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
-    
+
     networks:
       - data-catalog-network
-    
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s

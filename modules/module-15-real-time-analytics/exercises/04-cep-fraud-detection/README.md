@@ -3,8 +3,8 @@
 ## Overview
 Implement Complex Event Processing (CEP) using Apache Flink to detect fraud patterns in real-time transaction streams using pattern matching and sequence detection.
 
-**Difficulty**: ⭐⭐⭐ Advanced  
-**Duration**: ~2.5 hours  
+**Difficulty**: ⭐⭐⭐ Advanced
+**Duration**: ~2.5 hours
 **Prerequisites**: Exercise 01-02, Understanding of state management
 
 ## Learning Objectives
@@ -69,37 +69,37 @@ import os
 
 def create_cep_environment():
     """Create Flink environment optimized for CEP"""
-    
+
     # StreamExecutionEnvironment
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_parallelism(2)
-    
+
     # Enable checkpointing for state management
     env.enable_checkpointing(30000)  # 30 seconds
-    
+
     # Configure checkpoint storage
-    checkpoint_dir = os.getenv('CHECKPOINT_DIR', 
+    checkpoint_dir = os.getenv('CHECKPOINT_DIR',
                               'file:///tmp/flink-checkpoints')
     env.get_checkpoint_config().set_checkpoint_storage(checkpoint_dir)
-    
+
     # Set state backend to RocksDB for large state
     env.set_state_backend('rocksdb')
-    
+
     # Table environment
     settings = EnvironmentSettings.new_instance().in_streaming_mode().build()
     table_env = StreamTableEnvironment.create(env, settings)
-    
+
     # CEP-specific configs
     table_env.get_config().get_configuration().set_string(
         "table.exec.state.ttl", "1 h"  # Clean old patterns after 1 hour
     )
-    
+
     return env, table_env
 
 
 def register_transaction_source(table_env):
     """Register Kinesis source for transactions"""
-    
+
     ddl = """
     CREATE TABLE transactions (
         transaction_id STRING,
@@ -127,14 +127,14 @@ def register_transaction_source(table_env):
         'json.timestamp-format.standard' = 'ISO-8601'
     )
     """
-    
+
     table_env.execute_sql(ddl)
     print("✓ Transaction source registered")
 
 
 def register_fraud_sink(table_env):
     """Register sink for detected fraud events"""
-    
+
     # SNS sink for immediate alerts
     sns_ddl = """
     CREATE TABLE fraud_alerts (
@@ -154,9 +154,9 @@ def register_fraud_sink(table_env):
         'json.timestamp-format.standard' = 'ISO-8601'
     )
     """
-    
+
     table_env.execute_sql(sns_ddl)
-    
+
     # DynamoDB sink for investigation
     dynamodb_ddl = """
     CREATE TABLE fraud_detections (
@@ -176,9 +176,9 @@ def register_fraud_sink(table_env):
         'aws.endpoint' = 'http://localstack:4566'
     )
     """
-    
+
     table_env.execute_sql(dynamodb_ddl)
-    
+
     print("✓ Fraud sinks registered")
 
 
@@ -212,56 +212,56 @@ class CardTestingDetector(KeyedProcessFunction):
     """
     Detect pattern: 3-5 failed payments → 1 success within 10 minutes
     """
-    
+
     def __init__(self):
         self.failed_payments_state = None
         self.timer_state = None
-    
+
     def open(self, runtime_context: RuntimeContext):
         """Initialize state"""
-        
+
         # Store failed payment attempts
         failed_descriptor = ValueStateDescriptor(
             "failed-payments",
             Types.LIST(Types.TUPLE([Types.STRING(), Types.LONG()]))
         )
         self.failed_payments_state = runtime_context.get_state(failed_descriptor)
-        
+
         # Store cleanup timer
         timer_descriptor = ValueStateDescriptor(
             "cleanup-timer",
             Types.LONG()
         )
         self.timer_state = runtime_context.get_state(timer_descriptor)
-    
+
     def process_element(self, value, ctx):
         """Process each transaction"""
-        
+
         transaction = json.loads(value)
         status = transaction['status']
         transaction_id = transaction['transaction_id']
         timestamp = transaction['transaction_timestamp']
-        
+
         # Get current failed attempts
         failed_attempts = self.failed_payments_state.value() or []
-        
+
         # Remove old attempts (>10 minutes)
         ten_minutes_ago = timestamp - (10 * 60)
         failed_attempts = [
             (txn_id, ts) for txn_id, ts in failed_attempts
             if ts > ten_minutes_ago
         ]
-        
+
         if status == 'failed':
             # Add to failed attempts
             failed_attempts.append((transaction_id, timestamp))
             self.failed_payments_state.update(failed_attempts)
-            
+
             # Set cleanup timer (10 minutes from now)
             cleanup_time = timestamp + (10 * 60 * 1000)
             ctx.timer_service().register_event_time_timer(cleanup_time)
             self.timer_state.update(cleanup_time)
-            
+
         elif status == 'success':
             # Check if this follows multiple failures
             if len(failed_attempts) >= 3:
@@ -280,13 +280,13 @@ class CardTestingDetector(KeyedProcessFunction):
                     'transaction_ids': [txn_id for txn_id, _ in failed_attempts] + [transaction_id],
                     'detection_timestamp': datetime.fromtimestamp(timestamp).isoformat()
                 }
-                
+
                 yield json.dumps(fraud_event)
-            
+
             # Clear state after success
             self.failed_payments_state.clear()
             self.timer_state.clear()
-    
+
     def on_timer(self, timestamp, ctx):
         """Cleanup old state"""
         self.failed_payments_state.clear()
@@ -295,29 +295,29 @@ class CardTestingDetector(KeyedProcessFunction):
 
 def run_card_testing_detection():
     """Execute card testing detection job"""
-    
+
     from flink_cep_config import create_cep_environment, register_transaction_source, register_fraud_sink
-    
+
     env, table_env = create_cep_environment()
     register_transaction_source(table_env)
     register_fraud_sink(table_env)
-    
+
     # Convert table to DataStream
     transaction_stream = table_env.to_append_stream(
         table_env.from_path('transactions'),
         Types.STRING()
     )
-    
+
     # Apply pattern detector (keyed by user_id)
     fraud_stream = (transaction_stream
                     .key_by(lambda x: json.loads(x)['user_id'])
                     .process(CardTestingDetector()))
-    
+
     # Write to fraud sinks
     fraud_table = table_env.from_data_stream(fraud_stream)
     fraud_table.execute_insert('fraud_alerts').wait()
     fraud_table.execute_insert('fraud_detections').wait()
-    
+
     print("✓ Card testing detection running")
 
 
@@ -351,13 +351,13 @@ MATCH_RECOGNIZE (
         CAST((C.event_timestamp - A.event_timestamp) AS INTERVAL MINUTE) AS time_span,
         'geographic_anomaly' AS pattern_name,
         85.0 AS confidence_score
-    
+
     ONE ROW PER MATCH
     AFTER MATCH SKIP PAST LAST ROW
-    
+
     PATTERN (A B C)
     WITHIN INTERVAL '1' HOUR
-    
+
     DEFINE
         B AS B.country <> A.country,
         C AS C.country <> A.country AND C.country <> B.country
@@ -365,7 +365,7 @@ MATCH_RECOGNIZE (
 
 -- Write results to fraud alerts
 INSERT INTO fraud_alerts
-SELECT 
+SELECT
     CONCAT('geo_', user_id, '_', CAST(UNIX_TIMESTAMP(start_time) AS STRING)) AS fraud_id,
     user_id,
     pattern_name,
@@ -393,22 +393,22 @@ from flink_cep_config import create_cep_environment, register_transaction_source
 
 def run_geographic_anomaly_detection():
     """Run SQL-based geographic fraud detection"""
-    
+
     env, table_env = create_cep_environment()
     register_transaction_source(table_env)
     register_fraud_sink(table_env)
-    
+
     # Read SQL file
     with open('pattern_geographic_anomaly.sql', 'r') as f:
         sql_statements = f.read()
-    
+
     # Execute each statement
     for statement in sql_statements.split(';'):
         statement = statement.strip()
         if statement and not statement.startswith('--'):
             table_env.execute_sql(statement)
             print(f"✓ Executed: {statement[:50]}...")
-    
+
     print("✓ Geographic anomaly detection running")
 
 
@@ -438,64 +438,64 @@ class AmountSpikeDetector(KeyedProcessFunction):
     """
     Detect: Average amount increases 10x within 30 minutes
     """
-    
+
     def __init__(self):
         self.baseline_state = None
         self.recent_transactions_state = None
-    
+
     def open(self, runtime_context: RuntimeContext):
         """Initialize state"""
-        
+
         # Baseline average (from historical data)
         baseline_descriptor = ValueStateDescriptor(
             "baseline-average",
             Types.TUPLE([Types.DOUBLE(), Types.INT()])  # (sum, count)
         )
         self.baseline_state = runtime_context.get_state(baseline_descriptor)
-        
+
         # Recent transactions in window
         recent_descriptor = ValueStateDescriptor(
             "recent-transactions",
             Types.LIST(Types.TUPLE([Types.DOUBLE(), Types.LONG()]))
         )
         self.recent_transactions_state = runtime_context.get_state(recent_descriptor)
-    
+
     def process_element(self, value, ctx):
         """Process each transaction"""
-        
+
         transaction = json.loads(value)
         amount = float(transaction['amount'])
         timestamp = transaction['transaction_timestamp']
-        
+
         # Get or initialize baseline
         baseline = self.baseline_state.value()
         if baseline is None:
             baseline = (0.0, 0)
-        
+
         baseline_sum, baseline_count = baseline
-        
+
         # Update baseline (running average)
         baseline_sum += amount
         baseline_count += 1
         baseline_avg = baseline_sum / baseline_count if baseline_count > 0 else 0
-        
+
         self.baseline_state.update((baseline_sum, baseline_count))
-        
+
         # Get recent transactions
         recent = self.recent_transactions_state.value() or []
-        
+
         # Remove old transactions (>30 minutes)
         thirty_minutes_ago = timestamp - (30 * 60)
         recent = [(amt, ts) for amt, ts in recent if ts > thirty_minutes_ago]
-        
+
         # Add current transaction
         recent.append((amount, timestamp))
         self.recent_transactions_state.update(recent)
-        
+
         # Calculate recent average
         if len(recent) >= 3:  # Need at least 3 transactions
             recent_avg = sum(amt for amt, _ in recent) / len(recent)
-            
+
             # Check for spike (10x increase)
             if baseline_avg > 0 and recent_avg > baseline_avg * 10:
                 # FRAUD DETECTED!
@@ -514,35 +514,35 @@ class AmountSpikeDetector(KeyedProcessFunction):
                     'transaction_ids': [transaction['transaction_id']],
                     'detection_timestamp': datetime.fromtimestamp(timestamp).isoformat()
                 }
-                
+
                 yield json.dumps(fraud_event)
 
 
 def run_amount_spike_detection():
     """Execute amount spike detection job"""
-    
+
     from flink_cep_config import create_cep_environment, register_transaction_source, register_fraud_sink
-    
+
     env, table_env = create_cep_environment()
     register_transaction_source(table_env)
     register_fraud_sink(table_env)
-    
+
     # Convert to DataStream
     transaction_stream = table_env.to_append_stream(
         table_env.from_path('transactions'),
         Types.STRING()
     )
-    
+
     # Apply detector
     fraud_stream = (transaction_stream
                     .key_by(lambda x: json.loads(x)['user_id'])
                     .process(AmountSpikeDetector()))
-    
+
     # Write results
     fraud_table = table_env.from_data_stream(fraud_stream)
     fraud_table.execute_insert('fraud_alerts').wait()
     fraud_table.execute_insert('fraud_detections').wait()
-    
+
     print("✓ Amount spike detection running")
 
 
@@ -580,24 +580,24 @@ def run_pattern(pattern_name):
             from pattern_card_testing import run_card_testing_detection
             logger.info("Starting card testing detection...")
             run_card_testing_detection()
-            
+
         elif pattern_name == 'geographic':
             from pattern_geographic_anomaly import run_geographic_anomaly_detection
             logger.info("Starting geographic anomaly detection...")
             run_geographic_anomaly_detection()
-            
+
         elif pattern_name == 'amount_spike':
             from pattern_amount_spike import run_amount_spike_detection
             logger.info("Starting amount spike detection...")
             run_amount_spike_detection()
-            
+
         else:
             logger.error(f"Unknown pattern: {pattern_name}")
             return False
-        
+
         logger.info(f"✓ {pattern_name} detection completed")
         return True
-        
+
     except Exception as e:
         logger.error(f"✗ Error in {pattern_name}: {e}")
         return False
@@ -605,15 +605,15 @@ def run_pattern(pattern_name):
 
 def run_all_patterns():
     """Run all fraud detection patterns concurrently"""
-    
+
     patterns = ['card_testing', 'geographic', 'amount_spike']
-    
+
     logger.info(f"Starting {len(patterns)} fraud detection patterns...")
-    
+
     # Run patterns in separate threads
     with ThreadPoolExecutor(max_workers=3) as executor:
         futures = {executor.submit(run_pattern, p): p for p in patterns}
-        
+
         for future in futures:
             pattern_name = futures[future]
             try:
@@ -622,7 +622,7 @@ def run_all_patterns():
                     logger.error(f"✗ {pattern_name} failed")
             except Exception as e:
                 logger.error(f"✗ {pattern_name} exception: {e}")
-    
+
     logger.info("✓ All patterns started")
 
 
@@ -636,16 +636,16 @@ if __name__ == '__main__':
         default='all',
         help='Which pattern to run'
     )
-    
+
     args = parser.parse_args()
-    
+
     try:
         if args.pattern == 'all':
             run_all_patterns()
         else:
             success = run_pattern(args.pattern)
             sys.exit(0 if success else 1)
-    
+
     except KeyboardInterrupt:
         logger.info("\nStopped by user")
         sys.exit(0)
@@ -701,20 +701,20 @@ def generate_card_testing_sequence(user_id):
     """Generate card testing fraud pattern"""
     transactions = []
     base_time = int(time.time())
-    
+
     # 4 failed attempts
     for i in range(4):
         txn = generate_normal_transaction(user_id)
         txn['status'] = 'failed'
         txn['transaction_timestamp'] = base_time + (i * 60)  # 1 min apart
         transactions.append(txn)
-    
+
     # 1 success (the fraud)
     success_txn = generate_normal_transaction(user_id)
     success_txn['transaction_timestamp'] = base_time + (5 * 60)
     success_txn['amount'] = 199.99  # High value
     transactions.append(success_txn)
-    
+
     return transactions
 
 
@@ -723,13 +723,13 @@ def generate_geographic_anomaly_sequence(user_id):
     transactions = []
     base_time = int(time.time())
     countries = ['US', 'UK', 'JP']
-    
+
     for i, country in enumerate(countries):
         txn = generate_normal_transaction(user_id)
         txn['country'] = country
         txn['transaction_timestamp'] = base_time + (i * 10 * 60)  # 10 min apart
         transactions.append(txn)
-    
+
     return transactions
 
 
@@ -737,19 +737,19 @@ def generate_amount_spike_sequence(user_id):
     """Generate amount spike pattern"""
     transactions = []
     base_time = int(time.time())
-    
+
     # 5 normal transactions (~$50)
     for i in range(5):
         txn = generate_normal_transaction(user_id, base_amount=50)
         txn['transaction_timestamp'] = base_time + (i * 60)
         transactions.append(txn)
-    
+
     # 3 high-value transactions (~$500) - 10x spike
     for i in range(3):
         txn = generate_normal_transaction(user_id, base_amount=500)
         txn['transaction_timestamp'] = base_time + ((5 + i) * 60)
         transactions.append(txn)
-    
+
     return transactions
 
 
@@ -766,14 +766,14 @@ def send_to_kinesis(transactions):
 
 def main():
     print("Generating fraud test data...")
-    
+
     # Generate 80 normal transactions
     print("  Generating 80 normal transactions...")
     for i in range(80):
         user_id = f"user_{random.randint(1000, 9999)}"
         txn = generate_normal_transaction(user_id)
         send_to_kinesis([txn])
-    
+
     # Generate 5 card testing frauds
     print("  Generating 5 card testing patterns...")
     for i in range(5):
@@ -781,7 +781,7 @@ def main():
         txns = generate_card_testing_sequence(user_id)
         send_to_kinesis(txns)
         time.sleep(2)
-    
+
     # Generate 3 geographic anomalies
     print("  Generating 3 geographic anomalies...")
     for i in range(3):
@@ -789,7 +789,7 @@ def main():
         txns = generate_geographic_anomaly_sequence(user_id)
         send_to_kinesis(txns)
         time.sleep(2)
-    
+
     # Generate 2 amount spikes
     print("  Generating 2 amount spikes...")
     for i in range(2):
@@ -797,7 +797,7 @@ def main():
         txns = generate_amount_spike_sequence(user_id)
         send_to_kinesis(txns)
         time.sleep(2)
-    
+
     print("✓ Test data generated")
     print("  Total: 80 normal + 25 fraud = 105 transactions")
 

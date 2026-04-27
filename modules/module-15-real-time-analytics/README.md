@@ -75,7 +75,7 @@ This module contains:
    ```bash
    # Verify Module 08 completed
    test -f ../module-08-streaming-basics/STATUS.md && echo "✓ Module 08 ready"
-   
+
    # Check AWS CLI configured
    aws sts get-caller-identity
    ```
@@ -84,7 +84,7 @@ This module contains:
    ```bash
    # Start LocalStack (for local development)
    docker-compose -f infrastructure/docker-compose.yml up -d
-   
+
    # Run setup script
    bash scripts/setup.sh
    ```
@@ -297,6 +297,6 @@ After completing this module, you're ready for:
 
 ---
 
-**Module Status**: ✅ Theory Complete, Exercises Ready  
-**Last Updated**: 2024-03-08  
+**Module Status**: ✅ Theory Complete, Exercises Ready
+**Last Updated**: 2024-03-08
 **Maintainer**: Cloud Data Engineering Team

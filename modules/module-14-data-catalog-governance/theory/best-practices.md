@@ -361,18 +361,18 @@ QUALITY_THRESHOLDS = {
 ```python
 def handle_quality_failure(result, threshold):
     """Handle data quality failures based on layer and severity."""
-    
+
     if result.score >= threshold["completeness"]:
         # Pass - move to next layer
         move_to_layer(result.data, next_layer)
         update_catalog(status="quality_passed")
-        
+
     elif result.score >= threshold["completeness"] * 0.8:
         # Warning - process but flag
         move_to_layer(result.data, next_layer)
         send_notification("quality_warning", result.failed_rules)
         update_catalog(status="quality_warning")
-        
+
     else:
         # Failure - quarantine
         move_to_quarantine(result.data)
@@ -494,9 +494,9 @@ glueContext.write_dynamic_frame.from_catalog(
 def calculate_customer_lifetime_value(df):
     """
     Calculate customer lifetime value (CLV).
-    
+
     Formula: (Average Order Value) × (Purchase Frequency) × (Customer Lifespan)
-    
+
     Lineage:
     - Input: silver_transactions, silver_customers
     - Output: gold_customer_metrics
@@ -540,12 +540,12 @@ def calculate_customer_lifetime_value(df):
 1. **Time-Based Partitioning** (Most Common)
    ```
    s3://data-lake/bronze/sales/year=2024/month=03/day=08/
-   
+
    Pros:
    - Efficient for time-range queries
    - Natural data organization
    - Supports partition pruning
-   
+
    Cons:
    - Can create too many small partitions
    - Inefficient for non-time queries
@@ -554,11 +554,11 @@ def calculate_customer_lifetime_value(df):
 2. **Category-Based Partitioning**
    ```
    s3://data-lake/bronze/sales/region=us-west/product_category=electronics/
-   
+
    Pros:
    - Good for analytical queries by category
    - Balanced partition sizes
-   
+
    Cons:
    - Requires knowing categories upfront
    - Can have skewed partition sizes
@@ -567,11 +567,11 @@ def calculate_customer_lifetime_value(df):
 3. **Hybrid Partitioning**
    ```
    s3://data-lake/bronze/sales/date=2024-03-08/region=us-west/
-   
+
    Pros:
    - Combines benefits of multiple strategies
    - Flexible query patterns
-   
+
    Cons:
    - More complex management
    - Deeper directory structure
@@ -682,21 +682,21 @@ from awsglue.transforms import Map
 
 def mask_pii(record):
     """Mask PII fields based on user role."""
-    
+
     # Mask email: john.doe@example.com -> j***@example.com
     if 'email' in record:
         email_parts = record['email'].split('@')
         record['email'] = f"{email_parts[0][0]}***@{email_parts[1]}"
-    
+
     # Mask phone: +1-555-123-4567 -> +1-555-***-****
     if 'phone' in record:
         record['phone'] = record['phone'][:8] + '***-****'
-    
+
     # Hash SSN
     if 'ssn' in record:
         import hashlib
         record['ssn'] = hashlib.sha256(record['ssn'].encode()).hexdigest()
-    
+
     return record
 
 # Apply masking

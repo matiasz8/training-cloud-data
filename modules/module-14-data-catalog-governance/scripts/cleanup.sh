@@ -72,13 +72,13 @@ echo ""
 echo "[5/7] Deleting IAM roles..."
 for role in AWSGlueServiceRole-DataLake DataEngineer DataAnalyst DataScientist ExternalPartner ConsumerAnalyst; do
     echo "  Deleting role: $role"
-    
+
     # Detach policies first
     policies=$(awslocal iam list-attached-role-policies --role-name $role --query 'AttachedPolicies[*].PolicyArn' --output text 2>/dev/null || echo "")
     for policy in $policies; do
         awslocal iam detach-role-policy --role-name $role --policy-arn $policy 2>/dev/null || true
     done
-    
+
     # Delete role
     awslocal iam delete-role --role-name $role 2>/dev/null || true
 done

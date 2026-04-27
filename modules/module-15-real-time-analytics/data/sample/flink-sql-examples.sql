@@ -71,7 +71,7 @@ SELECT
     SUM(product_price * quantity) as total_revenue,
     AVG(product_price) as avg_price
 FROM events_source
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '1' MINUTE),
     event_type;
 
@@ -83,7 +83,7 @@ SELECT
     COUNT(DISTINCT user_id) as unique_visitors
 FROM events_source
 WHERE event_type = 'page_view'
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '5' MINUTE),
     page_url
 ORDER BY views DESC
@@ -98,7 +98,7 @@ SELECT
     AVG(product_price * quantity) as avg_order_value
 FROM events_source
 WHERE event_type = 'purchase'
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '1' HOUR),
     country;
 
@@ -115,7 +115,7 @@ SELECT
     COUNT(*) / 5.0 as events_per_minute,
     COUNT(DISTINCT user_id) as unique_users
 FROM events_source
-GROUP BY 
+GROUP BY
     HOP(event_timestamp, INTERVAL '1' MINUTE, INTERVAL '5' MINUTE),
     event_type;
 
@@ -133,7 +133,7 @@ SELECT
     window_start,
     event_count,
     unique_users,
-    CASE 
+    CASE
         WHEN event_count > 1000 THEN 'HIGH_TRAFFIC'
         WHEN event_count > 500 THEN 'MEDIUM_TRAFFIC'
         ELSE 'NORMAL_TRAFFIC'
@@ -171,7 +171,7 @@ SELECT
     MAX(event_timestamp) - MIN(event_timestamp) as session_duration,
     SUM(product_price * quantity) as session_revenue
 FROM events_source
-GROUP BY 
+GROUP BY
     SESSION(event_timestamp, INTERVAL '10' MINUTE),
     user_id;
 
@@ -185,7 +185,7 @@ WITH user_sessions AS (
         MAX(CASE WHEN event_type = 'add_to_cart' THEN 1 ELSE 0 END) as has_cart,
         MAX(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) as has_purchase
     FROM events_source
-    GROUP BY 
+    GROUP BY
         SESSION(event_timestamp, INTERVAL '10' MINUTE),
         user_id,
         session_id
@@ -212,12 +212,12 @@ SELECT
     p.event_timestamp as purchase_time,
     p.product_id,
     p.product_price
-FROM 
+FROM
     (SELECT * FROM events_source WHERE event_type = 'page_view') v
-JOIN 
+JOIN
     (SELECT * FROM events_source WHERE event_type = 'purchase') p
 ON v.user_id = p.user_id
-WHERE v.event_timestamp BETWEEN p.event_timestamp - INTERVAL '1' HOUR 
+WHERE v.event_timestamp BETWEEN p.event_timestamp - INTERVAL '1' HOUR
                             AND p.event_timestamp;
 
 -- Example 10: Interval join for click-to-purchase attribution
@@ -233,7 +233,7 @@ FROM
 JOIN
     (SELECT * FROM events_source WHERE event_type = 'purchase') p
 ON c.user_id = p.user_id AND c.product_id = p.product_id
-WHERE p.event_timestamp BETWEEN c.event_timestamp 
+WHERE p.event_timestamp BETWEEN c.event_timestamp
                             AND c.event_timestamp + INTERVAL '30' MINUTE;
 
 -- ============================================================================
@@ -254,7 +254,7 @@ FROM (
         ) as revenue_rank
     FROM events_source
     WHERE event_type = 'purchase'
-    GROUP BY 
+    GROUP BY
         TUMBLE(event_timestamp, INTERVAL '1' HOUR),
         product_id,
         product_name
@@ -273,7 +273,7 @@ FROM (
             ORDER BY COUNT(*) DESC
         ) as activity_rank
     FROM events_source
-    GROUP BY 
+    GROUP BY
         TUMBLE(event_timestamp, INTERVAL '5' MINUTE),
         user_id
 )
@@ -293,7 +293,7 @@ SELECT
 FROM (
     SELECT *,
         ROW_NUMBER() OVER (
-            PARTITION BY user_id, event_type, 
+            PARTITION BY user_id, event_type,
                          DATE_FORMAT(event_timestamp, 'yyyy-MM-dd HH:mm')
             ORDER BY event_timestamp ASC
         ) as rn
@@ -341,14 +341,14 @@ MATCH_RECOGNIZE (
     PATTERN (A B C)
     WITHIN INTERVAL '5' MINUTE
     DEFINE
-        A AS A.event_type = 'sensor_reading' 
-             AND A.sensor_type = 'temperature' 
+        A AS A.event_type = 'sensor_reading'
+             AND A.sensor_type = 'temperature'
              AND A.value > 80,
-        B AS B.event_type = 'sensor_reading' 
-             AND B.sensor_type = 'temperature' 
+        B AS B.event_type = 'sensor_reading'
+             AND B.sensor_type = 'temperature'
              AND B.value > 80,
-        C AS C.event_type = 'sensor_reading' 
-             AND C.sensor_type = 'temperature' 
+        C AS C.event_type = 'sensor_reading'
+             AND C.sensor_type = 'temperature'
              AND C.value > 80
 ) AS temperature_anomalies;
 
@@ -366,7 +366,7 @@ MATCH_RECOGNIZE (
     PATTERN (A)
     WITHIN INTERVAL '5' MINUTE
     DEFINE
-        A AS A.event_type = 'page_view' 
+        A AS A.event_type = 'page_view'
              AND A.page_url LIKE '/products/%'
 ) AS potential_abandonment;
 
@@ -399,7 +399,7 @@ SELECT
     COUNT(*) as event_count,
     SUM(product_price) as total_revenue
 FROM events_with_lateness
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '1' MINUTE),
     event_type;
 
@@ -415,7 +415,7 @@ SELECT
     CAST(COUNT(*) AS DOUBLE) as metric_value,
     JSON_OBJECT('event_type' VALUE event_type) as metadata
 FROM events_source
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '1' SECOND),
     event_type;
 
@@ -423,7 +423,7 @@ GROUP BY
 SELECT
     TUMBLE_START(event_timestamp, INTERVAL '5' MINUTE) as window_start,
     SUM(product_price * quantity) as revenue,
-    CASE 
+    CASE
         WHEN SUM(product_price * quantity) < 1000 THEN 'ALERT_LOW_REVENUE'
         WHEN SUM(product_price * quantity) > 50000 THEN 'ALERT_HIGH_REVENUE'
         ELSE 'NORMAL'
@@ -446,7 +446,7 @@ SELECT
     total_events,
     error_events,
     CAST(error_events AS DOUBLE) / total_events * 100 as error_rate_pct,
-    CASE 
+    CASE
         WHEN CAST(error_events AS DOUBLE) / total_events > 0.05 THEN 'CRITICAL'
         WHEN CAST(error_events AS DOUBLE) / total_events > 0.01 THEN 'WARNING'
         ELSE 'OK'

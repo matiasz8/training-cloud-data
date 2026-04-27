@@ -348,26 +348,26 @@ def lambda_handler(event, context):
     Starts the appropriate crawler based on S3 path.
     """
     glue = boto3.client('glue')
-    
+
     # Extract S3 bucket and key from event
     bucket = event['detail']['bucket']['name']
     key = event['detail']['object']['key']
-    
+
     print(f"New file: s3://{bucket}/{key}")
-    
+
     # Determine which crawler to run based on path
     crawler_name = None
     if 'bronze/sales' in key:
         crawler_name = 'sales-bronze-crawler'
     elif 'silver/sales' in key:
         crawler_name = 'sales-silver-crawler'
-    
+
     if crawler_name:
         try:
             # Check if crawler is already running
             response = glue.get_crawler(Name=crawler_name)
             state = response['Crawler']['State']
-            
+
             if state == 'READY':
                 # Start crawler
                 glue.start_crawler(Name=crawler_name)
@@ -388,7 +388,7 @@ def lambda_handler(event, context):
                 'statusCode': 500,
                 'body': json.dumps(f'Error: {str(e)}')
             }
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps('No crawler matched for this path')
@@ -431,14 +431,14 @@ glue = boto3.client(
 
 def analyze_crawler_performance(crawler_name):
     """Analyze crawler execution metrics"""
-    
+
     # Get crawler details
     crawler = glue.get_crawler(Name=crawler_name)['Crawler']
-    
+
     print(f"\n=== Crawler: {crawler_name} ===")
     print(f"State: {crawler['State']}")
     print(f"Schedule: {crawler.get('Schedule', 'On-demand only')}")
-    
+
     # Last crawl statistics
     if 'LastCrawl' in crawler:
         last_crawl = crawler['LastCrawl']
@@ -449,12 +449,12 @@ def analyze_crawler_performance(crawler_name):
         print(f"Tables Created: {last_crawl.get('TablesCreated', 0)}")
         print(f"Tables Updated: {last_crawl.get('TablesUpdated', 0)}")
         print(f"Tables Deleted: {last_crawl.get('TablesDeleted', 0)}")
-    
+
     # Get crawler metrics
     metrics = glue.get_crawler_metrics(
         CrawlerNameList=[crawler_name]
     )
-    
+
     if metrics['CrawlerMetricsList']:
         metric = metrics['CrawlerMetricsList'][0]
         print(f"\n=== Historical Metrics ===")
@@ -463,7 +463,7 @@ def analyze_crawler_performance(crawler_name):
         print(f"Tables Created: {metric.get('TablesCreated', 0)}")
         print(f"Tables Updated: {metric.get('TablesUpdated', 0)}")
         print(f"Tables Deleted: {metric.get('TablesDeleted', 0)}")
-    
+
     # Cost estimation (simplified)
     dpu_hours = last_crawl.get('Duration', 0) / 3600  # Duration in hours
     dpu_count = 2  # Default DPU allocation

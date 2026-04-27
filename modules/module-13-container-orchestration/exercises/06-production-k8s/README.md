@@ -4,7 +4,7 @@
 
 - **Nivel**: Avanzado
 - **Duración estimada**: 5-6 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicios 01-05 completados
   - Cluster EKS con 4+ nodos
   - Helm 3 instalado
@@ -177,7 +177,7 @@ webserver:
     limits:
       cpu: 1000m
       memory: 2Gi
-  
+
   service:
     type: LoadBalancer
 
@@ -200,11 +200,11 @@ workers:
     limits:
       cpu: 2000m
       memory: 4Gi
-  
+
   persistence:
     enabled: true
     size: 10Gi
-  
+
   autoscaling:
     enabled: true
     minReplicas: 3
@@ -223,11 +223,11 @@ config:
     dags_are_paused_at_creation: "False"
     load_examples: "False"
     max_active_runs_per_dag: 3
-  
+
   webserver:
     expose_config: "True"
     rbac: "True"
-  
+
   scheduler:
     catchup_by_default: "False"
     max_active_tasks_per_dag: 16
@@ -295,7 +295,7 @@ with DAG(
     catchup=False,
     tags=['production', 'sales', 'spark'],
 ) as dag:
-    
+
     # Check raw data availability
     check_raw_data = S3ListOperator(
         task_id='check_raw_data',
@@ -303,7 +303,7 @@ with DAG(
         prefix='raw/sales/{{ ds }}/',
         aws_conn_id='aws_default'
     )
-    
+
     # Spark ETL job
     spark_etl = SparkKubernetesOperator(
         task_id='spark_etl',
@@ -312,13 +312,13 @@ with DAG(
         kubernetes_conn_id='kubernetes_default',
         do_xcom_push=True
     )
-    
+
     # Validate data quality
     validate_data = PythonOperator(
         task_id='validate_data',
         python_callable=lambda: print("Data validation passed")
     )
-    
+
     # Load to warehouse
     load_to_warehouse = PostgresOperator(
         task_id='load_to_warehouse',
@@ -329,7 +329,7 @@ with DAG(
             ON CONFLICT DO NOTHING;
         """
     )
-    
+
     # Update metadata
     update_metadata = PostgresOperator(
         task_id='update_metadata',
@@ -339,7 +339,7 @@ with DAG(
             VALUES ('daily_sales_pipeline', '{{ ds }}', 'SUCCESS');
         """
     )
-    
+
     # Send notification
     notify_success = SlackWebhookOperator(
         task_id='notify_success',
@@ -347,7 +347,7 @@ with DAG(
         message='✅ Sales pipeline completed for {{ ds }}',
         username='Airflow Bot'
     )
-    
+
     # Define dependencies
     check_raw_data >> spark_etl >> validate_data >> load_to_warehouse >> update_metadata >> notify_success
 ```
@@ -426,7 +426,7 @@ spec:
       limits:
         memory: 8Gi
         cpu: 2000m
-  
+
   zookeeper:
     replicas: 3
     storage:
@@ -440,7 +440,7 @@ spec:
       limits:
         memory: 2Gi
         cpu: 1000m
-  
+
   entityOperator:
     topicOperator: {}
     userOperator: {}
@@ -620,16 +620,16 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  
+
   source:
     repoURL: https://github.com/your-org/data-platform-k8s.git
     targetRevision: main
     path: manifests/production
-  
+
   destination:
     server: https://kubernetes.default.svc
     namespace: airflow
-  
+
   syncPolicy:
     automated:
       prune: true
@@ -835,16 +835,16 @@ kubectl port-forward svc/kube-prometheus-grafana 3000:80 -n monitoring
 
 Has construido una **plataforma completa de data engineering production-ready** con:
 
-✅ **Orchestration**: Airflow en Kubernetes con KubernetesExecutor  
-✅ **Streaming**: Kafka cluster (3 brokers) con Strimzi operator  
-✅ **Storage**: PostgreSQL StatefulSets con persistent volumes  
-✅ **Processing**: Spark on Kubernetes (ejercicio anterior)  
-✅ **Monitoring**: Prometheus + Grafana + AlertManager  
-✅ **GitOps**: ArgoCD para continuous deployment  
-✅ **Security**: Network policies, RBAC, resource quotas  
-✅ **Multi-environment**: dev/staging/prod namespaces  
-✅ **Auto-scaling**: HPA para Airflow workers  
-✅ **High Availability**: Multi-replica deployments  
+✅ **Orchestration**: Airflow en Kubernetes con KubernetesExecutor
+✅ **Streaming**: Kafka cluster (3 brokers) con Strimzi operator
+✅ **Storage**: PostgreSQL StatefulSets con persistent volumes
+✅ **Processing**: Spark on Kubernetes (ejercicio anterior)
+✅ **Monitoring**: Prometheus + Grafana + AlertManager
+✅ **GitOps**: ArgoCD para continuous deployment
+✅ **Security**: Network policies, RBAC, resource quotas
+✅ **Multi-environment**: dev/staging/prod namespaces
+✅ **Auto-scaling**: HPA para Airflow workers
+✅ **High Availability**: Multi-replica deployments
 
 Esta es una arquitectura **enterprise-grade** lista para producción.
 

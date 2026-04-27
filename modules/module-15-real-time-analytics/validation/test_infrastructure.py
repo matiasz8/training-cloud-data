@@ -8,7 +8,6 @@ import boto3
 import requests
 import docker
 import time
-from typing import Dict, List
 
 
 @pytest.fixture(scope="module")
@@ -48,7 +47,7 @@ def docker_client():
 
 class TestDockerInfrastructure:
     """Test Docker containers are running"""
-    
+
     def test_localstack_running(self, docker_client):
         """Test LocalStack container is running"""
         containers = docker_client.containers.list(
@@ -56,7 +55,7 @@ class TestDockerInfrastructure:
         )
         assert len(containers) == 1, "LocalStack container not running"
         assert containers[0].status == 'running'
-    
+
     def test_flink_jobmanager_running(self, docker_client):
         """Test Flink Job Manager is running"""
         containers = docker_client.containers.list(
@@ -64,7 +63,7 @@ class TestDockerInfrastructure:
         )
         assert len(containers) == 1, "Flink Job Manager not running"
         assert containers[0].status == 'running'
-    
+
     def test_flink_taskmanagers_running(self, docker_client):
         """Test Flink Task Managers are running"""
         containers = docker_client.containers.list(
@@ -73,7 +72,7 @@ class TestDockerInfrastructure:
         assert len(containers) >= 2, "Expected at least 2 Flink Task Managers"
         for container in containers:
             assert container.status == 'running'
-    
+
     def test_postgres_running(self, docker_client):
         """Test PostgreSQL is running"""
         containers = docker_client.containers.list(
@@ -81,7 +80,7 @@ class TestDockerInfrastructure:
         )
         assert len(containers) == 1, "PostgreSQL container not running"
         assert containers[0].status == 'running'
-    
+
     def test_kafka_running(self, docker_client):
         """Test Kafka is running"""
         containers = docker_client.containers.list(
@@ -89,7 +88,7 @@ class TestDockerInfrastructure:
         )
         assert len(containers) == 1, "Kafka container not running"
         assert containers[0].status == 'running'
-    
+
     def test_grafana_running(self, docker_client):
         """Test Grafana is running"""
         containers = docker_client.containers.list(
@@ -101,18 +100,18 @@ class TestDockerInfrastructure:
 
 class TestLocalStackServices:
     """Test LocalStack AWS services are accessible"""
-    
+
     def test_localstack_health(self):
         """Test LocalStack health endpoint"""
         response = requests.get('http://localhost:4566/_localstack/health')
         assert response.status_code == 200
-        
+
         health = response.json()
         assert 'services' in health
         assert health['services']['kinesis'] == 'available'
         assert health['services']['dynamodb'] == 'available'
         assert health['services']['s3'] == 'available'
-    
+
     def test_kinesis_service_available(self, kinesis_client):
         """Test Kinesis service is responding"""
         try:
@@ -120,7 +119,7 @@ class TestLocalStackServices:
             assert 'StreamNames' in response
         except Exception as e:
             pytest.fail(f"Kinesis service not available: {e}")
-    
+
     def test_dynamodb_service_available(self, dynamodb_client):
         """Test DynamoDB service is responding"""
         try:
@@ -128,7 +127,7 @@ class TestLocalStackServices:
             assert 'TableNames' in response
         except Exception as e:
             pytest.fail(f"DynamoDB service not available: {e}")
-    
+
     def test_s3_service_available(self, s3_client):
         """Test S3 service is responding"""
         try:
@@ -140,75 +139,75 @@ class TestLocalStackServices:
 
 class TestKinesisStreams:
     """Test Kinesis streams are created correctly"""
-    
+
     def test_events_stream_exists(self, kinesis_client):
         """Test events-stream exists"""
         response = kinesis_client.describe_stream(StreamName='events-stream')
         assert response['StreamDescription']['StreamStatus'] in ['ACTIVE', 'UPDATING']
-    
+
     def test_events_stream_shard_count(self, kinesis_client):
         """Test events-stream has correct number of shards"""
         response = kinesis_client.describe_stream(StreamName='events-stream')
         shards = response['StreamDescription']['Shards']
         assert len(shards) == 4, f"Expected 4 shards, got {len(shards)}"
-    
+
     def test_aggregated_stream_exists(self, kinesis_client):
         """Test aggregated-stream exists"""
         response = kinesis_client.describe_stream(StreamName='aggregated-stream')
         assert response['StreamDescription']['StreamStatus'] in ['ACTIVE', 'UPDATING']
-    
+
     def test_fraud_alerts_stream_exists(self, kinesis_client):
         """Test fraud-alerts-stream exists"""
         response = kinesis_client.describe_stream(StreamName='fraud-alerts-stream')
         assert response['StreamDescription']['StreamStatus'] in ['ACTIVE', 'UPDATING']
-    
+
     def test_dlq_stream_exists(self, kinesis_client):
         """Test DLQ stream exists"""
         response = kinesis_client.describe_stream(StreamName='dlq-stream')
         assert response['StreamDescription']['StreamStatus'] in ['ACTIVE', 'UPDATING']
-    
+
     def test_can_write_to_stream(self, kinesis_client):
         """Test writing data to Kinesis stream"""
         import json
-        
+
         test_data = {
             'event_type': 'test',
             'timestamp': '2024-03-08T10:00:00Z',
             'test_id': 'pytest_infrastructure_test'
         }
-        
+
         response = kinesis_client.put_record(
             StreamName='events-stream',
             Data=json.dumps(test_data).encode('utf-8'),
             PartitionKey='test'
         )
-        
+
         assert 'SequenceNumber' in response
         assert 'ShardId' in response
 
 
 class TestDynamoDBTables:
     """Test DynamoDB tables are created correctly"""
-    
+
     def test_realtime_aggregates_table_exists(self, dynamodb_client):
         """Test realtime-aggregates table exists"""
         response = dynamodb_client.describe_table(TableName='realtime-aggregates')
         assert response['Table']['TableStatus'] == 'ACTIVE'
-    
+
     def test_user_sessions_table_exists(self, dynamodb_client):
         """Test user-sessions table exists"""
         response = dynamodb_client.describe_table(TableName='user-sessions')
         assert response['Table']['TableStatus'] == 'ACTIVE'
-    
+
     def test_fraud_detections_table_exists(self, dynamodb_client):
         """Test fraud-detections table exists"""
         response = dynamodb_client.describe_table(TableName='fraud-detections')
         assert response['Table']['TableStatus'] == 'ACTIVE'
-    
+
     def test_can_write_to_dynamodb(self, dynamodb_client):
         """Test writing data to DynamoDB"""
         from datetime import datetime
-        
+
         response = dynamodb_client.put_item(
             TableName='realtime-aggregates',
             Item={
@@ -218,93 +217,93 @@ class TestDynamoDBTables:
                 'metadata': {'S': 'test_data'}
             }
         )
-        
+
         assert response['ResponseMetadata']['HTTPStatusCode'] == 200
 
 
 class TestS3Buckets:
     """Test S3 buckets are created correctly"""
-    
+
     def test_checkpoints_bucket_exists(self, s3_client):
         """Test analytics-checkpoints bucket exists"""
         response = s3_client.list_buckets()
         bucket_names = [b['Name'] for b in response['Buckets']]
         assert 'analytics-checkpoints' in bucket_names
-    
+
     def test_savepoints_bucket_exists(self, s3_client):
         """Test analytics-savepoints bucket exists"""
         response = s3_client.list_buckets()
         bucket_names = [b['Name'] for b in response['Buckets']]
         assert 'analytics-savepoints' in bucket_names
-    
+
     def test_data_lake_bucket_exists(self, s3_client):
         """Test analytics-data-lake bucket exists"""
         response = s3_client.list_buckets()
         bucket_names = [b['Name'] for b in response['Buckets']]
         assert 'analytics-data-lake' in bucket_names
-    
+
     def test_can_write_to_s3(self, s3_client):
         """Test writing data to S3"""
         test_content = b"pytest infrastructure test"
-        
+
         s3_client.put_object(
             Bucket='analytics-checkpoints',
             Key='test/pytest_test.txt',
             Body=test_content
         )
-        
+
         # Verify it was written
         response = s3_client.get_object(
             Bucket='analytics-checkpoints',
             Key='test/pytest_test.txt'
         )
-        
+
         assert response['Body'].read() == test_content
 
 
 class TestFlinkCluster:
     """Test Flink cluster is properly configured"""
-    
+
     def test_flink_rest_api_accessible(self):
         """Test Flink REST API is accessible"""
         response = requests.get('http://localhost:8081/overview')
         assert response.status_code == 200
-        
+
         overview = response.json()
         assert 'taskmanagers' in overview
         assert 'slots-total' in overview
-    
+
     def test_flink_taskmanagers_registered(self):
         """Test task managers are registered with job manager"""
         response = requests.get('http://localhost:8081/taskmanagers')
         assert response.status_code == 200
-        
+
         data = response.json()
         assert 'taskmanagers' in data
         assert len(data['taskmanagers']) >= 2, "Expected at least 2 task managers"
-    
+
     def test_flink_has_available_slots(self):
         """Test Flink has available task slots"""
         response = requests.get('http://localhost:8081/overview')
         overview = response.json()
-        
+
         assert overview['slots-total'] >= 8, "Expected at least 8 total slots"
         assert overview['slots-available'] > 0, "No available slots"
-    
+
     def test_flink_configuration(self):
         """Test Flink configuration"""
         response = requests.get('http://localhost:8081/config')
         assert response.status_code == 200
-        
+
         config = response.json()
         # Check checkpointing is enabled
-        assert any('checkpoint' in item.get('key', '').lower() 
+        assert any('checkpoint' in item.get('key', '').lower()
                   for item in config)
 
 
 class TestGrafana:
     """Test Grafana is accessible"""
-    
+
     def test_grafana_accessible(self):
         """Test Grafana web UI is accessible"""
         max_attempts = 10
@@ -318,7 +317,7 @@ class TestGrafana:
                     time.sleep(2)
                 else:
                     raise
-        
+
         assert response.status_code == 200
         health = response.json()
         assert health['database'] == 'ok'
@@ -326,37 +325,37 @@ class TestGrafana:
 
 class TestEndToEndConnectivity:
     """Test end-to-end data flow"""
-    
+
     def test_kinesis_to_flink_connectivity(self, kinesis_client):
         """Test data can flow from Kinesis to Flink"""
         import json
         from datetime import datetime
-        
+
         # Send a test event
         test_event = {
             'event_type': 'connectivity_test',
             'timestamp': datetime.utcnow().isoformat() + 'Z',
             'test_id': f'pytest_{int(time.time())}'
         }
-        
+
         response = kinesis_client.put_record(
             StreamName='events-stream',
             Data=json.dumps(test_event).encode('utf-8'),
             PartitionKey='test'
         )
-        
+
         assert 'SequenceNumber' in response
-        
+
         # Note: Full Flink job testing would require deploying a job
         # This just verifies Kinesis is writable
-    
+
     def test_data_persistence(self, dynamodb_client, s3_client):
         """Test data can be persisted to DynamoDB and S3"""
         from datetime import datetime
         import json
-        
+
         timestamp = int(datetime.now().timestamp())
-        
+
         # Write to DynamoDB
         dynamodb_client.put_item(
             TableName='realtime-aggregates',
@@ -366,14 +365,14 @@ class TestEndToEndConnectivity:
                 'value': {'N': '99.9'}
             }
         )
-        
+
         # Write to S3
         s3_client.put_object(
             Bucket='analytics-data-lake',
             Key=f'tests/e2e_{timestamp}.json',
             Body=json.dumps({'test': 'e2e', 'timestamp': timestamp}).encode('utf-8')
         )
-        
+
         # Verify reads
         dynamo_item = dynamodb_client.get_item(
             TableName='realtime-aggregates',
@@ -383,7 +382,7 @@ class TestEndToEndConnectivity:
             }
         )
         assert 'Item' in dynamo_item
-        
+
         s3_object = s3_client.get_object(
             Bucket='analytics-data-lake',
             Key=f'tests/e2e_{timestamp}.json'

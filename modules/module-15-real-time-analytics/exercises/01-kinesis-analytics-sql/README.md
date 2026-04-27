@@ -3,8 +3,8 @@
 ## Overview
 Build your first Kinesis Data Analytics application using Flink SQL to analyze streaming clickstream data with tumbling windows.
 
-**Difficulty**: ⭐⭐ Intermediate  
-**Duration**: ~2 hours  
+**Difficulty**: ⭐⭐ Intermediate
+**Duration**: ~2 hours
 **Prerequisites**: Module 08 (Streaming Basics), basic SQL knowledge
 
 ## Learning Objectives
@@ -172,12 +172,12 @@ SELECT
     COUNT(*) as view_count,
     COUNT(DISTINCT user_id) as unique_users,
     AVG(CAST(
-        EXTRACT(EPOCH FROM (event_timestamp - LAG(event_timestamp) OVER (PARTITION BY session_id ORDER BY event_timestamp))) 
+        EXTRACT(EPOCH FROM (event_timestamp - LAG(event_timestamp) OVER (PARTITION BY session_id ORDER BY event_timestamp)))
         AS DOUBLE
     )) as avg_session_duration
 FROM clickstream_events
 WHERE event_type = 'page_view'
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '1' MINUTE),
     page_url;
 ```
@@ -200,7 +200,7 @@ SELECT
     JSON_OBJECT('country' VALUE country) as dimensions
 FROM clickstream_events
 WHERE event_type = 'purchase'
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '1' MINUTE),
     country;
 
@@ -217,7 +217,7 @@ SELECT
     ) as revenue_rank
 FROM clickstream_events
 WHERE event_type = 'purchase'
-GROUP BY 
+GROUP BY
     TUMBLE(event_timestamp, INTERVAL '5' MINUTE),
     product_id,
     product_name
@@ -266,14 +266,14 @@ import time
 
 def create_kinesis_analytics_app():
     """Create Kinesis Data Analytics application"""
-    client = boto3.client('kinesisanalyticsv2', 
+    client = boto3.client('kinesisanalyticsv2',
                          endpoint_url='http://localhost:4566',
                          region_name='us-east-1')
-    
+
     # Read SQL code
     with open('aggregation_query.sql', 'r') as f:
         sql_code = f.read()
-    
+
     # Create application
     response = client.create_application(
         ApplicationName='PageViewAnalytics',
@@ -337,9 +337,9 @@ def create_kinesis_analytics_app():
             }
         }
     )
-    
+
     print(f"✓ Application created: {response['ApplicationDetail']['ApplicationARN']}")
-    
+
     # Start application
     client.start_application(
         ApplicationName='PageViewAnalytics',
@@ -352,7 +352,7 @@ def create_kinesis_analytics_app():
             }]
         }
     )
-    
+
     print("✓ Application started")
     return response
 
@@ -398,7 +398,7 @@ def generate_event():
     """Generate a random clickstream event"""
     event_type = random.choice(EVENT_TYPES)
     product = random.choice(PRODUCTS)
-    
+
     event = {
         'event_id': fake.uuid4(),
         'event_type': event_type,
@@ -411,7 +411,7 @@ def generate_event():
         'country': random.choice(['US', 'CA', 'UK', 'DE', 'FR']),
         'city': fake.city()
     }
-    
+
     if event_type in ['add_to_cart', 'purchase']:
         event.update({
             'product_id': product['id'],
@@ -419,24 +419,24 @@ def generate_event():
             'product_price': product['price'],
             'quantity': random.randint(1, 3)
         })
-    
+
     return event
 
 def send_events(count=1000, rate=10):
     """Send events to Kinesis stream
-    
+
     Args:
         count: Number of events to send
         rate: Events per second
     """
     print(f"Sending {count} events at {rate} events/sec to {STREAM_NAME}...")
-    
+
     sent = 0
     start_time = time.time()
-    
+
     for i in range(count):
         event = generate_event()
-        
+
         try:
             response = kinesis.put_record(
                 StreamName=STREAM_NAME,
@@ -444,18 +444,18 @@ def send_events(count=1000, rate=10):
                 PartitionKey=event['user_id']
             )
             sent += 1
-            
+
             if (i + 1) % 100 == 0:
                 elapsed = time.time() - start_time
                 current_rate = sent / elapsed
                 print(f"  Sent {sent}/{count} events ({current_rate:.1f} events/sec)")
-            
+
         except Exception as e:
             print(f"  Error sending event: {e}")
-        
+
         # Rate limiting
         time.sleep(1.0 / rate)
-    
+
     elapsed = time.time() - start_time
     print(f"✓ Sent {sent} events in {elapsed:.1f}s ({sent/elapsed:.1f} events/sec)")
 
@@ -465,7 +465,7 @@ if __name__ == '__main__':
     parser.add_argument('--count', type=int, default=1000, help='Number of events')
     parser.add_argument('--rate', type=int, default=10, help='Events per second')
     args = parser.parse_args()
-    
+
     send_events(args.count, args.rate)
 ```
 
