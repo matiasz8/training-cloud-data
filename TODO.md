@@ -1,6 +1,6 @@
 # 📋 TODO: Next Steps & Roadmap
 
-**Status:** Phase 4 in progress (2/3) + Phase 5.1 complete  
+**Status:** Phase 4 in progress (2/3) + Phase 5.2 in progress  
 **Current Date:** April 26, 2026  
 **Last Updated:** After Phase 5.1 migration guide creation
 
@@ -71,16 +71,16 @@
        - theory/resources.md: Full English translation
        - All 6 exercises: README, hints files translated
        - Status/infrastructure/validation files: Translated
-   - ⬜ Remaining modules (02-09): Not yet started
-       - module-02-storage-basics
-       - module-03-compute-options
-       - module-04-networking-basics
-       - module-05-data-ingestion
-       - module-06-data-transformation
-       - module-07-serverless-data-processing
-       - module-08-stream-processing
-       - module-09-data-warehousing
-   - Next: Continue with modules 02-03 in next execution phase
+   - ✅ module-02-storage-basics: COMPLETE (commit 3a2de07)
+   - ✅ module-03-sql-foundations: COMPLETE (commit 3a2de07)
+   - ✅ module-04-python-for-data: COMPLETE (commit 3ff44c8)
+   - ✅ module-05-data-lakehouse: COMPLETE (commit 3ff44c8)
+   - ⬜ Remaining modules (06-09): Not yet started
+     - module-06-etl-fundamentals
+     - module-07-batch-processing
+     - module-08-streaming-basics
+     - module-09-data-quality
+   - Next: Continue with modules 06-07 in next execution phase
   - Effort: ~6-8h (distributed)
 
 - [ ] **5.3 - Re-validate After Migration**
@@ -193,7 +193,7 @@
 | Phase | Title | Priority | Time | Status | Next Action |
 |-------|-------|----------|------|--------|------------|
 | 4 | Pre-commit & CI | 🔴 HIGH | 4-6h | 🟨 IN PROGRESS (2/3) | Run end-to-end PR flow test (4.3) |
-| 5 | English Migration | 🟡 MED | 8-10h | 🟨 IN PROGRESS (1/9 complete) | Replicate module-01 pattern to modules 02-03 |
+| 5 | English Migration | 🟡 MED | 8-10h | 🟨 IN PROGRESS (5/9 complete) | Continue with modules 06-07 |
 | 6 | Skills Playbook | 🟡 MED | 6-8h | ⬜ TODO | Draft `SKILLS-PLAYBOOK.md` |
 | 7 | Learner Tracking | 🟢 LOW | 8-12h | ⬜ OPTIONAL | Extend progress.py (nice-to-have) |
 
