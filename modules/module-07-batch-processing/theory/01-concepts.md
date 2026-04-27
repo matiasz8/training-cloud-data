@@ -1,15 +1,15 @@
 # Conceptos de Batch Processing
 
-## 📚 ¿Qué es Batch Processing?
+## 📚 What is Batch Processing?
 
-**Batch Processing** es el procesamiento de grandes volúmenes de datos en **lotes discretos**, generalmente en ventanas de tiempo programadas (diaria, semanal, mensual).
+**Batch Processing** is the processing of large volumes of data in **discrete batches**, usually in scheduled time windows (daily, weekly, monthly).
 
-### Características Clave
+### features Clave
 
-✅ **Alto throughput**: Procesa millones de registros eficientemente  
-✅ **Latencia alta**: Minutes a horas entre ejecución  
-✅ **Eficiencia de recursos**: Optimizado para costos  
-✅ **Procesamiento offline**: No requiere respuesta inmediata  
+✅ **Alto throughput**: Procesa millones de registros eficientemente
+✅ **high latency**: Minutes to hours between execution
+✅ **Eficiencia de resources**: Optimizado para costos
+✅ **Procesamiento offline**: No requiere respuesta inmediata
 
 ---
 
@@ -23,10 +23,10 @@
   Collect                  Results
 ```
 
-**Características**:
-- ⏰ **Latencia**: Alta (horas/días)
+**features**:
+- ⏰ **latency**: High (hours/days)
 - 📊 **Volume**: Muy alto (GB-TB)
-- 💰 **Costo**: Bajo (recursos bajo demanda)
+- 💰 **Costo**: Bajo (resources bajo demanda)
 - 🔧 **Complejidad**: Baja/Media
 
 **Casos de uso**:
@@ -44,8 +44,8 @@
 Real-time         Immediate
 ```
 
-**Características**:
-- ⏰ **Latencia**: Baja (ms-segundos)
+**features**:
+- ⏰ **latency**: Baja (ms-segundos)
 - 📊 **Volume**: Continuo
 - 💰 **Costo**: Alto (24/7)
 - 🔧 **Complejidad**: Alta
@@ -56,7 +56,7 @@ Real-time         Immediate
 - IoT processing
 - Live dashboards
 
-### Micro-Batch (Híbrido)
+### Micro-Batch (Hybrid)
 
 ```
 [100 events] → Process → [Output]
@@ -65,9 +65,9 @@ Real-time         Immediate
 ```
 
 **Balance entre batch y streaming**:
-- Latencia media (segundos-minutos)
+- latency media (segundos-minutos)
 - Usa infraestructura batch
-- Más simple que streaming puro
+- Simpler than pure streaming
 - Usado por Spark Structured Streaming
 
 ---
@@ -83,10 +83,10 @@ Procesar **todos los datos** cada vez:
 def daily_batch():
     # Read all historical data
     df = read_all_data()  # 100M records
-    
+
     # Process everything
     result = transform(df)
-    
+
     # Replace existing data
     write(result, mode='overwrite')
 ```
@@ -98,11 +98,11 @@ def daily_batch():
 
 **Cons**:
 - ❌ Lento para datasets grandes
-- ❌ Desperdicia recursos (reprocesa datos sin cambios)
-- ❌ No escalable
+- ❌ Desperdicia resources (reprocesa datos sin cambios)
+- ❌ No scalable
 
-**Cuándo usar**:
-- Datasets pequeños (< 10M records)
+**When to use**:
+- Small datasets (< 10M records)
 - Data que cambia completamente
 - Cuando simplicidad > eficiencia
 
@@ -115,31 +115,31 @@ Procesar solo **datos nuevos o modificados**:
 def incremental_batch():
     # Get last processed timestamp
     last_run = get_watermark()  # 2024-03-06 00:00:00
-    
+
     # Read only new data
     df = read_data_since(last_run)  # 100K new records
-    
+
     # Process only new data
     result = transform(df)
-    
+
     # Append to existing data
     write(result, mode='append')
-    
+
     # Update watermark
     set_watermark(now())
 ```
 
 **Pros**:
-- ✅ Rápido (procesa menos datos)
-- ✅ Eficiente en recursos
-- ✅ Escalable
+- ✅ Fast (processes less data)
+- ✅ Eficiente en resources
+- ✅ scalable
 
 **Cons**:
 - ❌ Requiere watermark tracking
-- ❌ Más complejo
+- ❌ More complex
 - ❌ Puede perder deletes
 
-**Cuándo usar**:
+**When to use**:
 - Datos con timestamps
 - Alto volumen de nuevos registros
 - Cuando eficiencia importa
@@ -153,7 +153,7 @@ Capturar y procesar **cambios** (inserts, updates, deletes):
 def cdc_batch():
     # Read change log desde último batch
     changes = read_cdc_log(since=last_run)
-    
+
     for change in changes:
         if change.operation == 'INSERT':
             insert_record(change.new_values)
@@ -170,7 +170,7 @@ def cdc_batch():
 
 **Cons**:
 - ❌ Requiere CDC infrastructure
-- ❌ Más complejo de implementar
+- ❌ More complex to implement
 - ❌ Necesita source system support
 
 **Herramientas CDC**:
@@ -183,11 +183,11 @@ def cdc_batch():
 
 ## 📊 Particionamiento de Datos
 
-### ¿Por qué Particionar?
+### Why Partition?
 
 1. **Performance**: Leer solo particiones necesarias
-2. **Paralelización**: Procesar particiones en paralelo
-3. **Mantenibilidad**: Eliminar particiones antiguas fácilmente
+2. **Parallelization**: Process partitions in parallel
+3. **Maintainability**: Delete old partitions easily
 4. **Costos**: Reducir data scanned
 
 ### Estrategias de Particionamiento
@@ -216,11 +216,11 @@ df = spark.read.parquet('data/year=2024/month=03/day=07')
 
 **Ventajas**:
 - ✅ Natural para time-series data
-- ✅ Fácil de entender
+- ✅ Easy to understand
 - ✅ Eliminar datos antiguos simple
 
 **Consideraciones**:
-- ⚠️ Evitar muchas particiones pequeñas
+- ⚠️ Avoid many small partitions
 - ⚠️ Balance entre granularidad y overhead
 
 #### 2. Particionamiento por Rango
@@ -239,7 +239,7 @@ df['partition'] = df['amount'].apply(range_partition)
 ```
 
 **Casos de uso**:
-- Montos de transacciones
+- Montos de transactions
 - Edades de usuarios
 - Scores de productos
 
@@ -251,11 +251,11 @@ df['partition'] = df['user_id'] % 10  # 10 partitions
 ```
 
 **Ventajas**:
-- ✅ Distribución uniforme
+- ✅ Uniform distribution
 - ✅ Evita data skew
 - ✅ Bueno para joins
 
-#### 4. Particionamiento por Categoría
+#### 4. Category Partitioning
 
 ```
 data/
@@ -265,9 +265,9 @@ data/
 ```
 
 **Casos de uso**:
-- Por región geográfica
+- By geographic region
 - Por tipo de cliente
-- Por categoría de producto
+- By product category
 
 ---
 
@@ -275,14 +275,14 @@ data/
 
 ### Pattern 1: Batch Window
 
-Procesar datos en ventanas de tiempo específicas:
+Process data in specific time windows:
 
 ```python
 def process_daily_batch(date):
     """Process one day of data."""
     start = datetime(date.year, date.month, date.day)
     end = start + timedelta(days=1)
-    
+
     df = read_data(start_date=start, end_date=end)
     transformed = transform(df)
     write_output(transformed, date=date)
@@ -292,7 +292,7 @@ def process_daily_batch(date):
 
 ### Pattern 2: Backfill
 
-Reprocesar datos históricos:
+Reprocess historical data:
 
 ```python
 def backfill(start_date, end_date):
@@ -307,21 +307,21 @@ def backfill(start_date, end_date):
 
 ### Pattern 3: Idempotent Batch
 
-Batch seguro para re-ejecución:
+Safe batch for re-execution:
 
 ```python
 def idempotent_batch(date):
     """Safe to run multiple times."""
     # Delete existing output for this date
     delete_output(date)
-    
+
     # Process and write
     df = read_data(date)
     transformed = transform(df)
     write_output(transformed, date=date)
 ```
 
-**Garantía**: Múltiples ejecuciones = mismo resultado
+**Guarantee**: Multiple runs = same result
 
 ### Pattern 4: Checkpoint
 
@@ -330,7 +330,7 @@ Guardar progreso para recovery:
 ```python
 def batch_with_checkpoint():
     checkpoint = load_checkpoint()
-    
+
     for partition in partitions[checkpoint:]:
         process(partition)
         checkpoint += 1
@@ -349,9 +349,9 @@ def batch_with_checkpoint():
 df.to_csv('output.csv', index=False)
 ```
 
-**Pros**: Simple, human-readable  
-**Cons**: Lento, sin tipos, grande  
-**Uso**: Pequeños datasets, exports
+**Pros**: Simple, human-readable
+**Cons**: Lento, sin tipos, grande
+**Use**: Small datasets, exports
 
 ### JSON
 
@@ -359,8 +359,8 @@ df.to_csv('output.csv', index=False)
 df.to_json('output.json', orient='records', lines=True)
 ```
 
-**Pros**: Flexible schema, nested data  
-**Cons**: Lento, verboso  
+**Pros**: Flexible schema, nested data
+**Cons**: Lento, verboso
 **Uso**: APIs, semi-structured data
 
 ### Parquet ⭐
@@ -375,7 +375,7 @@ df.to_parquet('output.parquet', compression='snappy')
 - ✅ Schema embedded
 - ✅ Predicate pushdown
 
-**Cons**: Requiere librería  
+**Cons**: Requires library
 **Uso**: Data lakes, analytics ⭐ RECOMENDADO
 
 ### Avro
@@ -384,8 +384,8 @@ df.to_parquet('output.parquet', compression='snappy')
 df.to_avro('output.avro')
 ```
 
-**Pros**: Schema evolution, compact  
-**Cons**: Menos adoption  
+**Pros**: Schema evolution, compact
+**Cons**: Menos adoption
 **Uso**: Streaming, Kafka
 
 ---
@@ -486,4 +486,4 @@ logger.info(f"Throughput: {len(result)/duration:.2f} records/sec")
 
 ---
 
-Continúa con [02-architecture.md](./02-architecture.md) para arquitecturas batch en la nube.
+Continue with [02-architecture.md](./02-architecture.md) for batch architectures in the cloud.

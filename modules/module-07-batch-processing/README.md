@@ -45,39 +45,39 @@ By the end of this module, you will be able to:
 ## Exercises
 
 ### 📖 Exercise 01: Batch Basics
-**Concepts**: Chunking, memory optimization, progress tracking  
-**Tools**: pandas, tqdm  
-**Data**: 10M transactions  
-**Files**: BatchReader, MemoryOptimizer, comprehensive tests  
+**Concepts**: Chunking, memory optimization, progress tracking
+**Tools**: pandas, tqdm
+**Data**: 10M transactions
+**Files**: BatchReader, MemoryOptimizer, comprehensive tests
 
-### 📦 Exercise 02: Data Partitioning  
-**Concepts**: Date, range, hash partitioning strategies  
-**Tools**: pandas, pyarrow  
-**Data**: Partitioned transactions (year/month/day)  
-**Files**: DatePartitioner, RangePartitioner, HashPartitioner  
+### 📦 Exercise 02: Data Partitioning
+**Concepts**: Date, range, hash partitioning strategies
+**Tools**: pandas, pyarrow
+**Data**: Partitioned transactions (year/month/day)
+**Files**: DatePartitioner, RangePartitioner, HashPartitioner
 
 ### ⚡ Exercise 03: PySpark Basics
-**Concepts**: Distributed processing, Spark DataFrames  
-**Tools**: PySpark 3.5  
-**Data**: 10M transactions in distributed environment  
-**Files**: SparkManager, SparkOperations, SparkOptimizer  
+**Concepts**: Distributed processing, Spark DataFrames
+**Tools**: PySpark 3.5
+**Data**: 10M transactions in distributed environment
+**Files**: SparkManager, SparkOperations, SparkOptimizer
 
-### 🔄 Exercise 04: Batch ETL Pipeline
-**Concepts**: Complete pipeline, error handling, metrics  
-**Tools**: PySpark, great-expectations  
-**Data**: Multi-table joins (transactions + users + products)  
-**Files**: BatchETLPipeline, BusinessTransformations, PipelineMetrics  
+### 🔄 Exercise 04: Batch ETL pipeline
+**Concepts**: Complete pipeline, error handling, metrics
+**Tools**: PySpark, great-expectations
+**Data**: Multi-table joins (transactions + users + products)
+**Files**: BatchETLPipeline, BusinessTransformations, PipelineMetrics
 
 ### 🚀 Exercise 05: Performance Optimization
-**Concepts**: Caching, broadcast joins, partition tuning  
-**Tools**: PySpark, performance profiling  
-**Data**: Benchmarking with 10M+ records  
-**Files**: PartitionOptimizer, CacheManager, BroadcastOptimizer  
+**Concepts**: Caching, broadcast joins, partition tuning
+**Tools**: PySpark, performance profiling
+**Data**: Benchmarking with 10M+ records
+**Files**: PartitionOptimizer, CacheManager, BroadcastOptimizer
 
 ### 🏭 Exercise 06: Production Jobs
-**Concepts**: Scheduling, monitoring, SLA management  
-**Tools**: PySpark, logging, alerting  
-**Data**: Production-ready batch processing  
+**Concepts**: Scheduling, monitoring, SLA management
+**Tools**: PySpark, logging, alerting
+**Data**: Production-ready batch processing
 **Files**: ProductionBatchJob, RetryHandler, JobMonitor
 
 ---

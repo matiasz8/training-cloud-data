@@ -4,7 +4,7 @@ Exercise 06: Data Quality - Schema Validator - SOLUTION
 """
 import pandas as pd
 from pydantic import BaseModel, EmailStr, Field, validator
-from typing import List, Optional
+from typing import List
 from datetime import datetime
 import logging
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class UserSchema(BaseModel):
     """Pydantic schema for user validation."""
-    
+
     id: int = Field(..., gt=0, description="User ID must be positive")
     email: EmailStr = Field(..., description="Valid email required")
     first_name: str = Field(..., min_length=1, max_length=100)
@@ -22,7 +22,7 @@ class UserSchema(BaseModel):
     country: str = Field(..., min_length=2, max_length=100)
     status: str = Field(..., description="User status")
     created_at: str = Field(..., description="ISO format datetime")
-    
+
     @validator('status')
     def validate_status(cls, v):
         """Validate status is one of allowed values."""
@@ -30,7 +30,7 @@ class UserSchema(BaseModel):
         if v.lower() not in allowed:
             raise ValueError(f"Status must be one of {allowed}")
         return v.lower()
-    
+
     @validator('created_at')
     def validate_datetime(cls, v):
         """Validate datetime format."""
@@ -42,21 +42,21 @@ class UserSchema(BaseModel):
 
 class DataValidator:
     """Validate DataFrame against schema."""
-    
+
     def __init__(self, schema_class: type[BaseModel]):
         self.schema_class = schema_class
         self.validation_results = []
-    
+
     def validate_dataframe(self, df: pd.DataFrame) -> tuple[List[dict], List[dict]]:
         """
         Validate all records in DataFrame.
-        
+
         Returns:
             (valid_records, invalid_records)
         """
         valid = []
         invalid = []
-        
+
         for idx, row in df.iterrows():
             try:
                 # Validate with Pydantic
@@ -68,14 +68,14 @@ class DataValidator:
                     'record': row.to_dict(),
                     'errors': str(e)
                 })
-        
+
         logger.info(f"Validation complete: {len(valid)} valid, {len(invalid)} invalid")
         return valid, invalid
-    
+
     def get_validation_report(self, df: pd.DataFrame) -> dict:
         """Generate validation report."""
         valid, invalid = self.validate_dataframe(df)
-        
+
         report = {
             'total_records': len(df),
             'valid_records': len(valid),
@@ -83,7 +83,7 @@ class DataValidator:
             'valid_percentage': (len(valid) / len(df) * 100) if len(df) > 0 else 0,
             'validation_errors': []
         }
-        
+
         # Count error types
         from collections import Counter
         if invalid:
@@ -92,9 +92,9 @@ class DataValidator:
                 # Extract error type from error message
                 error_msg = item['errors']
                 error_types.append(error_msg.split('\n')[0])
-            
+
             report['error_distribution'] = dict(Counter(error_types))
-        
+
         return report
 
 def main():
@@ -117,24 +117,24 @@ def main():
         ]
     }
     df = pd.DataFrame(data)
-    
+
     print(f"Validating {len(df)} records...")
-    
+
     validator = DataValidator(UserSchema)
     valid, invalid = validator.validate_dataframe(df)
-    
+
     print(f"\n✓ Valid records: {len(valid)}")
     if valid:
         print(pd.DataFrame(valid).head())
-    
+
     print(f"\n❌ Invalid records: {len(invalid)}")
     if invalid:
         for item in invalid:
             print(f"  Row {item['row_index']}: {item['errors'][:100]}...")
-    
+
     # Get report
     report = validator.get_validation_report(df)
-    print(f"\n📊 Validation Report:")
+    print("\n📊 Validation Report:")
     print(f"  Total: {report['total_records']}")
     print(f"  Valid: {report['valid_records']} ({report['valid_percentage']:.1f}%)")
     print(f"  Invalid: {report['invalid_records']}")

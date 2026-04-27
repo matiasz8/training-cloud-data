@@ -104,11 +104,11 @@ def extract_data(source):
     try:
         # Extract logic
         data = read_from_source(source)
-        
+
         # Validate
         if data.empty:
             raise ValueError("No data extracted")
-        
+
         return data
     except FileNotFoundError as e:
         logger.error(f"File not found: {e}")

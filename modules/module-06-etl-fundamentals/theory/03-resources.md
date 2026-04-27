@@ -1,11 +1,11 @@
-# Recursos y Herramientas ETL
+# resources y Herramientas ETL
 
 ## 🐍 Python Libraries
 
 ### Data Processing
 
 #### pandas
-**DataFrame manipulation estándar**
+**DataFrame manipulation standard**
 ```bash
 pip install pandas
 ```
@@ -16,21 +16,21 @@ Capacidades:
 - Join y merge operations
 - Time series handling
 
-Documentación: https://pandas.pydata.org/docs/
+Documentation: https://pandas.pydata.org/docs/
 
 #### polars
-**DataFrame library ultra-rápida (Rust-based)**
+**Ultra-fast DataFrame library (Rust-based)**
 ```bash
 pip install polars
 ```
 
 Ventajas sobre pandas:
-- 5-10x más rápido
+- 5-10x faster
 - Mejor memory efficiency
 - Lazy evaluation
 - Parallel processing nativo
 
-Documentación: https://pola-rs.github.io/polars/
+Documentation: https://pola-rs.github.io/polars/
 
 #### dask
 **Parallel computing para datasets grandes**
@@ -40,10 +40,10 @@ pip install dask
 
 Usa cuando:
 - Datos no caben en memoria
-- Necesitas paralelización
+- You need parallelization
 - Compatibilidad con pandas API
 
-Documentación: https://docs.dask.org/
+Documentation: https://docs.dask.org/
 
 ### Database Connectors
 
@@ -208,7 +208,7 @@ with DAG('etl_dag', schedule='@daily') as dag:
     extract = PythonOperator(task_id='extract', python_callable=extract_data)
     transform = PythonOperator(task_id='transform', python_callable=transform_data)
     load = PythonOperator(task_id='load', python_callable=load_data)
-    
+
     extract >> transform >> load
 ```
 
@@ -280,7 +280,7 @@ Website: https://spark.apache.org/
 
 ```sql
 -- models/users_active.sql
-SELECT 
+SELECT
     id,
     name,
     email
@@ -516,11 +516,11 @@ logger = logging.getLogger(__name__)
 
 class ETLPipeline:
     """Base ETL pipeline con error handling."""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.metrics = {'records_processed': 0, 'errors': 0}
-    
+
     def extract(self) -> pd.DataFrame:
         """Extract data from source."""
         logger.info("Starting extraction")
@@ -531,7 +531,7 @@ class ETLPipeline:
         except Exception as e:
             logger.error(f"Extraction failed: {e}")
             raise
-    
+
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform data."""
         logger.info("Starting transformation")
@@ -539,17 +539,17 @@ class ETLPipeline:
             # Ejemplo: cleaning
             df = df.dropna()
             df = df.drop_duplicates()
-            
+
             # Ejemplo: derivation
             df['created_date'] = pd.to_datetime(df['created_at']).dt.date
-            
+
             self.metrics['records_processed'] = len(df)
             logger.info(f"Transformed {len(df)} records")
             return df
         except Exception as e:
             logger.error(f"Transformation failed: {e}")
             raise
-    
+
     def load(self, df: pd.DataFrame) -> None:
         """Load data to destination."""
         logger.info("Starting load")
@@ -561,7 +561,7 @@ class ETLPipeline:
         except Exception as e:
             logger.error(f"Load failed: {e}")
             raise
-    
+
     def run(self) -> Dict[str, Any]:
         """Run complete pipeline."""
         logger.info("Starting ETL pipeline")
@@ -581,7 +581,7 @@ if __name__ == '__main__':
         'source_path': 'data/raw/input.csv',
         'output_path': 'data/processed/output.parquet'
     }
-    
+
     pipeline = ETLPipeline(config)
     metrics = pipeline.run()
     print(f"Metrics: {metrics}")
@@ -589,4 +589,4 @@ if __name__ == '__main__':
 
 ---
 
-Este documento completa la sección de teoría. Ahora puedes proceder con los ejercicios prácticos.
+This document completes the theory section. Now you can proceed with the practical exercises.

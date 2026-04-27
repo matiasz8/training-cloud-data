@@ -23,9 +23,9 @@ def spark_session():
         .config("spark.sql.shuffle.partitions", "4") \
         .config("spark.default.parallelism", "4") \
         .getOrCreate()
-    
+
     yield spark
-    
+
     spark.stop()
 
 
@@ -41,10 +41,10 @@ def temp_dir():
 def sample_transactions_df():
     """Create sample transactions DataFrame."""
     np.random.seed(42)
-    
+
     n = 10000
     start_date = datetime(2024, 1, 1)
-    
+
     data = {
         'transaction_id': [f'TXN{i:010d}' for i in range(1, n + 1)],
         'user_id': [f'USER{i:06d}' for i in np.random.randint(1, 1000, n)],
@@ -75,7 +75,7 @@ def sample_transactions_df():
             n
         )
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -83,9 +83,9 @@ def sample_transactions_df():
 def sample_users_df():
     """Create sample users DataFrame."""
     np.random.seed(43)
-    
+
     n = 1000
-    
+
     data = {
         'user_id': [f'USER{i:06d}' for i in range(1, n + 1)],
         'email': [f'user{i}@example.com' for i in range(1, n + 1)],
@@ -104,7 +104,7 @@ def sample_users_df():
         'total_spent': np.random.rand(n) * 5000,
         'is_active': np.random.choice([True, False], n, p=[0.95, 0.05])
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -112,9 +112,9 @@ def sample_users_df():
 def sample_products_df():
     """Create sample products DataFrame."""
     np.random.seed(44)
-    
+
     n = 100
-    
+
     data = {
         'product_id': [f'PROD{i:05d}' for i in range(1, n + 1)],
         'name': [f'Product {i}' for i in range(1, n + 1)],
@@ -129,7 +129,7 @@ def sample_products_df():
         'reviews_count': np.random.randint(0, 1000, n),
         'is_available': np.random.choice([True, False], n, p=[0.95, 0.05])
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -156,19 +156,19 @@ def partitioned_data(sample_transactions_df, temp_dir):
     df['year'] = df['timestamp'].dt.year
     df['month'] = df['timestamp'].dt.month
     df['day'] = df['timestamp'].dt.day
-    
+
     # Write partitioned
     output_dir = temp_dir / "partitioned"
-    
+
     for (year, month, day), group in df.groupby(['year', 'month', 'day']):
         partition_dir = output_dir / f"year={year}" / f"month={month:02d}" / f"day={day:02d}"
         partition_dir.mkdir(parents=True, exist_ok=True)
-        
+
         group.to_parquet(
             partition_dir / "data.parquet",
             index=False
         )
-    
+
     return output_dir
 
 

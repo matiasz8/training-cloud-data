@@ -70,14 +70,14 @@ BRANDS = {
 
 def generate_product(product_id: int) -> Dict[str, Any]:
     """Generate a single product record."""
-    
+
     # Category
     category = random.choice(CATEGORIES)
-    
+
     # Name
     base_name = random.choice(PRODUCT_NAMES[category])
     brand = random.choice(BRANDS[category])
-    
+
     # Add variation to name
     if category == "electronics":
         variant = random.choice(["Pro", "Plus", "Max", "Mini", "Ultra", "Lite", ""])
@@ -89,7 +89,7 @@ def generate_product(product_id: int) -> Dict[str, Any]:
         name = f"{brand} {base_name} {size} {color}"
     else:
         name = f"{brand} {base_name}"
-    
+
     # Price based on category
     price_ranges = {
         "electronics": (50, 3000),
@@ -103,7 +103,7 @@ def generate_product(product_id: int) -> Dict[str, Any]:
     }
     min_price, max_price = price_ranges[category]
     price = round(random.uniform(min_price, max_price), 2)
-    
+
     # Stock (higher for cheaper items)
     if price < 50:
         stock = random.randint(100, 10000)
@@ -111,12 +111,12 @@ def generate_product(product_id: int) -> Dict[str, Any]:
         stock = random.randint(50, 1000)
     else:
         stock = random.randint(10, 500)
-    
+
     # Rating (normal distribution around 4.0)
     rating = random.normalvariate(4.0, 0.8)
     rating = max(1.0, min(5.0, rating))
     rating = round(rating, 1)
-    
+
     # Reviews (correlated with rating and price)
     base_reviews = int(random.expovariate(1 / 50))
     if rating > 4.5:
@@ -125,10 +125,10 @@ def generate_product(product_id: int) -> Dict[str, Any]:
         reviews_count = int(base_reviews * 0.5)
     else:
         reviews_count = base_reviews
-    
+
     # Availability (95% available)
     is_available = random.random() > 0.05 and stock > 0
-    
+
     return {
         "product_id": f"PROD{product_id:05d}",
         "name": name,
@@ -163,27 +163,27 @@ def main():
         default="parquet",
         help="Output format"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Setup
     output_path = Path(args.output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     print(f"Generating {args.num_products:,} products")
     print(f"Output: {output_path}")
     print(f"Format: {args.format}")
     print()
-    
+
     # Generate products
     products = []
     for product_id in tqdm(range(1, args.num_products + 1), desc="Generating products"):
         product = generate_product(product_id)
         products.append(product)
-    
+
     # Create DataFrame
     df = pd.DataFrame(products)
-    
+
     # Write data
     if args.format == "parquet":
         df.to_parquet(output_path, index=False, compression="snappy")
@@ -191,10 +191,10 @@ def main():
         df.to_csv(output_path, index=False)
     elif args.format == "json":
         df.to_json(output_path, orient="records", lines=True)
-    
+
     # Summary
     size_mb = output_path.stat().st_size / (1024 * 1024)
-    
+
     print()
     print("=" * 50)
     print("Generation Complete!")
@@ -202,15 +202,15 @@ def main():
     print(f"Total products: {len(df):,}")
     print(f"File size: {size_mb:.2f} MB")
     print()
-    
+
     print("Category distribution:")
     print(df["category"].value_counts())
     print()
-    
+
     print("Price statistics:")
     print(df["price"].describe())
     print()
-    
+
     print("Sample data (first 5 products):")
     print(df.head())
 

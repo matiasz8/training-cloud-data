@@ -38,7 +38,7 @@ done
 # Check exercises
 echo ""
 echo "🏋️  Checking exercises..."
-exercises=("01-extract-basics" "02-transform-basics" "03-load-basics" 
+exercises=("01-extract-basics" "02-transform-basics" "03-load-basics"
            "04-full-pipeline" "05-error-handling" "06-data-quality")
 for ex in "${exercises[@]}"; do
     if [ -d "exercises/$ex" ]; then

@@ -1,17 +1,17 @@
-# Módulo 06: Fundamentos de ETL (Extract, Transform, Load)
+# Module 06: ETL (Extract, Transform, Load) Fundamentals
 
-## 📋 Descripción
+## 📋 Description
 
-Bienvenido al Módulo 06 del bootcamp de Data Engineering. En este módulo aprenderás los fundamentos de **ETL (Extract, Transform, Load)**, el proceso core de la ingeniería de datos para mover y transformar datos entre sistemas.
+Welcome to Module 06 of the Data Engineering bootcamp. In this module you will learn the fundamentals of **ETL (Extract, Transform, Load)**, the core process of data engineering to move and transform data between systems.
 
-⏱️ **Duración estimada**: 12-15 horas
+⏱️ **Estimated duration**: 12-15 hours
 
-## 🎯 Objetivos de Aprendizaje
+## 🎯 Learning Objectives
 
-Al completar este módulo, serás capaz de:
+By completing this module, you will be able to:
 
 - ✅ Comprender los conceptos fundamentales de ETL
-- ✅ Extraer datos de múltiples fuentes (CSV, JSON, APIs, bases de datos)
+- ✅ Extract data from multiple sources (CSV, JSON, APIs, databases)
 - ✅ Transformar datos usando pandas y Python
 - ✅ Cargar datos a diferentes destinos
 - ✅ Construir pipelines ETL completos y robustos
@@ -20,15 +20,15 @@ Al completar este módulo, serás capaz de:
 
 ## 📦 Prerequisitos
 
-Antes de comenzar este módulo, debes haber completado:
+Before beginning this module, you must have completed:
 
-- ✅ **Módulo 02**: Storage Basics (lectura/escritura archivos)
-- ✅ **Módulo 04**: Python for Data (pandas, testing)
+- ✅ **Module 02**: Storage Basics (reading/writing files)
+- ✅ **Module 04**: Python for Data (pandas, testing)
 
 **Conocimientos necesarios**:
 - Python intermedio (funciones, clases, manejo de excepciones)
-- pandas básico (DataFrame operations)
-- SQL básico (queries, inserts)
+- basic pandas (DataFrame operations)
+- Basic SQL (queries, inserts)
 - Conceptos de APIs REST
 
 **Software requerido**:
@@ -60,7 +60,7 @@ Antes de comenzar este módulo, debes haber completado:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 📂 Estructura del Módulo
+## 📂 Module Structure
 
 ```
 module-06-etl-fundamentals/
@@ -100,39 +100,57 @@ module-06-etl-fundamentals/
     └── pandas-transforms.md
 ```
 
-## 🎓 Ejercicios
+## 🎓 Exercises
 
-### Ejercicio 01: Extract Basics (⭐ Básico - 1.5h)
-Extracción de datos de diferentes fuentes: CSV, JSON, APIs, SQLite
+### Exercise 01: Extract Basics (⭐ Basic - 1.5h)
+Data extraction from different sources: CSV, JSON, APIs, SQLite
 
-### Ejercicio 02: Transform Basics (⭐⭐ Intermedio - 2h)
-Transformaciones comunes: limpieza, conversión de tipos, agregaciones
+### Exercise 02: Transform Basics (⭐⭐ Intermediate - 2h)
+Common transformations: cleanup, type conversion, aggregations
 
-### Ejercicio 03: Load Basics (⭐⭐ Intermedio - 1.5h)
+### Exercise 03: Load Basics (⭐⭐ Intermediate - 1.5h)
 Carga de datos: CSV, JSON, SQLite con upsert
 
-### Ejercicio 04: Full Pipeline (⭐⭐⭐ Avanzado - 3h)
-Pipeline ETL end-to-end modular y configurable
+### Exercise 04: Full pipeline (⭐⭐⭐ Advanced - 3h)
+pipeline ETL end-to-end modular y configurable
 
-### Ejercicio 05: Error Handling (⭐⭐⭐⭐ Avanzado - 2h)
+### Exercise 05: Error Handling (⭐⭐⭐⭐ Advanced - 2h)
 Manejo robusto de errores, logging, retry logic
 
-### Ejercicio 06: Data Quality (⭐⭐⭐⭐⭐ Experto - 2.5h)
-Validación de calidad de datos y anomaly detection
+### Exercise 06: Data Quality (⭐⭐⭐⭐⭐ Expert - 2.5h)
+Data quality validation and anomaly detection
 
 ## 📊 Progress Checklist
 
-- [ ] Leer toda la teoría
-- [ ] Completar Ejercicio 01
-- [ ] Completar Ejercicio 02
-- [ ] Completar Ejercicio 03
-- [ ] Completar Ejercicio 04
-- [ ] Completar Ejercicio 05
-- [ ] Completar Ejercicio 06
+- [ ] Read the entire theory
+- [ ] Complete Exercise 01
+- [ ] Complete Exercise 02
+- [ ] Complete Exercise 03
+- [ ] Complete Exercise 04
+- [ ] Complete Exercise 05
+- [ ] Complete Exercise 06
 - [ ] Todos los tests pasan
 
-## ➡️ Próximos Pasos
+## ➡️ Next Steps
 
-- **Módulo 07**: Batch Processing (PySpark)
-- **Módulo 08**: Streaming Basics (Kafka)
-- **Módulo 10**: Workflow Orchestration (Airflow)
+- **Module 07**: Batch Processing (PySpark)
+- **Module 08**: Streaming Basics (Kafka)
+- **Module 10**: Workflow Orchestration (Airflow)
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

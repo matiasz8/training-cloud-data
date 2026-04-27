@@ -1,4 +1,4 @@
-# Exercise 04: Full ETL Pipeline
+# Exercise 04: Full ETL pipeline
 
 ## 🎯 Objective
 Build a complete, production-ready ETL pipeline combining extract, transform, and load.
@@ -8,11 +8,11 @@ Build a complete, production-ready ETL pipeline combining extract, transform, an
 - Configuration management
 - Logging and monitoring
 - Idempotent operations
-- Pipeline orchestration
+- pipeline orchestration
 
 ## 🏋️ Tasks
 
-### Task 1: Build Complete Pipeline
+### Task 1: Build Complete pipeline
 Create a configurable ETL pipeline:
 - Extract from multiple sources
 - Apply transformations
@@ -38,7 +38,7 @@ Track pipeline execution:
 - `test_pipeline.py` - Tests
 
 ## ✅ Success Criteria
-- Pipeline runs end-to-end
+- pipeline runs end-to-end
 - Configurable via YAML
 - Comprehensive logging
 - Idempotent execution

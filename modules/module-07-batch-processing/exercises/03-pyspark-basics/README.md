@@ -1,21 +1,21 @@
 # Exercise 03: PySpark Basics
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
-Introducción a Apache Spark para batch processing distribuido:
+Introduction to Apache Spark for distributed batch processing:
 - Setup de SparkSession
 - DataFrames y transformations
 - Actions y lazy evaluation
 - Joins y aggregations distribuidas
-- Performance optimization básica
+- Basic performance optimization
 
 ## 📚 Conceptos
 
 ### Apache Spark
 
-Spark es el framework líder para big data processing:
+Spark is the leading framework for big data processing:
 - **Distributed**: Procesa TB de datos en cluster
-- **In-Memory**: 100x más rápido que MapReduce
+- **In-Memory**: 100x faster than MapReduce
 - **Lazy Evaluation**: Optimiza execution plans
 - **Fault Tolerant**: Automatic recovery
 
@@ -37,7 +37,7 @@ df_grouped = df_filtered.groupBy("category").sum("amount")
 df_grouped.show()
 ```
 
-## 🏋️ Ejercicios
+## 🏋️ Exercises
 
 ### Parte 1: Spark Session Setup
 
@@ -53,7 +53,7 @@ class SparkManager:
     ) -> SparkSession:
         """Create configured Spark session."""
         pass
-    
+
     @staticmethod
     def stop_session(spark: SparkSession):
         """Stop Spark session and cleanup."""
@@ -76,7 +76,7 @@ Implementa operaciones comunes:
 class SparkOperations:
     def __init__(self, spark: SparkSession):
         self.spark = spark
-    
+
     def filter_transactions(
         self,
         df: DataFrame,
@@ -84,14 +84,14 @@ class SparkOperations:
     ) -> DataFrame:
         """Filter transactions by minimum amount."""
         pass
-    
+
     def aggregate_by_category(
         self,
         df: DataFrame
     ) -> DataFrame:
         """Aggregate amounts by category."""
         pass
-    
+
     def join_with_users(
         self,
         transactions: DataFrame,
@@ -99,7 +99,7 @@ class SparkOperations:
     ) -> DataFrame:
         """Join transactions with user data."""
         pass
-    
+
     def window_top_n(
         self,
         df: DataFrame,
@@ -121,7 +121,7 @@ class SparkOptimizer:
     def cache_dataframe(df: DataFrame) -> DataFrame:
         """Cache DataFrame for reuse."""
         pass
-    
+
     @staticmethod
     def repartition_for_join(
         df: DataFrame,
@@ -130,7 +130,7 @@ class SparkOptimizer:
     ) -> DataFrame:
         """Repartition for efficient joins."""
         pass
-    
+
     @staticmethod
     def broadcast_small_table(
         large_df: DataFrame,
@@ -139,14 +139,14 @@ class SparkOptimizer:
     ) -> DataFrame:
         """Broadcast join for small tables."""
         pass
-    
+
     @staticmethod
     def explain_plan(df: DataFrame):
         """Show execution plan."""
         pass
 ```
 
-### Parte 4: Batch Pipeline
+### Parte 4: Batch pipeline
 
 **Archivo**: `starter/spark_pipeline.py`
 
@@ -156,7 +156,7 @@ Crea un batch pipeline completo:
 class SparkBatchPipeline:
     def __init__(self, spark: SparkSession):
         self.spark = spark
-    
+
     def run(
         self,
         transactions_path: str,
@@ -173,7 +173,7 @@ class SparkBatchPipeline:
         pass
 ```
 
-**Pipeline steps**:
+**pipeline steps**:
 1. Read partitioned transactions
 2. Read users
 3. Join on user_id
@@ -285,4 +285,4 @@ df_result = large_df.join(
 
 ## ➡️ Next
 
-Continúa con [Exercise 04: Batch ETL Pipeline](../04-batch-pipeline/)
+Continue with [Exercise 04: Batch ETL Pipeline](../04-batch-pipeline/)

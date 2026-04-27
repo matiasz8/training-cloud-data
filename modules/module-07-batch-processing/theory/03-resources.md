@@ -1,10 +1,10 @@
-# Herramientas y Recursos para Batch Processing
+# Herramientas y resources para Batch Processing
 
 ## 🛠️ Herramientas de Batch Processing
 
 ### 1. Apache Spark ⭐
 
-**El estándar de facto para batch processing distribuido**
+**The de facto standard for distributed batch processing**
 
 ```python
 from pyspark.sql import SparkSession
@@ -20,13 +20,13 @@ result = df.groupBy("category").agg({"amount": "sum"})
 result.write.parquet("s3://bucket/output/")
 ```
 
-**Características**:
+**features**:
 - ✅ In-memory processing (100x faster que MapReduce)
 - ✅ Lazy evaluation + query optimization
-- ✅ Fault tolerance automática
+- ✅ Automatic fault tolerance
 - ✅ APIs: Python, Scala, Java, R, SQL
 
-**Cuándo usar**:
+**When to use**:
 - Datasets > 100GB
 - Procesamiento distribuido necesario
 - Joins y aggregations complejas
@@ -62,15 +62,15 @@ for chunk in pd.read_csv("large_file.csv", chunksize=chunk_size):
     processed.to_parquet("output.parquet", mode="append")
 ```
 
-**Características**:
+**features**:
 - ✅ Simple API
 - ✅ Rich ecosystem
 - ✅ Excelente para prototyping
 - ❌ Single-machine (no distribuido)
 
-**Cuándo usar**:
+**When to use**:
 - Datasets < 10GB
-- Prototipado rápido
+- Rapid prototyping
 - Single-machine suficiente
 - Data science interactivo
 
@@ -96,14 +96,14 @@ result = df.groupby("category").amount.sum()
 result_computed = result.compute()
 ```
 
-**Características**:
+**features**:
 - ✅ Pandas-compatible API
 - ✅ Escala a cluster
 - ✅ Out-of-core processing
 - ✅ Scheduler inteligente
 
-**Cuándo usar**:
-- Código Pandas que no escala
+**When to use**:
+- Pandas code that does not scale
 - Datasets 10GB - 10TB
 - Quieres API familiar (Pandas)
 
@@ -122,8 +122,8 @@ with beam.Pipeline() as pipeline:
      | "Write" >> beam.io.WriteToText("output.txt"))
 ```
 
-**Características**:
-- ✅ Mismo código para batch y stream
+**features**:
+- ✅ Same code for batch and stream
 - ✅ Portable (Spark, Flink, Dataflow)
 - ✅ Windowing avanzado
 
@@ -151,13 +151,13 @@ WHERE status = 'completed'
 GROUP BY 1, 2
 ```
 
-**Características**:
+**features**:
 - ✅ SQL-based transformations
 - ✅ Lineage tracking
 - ✅ Testing framework
 - ✅ Documentation auto-generada
 
-**Cuándo usar**:
+**When to use**:
 - Data warehouse transformations
 - Analytics engineering
 - SQL-first approach
@@ -184,7 +184,7 @@ aws emr create-cluster \
   --use-default-roles
 ```
 
-**Características**:
+**features**:
 - ✅ Managed Spark, Hive, Presto
 - ✅ Auto-scaling
 - ✅ S3 integration
@@ -223,7 +223,7 @@ glueContext.write_dynamic_frame.from_options(
 )
 ```
 
-**Características**:
+**features**:
 - ✅ Serverless (no cluster management)
 - ✅ Glue Catalog (metastore)
 - ✅ Auto-scaling
@@ -249,7 +249,7 @@ response = batch.submit_job(
 )
 ```
 
-**Cuándo usar**:
+**When to use**:
 - Docker-based jobs
 - HPC workloads
 - Non-Spark batch jobs
@@ -295,7 +295,7 @@ with beam.Pipeline(options=options) as pipeline:
      | beam.io.WriteToText('gs://bucket/output/'))
 ```
 
-**Características**:
+**features**:
 - ✅ Unified batch + stream
 - ✅ Auto-scaling
 - ✅ Streaming SQL
@@ -329,7 +329,7 @@ df_transformed.write.format("delta").mode("overwrite").save("/mnt/output/")
 
 ---
 
-## 📚 Librerías Útiles
+## 📚 Useful Libraries
 
 ### Data Processing
 
@@ -372,8 +372,8 @@ import structlog
 
 logger = structlog.get_logger()
 
-logger.info("batch_started", 
-           date="2024-03-07", 
+logger.info("batch_started",
+           date="2024-03-07",
            records=1000000)
 
 # tqdm: Progress bars
@@ -393,7 +393,7 @@ class Transaction(BaseModel):
     id: int
     amount: float
     user_id: str
-    
+
     @validator('amount')
     def amount_positive(cls, v):
         if v <= 0:
@@ -406,9 +406,9 @@ transaction = Transaction(**data)
 
 ---
 
-## 🎓 Recursos de Aprendizaje
+## 🎓 resources de Aprendizaje
 
-### Documentación Oficial
+### Official Documentation
 
 **Apache Spark**:
 - 📖 [Spark Programming Guide](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
@@ -425,44 +425,44 @@ transaction = Transaction(**data)
 
 ### Libros
 
-📚 **"Spark: The Definitive Guide"** - Matei Zaharia & Bill Chambers  
+📚 **"Spark: The Definitive Guide"** - Matei Zaharia & Bill Chambers
 El libro definitivo de los creadores de Spark
 
-📚 **"Learning Spark"** - Jules Damji et al.  
-Práctico para comenzar con Spark
+📚 **"Learning Spark"** - Jules Damji et al.
+Handy to get started with Spark
 
-📚 **"High Performance Spark"** - Holden Karau  
-Optimización avanzada de Spark
+📚 **"High Performance Spark"** - Holden Karau
+Advanced Spark Optimization
 
-📚 **"Data Pipelines Pocket Reference"** - James Densmore  
+📚 **"Data Pipelines Pocket Reference"** - James Densmore
 Quick reference para data engineering
 
 ### Cursos
 
-🎓 **Databricks Academy**  
+🎓 **Databricks Academy**
 - Apache Spark Programming with Databricks
 - Advanced Apache Spark
 - Delta Lake
 
-🎓 **Coursera**  
+🎓 **Coursera**
 - Big Data Specialization (UC San Diego)
 - Data Engineering with Google Cloud
 
-🎓 **edX**  
+🎓 **edX**
 - Big Data Analysis with Apache Spark (Berkeley)
 
 ### Blogs & Comunidades
 
-🌐 **The Databricks Blog**  
+🌐 **The Databricks Blog**
 https://databricks.com/blog
 
-🌐 **Netflix Tech Blog**  
+🌐 **Netflix Tech Blog**
 https://netflixtechblog.com/ (Data Platform posts)
 
-🌐 **Airbnb Engineering**  
+🌐 **Airbnb Engineering**
 https://medium.com/airbnb-engineering
 
-🌐 **r/dataengineering** (Reddit)  
+🌐 **r/dataengineering** (Reddit)
 Community Q&A
 
 ---
@@ -524,7 +524,7 @@ spark = SparkSession.builder \
 - **Jobs**: Jobs ejecutados
 - **Stages**: Stages y tasks
 - **Storage**: Cached RDDs/DataFrames
-- **Environment**: Configuración
+- **Environment**: Configuration
 - **Executors**: Estado de executors
 - **SQL**: Query execution plans
 
@@ -542,7 +542,7 @@ df.write.parquet("output.parquet", compression="snappy")
 df.to_csv("output.csv")  # 10x más grande y lento
 ```
 
-**Comparación**:
+**Comparison**:
 - CSV: 10 GB, 20 min read
 - Parquet (snappy): 2 GB, 2 min read
 
@@ -566,7 +566,7 @@ from pyspark.sql.functions import broadcast
 result = large_df.join(broadcast(small_df), "key")
 ```
 
-**Speedup**: 10-100x para joins pequeños
+**Speedup**: 10-100x for small joins
 
 ### 4. Lazy Evaluation
 
@@ -634,12 +634,12 @@ logger.info({
 
 ### Design
 - [ ] Definir input/output schemas
-- [ ] Diseñar partitioning strategy
+- [ ] Design partitioning strategy
 - [ ] Planificar error handling
 - [ ] Documentar dependencies
 
 ### Implementation
-- [ ] Usar formato columnar (Parquet)
+- [ ] Usar formato columnr (Parquet)
 - [ ] Implementar idempotencia
 - [ ] Agregar logging estructurado
 - [ ] Configurar checkpointing
@@ -659,9 +659,9 @@ logger.info({
 ### Operations
 - [ ] Monitor duration y throughput
 - [ ] Track data quality metrics
-- [ ] Review Spark UI periódicamente
-- [ ] Optimize basado en métricas
+- [ ] Review Spark UI periodically
+- [ ] Optimize based on metrics
 
 ---
 
-Ahora estás listo para los ejercicios prácticos. Comienza con [Exercise 01](../exercises/01-batch-basics/).
+Now you are ready for the practical exercises. Starts with [Exercise 01](../exercises/01-batch-basics/).

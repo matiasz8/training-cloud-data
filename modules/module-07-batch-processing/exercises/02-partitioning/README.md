@@ -1,6 +1,6 @@
 # Exercise 02: Data Partitioning Strategies
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
 Aprender estrategias de particionamiento para batch processing eficiente:
 - Particionamiento por fecha (time-based)
@@ -10,11 +10,11 @@ Aprender estrategias de particionamiento para batch processing eficiente:
 
 ## 📚 Conceptos
 
-### ¿Por Qué Particionar?
+### Why Partition?
 
 1. **Performance**: Lee solo particiones relevantes (partition pruning)
-2. **Paralelización**: Procesa particiones en paralelo
-3. **Mantenibilidad**: Elimina data antigua fácilmente
+2. **Parallelization**: Process partitions in parallel
+3. **Maintainability**: Delete old data easily
 4. **Cost Optimization**: Reduce data scanned en cloud
 
 ### Partition Layout
@@ -29,7 +29,7 @@ data/
 │   └── month=02/
 ```
 
-## 🏋️ Ejercicios
+## 🏋️ Exercises
 
 ### Parte 1: Date Partitioning
 
@@ -47,7 +47,7 @@ class DatePartitioner:
     ):
         """Write DataFrame partitioned by date."""
         pass
-    
+
     def read_partition(
         self,
         input_dir: str,
@@ -57,7 +57,7 @@ class DatePartitioner:
     ) -> pd.DataFrame:
         """Read specific date partition."""
         pass
-    
+
     def read_date_range(
         self,
         input_dir: str,
@@ -72,7 +72,7 @@ class DatePartitioner:
 - Extrae year/month/day de timestamp
 - Crea estructura de directorios
 - Escribe Parquet por partition
-- Lee particiones específicas
+- Read specific partitions
 
 ### Parte 2: Range Partitioning
 
@@ -85,7 +85,7 @@ class RangePartitioner:
     def __init__(self, ranges: List[Tuple[float, float, str]]):
         """
         Initialize with ranges.
-        
+
         Example:
             ranges = [
                 (0, 100, 'low'),
@@ -94,11 +94,11 @@ class RangePartitioner:
             ]
         """
         pass
-    
+
     def partition_value(self, value: float) -> str:
         """Determine partition for value."""
         pass
-    
+
     def write_partitioned(
         self,
         df: pd.DataFrame,
@@ -125,11 +125,11 @@ class HashPartitioner:
     def __init__(self, num_partitions: int = 10):
         """Initialize with number of partitions."""
         pass
-    
+
     def hash_key(self, key: str) -> int:
         """Hash key to partition number."""
         pass
-    
+
     def write_partitioned(
         self,
         df: pd.DataFrame,
@@ -154,16 +154,16 @@ Compare performance:
 ```python
 def benchmark_partitioning():
     """Compare non-partitioned vs partitioned reads."""
-    
+
     # Write same data both ways
     # 1. Single large file
     # 2. Date partitioned
-    
+
     # Benchmark queries:
     # - Read all
     # - Read specific date
     # - Read date range
-    
+
     # Report speedup
     pass
 ```
@@ -258,4 +258,4 @@ df['partition'] = df['user_id'].apply(lambda x: hash_partition(x, 10))
 
 ## ➡️ Next
 
-Continúa con [Exercise 03: PySpark Basics](../03-pyspark-basics/)
+Continue with [Exercise 03: PySpark Basics](../03-pyspark-basics/)

@@ -5,13 +5,13 @@
 ### Requirements Gathering
 - [ ] Definir input data sources
 - [ ] Identificar output requirements
-- [ ] Determinar SLA (tiempo máximo de ejecución)
+- [ ] Determine SLA (maximum execution time)
 - [ ] Estimar data volume (GB, records)
 - [ ] Identificar dependencies (otros jobs, external systems)
 
 ### Design
 - [ ] Elegir estrategia de procesamiento (full load vs incremental)
-- [ ] Diseñar partitioning strategy
+- [ ] Design partitioning strategy
 - [ ] Definir retention policy
 - [ ] Planificar error handling
 - [ ] Documentar data lineage
@@ -22,14 +22,14 @@
 - [ ] Seguir coding standards
 - [ ] Implementar logging estructurado
 - [ ] Agregar type hints (Python)
-- [ ] Documentar funciones críticas
+- [ ] Document critical functions
 - [ ] Code review completado
 
 ### Performance
-- [ ] Usar formato columnar (Parquet)
+- [ ] Usar formato columnr (Parquet)
 - [ ] Implementar partitioning apropiado
 - [ ] Optimizar dtypes para memoria
-- [ ] Usar broadcast join para tablas pequeñas
+- [ ] Use broadcast join for small tables
 - [ ] Cachear DataFrames reutilizados
 - [ ] Evitar shuffles innecesarios
 
@@ -42,7 +42,7 @@
 - [ ] Check record counts
 
 ### Error Handling
-- [ ] Try-catch en operaciones críticas
+- [ ] Try-catch on critical operations
 - [ ] Retry logic con exponential backoff
 - [ ] Dead letter queue para registros fallidos
 - [ ] Cleanup en caso de fallo
@@ -52,7 +52,7 @@
 - [ ] Usar mode='overwrite' o upsert
 - [ ] Partition overwriting correcto
 - [ ] No duplicar datos en append
-- [ ] Testear re-ejecución del job
+- [ ] Test re-execution of the job
 
 ## ✅ Testing
 
@@ -66,14 +66,14 @@
 ### Integration Tests
 - [ ] Test complete pipeline E2E
 - [ ] Test con sample production data
-- [ ] Test joins con todas las tablas
+- [ ] Test joins con todas las tables
 - [ ] Test partition reading/writing
 
 ### Performance Tests
 - [ ] Benchmark con dataset realista
 - [ ] Verificar throughput (records/sec)
 - [ ] Medir memory usage
-- [ ] Profile código (identify bottlenecks)
+- [ ] Profile code (identify bottlenecks)
 
 ## 📊 Monitoring & Observability
 
@@ -160,14 +160,14 @@
 - [ ] Collect feedback de usuarios
 - [ ] Revisar incidents y post-mortems
 - [ ] Actualizar documentation
-- [ ] Refactor código legacy
+- [ ] Refactor legacy code
 - [ ] Mantener dependencies actualizadas
 
 ## 🎯 Example Checklist for Daily Sales Batch Job
 
-**Job**: Daily Sales Aggregation  
-**Schedule**: Daily at 2 AM  
-**SLA**: Complete by 6 AM (4 hours)  
+**Job**: Daily Sales Aggregation
+**Schedule**: Daily at 2 AM
+**SLA**: Complete by 6 AM (4 hours)
 **Data Volume**: 10M transactions (~500MB)
 
 - [x] Input: S3 partitioned transactions
@@ -175,7 +175,7 @@
 - [x] Incremental processing (yesterday's data only)
 - [x] Join with users and products
 - [x] Aggregate by country, category
-- [x] Quality checks: 
+- [x] Quality checks:
   - [x] Record count > 100K
   - [x] No nulls in critical fields
   - [x] All amounts > 0

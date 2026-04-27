@@ -87,7 +87,7 @@
 ### Documentation
 - [ ] README with setup instructions
 - [ ] Data dictionary
-- [ ] Pipeline architecture diagram
+- [ ] pipeline architecture diagram
 - [ ] Runbook for common issues
 - [ ] Change log
 
@@ -123,7 +123,7 @@
 - [ ] Use appropriate data types
 - [ ] Optimize SQL queries
 - [ ] Add indexes to database tables
-- [ ] Use columnar formats (Parquet) for large files
+- [ ] Use columnr formats (Parquet) for large files
 
 ### Cost
 - [ ] Monitor compute costs

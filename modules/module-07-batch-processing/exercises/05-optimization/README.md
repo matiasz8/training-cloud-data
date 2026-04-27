@@ -1,8 +1,8 @@
 # Exercise 05: Performance Optimization
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
-Optimizar batch jobs para máximo performance:
+Optimize batch jobs for maximum performance:
 - Partition tuning
 - Caching strategies
 - Broadcast joins
@@ -31,7 +31,7 @@ df = spark.read.parquet("data/").repartition(200, "category")
 result = df.groupBy("category").sum("amount")
 ```
 
-## 🏋️ Ejercicios
+## 🏋️ Exercises
 
 ### Parte 1: Partition Tuning
 
@@ -41,11 +41,11 @@ result = df.groupBy("category").sum("amount")
 class PartitionOptimizer:
     def __init__(self, spark: SparkSession):
         self.spark = spark
-    
+
     def analyze_partitions(self, df: DataFrame) -> Dict[str, Any]:
         """
         Analyze partition distribution.
-        
+
         Returns:
             {
                 'num_partitions': int,
@@ -55,7 +55,7 @@ class PartitionOptimizer:
             }
         """
         pass
-    
+
     def repartition_by_size(
         self,
         df: DataFrame,
@@ -63,16 +63,16 @@ class PartitionOptimizer:
     ) -> DataFrame:
         """
         Repartition to achieve target partition size.
-        
+
         Args:
             df: Input DataFrame
             target_partition_size_mb: Target size per partition
-            
+
         Returns:
             Repartitioned DataFrame
         """
         pass
-    
+
     def optimize_for_join(
         self,
         df: DataFrame,
@@ -81,7 +81,7 @@ class PartitionOptimizer:
     ) -> DataFrame:
         """
         Repartition for efficient joins.
-        
+
         Args:
             df: DataFrame
             join_keys: Columns to partition by
@@ -99,18 +99,18 @@ class CacheManager:
     def __init__(self, spark: SparkSession):
         self.spark = spark
         self.cached_dfs = {}
-    
+
     def should_cache(self, df: DataFrame, reuse_count: int) -> bool:
         """
         Determine if DataFrame should be cached.
-        
+
         Rules:
         - Cache if used > 1 time
         - Cache if > 100MB
         - Cache after expensive transformations
         """
         pass
-    
+
     def cache_with_storage_level(
         self,
         df: DataFrame,
@@ -118,18 +118,18 @@ class CacheManager:
     ) -> DataFrame:
         """
         Cache DataFrame with specific storage level.
-        
+
         Levels:
         - MEMORY_ONLY: Fast but may evict
         - MEMORY_AND_DISK: Safe fallback
         - DISK_ONLY: For very large datasets
         """
         pass
-    
+
     def unpersist_all(self):
         """Unpersist all cached DataFrames."""
         pass
-    
+
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get caching statistics."""
         pass
@@ -143,7 +143,7 @@ class CacheManager:
 class BroadcastOptimizer:
     def __init__(self, spark: SparkSession):
         self.spark = spark
-    
+
     def analyze_join_candidates(
         self,
         df1: DataFrame,
@@ -151,7 +151,7 @@ class BroadcastOptimizer:
     ) -> Dict[str, Any]:
         """
         Analyze which table should be broadcast.
-        
+
         Returns:
             {
                 'df1_size_mb': float,
@@ -161,7 +161,7 @@ class BroadcastOptimizer:
             }
         """
         pass
-    
+
     def broadcast_join(
         self,
         large_df: DataFrame,
@@ -171,7 +171,7 @@ class BroadcastOptimizer:
     ) -> DataFrame:
         """
         Perform broadcast join if small table < threshold.
-        
+
         Args:
             large_df: Large table
             small_df: Small table (will be broadcast)
@@ -195,17 +195,17 @@ class SkewHandler:
     ) -> bool:
         """
         Detect data skew in partition column.
-        
+
         Args:
             df: DataFrame
             partition_col: Column to check
             threshold: Skew ratio threshold (max/avg)
-            
+
         Returns:
             True if skewed
         """
         pass
-    
+
     @staticmethod
     def handle_skew_with_salting(
         df: DataFrame,
@@ -214,13 +214,13 @@ class SkewHandler:
     ) -> DataFrame:
         """
         Handle skew using salting technique.
-        
+
         1. Add random salt to skewed keys
         2. Distribute across more partitions
         3. Aggregate results
         """
         pass
-    
+
     @staticmethod
     def adaptive_repartition(
         df: DataFrame,
@@ -242,7 +242,7 @@ class PerformanceBenchmark:
     def __init__(self, spark: SparkSession):
         self.spark = spark
         self.results = []
-    
+
     def benchmark_join_strategies(
         self,
         df1: DataFrame,
@@ -254,11 +254,11 @@ class PerformanceBenchmark:
         1. Default shuffle join
         2. Broadcast join
         3. Repartitioned join
-        
+
         Returns DataFrame with results
         """
         pass
-    
+
     def benchmark_partition_counts(
         self,
         df: DataFrame,
@@ -269,7 +269,7 @@ class PerformanceBenchmark:
         Benchmark operation with different partition counts.
         """
         pass
-    
+
     def benchmark_caching_impact(
         self,
         df: DataFrame,
@@ -279,7 +279,7 @@ class PerformanceBenchmark:
         Compare performance with/without caching.
         """
         pass
-    
+
     def generate_report(self, output_path: str):
         """Generate HTML performance report."""
         pass
@@ -400,4 +400,4 @@ result = result.withColumn(
 
 ## ➡️ Next
 
-Continúa con [Exercise 06: Production Batch Jobs](../06-production-jobs/)
+Continue with [Exercise 06: Production Batch Jobs](../06-production-jobs/)

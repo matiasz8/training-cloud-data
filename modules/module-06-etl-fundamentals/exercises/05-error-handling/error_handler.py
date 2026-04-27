@@ -7,19 +7,18 @@ from pathlib import Path
 from typing import Tuple
 import logging
 from datetime import datetime
-import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class ErrorHandler:
     """Handle errors in ETL pipeline."""
-    
+
     def __init__(self, dlq_path: str = None):
         self.dlq_path = Path(dlq_path) if dlq_path else Path('dlq')
         self.dlq_path.mkdir(parents=True, exist_ok=True)
         self.error_count = 0
-    
+
     def process_with_error_handling(
         self,
         df: pd.DataFrame,
@@ -27,13 +26,13 @@ class ErrorHandler:
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         Process records with error handling.
-        
+
         Returns:
             (successful_records, failed_records)
         """
         successful = []
         failed = []
-        
+
         for idx, row in df.iterrows():
             try:
                 transformed = transform_func(row)
@@ -47,25 +46,25 @@ class ErrorHandler:
                     'timestamp': datetime.now().isoformat()
                 })
                 self.error_count += 1
-        
+
         df_successful = pd.DataFrame(successful) if successful else pd.DataFrame()
         df_failed = pd.DataFrame(failed) if failed else pd.DataFrame()
-        
+
         logger.info(f"Processed: {len(successful)} successful, {len(failed)} failed")
         return df_successful, df_failed
-    
+
     def save_to_dlq(self, failed_records: pd.DataFrame, batch_id: str = None):
         """Save failed records to dead letter queue."""
         if failed_records.empty:
             logger.info("No failed records to save")
             return
-        
+
         batch_id = batch_id or datetime.now().strftime('%Y%m%d_%H%M%S')
         dlq_file = self.dlq_path / f"failed_{batch_id}.json"
-        
+
         failed_records.to_json(dlq_file, orient='records', indent=2)
         logger.info(f"Saved {len(failed_records)} failed records to {dlq_file}")
-    
+
     def get_error_summary(self) -> dict:
         """Get summary of errors."""
         return {
@@ -77,18 +76,18 @@ class ErrorHandler:
 def validate_and_transform(row: pd.Series) -> dict:
     """
     Validate and transform a record.
-    
+
     Raises ValueError for invalid data.
     """
     # Validate email
     if '@' not in str(row.get('email', '')):
         raise ValueError(f"Invalid email: {row.get('email')}")
-    
+
     # Validate age
     age = row.get('age')
     if pd.isna(age) or not (18 <= age <= 120):
         raise ValueError(f"Invalid age: {age}")
-    
+
     # Transform
     return {
         'id': int(row['id']),
@@ -109,31 +108,31 @@ def main():
         'status': ['active', 'active', 'active', 'pending', 'active']
     }
     df = pd.DataFrame(data)
-    
+
     print(f"Processing {len(df)} records...")
     print("\nOriginal data:")
     print(df)
-    
+
     # Process with error handling
     handler = ErrorHandler(dlq_path='../../data/dlq')
     df_success, df_failed = handler.process_with_error_handling(
         df,
         validate_and_transform
     )
-    
+
     print(f"\n✓ Successful records: {len(df_success)}")
     print(df_success)
-    
+
     print(f"\n❌ Failed records: {len(df_failed)}")
     if not df_failed.empty:
         print(df_failed[['error_type', 'error']])
-    
+
     # Save failed records to DLQ
     handler.save_to_dlq(df_failed)
-    
+
     # Summary
     summary = handler.get_error_summary()
-    print(f"\n📊 Error Summary:")
+    print("\n📊 Error Summary:")
     print(f"  Total errors: {summary['total_errors']}")
     print(f"  DLQ files: {summary['dlq_files']}")
 

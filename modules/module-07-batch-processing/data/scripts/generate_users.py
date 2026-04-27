@@ -43,7 +43,7 @@ def generate_email(name: str, user_id: int) -> str:
     name_part = name.lower().replace(" ", ".")
     domains = ["gmail.com", "yahoo.com", "outlook.com", "example.com", "mail.com"]
     domain = random.choice(domains)
-    
+
     # Sometimes add number to email
     if random.random() > 0.7:
         return f"{name_part}{user_id % 1000}@{domain}"
@@ -52,26 +52,26 @@ def generate_email(name: str, user_id: int) -> str:
 
 def generate_user(user_id: int, start_date: datetime) -> Dict[str, Any]:
     """Generate a single user record."""
-    
+
     # Name
     first_name = random.choice(FIRST_NAMES)
     last_name = random.choice(LAST_NAMES)
     name = f"{first_name} {last_name}"
-    
+
     # Email
     email = generate_email(name, user_id)
-    
+
     # Age distribution (25-55 peak)
     age = int(random.normalvariate(40, 15))
     age = max(18, min(100, age))
-    
+
     # Country
     country = random.choice(COUNTRIES)
-    
+
     # Created date (random date in past 3 years)
     days_ago = random.randint(0, 1095)  # 3 years
     created_at = start_date - timedelta(days=days_ago)
-    
+
     # Tier based on account age and activity
     if days_ago > 730:  # > 2 years
         tier = random.choices(TIERS, weights=[0.30, 0.30, 0.25, 0.15])[0]
@@ -79,7 +79,7 @@ def generate_user(user_id: int, start_date: datetime) -> Dict[str, Any]:
         tier = random.choices(TIERS, weights=[0.50, 0.30, 0.15, 0.05])[0]
     else:
         tier = random.choices(TIERS, weights=[0.80, 0.15, 0.04, 0.01])[0]
-    
+
     # Total spent (correlated with tier)
     tier_spending = {
         "bronze": (0, 1000),
@@ -89,10 +89,10 @@ def generate_user(user_id: int, start_date: datetime) -> Dict[str, Any]:
     }
     min_spent, max_spent = tier_spending[tier]
     total_spent = round(random.uniform(min_spent, max_spent), 2)
-    
+
     # Active status (95% active)
     is_active = random.random() > 0.05
-    
+
     return {
         "user_id": f"USER{user_id:06d}",
         "email": email,
@@ -133,36 +133,36 @@ def main():
         default="parquet",
         help="Output format"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Setup
     output_path = Path(args.output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     start_date = datetime.now()
-    
+
     print(f"Generating {args.num_users:,} users")
     print(f"Output: {output_path}")
     print(f"Format: {args.format}")
     print()
-    
+
     # Generate users in batches
     all_users = []
-    
+
     for user_id in tqdm(range(1, args.num_users + 1), desc="Generating users"):
         user = generate_user(user_id, start_date)
         all_users.append(user)
-        
+
         # Write batch
         if len(all_users) >= args.batch_size or user_id == args.num_users:
             df = pd.DataFrame(all_users)
-            
+
             if user_id == len(all_users):  # First batch
                 mode = "w"
             else:
                 mode = "a"
-            
+
             if args.format == "parquet":
                 if mode == "w":
                     df.to_parquet(output_path, index=False, compression="snappy")
@@ -175,9 +175,9 @@ def main():
                 df.to_csv(output_path, index=False, mode=mode, header=(mode == "w"))
             elif args.format == "json":
                 df.to_json(output_path, orient="records", lines=True, mode=mode)
-            
+
             all_users = []
-    
+
     # Summary
     if args.format == "parquet":
         df = pd.read_parquet(output_path)
@@ -185,9 +185,9 @@ def main():
         df = pd.read_csv(output_path)
     else:
         df = pd.read_json(output_path, lines=True)
-    
+
     size_mb = output_path.stat().st_size / (1024 * 1024)
-    
+
     print()
     print("=" * 50)
     print("Generation Complete!")
@@ -195,15 +195,15 @@ def main():
     print(f"Total users: {len(df):,}")
     print(f"File size: {size_mb:.2f} MB")
     print()
-    
+
     print("Tier distribution:")
     print(df["tier"].value_counts())
     print()
-    
+
     print("Country distribution:")
     print(df["country"].value_counts().head(5))
     print()
-    
+
     print("Sample data (first 5 users):")
     print(df.head())
 

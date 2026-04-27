@@ -1,28 +1,28 @@
 # Conceptos Fundamentales de ETL
 
-## 📚 ¿Qué es ETL?
+## 📚 What is ETL?
 
-**ETL** significa **Extract, Transform, Load** - el proceso fundamental en ingeniería de datos para mover y transformar datos entre sistemas.
+**ETL** stands for **Extract, Transform, Load** - the fundamental process in data engineering for moving and transforming data between systems.
 
 ### Las Tres Fases
 
-#### 1. Extract (Extracción)
+#### 1. Extract
 Extraer datos desde fuentes origen:
-- **Bases de datos**: PostgreSQL, MySQL, Oracle
+- **databases**: PostgreSQL, MySQL, Oracle
 - **Archivos**: CSV, JSON, Excel, Parquet
 - **APIs**: REST, GraphQL, SOAP
 - **Logs**: Application logs, system logs
 - **Streaming**: Kafka, Kinesis, Pub/Sub
 - **Web scraping**: HTML parsing
 
-#### 2. Transform (Transformación)
+#### 2. Transform
 Procesar y limpiar datos:
 - **Limpieza**: Eliminar nulls, duplicados, outliers
-- **Validación**: Schema validation, data types
+- **Validation**: Schema validation, data types
 - **Enriquecimiento**: Joins, lookups, APIs externas
-- **Agregación**: Group by, pivots, rollups
-- **Normalización**: Formato consistente
-- **Derivación**: Calcular nuevos campos
+- **Aggregation**: Group by, pivots, rollups
+- **Normalization**: Consistent format
+- **Derivation**: Calculate new fields
 
 #### 3. Load (Carga)
 Escribir datos a destino:
@@ -39,7 +39,7 @@ Escribir datos a destino:
 
 ### ETL (Extract-Transform-Load)
 
-**Transformación ANTES de cargar**
+**Transformation BEFORE loading**
 
 ```
 Source → Extract → Transform → Load → Warehouse
@@ -49,11 +49,11 @@ Source → Extract → Transform → Load → Warehouse
 - ✅ Datos ya limpios en warehouse
 - ✅ Menos carga en warehouse
 - ✅ Schema validado anticipadamente
-- ✅ Compliance y seguridad más fácil
+- ✅ Compliance and security made easier
 
 **Desventajas**:
-- ❌ Requiere servidor ETL potente
-- ❌ Schema rígido
+- ❌ Requiere server ETL potente
+- ❌ Rigid schema
 - ❌ Transformaciones complejas lentas
 
 **Casos de uso**:
@@ -64,28 +64,28 @@ Source → Extract → Transform → Load → Warehouse
 
 ### ELT (Extract-Load-Transform)
 
-**Transformación DESPUÉS de cargar**
+**Transformation AFTER loading**
 
 ```
 Source → Extract → Load → Data Lake → Transform
 ```
 
 **Ventajas**:
-- ✅ Carga rápida (raw data)
+- ✅ Fast loading (raw data)
 - ✅ Schema flexible (schema-on-read)
 - ✅ Aprovecha poder del warehouse moderno
-- ✅ Datos raw disponibles para análisis
+- ✅ Raw data available for analysis
 
 **Desventajas**:
 - ❌ Requiere warehouse potente
-- ❌ Costos de storage más altos
+- ❌ Higher storage costs
 - ❌ Datos raw pueden tener calidad baja
 
 **Casos de uso**:
 - Cloud Data Warehouses (Snowflake, BigQuery)
 - Data Lakes (S3, Azure Data Lake)
 - Big Data y datos no estructurados
-- Análisis exploratorio
+- Exploratory analysis
 
 ---
 
@@ -93,7 +93,7 @@ Source → Extract → Load → Data Lake → Transform
 
 ### Batch ETL
 
-**Procesa datos en lotes periódicos**
+**Processes data in periodic batches**
 
 ```python
 # Ejemplo: ETL diario
@@ -104,10 +104,10 @@ while True:
     time.sleep(86400)  # Esperar 24 horas
 ```
 
-**Características**:
-- ⏰ **Latencia**: Alta (horas/días)
-- 📊 **Throughput**: Alto (procesa mucho a la vez)
-- 💰 **Costo**: Menor (recursos bajo demanda)
+**features**:
+- ⏰ **latency**: High (hours/days)
+- 📊 **throughput**: Alto (procesa mucho a la vez)
+- 💰 **Costo**: Menor (resources bajo demanda)
 - 🔧 **Complejidad**: Baja
 
 **Casos de uso**:
@@ -131,10 +131,10 @@ for event in consumer:
     process_event(event)  # Procesa cada evento
 ```
 
-**Características**:
-- ⏰ **Latencia**: Baja (segundos/milisegundos)
-- 📊 **Throughput**: Variable
-- 💰 **Costo**: Mayor (recursos 24/7)
+**features**:
+- ⏰ **latency**: Baja (segundos/milisegundos)
+- 📊 **throughput**: Variable
+- 💰 **Costo**: Mayor (resources 24/7)
 - 🔧 **Complejidad**: Alta
 
 **Casos de uso**:
@@ -145,7 +145,7 @@ for event in consumer:
 
 ### Mini-Batch (Micro-Batch)
 
-**Híbrido: Lotes pequeños frecuentes**
+**Hybrid: Frequent small batches**
 
 ```python
 # Ejemplo: Procesar cada 5 minutos
@@ -156,9 +156,9 @@ while True:
     time.sleep(300)  # 5 minutos
 ```
 
-**Características**:
-- ⏰ **Latencia**: Media (minutos)
-- 📊 **Throughput**: Alto
+**features**:
+- ⏰ **latency**: Media (minutos)
+- 📊 **throughput**: Alto
 - 💰 **Costo**: Medio
 - 🔧 **Complejidad**: Media
 
@@ -188,14 +188,14 @@ load(df, mode='replace')  # Reemplaza todo
 - ✅ No requiere tracking
 
 **Desventajas**:
-- ❌ Lento para tablas grandes
-- ❌ Alto uso de recursos
-- ❌ No escalable
+- ❌ Lento para tables grandes
+- ❌ Alto uso de resources
+- ❌ No scalable
 
-**Cuándo usar**:
-- Tablas pequeñas (< 1M rows)
+**When to use**:
+- small tables (< 1M rows)
 - Datos que cambian completamente
-- Dimension tables estáticas
+- Static dimension tables
 
 ### Incremental Load (Carga Incremental)
 
@@ -210,19 +210,19 @@ update_watermark(now())
 ```
 
 **Ventajas**:
-- ✅ Rápido
-- ✅ Eficiente en recursos
-- ✅ Escalable
+- ✅ Fast
+- ✅ Eficiente en resources
+- ✅ scalable
 
 **Desventajas**:
-- ❌ Más complejo
+- ❌ More complex
 - ❌ Requiere watermark/timestamp
 - ❌ Puede perder deletes
 
-**Cuándo usar**:
-- Tablas grandes
+**When to use**:
+- tables grandes
 - Alto volumen de inserts
-- Event logs, transacciones
+- Event logs, transactions
 
 ### Change Data Capture (CDC)
 
@@ -263,7 +263,7 @@ for change in changes:
 
 ### Idempotencia
 
-Un proceso es **idempotente** si ejecutarlo múltiples veces produce el mismo resultado:
+A process is **idempotent** if running it multiple times produces the same result:
 
 ```python
 # ❌ NO idempotente
@@ -275,15 +275,15 @@ df.to_sql('table', con, if_exists='replace')
 # Segunda ejecución → mismo resultado
 ```
 
-**Por qué es importante**:
+**Why it is important**:
 - Permite re-runs sin side effects
 - Facilita recovery de errores
 - Simplifica debugging
 
-**Cómo lograr idempotencia**:
+**How ​​to achieve idempotence**:
 - Usar `replace` en lugar de `append`
 - Implementar UPSERT (update or insert)
-- Usar transaction IDs únicos
+- Use unique transaction IDs
 - Limpiar staging antes de cargar
 
 ### Data Lineage (Linaje de Datos)
@@ -296,10 +296,10 @@ Source DB → Extract → Transform (join) → Load → Warehouse
  Table A    Raw CSV    Enriched CSV     Staging   Final Table
 ```
 
-**Por qué es importante**:
+**Why it is important**:
 - 🔍 Debugging: Rastrear errores a origen
-- 📊 Impact analysis: Qué afecta un cambio
-- 🔒 Compliance: Auditoría de datos
+- 📊 Impact analysis: What affects a change
+- 🔒 Compliance: Data audit
 - 📈 Optimization: Identificar cuellos de botella
 
 **Herramientas**:
@@ -324,9 +324,9 @@ df['phone'] = df.get('phone', None)  # Default si no existe
 ```
 
 **Tipos de cambios**:
-- ✅ **Additive**: Agregar columnas (safe)
+- ✅ **Additive**: Agregar columns (safe)
 - ⚠️ **Modification**: Cambiar tipos (risky)
-- ❌ **Removal**: Eliminar columnas (breaking)
+- ❌ **Removal**: Eliminar columns (breaking)
 
 **Best practices**:
 - Siempre agregar, nunca remover
@@ -336,11 +336,11 @@ df['phone'] = df.get('phone', None)  # Default si no existe
 
 ### Data Quality
 
-**Asegurar que datos sean correctos y útiles**:
+**Ensure that data is correct and useful**:
 
 **Dimensiones de calidad**:
 1. **Completeness**: Sin nulls donde no deben estar
-2. **Accuracy**: Valores correctos (email válido)
+2. **Accuracy**: Correct values ​​(valid email)
 3. **Consistency**: Formato consistente
 4. **Timeliness**: Datos frescos y actuales
 5. **Uniqueness**: Sin duplicados
@@ -355,7 +355,7 @@ assert ~df.duplicated('id').any(), "Duplicate IDs"
 
 ---
 
-## 🏗️ Arquitectura de Pipeline ETL
+## 🏗️ Arquitectura de pipeline ETL
 
 ### Componentes
 
@@ -399,11 +399,11 @@ assert ~df.duplicated('id').any(), "Duplicate IDs"
 
 ---
 
-## 📊 Métricas de ETL
+## 📊 ETL Metrics
 
 ### Performance Metrics
 
-- **Throughput**: Registros/segundo procesados
+- **throughput**: Registros/segundo procesados
 - **Latency**: Tiempo desde extract hasta load
 - **Duration**: Tiempo total del pipeline
 - **Resource Usage**: CPU, memory, network
@@ -413,7 +413,7 @@ assert ~df.duplicated('id').any(), "Duplicate IDs"
 - **Success Rate**: % de runs exitosos
 - **Data Freshness**: Edad de los datos
 - **Completeness**: % de campos poblados
-- **Accuracy**: % de registros válidos
+- **Accuracy**: % of valid records
 
 ### Business Metrics
 
@@ -479,4 +479,4 @@ metrics.increment('etl.success')
 
 ---
 
-Este documento cubre los conceptos fundamentales. Continúa con [02-patterns.md](./02-patterns.md) para patrones de implementación.
+This document covers the fundamental concepts. Continue with [02-patterns.md](./02-patterns.md) for implementation patterns.

@@ -1,8 +1,8 @@
 # Arquitectura de Batch Processing
 
-## 🏗️ Arquitectura de Pipeline Batch
+## 🏗️ Arquitectura de pipeline Batch
 
-### Componente Básico
+### Basic Component
 
 ```
 ┌────────────┐    ┌───────────┐    ┌──────────┐    ┌─────────┐
@@ -13,7 +13,7 @@
    APIs             Filter          Aggregate       Warehouse
 ```
 
-### Multi-Stage Pipeline
+### Multi-Stage pipeline
 
 ```
 ┌─────────┐
@@ -45,14 +45,14 @@
 
 ## 🚀 Apache Spark for Batch Processing
 
-### ¿Por Qué Spark?
+### Why Spark?
 
-**Spark** es el framework líder para batch processing distribuido:
+**Spark** is the leading framework for distributed batch processing:
 
-✅ **Distributed**: Procesa TB de datos en cluster  
-✅ **In-Memory**: 100x más rápido que MapReduce  
-✅ **Lazy Evaluation**: Optimiza execution plans  
-✅ **Fault Tolerant**: Automatic recovery  
+✅ **Distributed**: Procesa TB de datos en cluster
+✅ **In-Memory**: 100x faster than MapReduce
+✅ **Lazy Evaluation**: Optimiza execution plans
+✅ **Fault Tolerant**: Automatic recovery
 
 ### Spark Architecture
 
@@ -79,7 +79,7 @@
 **Componentes**:
 - **Driver**: Coordina el trabajo
 - **Executors**: Ejecutan tasks
-- **Cluster Manager**: Gestiona recursos (YARN, K8s, Mesos)
+- **Cluster Manager**: Gestiona resources (YARN, K8s, Mesos)
 
 ### Spark Core Concepts
 
@@ -101,7 +101,7 @@ rdd3 = rdd2.filter(lambda x: x > 5)
 result = rdd3.collect()  # [6, 8, 10]
 ```
 
-**Características RDD**:
+**features RDD**:
 - Immutable
 - Lazily evaluated
 - Fault-tolerant (lineage)
@@ -125,8 +125,8 @@ df_grouped.show()
 ```
 
 **Ventajas DataFrame**:
-- API más simple que RDD
-- Optimizaciones automáticas (Catalyst)
+- Simpler API than RDD
+- Automatic optimizations (Catalyst)
 - Schema enforcement
 
 #### Dataset API (Typed)
@@ -206,7 +206,7 @@ df.explain(True)
 
 ---
 
-## 🎯 Batch Pipeline Architectures
+## 🎯 Batch pipeline Architectures
 
 ### 1. Lambda Architecture
 
@@ -229,8 +229,8 @@ df.explain(True)
              └─────────────┘
 ```
 
-**Características**:
-- **Batch Layer**: Procesa todo el histórico (slow, accurate)
+**features**:
+- **Batch Layer**: Processes the entire history (slow, accurate)
 - **Speed Layer**: Procesa datos recientes (fast, approximate)
 - **Serving Layer**: Combina batch + speed views
 
@@ -239,7 +239,7 @@ df.explain(True)
 - ✅ Accurate (batch) + Fast (speed)
 
 **Desventajas**:
-- ❌ Duplicación de lógica (batch + stream)
+- ❌ Logic duplication (batch + stream)
 - ❌ Complejo de mantener
 
 ### 2. Kappa Architecture (Simplified Lambda)
@@ -261,11 +261,11 @@ df.explain(True)
 └──────────────┘
 ```
 
-**Filosofía**: Todo es stream (batch = bounded stream)
+**Philosophy**: Everything is stream (batch = bounded stream)
 
 **Ventajas**:
 - ✅ Single code path
-- ✅ Más simple que Lambda
+- ✅ Simpler than Lambda
 
 **Desventajas**:
 - ❌ Requiere streaming infrastructure
@@ -289,15 +289,15 @@ df.explain(True)
 └──────────────┘
 ```
 
-**Características**:
+**features**:
 - Solo batch processing
-- Latencia alta (hours)
-- Simple y económico
+- latency alta (hours)
+- Simple and economical
 
-**Cuándo usar**:
+**When to use**:
 - No necesitas real-time
 - Budget limitado
-- Equipo pequeño
+- small team
 
 ---
 
@@ -339,7 +339,7 @@ result = orders.join(users, "user_id", "left")
 ```
 
 **Optimizaciones**:
-- Broadcast join para tablas pequeñas
+- Broadcast join for small tables
 - Partition pruning
 - Predicate pushdown
 
@@ -363,7 +363,7 @@ top_per_category = df_ranked.filter(col("rank") <= 10)
 
 ---
 
-## 🔧 Optimización de Batch Jobs
+## 🔧 Batch Job Optimization
 
 ### 1. Partitioning
 
@@ -391,10 +391,10 @@ sum_amount = df_cached.agg({"amount": "sum"}).collect()
 df_cached.unpersist()
 ```
 
-**Cuándo cachear**:
+**When to search**:
 - Dataset usado > 1 vez
-- Después de transformaciones costosas
-- Antes de múltiples actions
+- After expensive transformations
+- Before multiple actions
 
 ### 3. Broadcast Join
 
@@ -408,7 +408,7 @@ small_df = spark.read.parquet("categories/")
 result = large_df.join(broadcast(small_df), "category_id")
 ```
 
-**Beneficio**: 10-100x faster para joins con tablas pequeñas
+**Benefit**: 10-100x faster for joins with small tables
 
 ### 4. Repartitioning
 
@@ -440,7 +440,7 @@ result = df1.join(df2, "id").filter(
 
 ## 📊 Batch Job Monitoring
 
-### Métricas Clave
+### Key Metrics
 
 ```python
 import time
@@ -449,15 +449,15 @@ from datetime import datetime
 def monitor_batch_job():
     start_time = time.time()
     start_dt = datetime.now()
-    
+
     # Process
     result = process_batch(df)
-    
+
     # Métricas
     duration = time.time() - start_time
     records_processed = result.count()
     throughput = records_processed / duration
-    
+
     # Log metrics
     metrics = {
         'timestamp': start_dt.isoformat(),
@@ -466,15 +466,15 @@ def monitor_batch_job():
         'throughput_records_per_sec': throughput,
         'status': 'SUCCESS'
     }
-    
+
     log_metrics(metrics)
     return result
 ```
 
-**Métricas a monitorear**:
+**Metrics to monitor**:
 - ⏱️ Duration
 - 📊 Records processed
-- 🚀 Throughput (records/sec)
+- 🚀 throughput (records/sec)
 - 💾 Data volume (GB)
 - ⚠️ Error rate
 - 💰 Cost
@@ -485,13 +485,13 @@ def monitor_batch_job():
 def process_with_alerts(df):
     try:
         result = process_batch(df)
-        
+
         # Check SLA
         if duration > SLA_THRESHOLD:
             alert("Batch job exceeded SLA", severity="WARNING")
-        
+
         return result
-        
+
     except Exception as e:
         alert(f"Batch job failed: {e}", severity="CRITICAL")
         raise
@@ -508,20 +508,20 @@ def resilient_batch():
     try:
         # Intenta procesar
         result = process_batch()
-        
+
         # Valida resultado
         if not validate(result):
             raise ValidationError("Data quality check failed")
-        
+
         return result
-        
+
     except Exception as e:
         # Log error
         logger.error(f"Batch failed: {e}")
-        
+
         # Cleanup
         cleanup_partial_output()
-        
+
         # Re-raise para alerting
         raise
 ```
@@ -531,16 +531,16 @@ def resilient_batch():
 ```python
 def batch_with_checkpoint(partitions):
     checkpoint_file = "checkpoint.json"
-    
+
     # Load checkpoint
     completed = load_checkpoint(checkpoint_file)
-    
+
     for partition in partitions:
         if partition in completed:
             continue  # Skip ya procesadas
-        
+
         process_partition(partition)
-        
+
         # Save checkpoint
         completed.add(partition)
         save_checkpoint(checkpoint_file, completed)
@@ -552,7 +552,7 @@ def batch_with_checkpoint(partitions):
 def idempotent_write(df, date):
     # Output path incluye fecha
     output_path = f"data/year={date.year}/month={date.month}/day={date.day}/"
-    
+
     # Overwrite partition (garantiza idempotencia)
     df.write.mode("overwrite").parquet(output_path)
 ```
@@ -564,15 +564,15 @@ def validated_batch(input_path, output_path):
     # Valida input existe
     if not input_exists(input_path):
         raise InputError(f"Input not found: {input_path}")
-    
+
     # Process
     df = spark.read.parquet(input_path)
     result = transform(df)
-    
+
     # Valida output
     assert result.count() > 0, "Empty output"
     assert not result.filter(col("id").isNull()).count(), "Null IDs"
-    
+
     # Write
     result.write.parquet(output_path)
 ```
@@ -594,4 +594,4 @@ sla_hours: 4
 
 ---
 
-Continúa con [03-resources.md](./03-resources.md) para herramientas y recursos.
+Continue with [03-resources.md](./03-resources.md) for tools and resources.

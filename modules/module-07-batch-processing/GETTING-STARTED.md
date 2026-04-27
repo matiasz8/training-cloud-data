@@ -104,7 +104,7 @@ cd exercises/03-pyspark-basics
 - Use window functions
 - Cache DataFrames for reuse
 
-#### Exercise 04: Batch ETL Pipeline (2-3 hours)
+#### Exercise 04: Batch ETL pipeline (2-3 hours)
 **Focus**: Complete batch pipeline with error handling
 
 ```bash

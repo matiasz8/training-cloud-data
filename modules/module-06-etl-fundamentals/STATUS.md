@@ -1,8 +1,8 @@
-# 📊 Estado del Módulo 06 - ETL Fundamentals
+# 📊 Status of Module 06 - ETL Fundamentals
 
-**Estado**: ✅ COMPLETADO (100%)  
-**Iniciado**: Marzo 7, 2026  
-**Completado**: Marzo 7, 2026  
+**Estado**: ✅ COMPLETADO (100%)
+**Iniciado**: Marzo 7, 2026
+**Completado**: Marzo 7, 2026
 
 ---
 
@@ -13,15 +13,15 @@ Progreso: 8/8 pasos (100%)
 [████████████] 100% ✅ COMPLETO
 ```
 
-**Pasos Completados**: 8/8  
+**Pasos Completados**: 8/8
 **Archivos Creados**: 75+
 
 ---
 
-## 🎯 Objetivos del Módulo
+## 🎯 Module Objectives
 
 - [x] Comprender conceptos fundamentales de ETL
-- [x] Extraer datos de múltiples fuentes
+- [x] Extract data from multiple sources
 - [x] Transformar datos con pandas
 - [x] Cargar datos a diferentes destinos
 - [x] Construir pipelines ETL completos
@@ -56,7 +56,7 @@ Progreso: 8/8 pasos (100%)
 ### ✅ Paso 5/8: Exercises 04-06 (Completo)
 - [x] 04-full-pipeline/ (pipeline completo)
 - [x] 05-error-handling/ (manejo de errores)
-- [x] 06-data-quality/ (validación de calidad)
+- [x] 06-data-quality/ (quality validation)
 
 ### ✅ Paso 6/8: Validation (Completo)
 - [x] conftest.py
@@ -77,12 +77,12 @@ Progreso: 8/8 pasos (100%)
 
 ---
 
-## 📊 Métricas
+## 📊 Metrics
 
-**Archivos**: 75+ archivos  
-**Tests**: 30+ tests  
-**Líneas de código**: ~8,000+  
-**Contenido**: ~20,000 palabras  
+**Archivos**: 75+ archivos
+**Tests**: 30+ tests
+**Lines of code**: ~8,000+
+**Contenido**: ~20,000 palabras
 
 ---
 

@@ -10,20 +10,20 @@ source:
 
 transform:
   drop_duplicates: true
-  
+
   drop_nulls:
     - id
     - email
-  
+
   filters:
     - column: status
       operator: in
       value: [active, pending]
-    
+
     - column: age
       operator: "!="
       value: null
-  
+
   columns:
     - id
     - email
@@ -33,7 +33,7 @@ transform:
     - country
     - status
     - created_at
-  
+
   add_metadata: true
 
 destination:

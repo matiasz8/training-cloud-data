@@ -5,28 +5,28 @@ Este directorio contiene esquemas y scripts para generar datos de batch processi
 ## 📦 Datasets Disponibles
 
 ### 1. Transactions (10M+ records)
-Transacciones de e-commerce con:
-- Timestamps distribuidos en 90 días
-- Múltiples categorías de productos
-- Diferentes métodos de pago
-- Países diversos
+transactions de e-commerce con:
+- Timestamps distributed in 90 days
+- Multiple product categories
+- Different payment methods
+- Diverse countries
 - Particionado por fecha (year/month/day)
 
 ### 2. Users (1M records)
 Perfiles de usuarios con:
 - Diferentes tiers (bronze, silver, gold, platinum)
-- Distribución geográfica
+- Geographic distribution
 - Niveles de actividad
-- Timestamps de creación
+- Creation timestamps
 
 ### 3. Products (100K records)
-Catálogo deproductos con:
-- 8 categorías diferentes
+Product catalog with:
+- 8 different categories
 - Marcas populares
 - Ratings y reviews
 - Niveles de stock
 
-## 🚀 Generación de Datos
+## 🚀 Data Generation
 
 ### Requisitos
 
@@ -34,7 +34,7 @@ Catálogo deproductos con:
 pip install pandas pyarrow tqdm
 ```
 
-### Generar Transacciones
+### Generar transactions
 
 ```bash
 # Default: 10M transactions, 90 days, Parquet format, date partitioned
@@ -51,8 +51,8 @@ python data/scripts/generate_transactions.py \
 ```
 
 **Opciones**:
-- `--total-records`: Número total de transacciones (default: 10M)
-- `--days`: Número de días a generar (default: 90)
+- `--total-records`: Total number of transactions (default: 10M)
+- `--days`: Number of days to generate (default: 90)
 - `--start-date`: Fecha de inicio YYYY-MM-DD (default: 2024-01-01)
 - `--format`: parquet, csv, json (default: parquet)
 - `--partition-by`: date o none (default: date)
@@ -71,10 +71,10 @@ data/raw/transactions/
 │   └── ...
 ```
 
-**Tamaño estimado**:
+**Estimated size**:
 - 10M records: ~500 MB (Parquet snappy)
 - 1M records: ~50 MB
-- CSV es ~5x más grande
+- CSV is ~5x larger
 
 ### Generar Usuarios
 
@@ -89,7 +89,7 @@ python data/scripts/generate_users.py \
   --output-path data/raw/users.parquet
 ```
 
-**Tamaño**: ~50 MB para 1M users (Parquet)
+**Size**: ~50 MB for 1M users (Parquet)
 
 ### Generar Productos
 
@@ -104,21 +104,21 @@ python data/scripts/generate_products.py \
   --output-path data/raw/products.parquet
 ```
 
-**Tamaño**: ~10 MB para 100K products (Parquet)
+**Size**: ~10 MB for 100K products (Parquet)
 
 ## 📊 Schemas
 
 Los schemas JSON en `schemas/` definen la estructura de cada dataset:
 
-- `transactions.json`: Schema de transacciones
+- `transactions.json`: Schema de transactions
 - `users.json`: Schema de usuarios
 - `products.json`: Schema de productos
 
-Úsalos para validación con tools como `jsonschema` o `pydantic`.
+Use them for validation with tools like`jsonschema` o `pydantic`.
 
 ## 💡 Tips
 
-### Generar Dataset Pequeño (Testing)
+### Generate Small Dataset (Testing)
 
 ```bash
 # 100K transactions para testing rápido
@@ -142,20 +142,20 @@ python data/scripts/generate_transactions.py \
 
 ### Formato Recomendado
 
-✅ **Parquet**: Formato columnar, comprimido, rápido
+✅ **Parquet**: Columnr format, compressed, fast
 - Usa `--format parquet` (default)
-- Compression automática (snappy)
+- Automatic compression (snappy)
 - Mejor para batch processing
 
-❌ **CSV**: Solo para exports pequeños
-- 5x más grande que Parquet
-- 10x más lento para leer
+❌ **CSV**: Only for small exports
+- 5x larger than Parquet
+- 10x slower to read
 - No recomendado para > 1M records
 
-## 🎯 Uso en Ejercicios
+## 🎯 Usage in Exercises
 
 ### Exercise 01: Batch Basics
-Usa dataset pequeño (100K records)
+Use small dataset (100K records)
 
 ### Exercise 02-03: Partitioning & PySpark
 Usa dataset mediano (1M-5M records)
@@ -167,11 +167,11 @@ Usa dataset grande (10M-50M records)
 
 Los scripts generan datos realistas con:
 
-- ✅ Distribuciones ponderadas (más "completed" que "failed")
+- ✅ Weighted distributions (more "completed" than "failed")
 - ✅ Correlaciones (tier alto → mayor gasto)
-- ✅ Timestamps realistas (más actividad en horario laboral)
-- ✅ Data integrity (foreign keys válidos)
-- ✅ Edge cases (algunas transacciones failed, users inactivos)
+- ✅ Realistic timestamps (more activity during business hours)
+- ✅ Data integrity (valid foreign keys)
+- ✅ Edge cases (algunas transactions failed, users inactivos)
 
 ## 📁 Estructura de Archivos
 
@@ -196,7 +196,7 @@ data/
 ## ⚠️ Notas
 
 1. **Data es git ignored**: Los archivos en `data/raw/` no se suben a git
-2. **Generación toma tiempo**: 10M records = ~10 minutos
+2. **Generation takes time**: 10M records = ~10 minutes
 3. **Espacio en disco**: 10M records = ~500 MB
 4. **Memoria**: Scripts usan batching, safe para RAM limitado
 

@@ -1,6 +1,6 @@
-# Exercise 04: Batch ETL Pipeline
+# Exercise 04: Batch ETL pipeline
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
 Construir un batch ETL pipeline completo con:
 - Extract from multiple sources
@@ -12,7 +12,7 @@ Construir un batch ETL pipeline completo con:
 
 ## 📚 Conceptos
 
-### Batch ETL Pipeline
+### Batch ETL pipeline
 
 ```
 ┌─────────────┐
@@ -30,7 +30,7 @@ Construir un batch ETL pipeline completo con:
 
 ### Idempotence
 
-Pipeline debe producir mismo resultado si se ejecuta múltiples veces:
+pipeline should produce same result if executed multiple times:
 
 ```python
 # ✅ Idempotent (overwrite mode)
@@ -40,9 +40,9 @@ df.write.mode("overwrite").partitionBy("date").parquet(path)
 df.write.mode("append").parquet(path)  # Creates duplicates!
 ```
 
-## 🏋️ Ejercicios
+## 🏋️ Exercises
 
-### Parte 1: ETL Pipeline Class
+### Parte 1: ETL pipeline Class
 
 **Archivo**: `starter/etl_pipeline.py`
 
@@ -51,42 +51,42 @@ class BatchETLPipeline:
     def __init__(self, spark: SparkSession, config: Dict):
         """Initialize pipeline with Spark and configuration."""
         pass
-    
+
     def extract(self) -> Dict[str, DataFrame]:
         """
         Extract data from sources.
-        
+
         Returns:
             Dictionary of DataFrames by source name
         """
         pass
-    
+
     def transform(self, sources: Dict[str, DataFrame]) -> DataFrame:
         """
         Apply business transformations.
-        
+
         Args:
             sources: Dict of source DataFrames
-            
+
         Returns:
             Transformed DataFrame
         """
         pass
-    
+
     def load(self, df: DataFrame, output_path: str):
         """
         Load data to destination with partitioning.
-        
+
         Args:
             df: DataFrame to write
             output_path: Output location
         """
         pass
-    
+
     def run(self, execution_date: str):
         """
         Run complete ETL pipeline for execution date.
-        
+
         Args:
             execution_date: Date to process (YYYY-MM-DD)
         """
@@ -109,15 +109,15 @@ class BusinessTransformations:
     ) -> DataFrame:
         """
         Enrich transactions with user and product data.
-        
+
         Joins:
         - transactions + users (on user_id)
         - result + products (on product_id)
-        
+
         Returns full enriched dataset
         """
         pass
-    
+
     @staticmethod
     def calculate_metrics(df: DataFrame) -> DataFrame:
         """
@@ -128,7 +128,7 @@ class BusinessTransformations:
         - is_high_value (amount > $1000)
         """
         pass
-    
+
     @staticmethod
     def apply_business_rules(df: DataFrame) -> DataFrame:
         """
@@ -150,15 +150,15 @@ class PipelineErrorHandler:
     def __init__(self, logger):
         self.logger = logger
         self.errors = []
-    
+
     def handle_extraction_error(self, source: str, error: Exception):
         """Handle errors during extraction."""
         pass
-    
+
     def handle_transformation_error(self, error: Exception):
         """Handle errors during transformation."""
         pass
-    
+
     def validate_output(self, df: DataFrame) -> bool:
         """
         Validate output before writing:
@@ -168,7 +168,7 @@ class PipelineErrorHandler:
         - Amount values in valid range
         """
         pass
-    
+
     def write_error_log(self, output_dir: str):
         """Write error log to file."""
         pass
@@ -182,23 +182,23 @@ class PipelineErrorHandler:
 class PipelineMetrics:
     def __init__(self):
         self.metrics = {}
-    
+
     def track_extract(self, source: str, record_count: int, duration: float):
         """Track extraction metrics."""
         pass
-    
+
     def track_transform(self, input_count: int, output_count: int, duration: float):
         """Track transformation metrics."""
         pass
-    
+
     def track_load(self, record_count: int, bytes_written: int, duration: float):
         """Track load metrics."""
         pass
-    
+
     def get_summary(self) -> Dict[str, Any]:
         """Get metrics summary."""
         pass
-    
+
     def write_metrics(self, output_path: str):
         """Write metrics to JSON file."""
         pass
@@ -218,11 +218,11 @@ sources:
     path: data/raw/transactions
     format: parquet
     partition_columns: [year, month, day]
-  
+
   users:
     path: data/raw/users.parquet
     format: parquet
-  
+
   products:
     path: data/raw/products.parquet
     format: parquet
@@ -245,7 +245,7 @@ validation:
     - transaction_id
     - user_id
     - amount
-  
+
   business_rules:
     max_amount: 10000
     min_amount: 0.01
@@ -343,24 +343,24 @@ with open('metrics.json', 'w') as f:
 def validate_dataframe(df, required_columns, max_amount):
     # Check non-empty
     assert df.count() > 0, "Empty DataFrame"
-    
+
     # Check required columns
     missing = set(required_columns) - set(df.columns)
     assert not missing, f"Missing columns: {missing}"
-    
+
     # Check business rules
     invalid_amounts = df.filter(
         (col("amount") < 0) | (col("amount") > max_amount)
     ).count()
     assert invalid_amounts == 0, f"Found {invalid_amounts} invalid amounts"
-    
+
     return True
 ```
 </details>
 
 ## 🎓 Learning Outcomes
 
-- ✅ Diseñar y implementar batch ETL pipelines completos
+- ✅ Design and implement complete batch ETL pipelines
 - ✅ Aplicar business logic en transformaciones
 - ✅ Implementar error handling robusto
 - ✅ Trackear metrics y monitoring
@@ -374,4 +374,4 @@ def validate_dataframe(df, required_columns, max_amount):
 
 ## ➡️ Next
 
-Continúa con [Exercise 05: Performance Optimization](../05-optimization/)
+Continue with [Exercise 05: Performance Optimization](../05-optimization/)

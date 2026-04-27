@@ -1,8 +1,8 @@
 # Exercise 06: Production Batch Jobs
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
-Preparar batch jobs para producción:
+Prepare batch jobs for production:
 - Job scheduling y orchestration
 - Monitoring y alerting
 - Failure recovery y retry logic
@@ -14,11 +14,11 @@ Preparar batch jobs para producción:
 
 ### Production Requirements
 
-✅ **Reliability**: Job debe completar exitosamente  
-✅ **Observability**: Logs, metrics, alerts  
-✅ **Recoverability**: Falla → retry → success  
-✅ **Maintainability**: Easy to debug and modify  
-✅ **Performance**: Cumple SLA  
+✅ **Reliability**: Job debe completar exitosamente
+✅ **Observability**: Logs, metrics, alerts
+✅ **Recoverability**: Falla → retry → success
+✅ **Maintainability**: Easy to debug and modify
+✅ **Performance**: Cumple SLA
 
 ### Production Job Lifecycle
 
@@ -28,7 +28,7 @@ Schedule → Start → Monitor → Complete → Validate → Alert
             Retry → Success / Dead Letter
 ```
 
-## 🏋️ Ejercicios
+## 🏋️ Exercises
 
 ### Parte 1: Production Job Framework
 
@@ -41,7 +41,7 @@ class ProductionBatchJob:
         self.logger = logger
         self.metrics = {}
         self.status = "NOT_STARTED"
-    
+
     def setup(self):
         """
         Setup resources:
@@ -51,36 +51,36 @@ class ProductionBatchJob:
         - Setup logging
         """
         pass
-    
+
     def run(self, execution_date: str) -> bool:
         """
         Run job with error handling.
-        
+
         Returns:
             True if successful, False otherwise
         """
         try:
             self.status = "RUNNING"
-            
+
             # Execute pipeline
             self.extract()
             self.transform()
             self.load()
-            
+
             # Validate output
             self.validate_output()
-            
+
             self.status = "SUCCESS"
             return True
-            
+
         except Exception as e:
             self.status = "FAILED"
             self.handle_failure(e)
             return False
-        
+
         finally:
             self.cleanup()
-    
+
     def validate_output(self):
         """
         Validate output data:
@@ -90,7 +90,7 @@ class ProductionBatchJob:
         - File sizes reasonable
         """
         pass
-    
+
     def cleanup(self):
         """
         Cleanup resources:
@@ -116,14 +116,14 @@ class RetryHandler:
     ):
         """
         Initialize retry handler with exponential backoff.
-        
+
         Args:
             max_retries: Maximum retry attempts
             backoff_factor: Multiplier for backoff (2.0 = exponential)
             max_backoff: Maximum backoff time in seconds
         """
         pass
-    
+
     def execute_with_retry(
         self,
         func: Callable,
@@ -132,7 +132,7 @@ class RetryHandler:
     ) -> Any:
         """
         Execute function with retry logic.
-        
+
         Backoff schedule:
         - Attempt 1: immediate
         - Attempt 2: wait 2 seconds
@@ -140,16 +140,16 @@ class RetryHandler:
         - Attempt 4: wait 8 seconds
         """
         pass
-    
+
     def is_retryable_error(self, error: Exception) -> bool:
         """
         Determine if error should trigger retry.
-        
+
         Retryable:
         - Network errors
         - Timeout errors
         - Temporary resource unavailable
-        
+
         Not retryable:
         - Data validation errors
         - Schema mismatches
@@ -168,11 +168,11 @@ class JobMonitor:
         self.job_name = job_name
         self.start_time = None
         self.metrics = {}
-    
+
     def start(self):
         """Mark job start and initialize metrics."""
         pass
-    
+
     def track_stage(
         self,
         stage_name: str,
@@ -181,16 +181,16 @@ class JobMonitor:
     ):
         """Track individual stage metrics."""
         pass
-    
+
     def check_sla(self, sla_minutes: int) -> bool:
         """
         Check if job is within SLA.
-        
+
         Returns:
             True if within SLA, False otherwise
         """
         pass
-    
+
     def send_alert(
         self,
         severity: str,
@@ -199,22 +199,22 @@ class JobMonitor:
     ):
         """
         Send alert to monitoring system.
-        
+
         Args:
             severity: INFO, WARNING, ERROR, CRITICAL
             message: Alert message
             details: Additional context
         """
         pass
-    
+
     def write_metrics_to_cloudwatch(self):
         """Write metrics to AWS CloudWatch (or equivalent)."""
         pass
-    
+
     def generate_run_report(self) -> Dict[str, Any]:
         """
         Generate comprehensive run report.
-        
+
         Returns:
             {
                 'job_name': str,
@@ -239,7 +239,7 @@ class DataQualityChecker:
     def __init__(self, spark: SparkSession):
         self.spark = spark
         self.checks = []
-    
+
     def check_record_count(
         self,
         df: DataFrame,
@@ -248,7 +248,7 @@ class DataQualityChecker:
     ) -> bool:
         """Verify record count is within expected range."""
         pass
-    
+
     def check_null_values(
         self,
         df: DataFrame,
@@ -257,7 +257,7 @@ class DataQualityChecker:
     ) -> bool:
         """Check null percentage in critical columns."""
         pass
-    
+
     def check_data_freshness(
         self,
         df: DataFrame,
@@ -266,7 +266,7 @@ class DataQualityChecker:
     ) -> bool:
         """Verify data is fresh (not too old)."""
         pass
-    
+
     def check_duplicates(
         self,
         df: DataFrame,
@@ -275,7 +275,7 @@ class DataQualityChecker:
     ) -> bool:
         """Check for duplicate records."""
         pass
-    
+
     def check_value_ranges(
         self,
         df: DataFrame,
@@ -283,7 +283,7 @@ class DataQualityChecker:
     ) -> bool:
         """
         Check values are within valid ranges.
-        
+
         Example:
             checks = {
                 'amount': (0, 10000),
@@ -291,7 +291,7 @@ class DataQualityChecker:
             }
         """
         pass
-    
+
     def run_all_checks(self, df: DataFrame) -> Dict[str, bool]:
         """Run all configured checks and return results."""
         pass
@@ -339,11 +339,11 @@ quality_checks:
   record_count:
     min: 100000
     max: 50000000
-  
+
   null_checks:
     columns: [transaction_id, user_id, amount]
     max_null_percent: 0.1
-  
+
   value_ranges:
     amount:
       min: 0.01
@@ -358,11 +358,11 @@ alerts:
   - condition: job_failed
     severity: CRITICAL
     notify: [slack, email]
-  
+
   - condition: sla_exceeded
     severity: WARNING
     notify: [slack]
-  
+
   - condition: quality_check_failed
     severity: ERROR
     notify: [slack, email]
@@ -419,7 +419,7 @@ def execute_with_retry(func, max_retries=3):
         except Exception as e:
             if attempt == max_retries - 1:
                 raise
-            
+
             wait_time = min(2 ** attempt, 300)  # Cap at 5 min
             logger.warning(f"Attempt {attempt + 1} failed, retrying in {wait_time}s")
             time.sleep(wait_time)
@@ -453,18 +453,18 @@ if duration_minutes > SLA_MINUTES:
 ```python
 def validate_output(df, config):
     errors = []
-    
+
     # Check count
     count = df.count()
     if count < config['min_count']:
         errors.append(f"Too few records: {count}")
-    
+
     # Check nulls
     for col in config['required_columns']:
         null_count = df.filter(df[col].isNull()).count()
         if null_count > 0:
             errors.append(f"Nulls in {col}: {null_count}")
-    
+
     if errors:
         raise ValueError(f"Quality checks failed: {errors}")
 ```
@@ -499,7 +499,7 @@ def publish_metrics(metrics):
 
 ## 🎓 Learning Outcomes
 
-- ✅ Diseñar jobs production-ready
+- ✅ Design production-ready jobs
 - ✅ Implementar retry logic robusto
 - ✅ Configurar monitoring y alerting
 - ✅ Implementar data quality checks
@@ -524,4 +524,4 @@ Has completado todos los ejercicios de Batch Processing. Ahora dominas:
 
 ## ➡️ Next Module
 
-Continúa con **Module 08: Streaming Basics**
+Continue with **Module 08: Streaming Basics**

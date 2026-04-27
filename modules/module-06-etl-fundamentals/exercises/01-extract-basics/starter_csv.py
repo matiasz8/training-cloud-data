@@ -14,13 +14,13 @@ from pathlib import Path
 def extract_users_csv(file_path: str) -> pd.DataFrame:
     """
     Extract user data from CSV file.
-    
+
     Args:
         file_path: Path to CSV file
-        
+
     Returns:
         DataFrame with user data
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         ValueError: If data is invalid
@@ -31,21 +31,21 @@ def extract_users_csv(file_path: str) -> pd.DataFrame:
     # - Handle encoding parameter
     # - Check for nulls in required columns
     # - Validate email format
-    
+
     raise NotImplementedError("TODO: Implement extract_users_csv")
 
 def main():
     """Test the extractor."""
     data_dir = Path(__file__).parents[2] / 'data' / 'raw'
     csv_file = data_dir / 'users_clean.csv'
-    
+
     print("Extracting users from CSV...")
     try:
         df = extract_users_csv(str(csv_file))
         print(f"✓ Extracted {len(df)} users")
-        print(f"\nFirst 5 users:")
+        print("\nFirst 5 users:")
         print(df.head())
-        print(f"\nData types:")
+        print("\nData types:")
         print(df.dtypes)
     except Exception as e:
         print(f"❌ Error: {e}")

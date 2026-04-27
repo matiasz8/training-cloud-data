@@ -75,19 +75,19 @@ if [ "$generate_data" = "y" ]; then
     echo ""
     echo "Generating sample data..."
     echo "(This may take 5-10 minutes)"
-    
+
     # Generate users (fast)
     echo "  → Generating users (1M records)..."
     python3 data/scripts/generate_users.py \
         --num-users 1000000 \
         --output-path data/raw/users.parquet
-    
+
     # Generate products (fast)
     echo "  → Generating products (100K records)..."
     python3 data/scripts/generate_products.py \
         --num-products 100000 \
         --output-path data/raw/products.parquet
-    
+
     # Generate transactions (slower)
     echo "  → Generating transactions (10M records, partitioned)..."
     python3 data/scripts/generate_transactions.py \
@@ -95,9 +95,9 @@ if [ "$generate_data" = "y" ]; then
         --days 90 \
         --partition-by date \
         --output-dir data/raw/transactions
-    
+
     echo "✓ Sample data generated"
-    
+
     # Show data summary
     echo ""
     echo "Data Summary:"

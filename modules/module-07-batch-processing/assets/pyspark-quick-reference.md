@@ -346,7 +346,7 @@ df.withColumn("category",
 from pyspark.sql.functions import expr
 
 df.withColumn("status", expr("""
-    CASE 
+    CASE
         WHEN amount > 1000 THEN 'high'
         WHEN amount > 100 THEN 'medium'
         ELSE 'low'

@@ -1,6 +1,6 @@
 # Exercise 01: Batch Processing Basics
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
 Aprender los fundamentos de batch processing:
 - Procesar archivos grandes que no caben en memoria
@@ -35,7 +35,7 @@ df['user_id'] = int32  # 4 bytes (suficiente para IDs)
 df['category'] = 'category'  # Muy eficiente para strings repetidos
 ```
 
-## 🏋️ Ejercicios
+## 🏋️ Exercises
 
 ### Parte 1: Basic Chunking
 
@@ -51,7 +51,7 @@ class BatchReader:
     def __init__(self, filepath: str, chunksize: int = 100000):
         """Initialize batch reader."""
         pass
-    
+
     def process_chunks(self, transform_fn) -> pd.DataFrame:
         """Process file in chunks and aggregate results."""
         pass
@@ -64,7 +64,7 @@ python starter/batch_reader.py
 
 **Esperado**:
 - Lee archivo en chunks de 100K
-- Aplica transformación a cada chunk
+- Apply transformation to each chunk
 - Retorna resultado agregado
 
 ### Parte 2: Memory Optimization
@@ -72,8 +72,8 @@ python starter/batch_reader.py
 **Archivo**: `starter/memory_optimizer.py`
 
 Implementa optimizaciones de memoria:
-1. Detecta tipos de datos óptimos
-2. Convierte dtypes automáticamente
+1. Detect optimal data types
+2. Convert dtypes automatically
 3. Reporta ahorro de memoria
 
 ```python
@@ -82,7 +82,7 @@ class MemoryOptimizer:
     def optimize_dtypes(df: pd.DataFrame) -> pd.DataFrame:
         """Optimize DataFrame dtypes to reduce memory usage."""
         pass
-    
+
     @staticmethod
     def memory_usage_mb(df: pd.DataFrame) -> float:
         """Calculate DataFrame memory usage in MB."""
@@ -97,7 +97,7 @@ python starter/memory_optimizer.py
 **Esperado**:
 - int64 → int32 cuando posible
 - object → category para strings repetidos
-- float64 → float32 cuando precision no crítica
+- float64 → float32 when precision not critical
 - Reporte de ahorro (ej: "Reduced from 500MB to 150MB")
 
 ### Parte 3: Progress Tracking
@@ -119,7 +119,7 @@ class BatchProcessor:
 - Progress bar con tqdm
 - ETA (tiempo estimado)
 - Records/second throughput
-- Logging de métricas
+- Metrics Logging
 
 ### Parte 4: Batch Aggregations
 
@@ -131,11 +131,11 @@ Implementa aggregations incrementales:
 class BatchAggregator:
     def __init__(self):
         self.results = {}
-    
+
     def add_chunk(self, chunk: pd.DataFrame):
         """Process chunk and update aggregations."""
         pass
-    
+
     def get_results(self) -> Dict[str, Any]:
         """Get final aggregated results."""
         pass
@@ -144,13 +144,13 @@ class BatchAggregator:
 **Aggregations a implementar**:
 - Total records
 - Sum de amounts
-- Count por categoría
+- Count by category
 - Average amount
 - Min/max amounts
 
 ## 📊 Dataset
 
-Usa el dataset de transacciones generado:
+Usa el dataset de transactions generado:
 
 ```bash
 # Genera dataset pequeño para testing
@@ -176,17 +176,17 @@ pytest test_batch_basics.py --cov=starter --cov-report=html
 ## 💡 Hints
 
 <details>
-<summary>Hint 1: Chunking básico</summary>
+<summary>Hint 1: Basic Chunking</summary>
 
 ```python
 def process_chunks(filepath, chunksize=100000):
     results = []
-    
+
     for chunk in pd.read_csv(filepath, chunksize=chunksize):
         # Process chunk
         result = process(chunk)
         results.append(result)
-    
+
     # Combine results
     return pd.concat(results, ignore_index=True)
 ```
@@ -199,7 +199,7 @@ def process_chunks(filepath, chunksize=100000):
 def optimize_ints(df, col):
     col_min = df[col].min()
     col_max = df[col].max()
-    
+
     if col_min >= 0:
         if col_max < 255:
             return 'uint8'
@@ -214,7 +214,7 @@ def optimize_ints(df, col):
             return 'int16'
         elif col_min > -2147483648 and col_max < 2147483647:
             return 'int32'
-    
+
     return 'int64'
 ```
 </details>
@@ -246,11 +246,11 @@ class Aggregator:
         self.count = 0
         self.sum = 0
         self.category_counts = {}
-    
+
     def add_chunk(self, chunk):
         self.count += len(chunk)
         self.sum += chunk['amount'].sum()
-        
+
         # Update category counts
         chunk_counts = chunk['category'].value_counts()
         for cat, count in chunk_counts.items():
@@ -260,8 +260,8 @@ class Aggregator:
 
 ## 🎓 Learning Outcomes
 
-Después de completar este ejercicio, sabrás:
-- ✅ Cómo procesar archivos > RAM con chunking
+After completing this exercise, you will know:
+- ✅ How to process files > RAM with chunking
 - ✅ Optimizar memory usage con dtypes correctos
 - ✅ Implementar progress tracking profesional
 - ✅ Hacer aggregations incrementales eficientemente
@@ -274,4 +274,4 @@ Después de completar este ejercicio, sabrás:
 
 ## ➡️ Next
 
-Continúa con [Exercise 02: Partitioning Strategies](../02-partitioning/)
+Continue with [Exercise 02: Partitioning Strategies](../02-partitioning/)

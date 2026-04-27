@@ -1,8 +1,8 @@
-# Patrones de Diseño ETL
+# ETL Design Patterns
 
 ## 🎨 Design Patterns
 
-### 1. Pipeline Pattern
+### 1. pipeline Pattern
 
 **Un flujo secuencial de transformaciones**:
 
@@ -16,25 +16,25 @@ def pipeline():
     load(df)
 ```
 
-**Características**:
-- Lineal y fácil de entender
+**features**:
+- Linear and easy to understand
 - Cada paso depende del anterior
-- Fácil de debuggear
+- Easy to debug
 
-**Cuándo usar**:
+**When to use**:
 - Transformaciones simples
 - Dependencies claras
 - Procesos batch
 
 ### 2. Fan-Out Pattern
 
-**Procesar múltiples destinos en paralelo**:
+**Process multiple targets in parallel**:
 
 ```python
 def fan_out():
     df = extract()
     df = transform(df)
-    
+
     # Cargar a múltiples destinos en paralelo
     with ThreadPoolExecutor() as executor:
         executor.submit(load_warehouse, df)
@@ -42,19 +42,19 @@ def fan_out():
         executor.submit(load_search, df)
 ```
 
-**Características**:
-- Parallelización
-- Múltiples consumers
+**features**:
+- Parallelization
+- Multiple consumers
 - Mejor performance
 
-**Cuándo usar**:
-- Múltiples destinos
+**When to use**:
+- Multiple destinations
 - Destinos independientes
 - High throughput necesario
 
 ### 3. Fan-In Pattern
 
-**Combinar datos de múltiples fuentes**:
+**Combine data from multiple sources**:
 
 ```python
 def fan_in():
@@ -63,25 +63,25 @@ def fan_in():
         future1 = executor.submit(extract_db1)
         future2 = executor.submit(extract_db2)
         future3 = executor.submit(extract_api)
-    
+
     # Combine
     df = pd.concat([
         future1.result(),
         future2.result(),
         future3.result()
     ])
-    
+
     transform_and_load(df)
 ```
 
-**Características**:
-- Múltiples sources
-- Consolidación de datos
+**features**:
+- Multiple sources
+- Data consolidation
 - Parallel extraction
 
-**Cuándo usar**:
-- Data from múltiples sistemas
-- Consolidación necesaria
+**When to use**:
+- Data from multiple systems
+- Necessary consolidation
 - Extract es cuello de botella
 
 ### 4. Map-Reduce Pattern
@@ -95,7 +95,7 @@ def map_reduce(files):
     # MAP: Procesar cada archivo en paralelo
     with Pool() as pool:
         results = pool.map(process_file, files)
-    
+
     # REDUCE: Combinar resultados
     final = pd.concat(results).groupby('key').sum()
     return final
@@ -105,51 +105,51 @@ def process_file(file):
     return df.groupby('key').sum()
 ```
 
-**Características**:
+**features**:
 - Divide y conquista
-- Paralelización masiva
-- Agregación final
+- Massive parallelization
+- Final aggregation
 
-**Cuándo usar**:
-- Grandes volúmenes
+**When to use**:
+- Large volumes
 - Procesamiento independiente
 - Agregaciones necesarias
 
 ### 5. Delta Import Pattern
 
-**Cargar solo cambios desde último run**:
+**Load only changes from last run**:
 
 ```python
 def delta_import():
     # Get watermark
     last_run = get_watermark()
-    
+
     # Extract solo nuevos
     df = extract_where(f"updated_at > '{last_run}'")
-    
+
     # Process
     transformed = transform(df)
-    
+
     # Load
     upsert(transformed)
-    
+
     # Update watermark
     set_watermark(datetime.now())
 ```
 
-**Características**:
+**features**:
 - Eficiente
 - Incremental
 - Requiere timestamp column
 
-**Cuándo usar**:
-- Tablas grandes
+**When to use**:
+- tables grandes
 - Updates frecuentes
 - Tiempos de ventana limitados
 
 ### 6. Slowly Changing Dimension (SCD)
 
-Track histórico de cambios en dimensions:
+Historical track of changes in dimensions:
 
 #### Type 1: Overwrite
 
@@ -170,16 +170,16 @@ def scd_type2(new_record):
     """Nueva fila - guarda historia completa"""
     # Cerrar fila actual
     update(f"""
-        UPDATE customers 
+        UPDATE customers
         SET valid_to = CURRENT_DATE, is_current = false
         WHERE customer_id = {new_record['id']} AND is_current = true
     """)
-    
+
     # Insertar nueva fila
     insert(f"""
-        INSERT INTO customers 
+        INSERT INTO customers
         (customer_id, name, address, valid_from, valid_to, is_current)
-        VALUES 
+        VALUES
         ({new_record['id']}, '{new_record['name']}', '{new_record['address']}',
          CURRENT_DATE, '9999-12-31', true)
     """)
@@ -192,7 +192,7 @@ def scd_type3(new_record):
     """Columnas adicionales - historia limitada"""
     update(f"""
         UPDATE customers
-        SET 
+        SET
             current_address = '{new_record['address']}',
             previous_address = current_address,
             last_updated = CURRENT_DATE
@@ -200,10 +200,10 @@ def scd_type3(new_record):
     """)
 ```
 
-**Cuándo usar cada tipo**:
+**When to use each type**:
 - **Type 1**: Correcciones, datos que no necesitan historia
-- **Type 2**: Audit trail completo, reporting histórico
-- **Type 3**: Historia limitada, columnas específicas
+- **Type 2**: Complete audit trail, historical reporting
+- **Type 3**: Limited history, specific columns
 
 ---
 
@@ -211,7 +211,7 @@ def scd_type3(new_record):
 
 ### Configuration-Driven ETL
 
-**Pipeline configurable vía config file**:
+**pipeline configurable via config file**:
 
 ```python
 # config.yaml
@@ -242,11 +242,11 @@ def run_etl(config):
     # Extract dinámico
     source = SourceFactory.create(config['source'])
     df = source.extract()
-    
+
     # Transform dinámico
     for transform in config['transformations']:
         df = apply_transform(df, transform)
-    
+
     # Load dinámico
     destination = DestinationFactory.create(config['destination'])
     destination.load(df)
@@ -255,7 +255,7 @@ def run_etl(config):
 **Ventajas**:
 - Reutilizable
 - No code changes para nuevos pipelines
-- Fácil de testear
+- Easy to test
 
 ### Template Method Pattern
 
@@ -272,24 +272,24 @@ class ETLPipeline(ABC):
         data = self.transform(data)
         self.load(data)
         self.cleanup()
-    
+
     @abstractmethod
     def extract(self):
         """Subclases implementan"""
         pass
-    
+
     @abstractmethod
     def transform(self, data):
         pass
-    
+
     @abstractmethod
     def load(self, data):
         pass
-    
+
     def setup(self):
         """Default implementation - puede override"""
         self.logger.info("Starting ETL")
-    
+
     def cleanup(self):
         self.logger.info("ETL completed")
 
@@ -297,11 +297,11 @@ class ETLPipeline(ABC):
 class UserETL(ETLPipeline):
     def extract(self):
         return pd.read_sql("SELECT * FROM users", self.conn)
-    
+
     def transform(self, data):
         data['email'] = data['email'].str.lower()
         return data
-    
+
     def load(self, data):
         data.to_parquet('users.parquet')
 ```
@@ -332,7 +332,7 @@ class AggregationStrategy(TransformStrategy):
 class ETLPipeline:
     def __init__(self, strategy: TransformStrategy):
         self.strategy = strategy
-    
+
     def run(self):
         df = self.extract()
         df = self.strategy.transform(df)  # Strategy aplicado
@@ -362,7 +362,7 @@ def extract_from_api():
 
 ### Circuit Breaker Pattern
 
-**Evitar requests a servicio que falla**:
+**Evitar requests a service que falla**:
 
 ```python
 from pybreaker import CircuitBreaker
@@ -388,7 +388,7 @@ except CircuitBreakerError:
 def process_records(records):
     successful = []
     failed = []
-    
+
     for record in records:
         try:
             processed = transform(record)
@@ -399,10 +399,10 @@ def process_records(records):
                 'error': str(e),
                 'timestamp': datetime.now()
             })
-    
+
     # Load successful
     load(successful)
-    
+
     # Save failed to DLQ
     save_to_dlq(failed)
 ```
@@ -419,7 +419,7 @@ def enrich_data(df):
     except Exception as e:
         logger.warning(f"API enrichment failed: {e}")
         # Continuar sin enrichment
-    
+
     # Resto del pipeline continúa
     return df
 ```
@@ -444,20 +444,20 @@ class UserRecord(BaseModel):
 def validate_and_load(records):
     valid = []
     invalid = []
-    
+
     for record in records:
         try:
             validated = UserRecord(**record)
             valid.append(validated.dict())
         except ValidationError as e:
             invalid.append({'record': record, 'errors': e.errors()})
-    
+
     return valid, invalid
 ```
 
 ### Data Profiling Pattern
 
-**Generar estadísticas de datos**:
+**Generate data statistics**:
 
 ```python
 def profile_data(df):
@@ -468,14 +468,14 @@ def profile_data(df):
         'unique_counts': df.nunique().to_dict(),
         'numeric_stats': df.describe().to_dict()
     }
-    
+
     # Save profile
     save_profile(profile)
-    
+
     # Check thresholds
     if profile['null_counts']['email'] > 100:
         raise DataQualityError("Too many null emails")
-    
+
     return profile
 ```
 
@@ -487,18 +487,18 @@ def profile_data(df):
 def reconcile():
     # Count source
     source_count = count_source_records()
-    
+
     # Count destination
     dest_count = count_dest_records()
-    
+
     # Compare
     if source_count != dest_count:
         alert(f"Mismatch: {source_count} source vs {dest_count} dest")
-        
+
     # Sample checking
     source_sample = get_source_sample()
     dest_sample = get_dest_sample()
-    
+
     if not samples_match(source_sample, dest_sample):
         alert("Sample data mismatch")
 ```
@@ -518,18 +518,18 @@ def transactional_load(df):
         with conn.begin():  # Transaction
             # Truncate staging
             conn.execute("TRUNCATE staging_table")
-            
+
             # Load to staging
             df.to_sql('staging_table', conn, if_exists='append')
-            
+
             # Validate
             validate_staging(conn)
-            
+
             # Swap tables
             conn.execute("ALTER TABLE main_table RENAME TO main_table_old")
             conn.execute("ALTER TABLE staging_table RENAME TO main_table")
             conn.execute("DROP TABLE main_table_old")
-            
+
             # Commit implícito al salir de with
     except Exception as e:
         # Rollback automático
@@ -539,17 +539,17 @@ def transactional_load(df):
 
 ### Staging Pattern
 
-**Cargar a staging antes de producción**:
+**Upload to staging before production**:
 
 ```python
 def staged_load(df):
     # Step 1: Load to staging
     df.to_sql('staging_users', conn, if_exists='replace')
-    
+
     # Step 2: Validate staging
     validate_counts('staging_users')
     validate_quality('staging_users')
-    
+
     # Step 3: Move to production
     conn.execute("""
         INSERT INTO users
@@ -559,7 +559,7 @@ def staged_load(df):
             email = EXCLUDED.email,
             updated_at = CURRENT_TIMESTAMP
     """)
-    
+
     # Step 4: Cleanup staging
     conn.execute("DROP TABLE staging_users")
 ```
@@ -579,15 +579,15 @@ class UserBuilder:
             'email': 'test@example.com',
             'age': 30
         }
-    
+
     def with_id(self, id):
         self.data['id'] = id
         return self
-    
+
     def with_invalid_email(self):
         self.data['email'] = 'invalid'
         return self
-    
+
     def build(self):
         return self.data
 
@@ -601,10 +601,10 @@ user = UserBuilder().with_id(123).with_invalid_email().build()
 def test_etl():
     # Arrange
     input_df = create_test_data()
-    
+
     # Act
     result = run_pipeline(input_df)
-    
+
     # Assert
     assert len(result) == len(input_df)
     assert result['email'].notnull().all()
@@ -624,10 +624,10 @@ def test_api_extraction():
             {'id': 1, 'name': 'User 1'},
             {'id': 2, 'name': 'User 2'}
         ]
-        
+
         # Test
         result = extract_from_api()
-        
+
         # Verify
         assert len(result) == 2
         mock_get.assert_called_once()
@@ -656,10 +656,10 @@ from concurrent.futures import ThreadPoolExecutor
 def parallel_load(dfs, workers=4):
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = [
-            executor.submit(load_partition, df, i) 
+            executor.submit(load_partition, df, i)
             for i, df in enumerate(dfs)
         ]
-        
+
         # Wait for all
         for future in futures:
             future.result()
@@ -678,4 +678,4 @@ def get_lookup_value(key):
 
 ---
 
-Continúa con [03-resources.md](./03-resources.md) para herramientas y recursos adicionales.
+Continue to [03-resources.md](./03-resources.md) for additional tools and resources.

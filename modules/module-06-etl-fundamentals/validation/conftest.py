@@ -34,7 +34,7 @@ def sample_users_df():
     """Create sample users DataFrame."""
     return pd.DataFrame({
         'id': [1, 2, 3, 4, 5],
-        'email': ['user1@test.com', 'user2@test.com', 'user3@test.com', 
+        'email': ['user1@test.com', 'user2@test.com', 'user3@test.com',
                   'user4@test.com', 'user5@test.com'],
         'first_name': ['John', 'Jane', 'Bob', 'Alice', 'Charlie'],
         'last_name': ['Doe', 'Smith', 'Johnson', 'Brown', 'Wilson'],
