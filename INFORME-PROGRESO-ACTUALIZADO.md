@@ -94,7 +94,7 @@ Módulos pendientes:       7
 
 ### 📝 **Módulo 04: Data Pipelines con Airflow** - 0%
 
-**Estado**: No iniciado  
+**Estado**: No iniciado
 
 **Descripción**: Orquestación de pipelines, DAGs, operadores, scheduling
 
@@ -302,4 +302,3 @@ cd modules/module-01-fundamentos-cloud
 ---
 
 *¿Deseas proceder con Opción A (finalizar Módulo 01), o prefieres otra ruta?*
-

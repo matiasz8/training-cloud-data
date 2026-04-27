@@ -13,44 +13,44 @@ graph TD
     M02[Module 02<br/>Storage Basics]
     M03[Module 03<br/>SQL Foundations]
     M04[Module 04<br/>Python for Data]
-    
+
     %% Core Tier 1
     M05[Module 05<br/>Data Lakehouse Architecture]
     M06[Module 06<br/>ETL Fundamentals]
-    
+
     %% Checkpoint 1
     CP01{Checkpoint 01<br/>Serverless Data Lake}
-    
+
     %% Core Tier 2
     M07[Module 07<br/>Batch Processing]
     M08[Module 08<br/>Streaming Basics]
     M09[Module 09<br/>Data Quality]
     M10[Module 10<br/>Workflow Orchestration]
-    
+
     %% Cloud-Native Tier
     M11[Module 11<br/>Infrastructure as Code]
     M12[Module 12<br/>Serverless Processing]
-    
+
     %% Checkpoint 2
     CP02{Checkpoint 02<br/>Real-time Analytics Platform}
-    
+
     %% Cloud-Native Continued
     M13[Module 13<br/>Container Orchestration]
     M14[Module 14<br/>Data Catalog & Governance]
-    
+
     %% Advanced Tier (Parallel Tracks)
     M15[Module 15<br/>Real-time Analytics]
     M16[Module 16<br/>Data Security & Compliance]
     M17[Module 17<br/>Cost Optimization]
     M18[Module 18<br/>Advanced Architectures]
-    
+
     %% Checkpoint 3
     CP03{Checkpoint 03<br/>Enterprise Data Lakehouse}
-    
+
     %% Bonus Modules
     B01[Bonus 01<br/>Databricks Lakehouse]
     B02[Bonus 02<br/>Snowflake Data Cloud]
-    
+
     %% Dependencies
     M02 --> M05
     M02 --> M06
@@ -61,7 +61,7 @@ graph TD
     M04 --> CP01
     M05 --> CP01
     M06 --> CP01
-    
+
     M02 --> M07
     M04 --> M07
     M05 --> M07
@@ -70,23 +70,23 @@ graph TD
     M04 --> M09
     M06 --> M09
     M06 --> M10
-    
+
     M01 --> M11
     M02 --> M11
     M06 --> M12
     M11 --> M12
-    
+
     M07 --> CP02
     M08 --> CP02
     M09 --> CP02
     M10 --> CP02
     M11 --> CP02
     M12 --> CP02
-    
+
     M11 --> M13
     M05 --> M14
     M09 --> M14
-    
+
     M08 --> M15
     M10 --> M15
     M01 --> M16
@@ -96,20 +96,20 @@ graph TD
     M07 --> M18
     M08 --> M18
     M14 --> M18
-    
+
     M13 --> CP03
     M14 --> CP03
     M15 --> CP03
     M16 --> CP03
     M17 --> CP03
     M18 --> CP03
-    
+
     %% Bonus
     M05 --> B01
     M07 --> B01
     M03 --> B02
     M06 --> B02
-    
+
     %% Styling
     classDef foundation fill:#e1f5ff,stroke:#01579b
     classDef core fill:#fff9c4,stroke:#f57f17
@@ -117,7 +117,7 @@ graph TD
     classDef advanced fill:#e8f5e9,stroke:#1b5e20
     classDef checkpoint fill:#ffccbc,stroke:#bf360c
     classDef bonus fill:#fce4ec,stroke:#880e4f
-    
+
     class M01,M02,M03,M04 foundation
     class M05,M06,M07,M08,M09,M10 core
     class M11,M12,M13,M14 cloudnative

@@ -98,7 +98,7 @@ fi
 # Run infrastructure validation
 if [ -d "validation/infrastructure" ]; then
     echo -e "${BLUE}🏗️  Running Infrastructure Validation...${NC}"
-    
+
     # Check for Terraform files
     if find validation/infrastructure -name "*.tf" | grep -q .; then
         echo "   Validating Terraform configurations..."
@@ -112,7 +112,7 @@ if [ -d "validation/infrastructure" ]; then
             FAILED_TESTS=$((FAILED_TESTS + 1))
         fi
     fi
-    
+
     # Check for YAML files
     if find validation/infrastructure -name "*.yaml" -o -name "*.yml" | grep -q .; then
         echo "   Validating YAML configurations..."
@@ -127,7 +127,7 @@ if [ -d "validation/infrastructure" ]; then
                 fi
             fi
         done
-        
+
         if $YAML_VALID; then
             TOTAL_TESTS=$((TOTAL_TESTS + 1))
             PASSED_TESTS=$((PASSED_TESTS + 1))

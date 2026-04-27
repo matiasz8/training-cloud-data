@@ -1,4 +1,4 @@
-.PHONY: help setup up down clean validate progress check-deps install-deps
+.PHONY: help setup up down clean validate progress check-deps install-deps validate-contract validate-language validate-all
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -30,6 +30,16 @@ clean: ## Stop services and remove volumes
 
 validate: ## Validate a specific module (usage: make validate MODULE=module-01-cloud-fundamentals)
 	@bash scripts/validate-module.sh $(MODULE)
+
+validate-contract: ## Validate module contracts (strict core + headings)
+	@python scripts/validate_learning_labs.py --strict-core --strict-headings
+
+validate-language: ## Validate English governance scope
+	@python scripts/validate_english_content.py
+
+validate-all: ## Run contract and language validators
+	@python scripts/validate_learning_labs.py --strict-core --strict-headings
+	@python scripts/validate_english_content.py
 
 progress: ## Show learning progress
 	@python scripts/progress.py

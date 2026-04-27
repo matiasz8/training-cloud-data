@@ -226,12 +226,167 @@ This gives you a complete reference implementation to replicate.
 
 ---
 
+## 🏗️ Phase 3: Governance & Automation (COMPLETE ✅)
+
+### Completed Deliverables
+
+#### 1. Governance Foundation ✅
+- ✅ `AGENTS.md` - Contrato portable de comportamiento de agentes (source of truth)
+- ✅ `CONTRIBUTING.md` - Guías de rama, commits, PRs y authoring de módulos
+- ✅ `docs/MODULE-CONTRACT-MATRIX.md` - Matriz de requisitos por tipo de módulo
+- ✅ `.github/PULL_REQUEST_TEMPLATE.md` - Checklist de validación para PRs
+- ✅ `.github/copilot-instructions.md` - Ruteo de invocaciones Copilot
+
+#### 2. Skills & Agents Scaffolding ✅
+- ✅ `.github/skills/cloud-data-module-standardization/SKILL.md` - Workflow de normalización
+- ✅ `.github/skills/cloud-data-english-standards/SKILL.md` - Enforce English-only governance
+- ✅ `.github/agents/cloud-data-structure-guardian.agent.md` - Revisión de drift estructural
+- ✅ `.github/agents/cloud-data-learning-path-guardian.agent.md` - Validación de atomicidad
+
+#### 3. Validation Implementation ✅
+- ✅ `scripts/validate_learning_labs.py` (~280 líneas) - Multi-gate validator (structure, headings, exercises)
+- ✅ `scripts/validate_english_content.py` (~200 líneas) - Validador de English-only + naming
+- ✅ `Makefile` targets: `validate-contract`, `validate-language`, `validate-all`
+- ✅ **Validation Status: PASS** (0 errores, 0 warnings)
+
+#### 4. Structural Normalization ✅
+- ✅ Normalización de 23 módulos a estructura canónica
+- ✅ Creación de 3 checkpoint READMEs raíz faltantes
+- ✅ Bootstrap de 119+ directorios de ejercicios (hints.md + my_solution/.gitkeep)
+- ✅ Heading normalization en 9 módulos (secciones English)
+- ✅ All modules now conform to MODULE-CONTRACT-MATRIX
+
+**Validation Results:**
+- Contract validation: ✅ EXIT CODE 0
+- English content validation: ✅ EXIT CODE 0
+- Module structures: ✅ ALL 23/23 COMPLIANT
+
+---
+
+## 📋 Phase 4-6: Next Steps (PENDING)
+
+### Phase 4: Pre-commit & CI Integration (Priority: 🔴 HIGH)
+**Goal:** Automatizar validación en pre-commit + GitHub Actions
+
+**Tasks:**
+- [ ] Crear `.pre-commit-config.yaml` en raíz training-cloud-data
+  - Integrar `validate_learning_labs.py` como pre-commit hook
+  - Integrar `validate_english_content.py` como pre-commit hook
+  - Configurar ejecución automática antes de commit
+
+- [ ] Crear `.github/workflows/validate-modules.yml` para CI/CD
+  - Ejecutar validators en cada PR contra `main`
+  - Bloquear merge si validación falla
+  - Generar reporte JSON + comentario automático en PR
+
+- [ ] Validar flujo end-to-end
+  - Test dry-run de PR flow con nuevos templates y gates
+  - Confirmar que validators se ejecutan automáticamente
+
+**Effort:** ~4-6 horas
+
+**Success Criteria:**
+- ✅ Pre-commit hooks ejecutan automáticamente
+- ✅ GitHub Actions workflow pasa en PRs válidas
+- ✅ GitHub Actions workflow falla + comenta en PRs inválidas
+
+---
+
+### Phase 5: Full English Content Migration (Priority: 🟡 MEDIUM)
+**Goal:** Eliminar contenido mixto español/inglés
+
+**Current State:**
+- 9 módulos tienen secciones English appended (contenido mixto)
+- Falta migración completa de contenidos heredados
+
+**Tasks:**
+- [ ] Revisar patrones de nan-ai-engineering-labs migration
+  - Estudiar cómo convertir archivos completamente a English
+  - Documentar playbook de conversión
+
+- [ ] Full content replacement en 9 módulos:
+  - `modules/module-XX-*/README.md` (contenido mixto → pure English)
+  - `modules/module-XX-*/theory/*.md` (si existen)
+  - `modules/module-XX-*/*/README.md` (recursivo)
+
+- [ ] Re-validate después de migration
+  - Ejecutar `make validate-all`
+  - Confirmar 0 hallazgos de idioma
+
+**Effort:** ~8-10 horas
+
+**Success Criteria:**
+- ✅ 0 archivos con contenido mixto
+- ✅ validate-language PASS (0 findings)
+- ✅ All heading groups en English
+
+---
+
+### Phase 6: Skills Playbook & Templates (Priority: 🟡 MEDIUM)
+**Goal:** Documentar cómo invocar skills/agents + template de nuevo módulo
+
+**Tasks:**
+- [ ] Crear `docs/SKILLS-PLAYBOOK.md`
+  - Cómo invocar `cloud-data-module-standardization` skill
+  - Cómo invocar `cloud-data-english-standards` skill
+  - Ejemplos paso-a-paso
+  - Troubleshooting común
+
+- [ ] Crear `shared/templates/NEW-MODULE-TEMPLATE/`
+  - Estructura canónica lista para copiar
+  - README.md preformato con secciones obligatorias
+  - Exercise XX-template/ con structure de ejemplo
+  - Scripts setup.sh + validate.sh minimalistas
+
+- [ ] Documentar authoring guidelines en CONTRIBUTING.md
+  - Cuándo usar `cloud-data-module-standardization`
+  - Cuándo usar `cloud-data-english-standards`
+  - Referencia a MODULE-CONTRACT-MATRIX
+
+- [ ] Create "New Module Quickstart"
+  - One-command module generation
+  - Scaffold with pre-commit hooks + validation gates ready
+
+**Effort:** ~6-8 horas
+
+**Success Criteria:**
+- ✅ New author puede crear módulo en <30 min
+- ✅ Playbook tiene ejemplos reales
+- ✅ Template es actualizado y conforma a contract
+
+---
+
+### Phase 7: Extended Learner Tracking (Priority: 🟢 LOW, Optional)
+**Goal:** Extender tracking beyond file-system scan
+
+**Tasks:**
+- [ ] Extender `scripts/progress.py` para tracked learner state
+  - Leer completion marks desde cada módulo
+  - Integrar prerequisite enforcement
+  - Generar dashboard JSON
+
+- [ ] Opcional: Crear learner dashboard
+  - Frontend HTML/JS simple
+  - Mostrar progreso por estudiante + completion %
+  - Highlight prerequisites not yet completed
+
+**Effort:** ~8-12 horas (optional)
+
+**Success Criteria:**
+- ✅ Progress tracking incluye learner state (no solo file scan)
+- ✅ Prerequisites enforcement implementado en validation
+
+---
+
 ## 📊 Current Statistics
 
 - **Modules Created:** 23/23 ✅
 - **Infrastructure Code:** 100% ✅
 - **Automation Scripts:** 100% ✅
-- **Documentation Framework:** 80% ✅
+- **Governance Foundation:** 100% ✅ (NEW)
+- **Validators:** 100% ✅ (NEW)
+- **Module Structural Compliance:** 100% ✅ (NEW)
+- **Documentation Framework:** 80% ⚠️ (mixed language pending)
 - **Module Content:** ~5% ⚠️
 - **Ready for Learning:** 30% (infrastructure + system ready, content pending)
 
@@ -239,21 +394,66 @@ This gives you a complete reference implementation to replicate.
 
 ## 🎓 Conclusion
 
-**You have successfully built a professional-grade learning system infrastructure!**
+**¡Has construído exitosamente un sistema profesional de aprendizaje con governance & automatización!**
 
-What exists:
-- ✅ Complete module structure
-- ✅ All automation and tooling
-- ✅ Docker environment
-- ✅ Progress tracking
-- ✅ Validation framework
-- ✅ Comprehensive documentation
+### What Exists (Infrastructure ✅):
+- ✅ Complete module structure (23 módulos totalmente normalized)
+- ✅ All automation and tooling (scripts, docker, makefile)
+- ✅ Docker environment (8 services, docker-compose)
+- ✅ Progress tracking (scripts/progress.py)
+- ✅ Validation framework (2 validators, multi-gate system)
+- ✅ Comprehensive documentation (9 docs files)
+- ✅ **NEW:** Governance foundation (AGENTS.md, CONTRIBUTING.md, contracts)
+- ✅ **NEW:** Skills & Agents scaffolding (4 files, ready for detailed implementation)
+- ✅ **NEW:** Structural compliance (100% of 23 modules conforming to contract)
 
-What's needed:
+### What's Needed (Content + Advanced Automation):
 - ⚠️ Content population (exercises, theory, tests)
-
-**The system is production-ready from an infrastructure perspective. The next phase is content creation, which can be done incrementally module by module.**
+- ⚠️ Pre-commit + CI automation (Phase 4)
+- ⚠️ Full English content migration (Phase 5)
+- ⚠️ Skills playbook & templates (Phase 6)
+- 🟢 Optional: Extended learner tracking (Phase 7)
 
 ---
 
-**Recommendation:** Start with Module 01 complete implementation, then use it as a template for rapid content creation across all other modules. The infrastructure you've built is solid and scalable.
+### 🚀 Recommended Next Steps (by Priority)
+
+**Immediate (High Priority - 4-6 hours):**
+1. **Phase 4: Pre-commit & CI Integration** ← Bloquea merges automáticamente
+   - Agregar `.pre-commit-config.yaml`
+   - Crear `.github/workflows/validate-modules.yml`
+   - Test dry-run de PR flow completo
+
+**Short-term (Medium Priority - 8-16 hours):**
+2. **Phase 5: Full English Migration** ← Limpia contenido mixto
+   - Reemplazar 9 módulos con contenido mixto
+   - Re-validate que todos pasen
+
+3. **Phase 6: Skills Playbook & Templates** ← Habilita autonomía
+   - Documentar cómo invocar skills
+   - Crear template de nuevo módulo
+   - One-command module generation
+
+**Long-term (Low Priority - Content Phase):**
+4. **Module 01-04 Content Population** ← Templates para resto
+   - Theory, exercises, validation, infrastructure
+   - Use como reference para remaining modules
+
+---
+
+**The system is production-ready from an infrastructure perspective. The governance + validation gates are now in place to ensure quality as content is added incrementally, module by module.**
+
+---
+
+## 📅 Session Summary (April 26, 2026)
+
+**Esta sesión completó:**
+- ✅ Análisis comparativo de 3 repos (nan-python, nan-ai, training-cloud-data)
+- ✅ Creación de governance base (5 archivos)
+- ✅ Definición de skills (2 archivos con gates)
+- ✅ Definición de agents (2 archivos)
+- ✅ Implementación de validadores (2 scripts Python, ~500 líneas)
+- ✅ Normalización estructural de 23 módulos (122+ archivos)
+- ✅ Validación exitosa (EXIT CODE 0, 0 errores, 0 warnings)
+
+**Commits ready for:** `122+ files created/modified | Phase 3 Complete: Governance & Automation`

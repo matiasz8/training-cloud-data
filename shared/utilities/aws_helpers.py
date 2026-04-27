@@ -7,25 +7,25 @@ via boto3, with support for LocalStack endpoints.
 
 import boto3
 import os
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, List
 from pathlib import Path
 import json
 
 
 class AWSClientFactory:
     """Factory for creating AWS clients with LocalStack support."""
-    
+
     @staticmethod
-    def get_client(service_name: str, use_localstack: bool = True, 
+    def get_client(service_name: str, use_localstack: bool = True,
                    region_name: str = 'us-east-1') -> boto3.client:
         """
         Create AWS client with optional LocalStack endpoint.
-        
+
         Args:
             service_name: AWS service name (e.g., 's3', 'lambda', 'dynamodb')
             use_localstack: Whether to use LocalStack endpoint
             region_name: AWS region
-            
+
         Returns:
             boto3 client
         """
@@ -34,13 +34,13 @@ class AWSClientFactory:
             'aws_access_key_id': os.getenv('AWS_ACCESS_KEY_ID', 'test'),
             'aws_secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
         }
-        
+
         if use_localstack:
             endpoint_url = os.getenv('LOCALSTACK_ENDPOINT', 'http://localhost:4566')
             config['endpoint_url'] = endpoint_url
-        
+
         return boto3.client(service_name, **config)
-    
+
     @staticmethod
     def get_resource(service_name: str, use_localstack: bool = True,
                     region_name: str = 'us-east-1') -> boto3.resource:
@@ -50,21 +50,21 @@ class AWSClientFactory:
             'aws_access_key_id': os.getenv('AWS_ACCESS_KEY_ID', 'test'),
             'aws_secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
         }
-        
+
         if use_localstack:
             endpoint_url = os.getenv('LOCALSTACK_ENDPOINT', 'http://localhost:4566')
             config['endpoint_url'] = endpoint_url
-        
+
         return boto3.resource(service_name, **config)
 
 
 class S3Helper:
     """Helper functions for S3 operations."""
-    
+
     def __init__(self, use_localstack: bool = True):
         self.s3_client = AWSClientFactory.get_client('s3', use_localstack)
         self.s3_resource = AWSClientFactory.get_resource('s3', use_localstack)
-    
+
     def create_bucket(self, bucket_name: str) -> bool:
         """Create S3 bucket if it doesn't exist."""
         try:
@@ -77,7 +77,7 @@ class S3Helper:
         except Exception as e:
             print(f"✗ Failed to create bucket {bucket_name}: {e}")
             return False
-    
+
     def upload_file(self, file_path: Path, bucket: str, key: str) -> bool:
         """Upload file to S3."""
         try:
@@ -87,7 +87,7 @@ class S3Helper:
         except Exception as e:
             print(f"✗ Upload failed: {e}")
             return False
-    
+
     def download_file(self, bucket: str, key: str, local_path: Path) -> bool:
         """Download file from S3."""
         try:
@@ -97,7 +97,7 @@ class S3Helper:
         except Exception as e:
             print(f"✗ Download failed: {e}")
             return False
-    
+
     def list_objects(self, bucket: str, prefix: str = '') -> List[str]:
         """List objects in S3 bucket with optional prefix."""
         try:
@@ -108,7 +108,7 @@ class S3Helper:
         except Exception as e:
             print(f"✗ List objects failed: {e}")
             return []
-    
+
     def delete_bucket(self, bucket_name: str, force: bool = False) -> bool:
         """Delete S3 bucket (optionally force delete with contents)."""
         try:
@@ -116,7 +116,7 @@ class S3Helper:
                 # Delete all objects first
                 bucket = self.s3_resource.Bucket(bucket_name)
                 bucket.objects.all().delete()
-            
+
             self.s3_client.delete_bucket(Bucket=bucket_name)
             print(f"✓ Deleted bucket: {bucket_name}")
             return True
@@ -127,11 +127,11 @@ class S3Helper:
 
 class LambdaHelper:
     """Helper functions for Lambda operations."""
-    
+
     def __init__(self, use_localstack: bool = True):
         self.lambda_client = AWSClientFactory.get_client('lambda', use_localstack)
-    
-    def create_function(self, function_name: str, role_arn: str, 
+
+    def create_function(self, function_name: str, role_arn: str,
                        handler: str, runtime: str, zip_file: Path) -> Optional[str]:
         """Create Lambda function."""
         try:
@@ -149,7 +149,7 @@ class LambdaHelper:
         except Exception as e:
             print(f"✗ Create function failed: {e}")
             return None
-    
+
     def invoke_function(self, function_name: str, payload: Dict) -> Optional[Dict]:
         """Invoke Lambda function."""
         try:
@@ -168,12 +168,12 @@ class LambdaHelper:
 
 class DynamoDBHelper:
     """Helper functions for DynamoDB operations."""
-    
+
     def __init__(self, use_localstack: bool = True):
         self.dynamodb = AWSClientFactory.get_resource('dynamodb', use_localstack)
         self.dynamodb_client = AWSClientFactory.get_client('dynamodb', use_localstack)
-    
-    def create_table(self, table_name: str, key_schema: List[Dict], 
+
+    def create_table(self, table_name: str, key_schema: List[Dict],
                     attribute_definitions: List[Dict]) -> bool:
         """Create DynamoDB table."""
         try:
@@ -189,7 +189,7 @@ class DynamoDBHelper:
         except Exception as e:
             print(f"✗ Create table failed: {e}")
             return False
-    
+
     def put_item(self, table_name: str, item: Dict) -> bool:
         """Put item in DynamoDB table."""
         try:
@@ -199,7 +199,7 @@ class DynamoDBHelper:
         except Exception as e:
             print(f"✗ Put item failed: {e}")
             return False
-    
+
     def scan_table(self, table_name: str) -> List[Dict]:
         """Scan all items from DynamoDB table."""
         try:
@@ -213,11 +213,11 @@ class DynamoDBHelper:
 
 class GlueHelper:
     """Helper functions for AWS Glue operations."""
-    
+
     def __init__(self, use_localstack: bool = True):
         # Note: Glue is not in LocalStack Community - will need Pro or mocking
         self.glue_client = AWSClientFactory.get_client('glue', use_localstack)
-    
+
     def create_database(self, database_name: str, description: str = "") -> bool:
         """Create Glue catalog database."""
         try:
@@ -255,4 +255,4 @@ def setup_aws_credentials(profile_name: str = 'localstack'):
     os.environ['AWS_ACCESS_KEY_ID'] = 'test'
     os.environ['AWS_SECRET_ACCESS_KEY'] = 'test'
     os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
-    print(f"✓ AWS credentials configured for LocalStack")
+    print("✓ AWS credentials configured for LocalStack")

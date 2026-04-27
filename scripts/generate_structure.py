@@ -6,9 +6,8 @@ This script creates all 23 modules (18 regular + 3 checkpoints + 2 bonus)
 with the appropriate folder structure based on module type.
 """
 
-import os
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -20,40 +19,40 @@ MODULES = [
     {"id": "02", "name": "storage-basics", "type": "regular", "prerequisites": []},
     {"id": "03", "name": "sql-foundations", "type": "regular", "prerequisites": []},
     {"id": "04", "name": "python-for-data", "type": "regular", "prerequisites": []},
-    
+
     # Core Tier
     {"id": "05", "name": "data-lakehouse-architecture", "type": "regular", "prerequisites": ["02"]},
     {"id": "06", "name": "etl-fundamentals", "type": "regular", "prerequisites": ["02", "04"]},
-    
+
     # Checkpoint 01 - Serverless Data Lake
     {"id": "checkpoint-01", "name": "serverless-data-lake", "type": "checkpoint", "prerequisites": ["01", "02", "03", "04", "05", "06"]},
-    
+
     # Core Tier Continued
     {"id": "07", "name": "batch-processing", "type": "regular", "prerequisites": ["02", "04", "05"]},
     {"id": "08", "name": "streaming-basics", "type": "regular", "prerequisites": ["04", "06"]},
     {"id": "09", "name": "data-quality", "type": "regular", "prerequisites": ["04", "06"]},
     {"id": "10", "name": "workflow-orchestration", "type": "regular", "prerequisites": ["06"]},
-    
+
     # Cloud-Native Tier
     {"id": "11", "name": "infrastructure-as-code", "type": "regular", "prerequisites": ["01", "02"]},
     {"id": "12", "name": "serverless-processing", "type": "regular", "prerequisites": ["06", "11"]},
-    
+
     # Checkpoint 02 - Real-time Analytics Platform
     {"id": "checkpoint-02", "name": "realtime-analytics-platform", "type": "checkpoint", "prerequisites": ["07", "08", "09", "10", "11", "12"]},
-    
+
     # Cloud-Native Continued
     {"id": "13", "name": "container-orchestration", "type": "regular", "prerequisites": ["11"]},
     {"id": "14", "name": "data-catalog-governance", "type": "regular", "prerequisites": ["05", "09"]},
-    
+
     # Advanced Tier (Parallel tracks - no mutual dependencies)
     {"id": "15", "name": "real-time-analytics", "type": "regular", "prerequisites": ["08", "10"], "parallel_track": "A"},
     {"id": "16", "name": "data-security-compliance", "type": "regular", "prerequisites": ["01", "14"], "parallel_track": "B"},
     {"id": "17", "name": "cost-optimization", "type": "regular", "prerequisites": ["11"], "parallel_track": "C"},
     {"id": "18", "name": "advanced-architectures", "type": "regular", "prerequisites": ["05", "07", "08", "14"]},
-    
+
     # Checkpoint 03 - Enterprise Data Lakehouse
     {"id": "checkpoint-03", "name": "enterprise-data-lakehouse", "type": "checkpoint", "prerequisites": ["13", "14", "15", "16", "17", "18"]},
-    
+
     # Bonus Modules (Optional)
     {"id": "bonus-01", "name": "databricks-lakehouse", "type": "bonus", "prerequisites": ["05", "07"]},
     {"id": "bonus-02", "name": "snowflake-data-cloud", "type": "bonus", "prerequisites": ["03", "06"]},
@@ -75,7 +74,7 @@ def create_regular_module_structure(module_path: Path):
         "scripts",
         "assets/diagrams",
     ]
-    
+
     for folder in folders:
         (module_path / folder).mkdir(parents=True, exist_ok=True)
         # Create .gitkeep to preserve empty folders
@@ -100,7 +99,7 @@ def create_checkpoint_structure(module_path: Path):
         "validation/acceptance-tests",
         "extensions",
     ]
-    
+
     for folder in folders:
         (module_path / folder).mkdir(parents=True, exist_ok=True)
         (module_path / folder / ".gitkeep").touch()
@@ -117,7 +116,7 @@ def create_bonus_module_structure(module_path: Path):
         "scripts",
         "assets",
     ]
-    
+
     for folder in folders:
         (module_path / folder).mkdir(parents=True, exist_ok=True)
         (module_path / folder / ".gitkeep").touch()
@@ -128,7 +127,7 @@ def create_module_readme(module_path: Path, module: Dict):
     module_id = module["id"]
     module_name = module["name"].replace("-", " ").title()
     module_type = module["type"]
-    
+
     if module_type == "regular":
         content = f"""# Module {module_id}: {module_name}
 
@@ -142,10 +141,10 @@ def create_module_readme(module_path: Path, module: Dict):
                 content += f"- ✅ Module {prereq} must be completed (100%)\n"
         else:
             content += "- None - This is a foundation module\n"
-        
+
         if module.get("parallel_track"):
             content += f"\n**Note:** This module is part of parallel track {module['parallel_track']} and can be completed alongside other parallel modules.\n"
-        
+
         content += """
 
 ## Module Overview
@@ -224,11 +223,11 @@ make validate MODULE=module-{module_id}-{module["name"]}
 After completing this module, you'll be ready for:
 [List of modules that depend on this one]
 """
-    
+
     elif module_type == "checkpoint":
         content = f"""# Checkpoint {module_id}: {module_name}
 
-🎯 **Project Type:** Integration Checkpoint  
+🎯 **Project Type:** Integration Checkpoint
 ⏱️ **Estimated Time:** TBD hours
 
 ## Prerequisites
@@ -237,7 +236,7 @@ After completing this module, you'll be ready for:
 """
         for prereq in module.get("prerequisites", []):
             content += f"- ✅ Module {prereq}\n"
-        
+
         content += """
 
 ## Project Overview
@@ -304,12 +303,12 @@ See `validation/certification-practice-questions.md` for exam-style questions re
 
 Complete `validation/rubric.md` to evaluate your solution against industry standards.
 """
-    
+
     else:  # bonus
         content = f"""# Bonus Module {module_id}: {module_name}
 
-🎁 **Type:** Optional Bonus Module  
-☁️ **Platform:** Cloud-Managed Service  
+🎁 **Type:** Optional Bonus Module
+☁️ **Platform:** Cloud-Managed Service
 ⏱️ **Estimated Time:** TBD hours
 
 ## Prerequisites
@@ -318,7 +317,7 @@ Complete `validation/rubric.md` to evaluate your solution against industry stand
         if module.get("prerequisites"):
             for prereq in module["prerequisites"]:
                 content += f"- Module {prereq}\n"
-        
+
         content += """
 
 ## ⚠️ Important Notes
@@ -350,7 +349,7 @@ Complete `validation/rubric.md` to evaluate your solution against industry stand
 
 See `theory/resources.md` for platform-specific documentation and tutorials.
 """
-    
+
     (module_path / "README.md").write_text(content)
 
 
@@ -358,16 +357,16 @@ def generate_all_modules():
     """Generate all module structures."""
     modules_dir = PROJECT_ROOT / "modules"
     modules_dir.mkdir(exist_ok=True)
-    
+
     print("🚀 Generating Cloud Data Engineering module structure...\n")
-    
+
     for module in MODULES:
         module_folder = f"module-{module['id']}-{module['name']}"
         module_path = modules_dir / module_folder
-        
+
         print(f"📁 Creating {module_folder}...")
         module_path.mkdir(exist_ok=True)
-        
+
         # Create appropriate structure based on type
         if module["type"] == "regular":
             create_regular_module_structure(module_path)
@@ -375,12 +374,12 @@ def generate_all_modules():
             create_checkpoint_structure(module_path)
         else:  # bonus
             create_bonus_module_structure(module_path)
-        
+
         # Create README
         create_module_readme(module_path, module)
-        
+
         print(f"   ✓ {module['type'].capitalize()} module structure created")
-    
+
     print(f"\n✅ Successfully generated {len(MODULES)} modules!")
     print(f"   - Regular modules: {sum(1 for m in MODULES if m['type'] == 'regular')}")
     print(f"   - Checkpoints: {sum(1 for m in MODULES if m['type'] == 'checkpoint')}")

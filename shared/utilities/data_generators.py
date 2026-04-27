@@ -13,7 +13,6 @@ import numpy as np
 from datetime import datetime, timedelta
 from faker import Faker
 import random
-from typing import List, Optional
 from pathlib import Path
 
 
@@ -22,7 +21,7 @@ fake = Faker()
 
 class IoTDataGenerator:
     """Generate synthetic IoT sensor data."""
-    
+
     @staticmethod
     def generate_sensor_readings(
         num_records: int = 10000,
@@ -32,13 +31,13 @@ class IoTDataGenerator:
     ) -> pd.DataFrame:
         """
         Generate IoT sensor readings dataset.
-        
+
         Args:
             num_records: Number of records to generate
             num_devices: Number of unique devices
             start_date: Start datetime
             end_date: End datetime
-            
+
         Returns:
             DataFrame with sensor readings
         """
@@ -46,11 +45,11 @@ class IoTDataGenerator:
             start_date = datetime.now() - timedelta(days=30)
         if end_date is None:
             end_date = datetime.now()
-        
+
         device_ids = [f"DEVICE_{i:05d}" for i in range(num_devices)]
         device_types = ['temperature', 'humidity', 'pressure', 'vibration', 'light']
         locations = ['warehouse_A', 'warehouse_B', 'factory_1', 'factory_2', 'office']
-        
+
         data = {
             'timestamp': [
                 start_date + (end_date - start_date) * random.random()
@@ -60,19 +59,19 @@ class IoTDataGenerator:
             'device_type': [random.choice(device_types) for _ in range(num_records)],
             'location': [random.choice(locations) for _ in range(num_records)],
         }
-        
+
         df = pd.DataFrame(data)
-        
+
         # Generate sensor-specific values
         df['value'] = df['device_type'].apply(lambda x: IoTDataGenerator._generate_sensor_value(x))
         df['unit'] = df['device_type'].apply(lambda x: IoTDataGenerator._get_unit(x))
         df['status'] = np.random.choice(['OK', 'WARNING', 'ERROR'], size=num_records, p=[0.85, 0.10, 0.05])
-        
+
         # Sort by timestamp
         df = df.sort_values('timestamp').reset_index(drop=True)
-        
+
         return df
-    
+
     @staticmethod
     def _generate_sensor_value(sensor_type: str) -> float:
         """Generate realistic value based on sensor type."""
@@ -85,7 +84,7 @@ class IoTDataGenerator:
         }
         low, high = ranges.get(sensor_type, (0.0, 100.0))
         return round(random.uniform(low, high), 2)
-    
+
     @staticmethod
     def _get_unit(sensor_type: str) -> str:
         """Get unit for sensor type."""
@@ -101,7 +100,7 @@ class IoTDataGenerator:
 
 class FinancialDataGenerator:
     """Generate synthetic financial transaction data."""
-    
+
     @staticmethod
     def generate_transactions(
         num_records: int = 10000,
@@ -111,13 +110,13 @@ class FinancialDataGenerator:
     ) -> pd.DataFrame:
         """
         Generate financial transactions dataset.
-        
+
         Args:
             num_records: Number of transactions
             num_customers: Number of unique customers
             start_date: Start datetime
             end_date: End datetime
-            
+
         Returns:
             DataFrame with transactions
         """
@@ -125,11 +124,11 @@ class FinancialDataGenerator:
             start_date = datetime.now() - timedelta(days=90)
         if end_date is None:
             end_date = datetime.now()
-        
+
         transaction_types = ['purchase', 'refund', 'withdrawal', 'deposit', 'transfer']
         categories = ['groceries', 'entertainment', 'utilities', 'transport', 'healthcare', 'other']
         payment_methods = ['credit_card', 'debit_card', 'bank_transfer', 'cash', 'mobile_payment']
-        
+
         data = {
             'transaction_id': [f"TXN_{i:010d}" for i in range(num_records)],
             'timestamp': [
@@ -145,21 +144,21 @@ class FinancialDataGenerator:
             'merchant_id': [f"MERCH_{random.randint(1, 500):05d}" for _ in range(num_records)],
             'status': np.random.choice(['completed', 'pending', 'failed'], size=num_records, p=[0.90, 0.07, 0.03]),
         }
-        
+
         df = pd.DataFrame(data)
-        
+
         # Refunds should have negative amounts
         df.loc[df['transaction_type'] == 'refund', 'amount'] *= -1
-        
+
         # Sort by timestamp
         df = df.sort_values('timestamp').reset_index(drop=True)
-        
+
         return df
 
 
 class ECommerceDataGenerator:
     """Generate synthetic e-commerce event data."""
-    
+
     @staticmethod
     def generate_user_events(
         num_records: int = 10000,
@@ -170,14 +169,14 @@ class ECommerceDataGenerator:
     ) -> pd.DataFrame:
         """
         Generate e-commerce user event stream.
-        
+
         Args:
             num_records: Number of events
             num_users: Number of unique users
             num_products: Number of unique products
             start_date: Start datetime
             end_date: End datetime
-            
+
         Returns:
             DataFrame with user events
         """
@@ -185,10 +184,10 @@ class ECommerceDataGenerator:
             start_date = datetime.now() - timedelta(days=30)
         if end_date is None:
             end_date = datetime.now()
-        
+
         event_types = ['page_view', 'product_view', 'add_to_cart', 'remove_from_cart', 'purchase', 'search']
         product_categories = ['electronics', 'clothing', 'home', 'sports', 'books', 'toys']
-        
+
         data = {
             'event_id': [f"EVT_{i:012d}" for i in range(num_records)],
             'timestamp': [
@@ -204,16 +203,16 @@ class ECommerceDataGenerator:
             'device_type': np.random.choice(['mobile', 'desktop', 'tablet'], size=num_records, p=[0.5, 0.4, 0.1]),
             'country': [fake.country_code() for _ in range(num_records)],
         }
-        
+
         df = pd.DataFrame(data)
         df = df.sort_values('timestamp').reset_index(drop=True)
-        
+
         return df
 
 
 class LogDataGenerator:
     """Generate synthetic application log data."""
-    
+
     @staticmethod
     def generate_application_logs(
         num_records: int = 10000,
@@ -222,12 +221,12 @@ class LogDataGenerator:
     ) -> pd.DataFrame:
         """
         Generate application log entries.
-        
+
         Args:
             num_records: Number of log entries
             start_date: Start datetime
             end_date: End datetime
-            
+
         Returns:
             DataFrame with log entries
         """
@@ -235,10 +234,10 @@ class LogDataGenerator:
             start_date = datetime.now() - timedelta(days=7)
         if end_date is None:
             end_date = datetime.now()
-        
+
         log_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
         services = ['auth-service', 'payment-service', 'inventory-service', 'user-service', 'api-gateway']
-        
+
         messages = {
             'DEBUG': ['Request received', 'Cache hit', 'Query executed'],
             'INFO': ['User logged in', 'Payment processed', 'Order created', 'Email sent'],
@@ -246,13 +245,13 @@ class LogDataGenerator:
             'ERROR': ['Database connection failed', 'Invalid token', 'Payment declined', 'Service unavailable'],
             'CRITICAL': ['System crash', 'Data corruption detected', 'Security breach attempt'],
         }
-        
+
         data = []
         for _ in range(num_records):
             level = np.random.choice(log_levels, p=[0.30, 0.45, 0.15, 0.08, 0.02])
             service = random.choice(services)
             message = random.choice(messages[level])
-            
+
             data.append({
                 'timestamp': start_date + (end_date - start_date) * random.random(),
                 'level': level,
@@ -263,24 +262,24 @@ class LogDataGenerator:
                 'duration_ms': random.randint(10, 5000) if level in ['DEBUG', 'INFO'] else None,
                 'error_code': f"E{random.randint(1000, 9999)}" if level in ['ERROR', 'CRITICAL'] else None,
             })
-        
+
         df = pd.DataFrame(data)
         df = df.sort_values('timestamp').reset_index(drop=True)
-        
+
         return df
 
 
 def save_dataset(df: pd.DataFrame, output_path: Path, format: str = 'parquet'):
     """
     Save DataFrame to file in specified format.
-    
+
     Args:
         df: DataFrame to save
         output_path: Output file path
         format: Output format ('parquet', 'csv', 'json')
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     if format == 'parquet':
         df.to_parquet(output_path, index=False)
     elif format == 'csv':
@@ -289,7 +288,7 @@ def save_dataset(df: pd.DataFrame, output_path: Path, format: str = 'parquet'):
         df.to_json(output_path, orient='records', lines=True)
     else:
         raise ValueError(f"Unsupported format: {format}")
-    
+
     print(f"✓ Saved {len(df)} records to {output_path}")
 
 
@@ -298,21 +297,21 @@ if __name__ == "__main__":
     # Generate sample datasets
     output_dir = Path("../data/common-datasets")
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # IoT sensor data
     iot_data = IoTDataGenerator.generate_sensor_readings(num_records=10000)
     save_dataset(iot_data, output_dir / "iot_sensor_data.parquet")
-    
+
     # Financial transactions
     financial_data = FinancialDataGenerator.generate_transactions(num_records=10000)
     save_dataset(financial_data, output_dir / "financial_transactions.parquet")
-    
+
     # E-commerce events
     ecommerce_data = ECommerceDataGenerator.generate_user_events(num_records=10000)
     save_dataset(ecommerce_data, output_dir / "ecommerce_events.parquet")
-    
+
     # Application logs
     log_data = LogDataGenerator.generate_application_logs(num_records=10000)
     save_dataset(log_data, output_dir / "application_logs.parquet")
-    
+
     print("\n✅ All sample datasets generated successfully!")

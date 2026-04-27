@@ -10,7 +10,7 @@
 
 ## 🌟 Hub de Inicio
 
-Este bloque nuevo te orienta rápido en **cómo está armado el training**, **qué estudiar primero** y **dónde encontrar cada documento**.  
+Este bloque nuevo te orienta rápido en **cómo está armado el training**, **qué estudiar primero** y **dónde encontrar cada documento**.
 Todo el contenido original y detallado se mantiene más abajo sin cambios.
 
 ### 🎯 ¿Qué vas a aprender?
@@ -164,13 +164,13 @@ This is a **complete, production-quality learning system** for Cloud Data Engine
 
 ### AWS Services Covered
 
-**Storage:** S3, Glacier  
-**Compute:** Lambda, EC2, ECS, EKS  
-**Data Processing:** Glue, EMR, Kinesis, MSK  
-**Analytics:** Athena, QuickSight, Redshift  
-**Orchestration:** Step Functions, EventBridge  
-**Governance:** Glue Catalog, Lake Formation  
-**Infrastructure:** CloudFormation, IAM, VPC  
+**Storage:** S3, Glacier
+**Compute:** Lambda, EC2, ECS, EKS
+**Data Processing:** Glue, EMR, Kinesis, MSK
+**Analytics:** Athena, QuickSight, Redshift
+**Orchestration:** Step Functions, EventBridge
+**Governance:** Glue Catalog, Lake Formation
+**Infrastructure:** CloudFormation, IAM, VPC
 
 ---
 
