@@ -38,7 +38,7 @@ terraform apply
 ```hcl
 module "my_bucket" {
   source = "../../modules/s3-bucket"
-  
+
   bucket_name = "my-data-bucket"
   environment = "dev"
   enable_versioning = true

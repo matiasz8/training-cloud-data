@@ -65,7 +65,7 @@ variable "environment" {
   description = "Ambiente de despliegue"
   type        = string
   default     = "development"
-  
+
   validation {
     condition     = contains(["development", "staging", "production"], var.environment)
     error_message = "Ambiente debe ser: development, staging, o production."
@@ -137,7 +137,7 @@ variable "tags" {
 
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -161,7 +161,7 @@ provider "aws" {
 }
 
 # ===================================
-# DATA LAKE BUCKETS  
+# DATA LAKE BUCKETS
 # ===================================
 
 # Buckets para cada capa del Data Lake usando for_each
@@ -1600,7 +1600,7 @@ resource "aws_s3_bucket" "replica" {
   lifecycle {
     # Recrear este recurso si primary es reemplazado (Terraform 1.2+)
     # replace_triggered_by = [aws_s3_bucket.primary]
-    
+
     # Nota: Esta feature requiere Terraform >= 1.2
     # Para versiones anteriores, usar null_resource con triggers
   }
@@ -1707,7 +1707,7 @@ resource "null_resource" "bucket_config_monitor" {
       echo "🔄 Configuración del bucket cambió"
       echo "Bucket ID: ${aws_s3_bucket.primary.id}"
       echo "Timestamp: ${timestamp()}"
-      
+
       # Aquí podrías ejecutar scripts de sincronización, notificaciones, etc.
     EOT
   }

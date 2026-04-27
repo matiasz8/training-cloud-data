@@ -43,27 +43,27 @@ graph LR
         A[terraform init] --> B[terraform validate]
         B --> C[terraform fmt]
     end
-    
+
     subgraph "Planificación"
         C --> D[terraform plan]
         D --> E[terraform plan -out=plan.tfplan]
     end
-    
+
     subgraph "Aplicación"
         E --> F[terraform apply]
         F --> G[terraform apply plan.tfplan]
     end
-    
+
     subgraph "Gestión"
         G --> H[terraform show]
         H --> I[terraform state list]
         I --> J[terraform output]
     end
-    
+
     subgraph "Limpieza"
         J --> K[terraform destroy]
     end
-    
+
     style A fill:#E1F5FF
     style D fill:#FFF4E1
     style F fill:#FFE1E1
@@ -78,22 +78,22 @@ flowchart LR
     Default --> Create1[terraform workspace new dev]
     Default --> Create2[terraform workspace new staging]
     Default --> Create3[terraform workspace new prod]
-    
+
     Create1 --> Dev[Workspace: dev]
     Create2 --> Staging[Workspace: staging]
     Create3 --> Prod[Workspace: prod]
-    
+
     Dev --> StateDev[(State: dev)]
     Staging --> StateStaging[(State: staging)]
     Prod --> StateProd[(State: prod)]
-    
+
     Dev --> Switch1[terraform workspace select]
     Staging --> Switch1
     Prod --> Switch1
-    
+
     Switch1 --> List[terraform workspace list]
     List --> Show[terraform workspace show]
-    
+
     style Dev fill:#E8F5E9
     style Staging fill:#FFF3E0
     style Prod fill:#FFEBEE
@@ -142,27 +142,27 @@ flowchart TD
     B --> D[terraform validate]
     B --> E[tflint]
     B --> F[tfsec]
-    
+
     C --> G{¿Formato OK?}
     D --> H{¿Validación OK?}
     E --> I{¿Lint OK?}
     F --> J{¿Seguridad OK?}
-    
+
     G -->|No| Fix1[Corregir Formato]
     H -->|No| Fix2[Corregir Sintaxis]
     I -->|No| Fix3[Corregir Lint]
     J -->|No| Fix4[Corregir Seguridad]
-    
+
     Fix1 --> A
     Fix2 --> A
     Fix3 --> A
     Fix4 --> A
-    
+
     G -->|Sí| K[Commit]
     H -->|Sí| K
     I -->|Sí| K
     J -->|Sí| K
-    
+
     K --> L[Push to Branch]
     L --> M[Pull Request]
     M --> N[Code Review]
@@ -177,7 +177,7 @@ flowchart TD
     T -->|Sí| V[terraform apply]
     V --> W[Actualizar Docs]
     W --> X[Notificar Equipo]
-    
+
     style K fill:#90EE90
     style Q fill:#FFD700
     style V fill:#87CEEB

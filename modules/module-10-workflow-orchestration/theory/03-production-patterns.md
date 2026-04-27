@@ -782,7 +782,7 @@ default_args = {
 def task_failure_callback(context):
     task_instance = context['task_instance']
     exception = context.get('exception')
-    
+
     # Send to Slack
     send_slack_message(
         f"❌ Task Failed: {task_instance.task_id}\n"
@@ -826,7 +826,7 @@ def notify_slack(context):
         exec_date=context.get('execution_date'),
         log_url=context.get('task_instance').log_url,
     )
-    
+
     slack_alert = SlackWebhookOperator(
         task_id='slack_notification',
         http_conn_id='slack_webhook',
@@ -1045,14 +1045,14 @@ import boto3
 def rotate_api_key():
     # Generate new key
     new_key = generate_new_api_key()
-    
+
     # Update in Secrets Manager
     client = boto3.client('secretsmanager')
     client.update_secret(
         SecretId='airflow/variables/api_key',
         SecretString=new_key
     )
-    
+
     # Clear cached variable
     Variable.set('api_key', new_key)
 
@@ -1094,14 +1094,14 @@ def test_no_import_errors():
 def test_dag_integrity():
     """Test DAG integrity"""
     dag_bag = DagBag()
-    
+
     for dag_id, dag in dag_bag.dags.items():
         # No cycles
         assert dag.test_cycle() is None, f"Cycle detected in {dag_id}"
-        
+
         # Has tags
         assert len(dag.tags) > 0, f"DAG {dag_id} missing tags"
-        
+
         # Has owner
         assert dag.default_args.get('owner') is not None
 
@@ -1109,7 +1109,7 @@ def test_specific_dag():
     """Test specific DAG structure"""
     dag_bag = DagBag()
     dag = dag_bag.get_dag('my_dag')
-    
+
     assert dag is not None
     assert len(dag.tasks) == 5
     assert 'extract' in dag.task_ids
@@ -1126,22 +1126,22 @@ def test_dag_run():
     """Test full DAG execution"""
     dag_bag = DagBag()
     dag = dag_bag.get_dag('my_dag')
-    
+
     # Create test DagRun
     dag.test(execution_date=days_ago(1))
 
 def test_task_execution():
     """Test individual task"""
     from airflow.operators.python import PythonOperator
-    
+
     def mock_function():
         return "test_result"
-    
+
     task = PythonOperator(
         task_id='test_task',
         python_callable=mock_function,
     )
-    
+
     result = task.execute(context={})
     assert result == "test_result"
 ```
@@ -1161,33 +1161,33 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install apache-airflow==2.8.1
           pip install pytest pytest-cov
           pip install -r requirements.txt
-      
+
       - name: Initialize Airflow DB
         run: airflow db init
-      
+
       - name: Run Tests
         run: |
           pytest tests/ -v --cov=dags --cov-report=xml
-      
+
       - name: Lint DAGs
         run: |
           pip install flake8
           flake8 dags/ --max-line-length=120
-      
+
       - name: Upload Coverage
         uses: codecov/codecov-action@v2
         with:
@@ -1207,18 +1207,18 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Deploy to Airflow
         run: |
           # Sync DAGs to S3 (or other storage)
           aws s3 sync dags/ s3://my-airflow-dags/dags/
-          
+
           # Or: Git sync (if using GitSync)
           # Git push triggers automatic sync in Airflow
-      
+
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1
         with:
@@ -1394,7 +1394,7 @@ def my_function():
 
 ---
 
-**Document**: 03-production-patterns.md  
-**Words**: ~4,500  
-**Level**: Advanced  
+**Document**: 03-production-patterns.md
+**Words**: ~4,500
+**Level**: Advanced
 **Prerequisites**: 01-airflow-fundamentals.md, 02-dags-and-operators.md

@@ -4,7 +4,7 @@
 
 - **Nivel**: Avanzado
 - **Duración estimada**: 4-5 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Todos los ejercicios anteriores completados
   - Comprensión completa de serverless patterns
   - Experiencia con CI/CD
@@ -110,16 +110,16 @@ def lambda_handler(event, context):
     """
     POST /logs - Ingest log events
     """
-    
+
     try:
         body = json.loads(event['body'])
-        
+
         # Validar
         validate_log_event(body)
-        
+
         # Enriquecer con metadata
         enriched_event = enrich_event(body, event)
-        
+
         # Enviar a Kinesis
         with xray_recorder.in_subsegment('kinesis_put') as subsegment:
             response = kinesis.put_record(
@@ -127,19 +127,19 @@ def lambda_handler(event, context):
                 Data=json.dumps(enriched_event),
                 PartitionKey=enriched_event['app_id']
             )
-            
+
             subsegment.put_annotation('app_id', enriched_event['app_id'])
             subsegment.put_metadata('event', enriched_event)
-        
+
         logger.info(json.dumps({
             'event': 'log_ingested',
             'app_id': enriched_event['app_id'],
             'level': enriched_event['level'],
             'shard_id': response['ShardId']
         }))
-        
+
         return response_ok({'message': 'Log ingested', 'sequence_number': response['SequenceNumber']})
-    
+
     except ValueError as e:
         return response_error(400, str(e))
     except Exception as e:
@@ -150,11 +150,11 @@ def lambda_handler(event, context):
 def validate_log_event(event: dict):
     """Validar evento de log"""
     required = ['app_id', 'level', 'message', 'timestamp']
-    
+
     for field in required:
         if field not in event:
             raise ValueError(f"Missing required field: {field}")
-    
+
     valid_levels = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL']
     if event['level'] not in valid_levels:
         raise ValueError(f"Invalid level. Must be one of: {valid_levels}")
@@ -162,7 +162,7 @@ def validate_log_event(event: dict):
 
 def enrich_event(event: dict, api_event: dict) -> dict:
     """Enriquecer evento con metadata adicional"""
-    
+
     return {
         **event,
         'ingestion_timestamp': datetime.utcnow().isoformat(),
@@ -224,46 +224,46 @@ def lambda_handler(event, context):
     """
     Procesar batch de records de Kinesis
     """
-    
+
     metrics = defaultdict(int)
     errors = []
-    
+
     for record in event['Records']:
         # Decodificar data de Kinesis
         payload = base64.b64decode(record['kinesis']['data'])
         log_event = json.loads(payload)
-        
+
         # Contadores
         metrics[f"{log_event['app_id']}_{log_event['level']}"] += 1
-        
+
         # Detectar errores
         if log_event['level'] in ['ERROR', 'FATAL']:
             errors.append(log_event)
-    
+
     # Publicar métricas a CloudWatch
     publish_metrics(metrics)
-    
+
     # Alertar si hay muchos errores
     if len(errors) >= ERROR_THRESHOLD:
         send_alert(errors)
-    
+
     logger.info(json.dumps({
         'event': 'batch_processed',
         'records': len(event['Records']),
         'errors': len(errors)
     }))
-    
+
     return {'processed': len(event['Records'])}
 
 
 def publish_metrics(metrics: dict):
     """Publicar custom metrics a CloudWatch"""
-    
+
     metric_data = []
-    
+
     for metric_name, value in metrics.items():
         app_id, level = metric_name.rsplit('_', 1)
-        
+
         metric_data.append({
             'MetricName': 'LogEvents',
             'Value': value,
@@ -274,7 +274,7 @@ def publish_metrics(metrics: dict):
                 {'Name': 'Level', 'Value': level}
             ]
         })
-    
+
     if metric_data:
         cloudwatch.put_metric_data(
             Namespace='LogAnalytics',
@@ -284,7 +284,7 @@ def publish_metrics(metrics: dict):
 
 def send_alert(errors: list):
     """Enviar alerta por SNS"""
-    
+
     message = {
         'alert_type': 'HIGH_ERROR_RATE',
         'timestamp': datetime.utcnow().isoformat(),
@@ -292,13 +292,13 @@ def send_alert(errors: list):
         'threshold': ERROR_THRESHOLD,
         'sample_errors': errors[:5]  # Primeros 5 errores
     }
-    
+
     sns.publish(
         TopicArn=ALERT_TOPIC,
         Subject='🚨 High Error Rate Detected',
         Message=json.dumps(message, indent=2)
     )
-    
+
     logger.warning(f"Alert sent: {len(errors)} errors detected")
 ```
 
@@ -311,12 +311,12 @@ def send_alert(errors: list):
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   backend "s3" {
     # Configurar backend S3 para Terraform state
     # terraform init -backend-config="bucket=my-terraform-state"
   }
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -327,7 +327,7 @@ terraform {
 
 provider "aws" {
   region = var.region
-  
+
   default_tags {
     tags = {
       Environment = var.environment
@@ -340,7 +340,7 @@ provider "aws" {
 # Workspaces para multi-environment
 locals {
   environment = terraform.workspace
-  
+
   # Configuración por environment
   config = {
     dev = {
@@ -362,7 +362,7 @@ locals {
       alarm_threshold    = 10
     }
   }
-  
+
   env_config = local.config[local.environment]
 }
 
@@ -398,21 +398,21 @@ resource "aws_kinesis_firehose_delivery_stream" "s3" {
     role_arn   = aws_iam_role.firehose.arn
     bucket_arn = aws_s3_bucket.data_lake.arn
     prefix     = "raw/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/"
-    
+
     # Buffer settings
     buffering_size     = 5   # MB
     buffering_interval = 60  # seconds
-    
+
     # Compression
     compression_format = "GZIP"
-    
+
     # Cloudwatch Logging
     cloudwatch_logging_options {
       enabled         = true
       log_group_name  = aws_cloudwatch_log_group.firehose.name
       log_stream_name = "S3Delivery"
     }
-    
+
     # Data transformation con Lambda (opcional)
     processing_configuration {
       enabled = true
@@ -436,7 +436,7 @@ resource "aws_s3_bucket" "data_lake" {
 
 resource "aws_s3_bucket_versioning" "data_lake" {
   bucket = aws_s3_bucket.data_lake.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -515,7 +515,7 @@ resource "aws_lambda_event_source_mapping" "kinesis_processor" {
   function_name     = aws_lambda_function.realtime_processor.arn
   starting_position = "LATEST"
   batch_size        = 100
-  
+
   maximum_batching_window_in_seconds = 10
   parallelization_factor             = 2
 }
@@ -637,23 +637,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov moto
-      
+
       - name: Run unit tests
         run: pytest tests/unit/ -v --cov=src --cov-report=xml
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
-  
+
   deploy-dev:
     needs: test
     if: github.ref == 'refs/heads/develop'
@@ -661,24 +661,24 @@ jobs:
     environment: development
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Package Lambda functions
         run: ./scripts/package-lambdas.sh
-      
+
       - name: Deploy with Terraform
         run: |
           cd infrastructure
           terraform init
           terraform workspace select dev || terraform workspace new dev
           terraform apply -auto-approve
-  
+
   deploy-prod:
     needs: test
     if: github.ref == 'refs/heads/main'
@@ -686,24 +686,24 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Package Lambda functions
         run: ./scripts/package-lambdas.sh
-      
+
       - name: Deploy with Terraform
         run: |
           cd infrastructure
           terraform init
           terraform workspace select prod || terraform workspace new prod
           terraform apply -auto-approve
-      
+
       - name: Run smoke tests
         run: ./scripts/smoke-tests.sh
 ```

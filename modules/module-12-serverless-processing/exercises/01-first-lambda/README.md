@@ -4,7 +4,7 @@
 
 - **Nivel**: Básico
 - **Duración estimada**: 2-3 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Module 06 (ETL Fundamentals)
   - Cuenta AWS con permisos para Lambda, S3, CloudWatch
   - Python 3.11+
@@ -101,15 +101,15 @@ s3 = boto3.client('s3')
 def lambda_handler(event, context):
     """
     Lambda handler principal
-    
+
     Args:
         event: Evento S3 con información del archivo subido
         context: Contexto de Lambda (request_id, etc.)
-    
+
     Returns:
         dict: Respuesta con statusCode y body
     """
-    
+
     # Log del evento completo (útil para debugging)
     logger.info(json.dumps({
         'event': 'lambda_invoked',
@@ -117,21 +117,21 @@ def lambda_handler(event, context):
         'event_source': event.get('Records', [{}])[0].get('eventSource'),
         'timestamp': datetime.utcnow().isoformat()
     }))
-    
+
     try:
         # Extraer información del evento S3
         record = event['Records'][0]
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         size = record['s3']['object']['size']
-        
+
         logger.info(json.dumps({
             'event': 'file_detected',
             'bucket': bucket,
             'key': key,
             'size_bytes': size
         }))
-        
+
         # Validación: Solo procesar archivos CSV
         if not key.endswith('.csv'):
             logger.warning(f"File {key} is not CSV, skipping")
@@ -139,14 +139,14 @@ def lambda_handler(event, context):
                 'statusCode': 200,
                 'body': json.dumps({'message': 'Not a CSV file, skipped'})
             }
-        
+
         # Procesar archivo
         stats = process_csv_file(bucket, key)
-        
+
         # Guardar estadísticas
         output_key = key.replace('.csv', '_stats.json').replace('landing/', 'processed/')
         save_stats(bucket, output_key, stats)
-        
+
         logger.info(json.dumps({
             'event': 'processing_completed',
             'request_id': context.aws_request_id,
@@ -155,7 +155,7 @@ def lambda_handler(event, context):
             'records_processed': stats['row_count'],
             'duration_ms': context.get_remaining_time_in_millis()
         }))
-        
+
         return {
             'statusCode': 200,
             'body': json.dumps({
@@ -165,7 +165,7 @@ def lambda_handler(event, context):
                 'stats': stats
             })
         }
-        
+
     except Exception as e:
         logger.error(json.dumps({
             'event': 'processing_failed',
@@ -173,7 +173,7 @@ def lambda_handler(event, context):
             'error': str(e),
             'error_type': type(e).__name__
         }))
-        
+
         # Re-raise para que Lambda marque como fallida
         raise e
 
@@ -181,24 +181,24 @@ def lambda_handler(event, context):
 def process_csv_file(bucket: str, key: str) -> dict:
     """
     Descargar y procesar archivo CSV desde S3
-    
+
     Args:
         bucket: Nombre del bucket S3
         key: Key del objeto en S3
-    
+
     Returns:
         dict: Estadísticas del archivo
     """
-    
+
     # Descargar archivo de S3
     logger.info(f"Downloading s3://{bucket}/{key}")
-    
+
     response = s3.get_object(Bucket=bucket, Key=key)
     csv_content = response['Body'].read()
-    
+
     # Leer CSV con pandas
     df = pd.read_csv(BytesIO(csv_content))
-    
+
     # Calcular estadísticas
     stats = {
         'row_count': len(df),
@@ -208,31 +208,31 @@ def process_csv_file(bucket: str, key: str) -> dict:
         'missing_values': df.isnull().sum().to_dict(),
         'dtypes': df.dtypes.astype(str).to_dict()
     }
-    
+
     # Estadísticas de columnas numéricas
     numeric_cols = df.select_dtypes(include=['number']).columns
     if len(numeric_cols) > 0:
         stats['numeric_stats'] = df[numeric_cols].describe().to_dict()
-    
+
     return stats
 
 
 def save_stats(bucket: str, key: str, stats: dict):
     """
     Guardar estadísticas en S3 como JSON
-    
+
     Args:
         bucket: Nombre del bucket S3
         key: Key del objeto en S3
         stats: Diccionario con estadísticas
     """
-    
+
     logger.info(f"Saving stats to s3://{bucket}/{key}")
-    
+
     # Agregar metadata
     stats['processed_at'] = datetime.utcnow().isoformat()
     stats['processor'] = 'lambda-csv-processor'
-    
+
     # Subir a S3
     s3.put_object(
         Bucket=bucket,
@@ -260,7 +260,7 @@ boto3==1.34.0
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -478,22 +478,22 @@ def sample_csv():
 @patch('src.handler.s3')
 def test_lambda_handler_success(mock_s3, s3_event, lambda_context, sample_csv):
     """Test procesamiento exitoso"""
-    
+
     # Mock S3 get_object
     mock_s3.get_object.return_value = {
         'Body': MagicMock(read=MagicMock(return_value=sample_csv))
     }
-    
+
     # Ejecutar Lambda
     response = lambda_handler(s3_event, lambda_context)
-    
+
     # Assertions
     assert response['statusCode'] == 200
     body = json.loads(response['body'])
     assert body['message'] == 'File processed successfully'
     assert body['stats']['row_count'] == 3
     assert body['stats']['column_count'] == 4
-    
+
     # Verificar que se guardó el resultado
     mock_s3.put_object.assert_called_once()
     call_args = mock_s3.put_object.call_args
@@ -503,7 +503,7 @@ def test_lambda_handler_success(mock_s3, s3_event, lambda_context, sample_csv):
 @patch('src.handler.s3')
 def test_lambda_handler_non_csv(mock_s3, lambda_context):
     """Test archivo no CSV (debe skipear)"""
-    
+
     event = {
         'Records': [{
             'eventSource': 'aws:s3',
@@ -513,25 +513,25 @@ def test_lambda_handler_non_csv(mock_s3, lambda_context):
             }
         }]
     }
-    
+
     response = lambda_handler(event, lambda_context)
-    
+
     assert response['statusCode'] == 200
     assert 'skipped' in json.loads(response['body'])['message'].lower()
-    
+
     # No debe llamar a S3
     mock_s3.get_object.assert_not_called()
 
 @patch('src.handler.s3')
 def test_process_csv_file(mock_s3, sample_csv):
     """Test procesamiento de CSV"""
-    
+
     mock_s3.get_object.return_value = {
         'Body': MagicMock(read=MagicMock(return_value=sample_csv))
     }
-    
+
     stats = process_csv_file('test-bucket', 'test.csv')
-    
+
     assert stats['row_count'] == 3
     assert stats['column_count'] == 4
     assert 'user_id' in stats['columns']
@@ -733,7 +733,7 @@ fields @timestamp, @message
 
 -- Calcular duración promedio
 fields duration_ms
-| stats avg(duration_ms) as avg_duration, 
+| stats avg(duration_ms) as avg_duration,
         max(duration_ms) as max_duration,
         count() as invocations
 

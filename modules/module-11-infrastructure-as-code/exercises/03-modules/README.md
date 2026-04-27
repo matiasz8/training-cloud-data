@@ -458,7 +458,7 @@ Ver `examples/` directory.
 
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -2432,11 +2432,11 @@ echo "$NEW_VERSION" > VERSION
 # Git operations (si es un repo git)
 if [ -d ".git" ] || git rev-parse --git-dir > /dev/null 2>&1; then
     echo "📝 Creando commit y tag..."
-    
+
     git add VERSION CHANGELOG.md
     git commit -m "chore: bump version to $NEW_VERSION"
     git tag -a "v$NEW_VERSION" -m "Version $NEW_VERSION"
-    
+
     echo "✅ Tag creado: v$NEW_VERSION"
     echo "📤 Para publicar: git push && git push --tags"
 else
@@ -2734,17 +2734,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Validate Terraform
         run: |
           terraform init
           terraform validate
-      
+
       - name: Run Tests
         run: |
           # Ejecutar terratest o similar
           go test -v ./tests/
-      
+
       - name: Create Release
         uses: actions/create-release@v1
         env:

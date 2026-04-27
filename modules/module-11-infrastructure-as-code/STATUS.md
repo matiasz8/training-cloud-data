@@ -2,7 +2,7 @@
 
 **Progreso General**: ✅ **COMPLETO - 100%**
 
-**Última Actualización**: 2024-03-07  
+**Última Actualización**: 2024-03-07
 **Estado**: ✅ **PRODUCTION READY**
 
 ---
@@ -251,5 +251,5 @@ Al completar este módulo, el estudiante podrá:
 
 ---
 
-**Estado Actual**: Fase 1 iniciada - Archivos base creados  
+**Estado Actual**: Fase 1 iniciada - Archivos base creados
 **Siguiente Acción**: Escribir teoría 01-terraform-fundamentals.md

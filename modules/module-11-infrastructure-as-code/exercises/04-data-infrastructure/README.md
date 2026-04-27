@@ -929,7 +929,7 @@ resource "aws_athena_named_query" "sample_events_count" {
   workgroup   = aws_athena_workgroup.main.name
 
   query = <<-SQL
-    SELECT 
+    SELECT
       event_type,
       COUNT(*) as event_count,
       COUNT(DISTINCT user_id) as unique_users
@@ -948,7 +948,7 @@ resource "aws_athena_named_query" "daily_active_users" {
   workgroup   = aws_athena_workgroup.analysts.name
 
   query = <<-SQL
-    SELECT 
+    SELECT
       year,
       month,
       day,

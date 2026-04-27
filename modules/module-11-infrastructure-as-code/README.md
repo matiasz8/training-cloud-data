@@ -1,7 +1,7 @@
 # Módulo 11: Infrastructure as Code con Terraform
 
-⏱️ **Duración estimada**: 16-20 horas  
-🎯 **Nivel**: Intermedio a Avanzado  
+⏱️ **Duración estimada**: 16-20 horas
+🎯 **Nivel**: Intermedio a Avanzado
 📋 **Prerequisitos**: Módulos 01-02 completados
 
 ## 📖 Descripción del Módulo
@@ -341,3 +341,21 @@ Este módulo prepara para:
 **¡Hora de convertir clicks en código!** 🚀
 
 Comienza con: [theory/01-terraform-fundamentals.md](theory/01-terraform-fundamentals.md)
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

@@ -4,7 +4,7 @@
 
 - **Nivel**: Intermedio
 - **Duración estimada**: 3-4 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicios 01 y 02 completados
   - Comprensión de state machines
   - Conocimiento de Amazon States Language (ASL)
@@ -113,14 +113,14 @@ def lambda_handler(event, context):
     """
     Extraer datos de API externa y guardar en S3
     """
-    
+
     # Parámetros
     api_url = event.get('api_url', 'https://api.example.com/data')
     start_date = event.get('start_date', (datetime.utcnow() - timedelta(days=1)).strftime('%Y-%m-%d'))
     end_date = event.get('end_date', datetime.utcnow().strftime('%Y-%m-%d'))
-    
+
     logger.info(f"Extracting data from {start_date} to {end_date}")
-    
+
     try:
         # Llamar API (simulado con fake API)
         response = requests.get(
@@ -132,22 +132,22 @@ def lambda_handler(event, context):
             timeout=30
         )
         response.raise_for_status()
-        
+
         data = response.json()
-        
+
         # Guardar raw data en S3
         bucket = event.get('bucket', 'data-lake-dev')
         key = f"raw/extraction_date={datetime.utcnow().strftime('%Y%m%d')}/data.json"
-        
+
         s3.put_object(
             Bucket=bucket,
             Key=key,
             Body=json.dumps(data, indent=2),
             ContentType='application/json'
         )
-        
+
         logger.info(f"Extracted {len(data.get('records', []))} records")
-        
+
         return {
             'statusCode': 200,
             'extraction_timestamp': datetime.utcnow().isoformat(),
@@ -156,7 +156,7 @@ def lambda_handler(event, context):
             'start_date': start_date,
             'end_date': end_date
         }
-        
+
     except requests.exceptions.RequestException as e:
         logger.error(f"API request failed: {e}")
         raise Exception(f"Extraction failed: {e}")
@@ -185,18 +185,18 @@ def lambda_handler(event, context):
     """
     Validar calidad de datos extraídos
     """
-    
+
     # Obtener S3 URI de datos
     extraction_result = event
     s3_uri = extraction_result['s3_uri']
     bucket, key = parse_s3_uri(s3_uri)
-    
+
     logger.info(f"Validating data from {s3_uri}")
-    
+
     # Descargar datos
     response = s3.get_object(Bucket=bucket, Key=key)
     data = json.loads(response['Body'].read())
-    
+
     # Ejecutar validaciones
     validation_results = {
         'is_valid': True,
@@ -204,16 +204,16 @@ def lambda_handler(event, context):
         'errors': [],
         'warnings': []
     }
-    
+
     records = data.get('records', [])
-    
+
     # 1. Check: Mínimo de registros
     if len(records) < 1:
         validation_results['is_valid'] = False
         validation_results['errors'].append('No records found')
     else:
         validation_results['checks'].append(f'✓ Record count: {len(records)}')
-    
+
     # 2. Check: Campos requeridos
     required_fields = ['id', 'customer_id', 'amount', 'date']
     for idx, record in enumerate(records[:10]):  # Validar primeros 10
@@ -223,10 +223,10 @@ def lambda_handler(event, context):
             validation_results['errors'].append(
                 f'Record {idx}: Missing fields {missing}'
             )
-    
+
     if len(validation_results['errors']) == 0:
         validation_results['checks'].append('✓ All required fields present')
-    
+
     # 3. Check: Valores nulos
     df = pd.DataFrame(records)
     null_counts = df.isnull().sum()
@@ -236,23 +236,23 @@ def lambda_handler(event, context):
         )
     else:
         validation_results['checks'].append('✓ No null values')
-    
+
     # 4. Check: Duplicados
     if df.duplicated(subset=['id']).any():
         validation_results['is_valid'] = False
         validation_results['errors'].append('Duplicate IDs found')
     else:
         validation_results['checks'].append('✓ No duplicates')
-    
+
     # 5. Check: Valores negativos en amount
     if (df['amount'] < 0).any():
         validation_results['is_valid'] = False
         validation_results['errors'].append('Negative amounts found')
     else:
         validation_results['checks'].append('✓ All amounts positive')
-    
+
     logger.info(json.dumps(validation_results))
-    
+
     # Agregar resultado al evento
     return {
         **extraction_result,
@@ -289,40 +289,40 @@ def lambda_handler(event, context):
     """
     Transformar datos de clientes
     """
-    
+
     s3_uri = event['s3_uri']
     bucket, key = parse_s3_uri(s3_uri)
-    
+
     logger.info(f"Transforming customers from {s3_uri}")
-    
+
     # Cargar datos
     response = s3.get_object(Bucket=bucket, Key=key)
     data = json.loads(response['Body'].read())
     df = pd.DataFrame(data['records'])
-    
+
     # Transformaciones
     customers = df.groupby('customer_id').agg({
         'amount': ['sum', 'mean', 'count'],
         'date': ['min', 'max']
     }).reset_index()
-    
-    customers.columns = ['customer_id', 'total_amount', 'avg_amount', 
+
+    customers.columns = ['customer_id', 'total_amount', 'avg_amount',
                          'transaction_count', 'first_purchase', 'last_purchase']
-    
+
     # Guardar resultado
     output_key = key.replace('raw/', 'transformed/customers/')
-    
+
     parquet_buffer = BytesIO()
     customers.to_parquet(parquet_buffer, engine='pyarrow')
-    
+
     s3.put_object(
         Bucket=bucket,
         Key=output_key,
         Body=parquet_buffer.getvalue()
     )
-    
+
     logger.info(f"Transformed {len(customers)} customers")
-    
+
     return {
         's3_uri': f's3://{bucket}/{output_key}',
         'record_count': len(customers)
@@ -355,37 +355,37 @@ def lambda_handler(event, context):
     """
     Transformar datos de órdenes
     """
-    
+
     s3_uri = event['s3_uri']
     bucket, key = parse_s3_uri(s3_uri)
-    
+
     logger.info(f"Transforming orders from {s3_uri}")
-    
+
     # Cargar datos
     response = s3.get_object(Bucket=bucket, Key=key)
     data = json.loads(response['Body'].read())
     df = pd.DataFrame(data['records'])
-    
+
     # Transformaciones
     df['date'] = pd.to_datetime(df['date'])
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month
     df['day'] = df['date'].dt.day
-    
+
     # Guardar resultado particionado por fecha
     output_key = key.replace('raw/', 'transformed/orders/')
-    
+
     parquet_buffer = BytesIO()
     df.to_parquet(parquet_buffer, engine='pyarrow')
-    
+
     s3.put_object(
         Bucket=bucket,
         Key=output_key,
         Body=parquet_buffer.getvalue()
     )
-    
+
     logger.info(f"Transformed {len(df)} orders")
-    
+
     return {
         's3_uri': f's3://{bucket}/{output_key}',
         'record_count': len(df)
@@ -418,19 +418,19 @@ def lambda_handler(event, context):
     """
     Trigger Glue Crawler para actualizar Catalog
     """
-    
+
     customers_result = event[0]  # Resultado parallel branch 1
     orders_result = event[1]     # Resultado parallel branch 2
-    
+
     logger.info("Loading transformed data to Data Catalog")
-    
+
     # Trigger Glue Crawler
     try:
         glue.start_crawler(Name='data-lake-crawler')
         logger.info("Glue crawler started successfully")
     except glue.exceptions.CrawlerRunningException:
         logger.info("Crawler already running")
-    
+
     return {
         'statusCode': 200,
         'customers': customers_result,
@@ -456,7 +456,7 @@ def lambda_handler(event, context):
     """
     Generar reporte final del pipeline
     """
-    
+
     report = {
         'pipeline': 'daily-etl',
         'execution_time': datetime.utcnow().isoformat(),
@@ -468,9 +468,9 @@ def lambda_handler(event, context):
             'validation_passed': event['validation']['is_valid']
         }
     }
-    
+
     logger.info(json.dumps(report, indent=2))
-    
+
     return report
 ```
 
@@ -508,14 +508,14 @@ def lambda_handler(event, context):
       ],
       "Next": "Validate"
     },
-    
+
     "Validate": {
       "Type": "Task",
       "Resource": "${ValidateLambdaArn}",
       "ResultPath": "$",
       "Next": "CheckValidation"
     },
-    
+
     "CheckValidation": {
       "Type": "Choice",
       "Choices": [
@@ -527,7 +527,7 @@ def lambda_handler(event, context):
       ],
       "Default": "ValidationFailed"
     },
-    
+
     "ParallelTransform": {
       "Type": "Parallel",
       "ResultPath": "$.transform_results",
@@ -555,7 +555,7 @@ def lambda_handler(event, context):
       ],
       "Next": "Load"
     },
-    
+
     "Load": {
       "Type": "Task",
       "Resource": "${LoadLambdaArn}",
@@ -563,14 +563,14 @@ def lambda_handler(event, context):
       "ResultPath": "$.load_result",
       "Next": "GenerateReport"
     },
-    
+
     "GenerateReport": {
       "Type": "Task",
       "Resource": "${ReportLambdaArn}",
       "ResultPath": "$.report",
       "Next": "NotifySuccess"
     },
-    
+
     "NotifySuccess": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
@@ -581,7 +581,7 @@ def lambda_handler(event, context):
       },
       "End": true
     },
-    
+
     "ValidationFailed": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
@@ -596,7 +596,7 @@ def lambda_handler(event, context):
       },
       "Next": "FailState"
     },
-    
+
     "ExtractFailed": {
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
@@ -607,7 +607,7 @@ def lambda_handler(event, context):
       },
       "Next": "FailState"
     },
-    
+
     "FailState": {
       "Type": "Fail",
       "Error": "PipelineExecutionFailed",

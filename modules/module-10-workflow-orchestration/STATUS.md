@@ -64,6 +64,6 @@
 
 ---
 
-**Iniciado**: 7 de marzo, 2026  
-**Completitud Objetivo**: TBD  
+**Iniciado**: 7 de marzo, 2026
+**Completitud Objetivo**: TBD
 **Última Actualización**: 7 de marzo, 2026

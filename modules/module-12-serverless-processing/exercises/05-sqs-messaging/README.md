@@ -4,7 +4,7 @@
 
 - **Nivel**: Avanzado
 - **Duración estimada**: 2-3 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicios 01-04 completados
   - Comprensión de message queues
   - Conocimiento de retry patterns
@@ -90,16 +90,16 @@ def lambda_handler(event, context):
     """
     POST /orders - Create order and send to queue
     """
-    
+
     try:
         body = json.loads(event['body'])
-        
+
         # Validar orden
         validate_order(body)
-        
+
         # Generar deduplication ID (idempotencia)
         dedup_id = generate_dedup_id(body)
-        
+
         # Enviar mensaje a SQS FIFO
         response = sqs.send_message(
             QueueUrl=QUEUE_URL,
@@ -107,9 +107,9 @@ def lambda_handler(event, context):
             MessageGroupId=body['customer_id'],  # FIFO grouping
             MessageDeduplicationId=dedup_id  # Deduplication
         )
-        
+
         logger.info(f"Order queued: {response['MessageId']}")
-        
+
         return {
             'statusCode': 202,  # Accepted
             'headers': {'Content-Type': 'application/json'},
@@ -119,7 +119,7 @@ def lambda_handler(event, context):
                 'order_id': body['order_id']
             })
         }
-    
+
     except ValueError as e:
         return {
             'statusCode': 400,
@@ -129,16 +129,16 @@ def lambda_handler(event, context):
 
 def validate_order(order: dict):
     """Validar campos de orden"""
-    
+
     required = ['order_id', 'customer_id', 'items', 'total']
-    
+
     for field in required:
         if field not in order:
             raise ValueError(f"Missing required field: {field}")
-    
+
     if not order['items']:
         raise ValueError("Order must have at least one item")
-    
+
     if order['total'] <= 0:
         raise ValueError("Total must be positive")
 
@@ -179,38 +179,38 @@ def lambda_handler(event, context):
     """
     Procesar batch de órdenes desde SQS
     """
-    
+
     results = {
         'processed': 0,
         'failed': 0
     }
-    
+
     batch_item_failures = []
-    
+
     for record in event['Records']:
         try:
             # Parsear mensaje
             order = json.loads(record['body'])
             message_id = record['messageId']
-            
+
             logger.info(f"Processing order {order['order_id']}")
-            
+
             # Procesar orden
             process_order(order)
-            
+
             results['processed'] += 1
-            
+
         except Exception as e:
             logger.error(f"Failed to process message {message_id}: {e}")
             results['failed'] += 1
-            
+
             # Marcar mensaje como fallido para retry
             batch_item_failures.append({
                 'itemIdentifier': record['messageId']
             })
-    
+
     logger.info(f"Batch results: {results}")
-    
+
     # Retornar mensajes fallidos (Lambda will retry them)
     return {
         'batchItemFailures': batch_item_failures
@@ -221,15 +221,15 @@ def process_order(order: dict):
     """
     Procesar una orden
     """
-    
+
     # 1. Validar inventario (simulado)
     if not check_inventory(order['items']):
         raise Exception("Insufficient inventory")
-    
+
     # 2. Procesar pago (simulado)
     if not process_payment(order['customer_id'], order['total']):
         raise Exception("Payment failed")
-    
+
     # 3. Guardar orden en DynamoDB
     order_record = {
         'order_id': order['order_id'],
@@ -239,9 +239,9 @@ def process_order(order: dict):
         'status': 'PROCESSED',
         'processed_at': datetime.utcnow().isoformat()
     }
-    
+
     orders_table.put_item(Item=order_record)
-    
+
     logger.info(f"Order {order['order_id']} processed successfully")
 
 
@@ -273,10 +273,10 @@ resource "aws_sqs_queue" "orders_fifo" {
   content_based_deduplication = false  # Usaremos MessageDeduplicationId
   deduplication_scope        = "messageGroup"
   fifo_throughput_limit      = "perMessageGroupId"
-  
+
   visibility_timeout_seconds = 300  # 5 min
   message_retention_seconds  = 1209600  # 14 días
-  
+
   # Dead Letter Queue
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
@@ -348,10 +348,10 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   function_name    = aws_lambda_function.order_processor.arn
   batch_size       = 10
   enabled          = true
-  
+
   # Configuración de retry
   function_response_types = ["ReportBatchItemFailures"]
-  
+
   scaling_config {
     maximum_concurrency = 5  # Max 5 Lambda instances
   }

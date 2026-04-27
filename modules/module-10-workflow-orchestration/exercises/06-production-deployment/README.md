@@ -62,10 +62,10 @@ def test_dag_integrity():
     for dag_id, dag in dag_bag.dags.items():
         # No cycles
         assert dag.test_cycle() is None
-        
+
         # Has owner
         assert dag.default_args.get('owner') is not None
-        
+
         # Has tags
         assert len(dag.tags) > 0
 
@@ -100,27 +100,27 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install apache-airflow==2.8.1
           pip install pytest pytest-cov
           pip install -r requirements.txt
-      
+
       - name: Initialize Airflow DB
         run: airflow db init
-      
+
       - name: Run Tests
         run: pytest tests/ -v --cov=dags
-      
+
       - name: Lint DAGs
         run: |
           pip install flake8
@@ -291,14 +291,14 @@ airflow tasks list my_dag
 
 ## 🎓 Learning Objectives
 
-✅ Docker Compose production setup  
-✅ CeleryExecutor configuration  
-✅ DAG testing strategies  
-✅ CI/CD pipeline implementation  
-✅ Secrets management  
-✅ Production monitoring  
-✅ Deployment best practices  
-✅ Health checks and validation  
+✅ Docker Compose production setup
+✅ CeleryExecutor configuration
+✅ DAG testing strategies
+✅ CI/CD pipeline implementation
+✅ Secrets management
+✅ Production monitoring
+✅ Deployment best practices
+✅ Health checks and validation
 
 ---
 

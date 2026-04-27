@@ -20,12 +20,12 @@
 
 ### Key Features
 
-✅ **Dynamic Pipeline Generation**: DAGs son definidos en Python, lo que permite generación dinámica  
-✅ **Extensible**: Rico conjunto de operadores y fácil creación de custom operators  
-✅ **Elegant UI**: Web interface para visualizar, monitorear y troubleshoot pipelines  
-✅ **Scalable**: Arquitectura modular que escala horizontalmente  
-✅ **Rich Scheduling**: Expresiones cron, intervals, backfilling  
-✅ **Dependency Management**: Define dependencias complejas entre tasks  
+✅ **Dynamic Pipeline Generation**: DAGs son definidos en Python, lo que permite generación dinámica
+✅ **Extensible**: Rico conjunto de operadores y fácil creación de custom operators
+✅ **Elegant UI**: Web interface para visualizar, monitorear y troubleshoot pipelines
+✅ **Scalable**: Arquitectura modular que escala horizontalmente
+✅ **Rich Scheduling**: Expresiones cron, intervals, backfilling
+✅ **Dependency Management**: Define dependencias complejas entre tasks
 
 ### When to Use Airflow
 
@@ -374,25 +374,25 @@ catchup_by_default = True
 while True:
     # 1. Heartbeat (check if scheduler is alive)
     record_heartbeat()
-    
+
     # 2. Parse DAGs
     dag_bag = DagBag(dag_folder)
-    
+
     # 3. Create DagRuns for each DAG
     for dag in dag_bag.dags:
         create_dag_run_if_needed(dag)
-    
+
     # 4. Schedule tasks
     task_instances = get_schedulable_task_instances()
     for ti in task_instances:
         executor.queue_task(ti)
-    
+
     # 5. Update task states
     executor.heartbeat()
-    
+
     # 6. Process executor feedback
     process_executor_events()
-    
+
     time.sleep(scheduler_heartbeat_sec)
 ```
 
@@ -981,12 +981,12 @@ airflow webserver --port 8080
 
 **Key Takeaways:**
 
-✅ Airflow = Workflow orchestration platform  
-✅ DAG = Directed Acyclic Graph (workflow)  
-✅ Task = Unit of work (Operators, Sensors)  
-✅ Scheduler = Monitors and triggers tasks  
-✅ Executor = Determines how tasks run  
-✅ Web Server = UI for monitoring  
+✅ Airflow = Workflow orchestration platform
+✅ DAG = Directed Acyclic Graph (workflow)
+✅ Task = Unit of work (Operators, Sensors)
+✅ Scheduler = Monitors and triggers tasks
+✅ Executor = Determines how tasks run
+✅ Web Server = UI for monitoring
 
 **Architecture:**
 ```
@@ -1000,7 +1000,7 @@ Web Server ⟷ Metadata DB ⟷ Scheduler → Executor → Workers
 
 ---
 
-**Document**: 01-airflow-fundamentals.md  
-**Words**: ~5,000  
-**Level**: Beginner-Intermediate  
+**Document**: 01-airflow-fundamentals.md
+**Words**: ~5,000
+**Level**: Beginner-Intermediate
 **Next**: [02-dags-and-operators.md](02-dags-and-operators.md)

@@ -106,16 +106,16 @@ logger = logging.getLogger(__name__)
 def sla_miss_callback(dag, task_list, blocking_task_list, slas, blocking_tis):
     """Called when SLA is missed"""
     logger.error(f"SLA MISS: {[t.task_id for t in task_list]}")
-    
+
     # Send alert
     message = f"""
     🚨 SLA VIOLATION
-    
+
     DAG: {dag.dag_id}
     Tasks: {[t.task_id for t in task_list]}
     Time: {datetime.now()}
     """
-    
+
     logger.error(message)
     # send_pagerduty_alert(message)
 
@@ -123,27 +123,27 @@ def task_failure_callback(context):
     """Called when task fails"""
     ti = context['task_instance']
     exception = context.get('exception')
-    
+
     logger.error(f"Task {ti.task_id} failed: {exception}")
-    
+
     # Send Slack notification
     message = f"""
     ❌ *Task Failed*
-    
+
     *DAG*: {ti.dag_id}
     *Task*: {ti.task_id}
     *Execution Date*: {context['execution_date']}
     *Error*: {exception}
     *Log*: {ti.log_url}
     """
-    
+
     # slack_alert(message)
 
 def task_success_callback(context):
     """Called when task succeeds"""
     ti = context['task_instance']
     duration = (ti.end_date - ti.start_date).total_seconds()
-    
+
     logger.info(f"Task {ti.task_id} completed in {duration}s")
 
 with DAG(
@@ -155,13 +155,13 @@ with DAG(
     sla_miss_callback=sla_miss_callback,
     tags=['exercise', 'monitoring', 'ex05'],
 ) as dag:
-    
+
     def task_with_sla():
         """Task that should complete in 5 minutes"""
         logger.info("Processing...")
         time.sleep(2)  # Simulate work
         return "completed"
-    
+
     monitored_task = PythonOperator(
         task_id='monitored_task',
         python_callable=task_with_sla,
@@ -169,20 +169,20 @@ with DAG(
         on_success_callback=task_success_callback,
         on_failure_callback=task_failure_callback,
     )
-    
+
     def send_success_summary(**context):
         """Send success notification"""
         dag_run = context['dag_run']
         duration = (dag_run.end_date - dag_run.start_date).total_seconds() if dag_run.end_date else 0
-        
+
         message = f"✅ DAG {dag_run.dag_id} completed in {duration}s"
         logger.info(message)
-    
+
     notify = PythonOperator(
         task_id='notify',
         python_callable=send_success_summary,
     )
-    
+
     monitored_task >> notify
 ```
 
@@ -205,12 +205,12 @@ airflow tasks logs ex05_monitoring monitored_task 2024-01-01
 
 ## 🎓 Learning Objectives
 
-✅ SLA configuration and monitoring  
-✅ Callback functions (success, failure, retry, SLA)  
-✅ Slack integration for alerts  
-✅ Performance tracking  
-✅ Health checks and pre-flight validation  
-✅ Production monitoring patterns  
+✅ SLA configuration and monitoring
+✅ Callback functions (success, failure, retry, SLA)
+✅ Slack integration for alerts
+✅ Performance tracking
+✅ Health checks and pre-flight validation
+✅ Production monitoring patterns
 
 ---
 

@@ -26,7 +26,7 @@ Primer DAG de introducción que muestra:
 - Dependencias secuenciales (`>>`)
 - Tags y metadata
 
-**Schedule**: `@daily`  
+**Schedule**: `@daily`
 **Tags**: `ejercicio`, `basico`, `ejemplo`
 
 ### 2. ex01_etl_pipeline.py
@@ -39,7 +39,7 @@ Pipeline ETL completo que demuestra:
 - Uso de XComs para pasar datos entre tasks
 - `provide_context=True` para acceder a contexto
 
-**Schedule**: `@daily`  
+**Schedule**: `@daily`
 **Tags**: `ejercicio`, `etl`, `xcoms`
 
 ### 3. ex02_multi_operators.py
@@ -52,7 +52,7 @@ Demuestra el uso de varios operadores:
 - Trigger rule `all_done` para cleanup
 - Callbacks de éxito y fallo
 
-**Schedule**: `0 */6 * * *` (cada 6 horas)  
+**Schedule**: `0 */6 * * *` (cada 6 horas)
 **Tags**: `ejercicio`, `operadores`
 
 ### 4. ex03_branching.py
@@ -64,7 +64,7 @@ Pipeline con lógica condicional:
 - Trigger rule `none_failed_min_one_success` para consolidación
 - Lógica de negocio basada en datos
 
-**Schedule**: `@daily`  
+**Schedule**: `@daily`
 **Tags**: `ejercicio`, `branching`, `avanzado`
 
 ### 5. ex04_api_pipeline.py
@@ -77,7 +77,7 @@ Pipeline ETL completo con API real:
 - Generación de reportes
 - Manejo de errores con retries
 
-**Schedule**: `0 */12 * * *` (cada 12 horas)  
+**Schedule**: `0 */12 * * *` (cada 12 horas)
 **Tags**: `ejercicio`, `etl`, `api`, `pipeline`
 
 ### 6. ex05_monitoring.py
@@ -90,7 +90,7 @@ DAG con monitoreo completo:
 - Métricas de performance
 - Quality checks
 
-**Schedule**: `*/15 * * * *` (cada 15 minutos)  
+**Schedule**: `*/15 * * * *` (cada 15 minutos)
 **Tags**: `ejercicio`, `monitoreo`, `alertas`, `produccion`
 
 ## 🚀 Cómo Usar

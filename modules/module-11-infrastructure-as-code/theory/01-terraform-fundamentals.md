@@ -107,7 +107,7 @@ Ingeniero 1: "Umm... creo que era t2.medium... ¿o t3.medium?"
 resource "aws_instance" "staging" {
   instance_type = "t3.medium"  # Definido claramente
   ami           = data.aws_ami.ubuntu.id
-  
+
   tags = {
     Environment = "staging"
     Project     = "data-platform"
@@ -448,7 +448,7 @@ El **state** es el mecanismo que Terraform usa para mapear recursos del mundo re
 
 // También es un comentario
 
-/* 
+/*
   Comentario
   multilínea
 */
@@ -457,7 +457,7 @@ El **state** es el mecanismo que Terraform usa para mapear recursos del mundo re
 <BLOCK_TYPE> "<BLOCK_LABEL>" "<BLOCK_LABEL>" {
   # Argumentos
   <IDENTIFIER> = <EXPRESSION>
-  
+
   # Bloque anidado
   <NESTED_BLOCK> {
     <IDENTIFIER> = <EXPRESSION>
@@ -473,7 +473,7 @@ Los bloques son contenedores de configuración. Ejemplo:
 resource "aws_instance" "web" {
   ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t3.medium"
-  
+
   tags = {
     Name = "WebServer"
   }
@@ -492,7 +492,7 @@ Componentes:
 # 1. Terraform block - Configuración de Terraform mismo
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -504,7 +504,7 @@ terraform {
 # 2. Provider block - Configuración de providers
 provider "aws" {
   region = "us-east-1"
-  
+
   default_tags {
     tags = {
       Project = "DataPlatform"
@@ -545,7 +545,7 @@ locals {
 # 8. Module block - Usa un módulo
 module "vpc" {
   source = "./modules/vpc"
-  
+
   cidr_block = "10.0.0.0/16"
 }
 ```
@@ -734,7 +734,7 @@ Crea archivos `.tf` con tu configuración:
 # main.tf
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -934,7 +934,7 @@ provider "aws" {
   region     = "us-east-1"
   access_key = var.aws_access_key
   secret_key = var.aws_secret_key
-  
+
   # Default tags para todos los recursos
   default_tags {
     tags = {
@@ -943,10 +943,10 @@ provider "aws" {
       Project     = "DataPlatform"
     }
   }
-  
+
   # Configuración de retry
   max_retries = 3
-  
+
   # Ignorar tags específicos
   ignore_tags {
     keys = ["LastModified", "AutoScaling"]
@@ -965,7 +965,7 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"  # Cualquier versión 5.x
     }
-    
+
     random = {
       source  = "hashicorp/random"
       version = ">= 3.0.0"
@@ -1018,16 +1018,16 @@ resource "aws_s3_bucket" "west" {
 provider "aws" {
   region  = var.aws_region
   profile = "mycompany"  # AWS CLI profile
-  
+
   # Assume role
   assume_role {
     role_arn     = "arn:aws:iam::123456789012:role/TerraformRole"
     session_name = "terraform-session"
   }
-  
+
   # Shared credentials file
   shared_credentials_files = ["~/.aws/credentials"]
-  
+
   # Default tags
   default_tags {
     tags = {
@@ -1129,7 +1129,7 @@ Los **resources** son el componente más importante de Terraform. Cada bloque de
 ```hcl
 resource "<PROVIDER>_<TYPE>" "<NAME>" {
   <ARGUMENT> = <VALUE>
-  
+
   <NESTED_BLOCK> {
     <ARGUMENT> = <VALUE>
   }
@@ -1143,7 +1143,7 @@ resource "<PROVIDER>_<TYPE>" "<NAME>" {
 ```hcl
 resource "aws_s3_bucket" "data_lake" {
   bucket = "my-company-data-lake"
-  
+
   tags = {
     Name        = "Data Lake"
     Environment = "production"
@@ -1153,7 +1153,7 @@ resource "aws_s3_bucket" "data_lake" {
 # Versioning separado (AWS provider 4.x+)
 resource "aws_s3_bucket_versioning" "data_lake" {
   bucket = aws_s3_bucket.data_lake.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -1162,7 +1162,7 @@ resource "aws_s3_bucket_versioning" "data_lake" {
 # Encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake" {
   bucket = aws_s3_bucket.data_lake.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -1173,16 +1173,16 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake" {
 # Lifecycle policy
 resource "aws_s3_bucket_lifecycle_configuration" "data_lake" {
   bucket = aws_s3_bucket.data_lake.id
-  
+
   rule {
     id     = "archive-old-data"
     status = "Enabled"
-    
+
     transition {
       days          = 90
       storage_class = "GLACIER"
     }
-    
+
     expiration {
       days = 365
     }
@@ -1196,19 +1196,19 @@ resource "aws_s3_bucket_lifecycle_configuration" "data_lake" {
 resource "aws_instance" "web_server" {
   ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t3.medium"
-  
+
   # Network configuration
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.web.id]
   associate_public_ip_address = true
-  
+
   # Storage
   root_block_device {
     volume_size = 30
     volume_type = "gp3"
     encrypted   = true
   }
-  
+
   # User data script
   user_data = <<-EOF
               #!/bin/bash
@@ -1218,14 +1218,14 @@ resource "aws_instance" "web_server" {
               systemctl enable httpd
               echo "<h1>Hello from Terraform</h1>" > /var/www/html/index.html
               EOF
-  
+
   # Tags
   tags = {
     Name        = "WebServer"
     Environment = "production"
     Role        = "webserver"
   }
-  
+
   # Lifecycle
   lifecycle {
     create_before_destroy = true
@@ -1238,43 +1238,43 @@ resource "aws_instance" "web_server" {
 ```hcl
 resource "aws_db_instance" "postgres" {
   identifier = "myapp-database"
-  
+
   # Engine
   engine         = "postgres"
   engine_version = "14.7"
-  
+
   # Size and performance
   instance_class    = "db.t3.medium"
   allocated_storage = 100
   storage_type      = "gp3"
   storage_encrypted = true
-  
+
   # Database
   db_name  = "myappdb"
   username = var.db_username
   password = var.db_password
   port     = 5432
-  
+
   # Network
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.database.id]
   publicly_accessible    = false
-  
+
   # Backup
   backup_retention_period = 7
   backup_window           = "03:00-04:00"
   maintenance_window      = "mon:04:00-mon:05:00"
-  
+
   # Monitoring
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
   monitoring_interval             = 60
   monitoring_role_arn             = aws_iam_role.rds_monitoring.arn
-  
+
   # Deletion protection
   deletion_protection = true
   skip_final_snapshot = false
   final_snapshot_identifier = "myapp-database-final-snapshot"
-  
+
   tags = {
     Name        = "Application Database"
     Environment = "production"
@@ -1290,7 +1290,7 @@ Los resources pueden referenciar atributos de otros resources:
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-  
+
   tags = {
     Name = "main-vpc"
   }
@@ -1300,7 +1300,7 @@ resource "aws_vpc" "main" {
 resource "aws_subnet" "public" {
   vpc_id     = aws_vpc.main.id  # ← Referencia
   cidr_block = "10.0.1.0/24"
-  
+
   tags = {
     Name = "public-subnet"
   }
@@ -1310,7 +1310,7 @@ resource "aws_subnet" "public" {
 resource "aws_security_group" "web" {
   name   = "web-sg"
   vpc_id = aws_vpc.main.id  # ← Referencia
-  
+
   ingress {
     from_port   = 80
     to_port     = 80
@@ -1344,7 +1344,7 @@ Algunos cambios pueden aplicarse sin recrear el recurso:
 resource "aws_instance" "web" {
   ami           = "ami-12345"
   instance_type = "t3.medium"
-  
+
   tags = {
     Name = "WebServer v1"  # Cambiar esto solo actualiza tags
   }
@@ -1429,12 +1429,12 @@ data "<PROVIDER>_<TYPE>" "<NAME>" {
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]  # Canonical (Ubuntu)
-  
+
   filter {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
-  
+
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
@@ -1463,7 +1463,7 @@ output "ami_info" {
 # Obtener todas las AZs disponibles
 data "aws_availability_zones" "available" {
   state = "available"
-  
+
   filter {
     name   = "opt-in-status"
     values = ["opt-in-not-required"]
@@ -1476,7 +1476,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.${count.index + 10}.0/24"
   availability_zone = data.aws_availability_zones.available.names[count.index]
-  
+
   tags = {
     Name = "private-subnet-${count.index + 1}"
   }
@@ -1499,7 +1499,7 @@ data "aws_subnets" "private" {
     name   = "vpc-id"
     values = [data.aws_vpc.selected.id]
   }
-  
+
   tags = {
     Tier = "private"
   }
@@ -1541,12 +1541,12 @@ data "aws_iam_policy_document" "s3_read" {
   statement {
     sid    = "AllowS3Read"
     effect = "Allow"
-    
+
     actions = [
       "s3:GetObject",
       "s3:ListBucket"
     ]
-    
+
     resources = [
       "arn:aws:s3:::my-bucket",
       "arn:aws:s3:::my-bucket/*"
@@ -1589,7 +1589,7 @@ variable "instance_type" {
   description = "EC2 instance type"
   type        = string
   default     = "t3.medium"
-  
+
   validation {
     condition     = contains(["t3.small", "t3.medium", "t3.large"], var.instance_type)
     error_message = "Instance type must be t3.small, t3.medium, or t3.large."
@@ -1673,7 +1673,7 @@ variable "database_config" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = var.instance_type
-  
+
   tags = var.tags
 }
 
@@ -1691,10 +1691,10 @@ resource "aws_instance" "web" {
 # En count
 resource "aws_instance" "web" {
   count = var.instance_count
-  
+
   ami           = var.ami_id
   instance_type = var.instance_type
-  
+
   tags = {
     Name = "web-${count.index + 1}"
   }
@@ -1764,7 +1764,7 @@ Las **locals** son valores calculados que se usan internamente:
 locals {
   # Nombre del proyecto combinado con environment
   name_prefix = "${var.project}-${var.environment}"
-  
+
   # Tags comunes
   common_tags = {
     Project     = var.project
@@ -1772,15 +1772,15 @@ locals {
     ManagedBy   = "Terraform"
     CreatedDate = timestamp()
   }
-  
+
   # Lista de subnets privadas
   private_subnets = [
     for i in range(3) : "10.0.${i + 10}.0/24"
   ]
-  
+
   # Configuración condicional
   instance_type = var.environment == "prod" ? "t3.large" : "t3.small"
-  
+
   # Merge de configuraciones
   all_tags = merge(
     local.common_tags,
@@ -1943,7 +1943,7 @@ module "networking" {
 
 module "compute" {
   source = "./modules/compute"
-  
+
   # Usar outputs del módulo networking
   vpc_id     = module.networking.vpc_id
   subnet_ids = module.networking.private_subnet_ids
@@ -2371,7 +2371,7 @@ variable "db_password" {
 # Configure Terraform
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -2383,7 +2383,7 @@ terraform {
 # Configure AWS Provider
 provider "aws" {
   region = var.region
-  
+
   default_tags {
     tags = {
       Project     = var.project
@@ -2396,12 +2396,12 @@ provider "aws" {
 # Locals
 locals {
   name_prefix = "${var.project}-${var.environment}"
-  
+
   availability_zones = [
     "${var.region}a",
     "${var.region}b"
   ]
-  
+
   common_tags = {
     Project     = var.project
     Environment = var.environment
@@ -2413,7 +2413,7 @@ locals {
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
-  
+
   filter {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
@@ -2425,7 +2425,7 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-  
+
   tags = {
     Name = "${local.name_prefix}-vpc"
   }
@@ -2434,7 +2434,7 @@ resource "aws_vpc" "main" {
 # Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
-  
+
   tags = {
     Name = "${local.name_prefix}-igw"
   }
@@ -2447,7 +2447,7 @@ resource "aws_subnet" "public" {
   cidr_block              = "10.0.${count.index + 1}.0/24"
   availability_zone       = local.availability_zones[count.index]
   map_public_ip_on_launch = true
-  
+
   tags = {
     Name = "${local.name_prefix}-public-${count.index + 1}"
     Tier = "public"
@@ -2460,7 +2460,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.${count.index + 10}.0/24"
   availability_zone = local.availability_zones[count.index]
-  
+
   tags = {
     Name = "${local.name_prefix}-private-${count.index + 1}"
     Tier = "private"
@@ -2470,12 +2470,12 @@ resource "aws_subnet" "private" {
 # Route Table for Public Subnets
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-  
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
-  
+
   tags = {
     Name = "${local.name_prefix}-public-rt"
   }
@@ -2493,7 +2493,7 @@ resource "aws_security_group" "web" {
   name        = "${local.name_prefix}-web-sg"
   description = "Security group for web servers"
   vpc_id      = aws_vpc.main.id
-  
+
   # HTTP from anywhere
   ingress {
     description = "HTTP from anywhere"
@@ -2502,7 +2502,7 @@ resource "aws_security_group" "web" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   # HTTPS from anywhere
   ingress {
     description = "HTTPS from anywhere"
@@ -2511,7 +2511,7 @@ resource "aws_security_group" "web" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   # SSH (for management - consider restricting)
   ingress {
     description = "SSH"
@@ -2520,7 +2520,7 @@ resource "aws_security_group" "web" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   # All outbound traffic
   egress {
     from_port   = 0
@@ -2528,7 +2528,7 @@ resource "aws_security_group" "web" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = {
     Name = "${local.name_prefix}-web-sg"
   }
@@ -2539,7 +2539,7 @@ resource "aws_security_group" "database" {
   name        = "${local.name_prefix}-db-sg"
   description = "Security group for database"
   vpc_id      = aws_vpc.main.id
-  
+
   # PostgreSQL from web security group only
   ingress {
     description     = "PostgreSQL from web servers"
@@ -2548,14 +2548,14 @@ resource "aws_security_group" "database" {
     protocol        = "tcp"
     security_groups = [aws_security_group.web.id]
   }
-  
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = {
     Name = "${local.name_prefix}-db-sg"
   }
@@ -2568,7 +2568,7 @@ resource "aws_instance" "web" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public[count.index % 2].id
   vpc_security_group_ids = [aws_security_group.web.id]
-  
+
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
@@ -2577,13 +2577,13 @@ resource "aws_instance" "web" {
               systemctl enable httpd
               echo "<h1>Hello from ${local.name_prefix} - Server ${count.index + 1}</h1>" > /var/www/html/index.html
               EOF
-  
+
   root_block_device {
     volume_size = 20
     volume_type = "gp3"
     encrypted   = true
   }
-  
+
   tags = {
     Name = "${local.name_prefix}-web-${count.index + 1}"
   }
@@ -2592,7 +2592,7 @@ resource "aws_instance" "web" {
 # S3 Bucket for Data
 resource "aws_s3_bucket" "data" {
   bucket = "${local.name_prefix}-data-${data.aws_caller_identity.current.account_id}"
-  
+
   tags = {
     Name = "${local.name_prefix}-data"
   }
@@ -2601,7 +2601,7 @@ resource "aws_s3_bucket" "data" {
 # S3 Bucket Versioning
 resource "aws_s3_bucket_versioning" "data" {
   bucket = aws_s3_bucket.data.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -2610,7 +2610,7 @@ resource "aws_s3_bucket_versioning" "data" {
 # S3 Bucket Encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
   bucket = aws_s3_bucket.data.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -2622,7 +2622,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
 resource "aws_db_subnet_group" "main" {
   name       = "${local.name_prefix}-db-subnet-group"
   subnet_ids = aws_subnet.private[*].id
-  
+
   tags = {
     Name = "${local.name_prefix}-db-subnet-group"
   }
@@ -2636,17 +2636,17 @@ resource "aws_db_instance" "main" {
   instance_class    = "db.t3.micro"
   allocated_storage = 20
   storage_encrypted = true
-  
+
   db_name  = "appdb"
   username = var.db_username
   password = var.db_password
-  
+
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.database.id]
-  
+
   backup_retention_period = 7
   skip_final_snapshot     = true
-  
+
   tags = {
     Name = "${local.name_prefix}-db"
   }
@@ -2877,13 +2877,13 @@ terraform destroy
 
 En este módulo has aprendido los fundamentos de Terraform e Infrastructure as Code:
 
-✅ **Qué es IaC** y sus beneficios  
-✅ **Arquitectura de Terraform** (Core, Providers, State)  
-✅ **HCL Syntax** y estructura de bloques  
-✅ **Terraform Workflow** (init, plan, apply, destroy)  
-✅ **Resources y Data Sources**  
-✅ **Variables y Outputs**  
-✅ **State Management**  
+✅ **Qué es IaC** y sus beneficios
+✅ **Arquitectura de Terraform** (Core, Providers, State)
+✅ **HCL Syntax** y estructura de bloques
+✅ **Terraform Workflow** (init, plan, apply, destroy)
+✅ **Resources y Data Sources**
+✅ **Variables y Outputs**
+✅ **State Management**
 ✅ **Primer proyecto completo**
 
 En el siguiente módulo (`02-terraform-advanced.md`), profundizaremos en temas avanzados como módulos, funciones complejas, remote state, y workflows de equipo.

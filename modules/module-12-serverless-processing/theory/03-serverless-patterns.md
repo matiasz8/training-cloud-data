@@ -58,15 +58,15 @@ table = dynamodb.Table('users')
 def get_user(event, context):
     """GET /users/{id}"""
     user_id = event['pathParameters']['id']
-    
+
     response = table.get_item(Key={'user_id': user_id})
-    
+
     if 'Item' not in response:
         return {
             'statusCode': 404,
             'body': json.dumps({'error': 'User not found'})
         }
-    
+
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
@@ -76,14 +76,14 @@ def get_user(event, context):
 def create_user(event, context):
     """POST /users"""
     body = json.loads(event['body'])
-    
+
     # Validación
     if 'email' not in body or 'name' not in body:
         return {
             'statusCode': 400,
             'body': json.dumps({'error': 'Missing required fields'})
         }
-    
+
     # Crear usuario
     item = {
         'user_id': str(uuid.uuid4()),
@@ -91,9 +91,9 @@ def create_user(event, context):
         'name': body['name'],
         'created_at': datetime.utcnow().isoformat()
     }
-    
+
     table.put_item(Item=item)
-    
+
     return {
         'statusCode': 201,
         'headers': {'Content-Type': 'application/json'},
@@ -104,9 +104,9 @@ def list_users(event, context):
     """GET /users"""
     # Query parameters
     limit = int(event['queryStringParameters'].get('limit', 10))
-    
+
     response = table.scan(Limit=limit)
-    
+
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
@@ -186,12 +186,12 @@ USER_SCHEMA = {
 def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
-    
+
     print(f"Validating s3://{bucket}/{key}")
-    
+
     # Descargar archivo
     obj = s3.get_object(Bucket=bucket, Key=key)
-    
+
     if key.endswith('.csv'):
         df = pd.read_csv(BytesIO(obj['Body'].read()))
     elif key.endswith('.json'):
@@ -200,24 +200,24 @@ def lambda_handler(event, context):
     else:
         move_to_quarantine(bucket, key, 'Unsupported format')
         return
-    
+
     # Validaciones
     validation_errors = []
-    
+
     # 1. Schema validation
     try:
         for record in df.to_dict('records'):
             jsonschema.validate(record, USER_SCHEMA)
     except jsonschema.ValidationError as e:
         validation_errors.append(f"Schema error: {e.message}")
-    
+
     # 2. Quality checks
     if df['email'].isna().any():
         validation_errors.append("Null emails found")
-    
+
     if df.duplicated(subset=['user_id']).any():
         validation_errors.append("Duplicate user IDs found")
-    
+
     # Resultado
     if validation_errors:
         move_to_quarantine(bucket, key, validation_errors)
@@ -227,15 +227,15 @@ def lambda_handler(event, context):
 def move_to_quarantine(bucket, key, errors):
     """Mover archivo inválido a quarantine"""
     quarantine_key = key.replace('landing/', 'quarantine/')
-    
+
     s3.copy_object(
         Bucket=bucket,
         CopySource={'Bucket': bucket, 'Key': key},
         Key=quarantine_key
     )
-    
+
     s3.delete_object(Bucket=bucket, Key=key)
-    
+
     # Notificar error
     sns.publish(
         TopicArn='arn:aws:sns:us-east-1:123:data-quality-alerts',
@@ -247,20 +247,20 @@ def process_valid_file(bucket, key, df):
     """Procesar archivo válido"""
     # Transformar a Parquet con particiones
     df['ingestion_date'] = pd.Timestamp.now().date()
-    
+
     # Partition por fecha
     for date, group in df.groupby('ingestion_date'):
         output_key = f"processed/date={date}/data.parquet"
-        
+
         parquet_buffer = BytesIO()
         group.to_parquet(parquet_buffer, engine='pyarrow', compression='snappy')
-        
+
         s3.put_object(
             Bucket=bucket,
             Key=output_key,
             Body=parquet_buffer.getvalue()
         )
-    
+
     # Eliminar archivo original
     s3.delete_object(Bucket=bucket, Key=key)
 ```
@@ -293,7 +293,7 @@ eventbridge = boto3.client('events')
 
 def lambda_handler(event, context):
     """Guardar evento y publicar a EventBridge"""
-    
+
     # 1. Guardar evento en Event Store (DynamoDB)
     event_record = {
         'event_id': str(uuid.uuid4()),
@@ -309,9 +309,9 @@ def lambda_handler(event, context):
             'version': '1.0'
         }
     }
-    
+
     events_table.put_item(Item=event_record)
-    
+
     # 2. Publicar a EventBridge
     eventbridge.put_events(
         Entries=[{
@@ -321,16 +321,16 @@ def lambda_handler(event, context):
             'EventBusName': 'default'
         }]
     )
-    
+
     return {'statusCode': 200, 'event_id': event_record['event_id']}
 
 # Lambda consumidor 1: Actualizar read model
 def update_read_model(event, context):
     detail = event['detail']
-    
+
     # Proyección: Tabla de usuarios (denormalizada para lectura rápida)
     users_table = dynamodb.Table('users_read_model')
-    
+
     users_table.put_item(Item={
         'user_id': detail['data']['user_id'],
         'email': detail['data']['email'],
@@ -341,7 +341,7 @@ def update_read_model(event, context):
 # Lambda consumidor 2: Generar reporte
 def generate_report(event, context):
     detail = event['detail']
-    
+
     # Enviar email de bienvenida
     ses = boto3.client('ses')
     ses.send_email(
@@ -372,7 +372,7 @@ def lambda_handler(event, context):
     headers = event['headers']
     body = json.loads(event['body']) if event['body'] else {}
     query = event['queryStringParameters'] or {}
-    
+
     # Respuesta debe incluir statusCode, headers, body
     return {
         'statusCode': 200,
@@ -438,9 +438,9 @@ def lambda_handler(event, context):
     claims = event['requestContext']['authorizer']['claims']
     user_id = claims['sub']
     email = claims['email']
-    
+
     print(f"User {email} ({user_id}) made request")
-    
+
     return {'statusCode': 200, 'body': f'Hello {email}'}
 ```
 
@@ -450,11 +450,11 @@ def lambda_handler(event, context):
 # Lambda Authorizer
 def authorizer_handler(event, context):
     token = event['authorizationToken']  # "Bearer abc123"
-    
+
     # Validar token (ej: JWT, consultar DB, etc.)
     if validate_token(token):
         principal_id = 'user123'
-        
+
         # Generar IAM policy
         return {
             'principalId': principal_id,
@@ -479,7 +479,7 @@ def handler(event, context):
     # Acceder a context del authorizer
     user_id = event['requestContext']['authorizer']['user_id']
     role = event['requestContext']['authorizer']['role']
-    
+
     return {'statusCode': 200, 'body': f'Hello {user_id} ({role})'}
 ```
 
@@ -582,7 +582,7 @@ def get_secret(secret_name):
 
 def lambda_handler(event, context):
     db_creds = get_secret('prod/db/credentials')
-    
+
     conn = psycopg2.connect(
         host=db_creds['host'],
         user=db_creds['username'],
@@ -648,14 +648,14 @@ def lambda_handler(event, context):
         KeyId='arn:aws:kms:us-east-1:123:key/abc-123',
         KeySpec='AES_256'
     )
-    
+
     plaintext_key = response['Plaintext']
     encrypted_key = response['CiphertextBlob']
-    
+
     # Cifrar data con data key
     cipher = Fernet(plaintext_key)
     encrypted_data = cipher.encrypt(b'sensitive data')
-    
+
     # Guardar encrypted_data + encrypted_key
     s3.put_object(
         Bucket='my-bucket',
@@ -672,7 +672,7 @@ def lambda_handler(event, context):
 ```hcl
 resource "aws_lambda_function" "processor" {
   function_name = "data-processor"
-  
+
   # VPC Configuration
   vpc_config {
     subnet_ids         = aws_subnet.private[*].id
@@ -729,17 +729,17 @@ def lambda_handler(event, context):
         'file_key': event['key'],
         'timestamp': datetime.utcnow().isoformat()
     }))
-    
+
     try:
         result = process_file(event['key'])
-        
+
         logger.info(json.dumps({
             'event': 'processing_completed',
             'request_id': context.aws_request_id,
             'records_processed': len(result),
             'duration_ms': context.get_remaining_time_in_millis()
         }))
-        
+
     except Exception as e:
         logger.error(json.dumps({
             'event': 'processing_failed',
@@ -783,7 +783,7 @@ cloudwatch = boto3.client('cloudwatch')
 
 def lambda_handler(event, context):
     records_processed = process_data(event)
-    
+
     # Publicar métrica
     cloudwatch.put_metric_data(
         Namespace='DataPipeline',
@@ -859,12 +859,12 @@ def lambda_handler(event, context):
         data = s3.get_object(Bucket=bucket, Key=key)
         subsegment.put_annotation('bucket', bucket)
         subsegment.put_annotation('key', key)
-    
+
     # Subsegmento para processing
     with xray_recorder.in_subsegment('process_data') as subsegment:
         result = process(data)
         subsegment.put_metadata('record_count', len(result))
-    
+
     return result
 ```
 
@@ -873,7 +873,7 @@ def lambda_handler(event, context):
 ```hcl
 resource "aws_lambda_function" "processor" {
   function_name = "processor"
-  
+
   tracing_config {
     mode = "Active"  # Enable X-Ray
   }
@@ -912,65 +912,65 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov moto
-      
+
       - name: Run unit tests
         run: pytest tests/unit/ -v --cov=src
-      
+
       - name: Run integration tests
         run: pytest tests/integration/ -v
-  
+
   deploy-staging:
     needs: test
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      
+
       - name: Deploy to Staging
         run: |
           cd infrastructure
           terraform init
           terraform workspace select staging
           terraform apply -auto-approve
-  
+
   deploy-production:
     needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      
+
       - name: Deploy to Production
         run: |
           cd infrastructure
           terraform init
           terraform workspace select production
           terraform apply -auto-approve
-      
+
       - name: Run smoke tests
         run: |
           python scripts/smoke-tests.py
@@ -1009,7 +1009,7 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref UsersTable
-  
+
   CreateUserFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1024,7 +1024,7 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref UsersTable
-  
+
   # DynamoDB Table
   UsersTable:
     Type: AWS::DynamoDB::Table
@@ -1082,7 +1082,7 @@ sam deploy --stack-name my-app-prod --parameter-overrides Environment=production
 ```hcl
 resource "aws_lambda_function" "critical" {
   function_name = "critical-function"
-  
+
   # Reservar 100 concurrent executions
   reserved_concurrent_executions = 100
 }
@@ -1097,7 +1097,7 @@ resource "aws_lambda_function" "critical" {
 ```hcl
 resource "aws_lambda_provisioned_concurrency_config" "warm" {
   function_name = aws_lambda_function.api.function_name
-  
+
   # Mantener 5 instancias siempre warm
   provisioned_concurrent_executions = 5
 }
@@ -1147,7 +1147,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "data_lake" {
 resource "aws_dynamodb_table" "users" {
   name         = "users"
   billing_mode = "PAY_PER_REQUEST"  # On-demand
-  
+
   # O provisioned:
   # billing_mode   = "PROVISIONED"
   # read_capacity  = 5
@@ -1160,7 +1160,7 @@ resource "aws_dynamodb_table" "users" {
 ## Resumen
 
 - **Patrones**: API Backend, Data Lake Ingestion, Event Sourcing
-- **API Gateway**: REST API serverless con authentication y rate limiting  
+- **API Gateway**: REST API serverless con authentication y rate limiting
 - **Seguridad**: Least privilege, Secrets Manager, encryption
 - **Observabilidad**: CloudWatch Logs/Metrics, X-Ray tracing
 - **CI/CD**: GitHub Actions + Terraform/SAM

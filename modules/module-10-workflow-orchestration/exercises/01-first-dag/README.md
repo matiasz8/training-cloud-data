@@ -248,11 +248,11 @@ with DAG(
     catchup=False,
     tags=['exercise', 'beginner', 'ex01'],
 ) as dag:
-    
+
     def print_hello():
         print("Hello from Airflow!")
         return "Success"
-    
+
     hello_task = PythonOperator(
         task_id='hello_task',
         python_callable=print_hello,
@@ -360,23 +360,23 @@ with DAG(
     catchup=False,
     tags=['exercise', 'mixed', 'ex01'],
 ) as dag:
-    
+
     start = BashOperator(
         task_id='start',
         bash_command='echo "Starting pipeline on {{ ds }}"',
     )
-    
+
     def calculate_sum():
         numbers = list(range(1, 11))
         total = sum(numbers)
         print(f"Sum of {numbers} = {total}")
         return total
-    
+
     python_task = PythonOperator(
         task_id='python_task',
         python_callable=calculate_sum,
     )
-    
+
     check_file = BashOperator(
         task_id='check_file',
         bash_command='''
@@ -388,19 +388,19 @@ with DAG(
             fi
         ''',
     )
-    
+
     def completion_message(**context):
         run_id = context['run_id']
         execution_date = context['execution_date']
         print(f"Pipeline completed!")
         print(f"Run ID: {run_id}")
         print(f"Execution Date: {execution_date}")
-    
+
     end = PythonOperator(
         task_id='end',
         python_callable=completion_message,
     )
-    
+
     # Dependencies: Fan-out and Fan-in
     start >> [python_task, check_file] >> end
 ```
@@ -437,16 +437,16 @@ airflow dags test ex01_hello_world 2024-01-01
 
 After completing this exercise, you should understand:
 
-✅ How to create a basic DAG  
-✅ DAG scheduling (daily, hourly, custom)  
-✅ PythonOperator and BashOperator usage  
-✅ Setting task dependencies (>>, <<)  
-✅ Using XCom for data passing  
-✅ Accessing context variables  
-✅ Testing DAGs locally  
-✅ Navigating Airflow UI  
-✅ Reading task logs  
-✅ Dynamic task generation  
+✅ How to create a basic DAG
+✅ DAG scheduling (daily, hourly, custom)
+✅ PythonOperator and BashOperator usage
+✅ Setting task dependencies (>>, <<)
+✅ Using XCom for data passing
+✅ Accessing context variables
+✅ Testing DAGs locally
+✅ Navigating Airflow UI
+✅ Reading task logs
+✅ Dynamic task generation
 
 ---
 

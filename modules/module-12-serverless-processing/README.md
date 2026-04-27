@@ -282,7 +282,7 @@ aws iam get-role --role-name lambda-role
 
 ## 🤝 Contribuciones
 
-¿Encontraste un error? ¿Tienes sugerencias? 
+¿Encontraste un error? ¿Tienes sugerencias?
 - Abre un issue en GitHub
 - Envía un pull request
 - Contacta al instructor
@@ -327,3 +327,21 @@ Una vez completado este módulo, continúa con:
 
 ¡Buena suerte con tu aprendizaje serverless! 🚀
 
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

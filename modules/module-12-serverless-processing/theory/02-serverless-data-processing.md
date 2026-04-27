@@ -34,26 +34,26 @@ def lambda_handler(event, context):
     # Evento S3
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
-    
+
     # Descargar CSV
     obj = s3.get_object(Bucket=bucket, Key=key)
     df = pd.read_csv(BytesIO(obj['Body'].read()))
-    
+
     # Transformar
     df['processed_at'] = pd.Timestamp.now()
     df['source_file'] = key
-    
+
     # Guardar como Parquet
     parquet_buffer = BytesIO()
     df.to_parquet(parquet_buffer, engine='pyarrow', compression='snappy')
-    
+
     output_key = key.replace('.csv', '.parquet').replace('raw/', 'processed/')
     s3.put_object(
         Bucket=bucket,
         Key=output_key,
         Body=parquet_buffer.getvalue()
     )
-    
+
     return {'output': f's3://{bucket}/{output_key}'}
 ```
 
@@ -72,10 +72,10 @@ S3 Upload → SNS Topic
 # Lambda Publisher (disparada por S3)
 def lambda_handler(event, context):
     sns = boto3.client('sns')
-    
+
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
-    
+
     # Publicar mensaje a SNS
     sns.publish(
         TopicArn='arn:aws:sns:us-east-1:123456789012:FileProcessing',
@@ -121,11 +121,11 @@ def lambda_handler(event, context):
         # Decodificar data de Kinesis
         payload = base64.b64decode(record['kinesis']['data'])
         log_entry = json.loads(payload)
-        
+
         # Procesar log
         if log_entry['level'] == 'ERROR':
             send_alert(log_entry)
-        
+
         # Agregar métricas
         update_metrics(log_entry)
 ```
@@ -150,38 +150,38 @@ s3 = boto3.client('s3')
 def lambda_handler(event, context):
     bucket = event['bucket']
     key = event['key']
-    
+
     # Obtener tamaño del archivo
     head = s3.head_object(Bucket=bucket, Key=key)
     file_size = head['ContentLength']
-    
+
     chunk_size = 50 * 1024 * 1024  # 50 MB chunks
     num_chunks = (file_size // chunk_size) + 1
-    
+
     results = []
-    
+
     for i in range(num_chunks):
         # Descargar chunk con Range request
         start_byte = i * chunk_size
         end_byte = min(start_byte + chunk_size - 1, file_size - 1)
-        
+
         response = s3.get_object(
             Bucket=bucket,
             Key=key,
             Range=f'bytes={start_byte}-{end_byte}'
         )
-        
+
         # Procesar chunk
         chunk_data = response['Body'].read()
         df_chunk = pd.read_csv(BytesIO(chunk_data))
-        
+
         # Agregación
         result = df_chunk.groupby('category')['amount'].sum()
         results.append(result)
-    
+
     # Combinar resultados
     final_result = pd.concat(results).groupby(level=0).sum()
-    
+
     return {'status': 'success', 'results': final_result.to_dict()}
 ```
 
@@ -192,15 +192,15 @@ def lambda_handler(event, context):
 ```python
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
-    
+
     # Query SQL en CSV
     response = s3.select_object_content(
         Bucket='my-bucket',
         Key='data.csv',
         ExpressionType='SQL',
         Expression="""
-            SELECT customer_id, amount 
-            FROM s3object s 
+            SELECT customer_id, amount
+            FROM s3object s
             WHERE amount > 1000
         """,
         InputSerialization={
@@ -209,14 +209,14 @@ def lambda_handler(event, context):
         },
         OutputSerialization={'CSV': {}}
     )
-    
+
     # Procesar stream
     results = []
     for event in response['Payload']:
         if 'Records' in event:
             data = event['Records']['Payload'].decode('utf-8')
             results.append(data)
-    
+
     return ''.join(results)
 ```
 
@@ -232,7 +232,7 @@ Generar URLs temporales para upload/download sin credenciales AWS.
 ```python
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
-    
+
     # Presigned URL para UPLOAD (usuario puede subir archivo)
     upload_url = s3.generate_presigned_url(
         'put_object',
@@ -243,7 +243,7 @@ def lambda_handler(event, context):
         },
         ExpiresIn=3600  # Válido por 1 hora
     )
-    
+
     # Presigned URL para DOWNLOAD
     download_url = s3.generate_presigned_url(
         'get_object',
@@ -253,7 +253,7 @@ def lambda_handler(event, context):
         },
         ExpiresIn=300  # Válido por 5 minutos
     )
-    
+
     return {
         'upload_url': upload_url,
         'download_url': download_url
@@ -426,14 +426,14 @@ Definido en **Amazon States Language (ASL)** - JSON que describe el workflow.
       }],
       "Next": "ValidateData"
     },
-    
+
     "ValidateData": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:123:function:validate",
       "ResultPath": "$.validation",
       "Next": "IsDataValid"
     },
-    
+
     "IsDataValid": {
       "Type": "Choice",
       "Choices": [{
@@ -443,7 +443,7 @@ Definido en **Amazon States Language (ASL)** - JSON que describe el workflow.
       }],
       "Default": "ValidationFailed"
     },
-    
+
     "ParallelTransform": {
       "Type": "Parallel",
       "Branches": [
@@ -471,25 +471,25 @@ Definido en **Amazon States Language (ASL)** - JSON que describe el workflow.
       "ResultPath": "$.transform_results",
       "Next": "LoadToWarehouse"
     },
-    
+
     "LoadToWarehouse": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:123:function:load",
       "Next": "GenerateReport"
     },
-    
+
     "GenerateReport": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:123:function:generate-report",
       "End": true
     },
-    
+
     "ExtractFailed": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:123:function:send-alert",
       "End": true
     },
-    
+
     "ValidationFailed": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-1:123:function:handle-invalid-data",
@@ -516,14 +516,14 @@ def lambda_handler(event, context):
         'destination': 's3://my-warehouse/processed/',
         'timestamp': datetime.utcnow().isoformat()
     }
-    
+
     # Iniciar ejecución
     response = sfn.start_execution(
         stateMachineArn='arn:aws:states:us-east-1:123:stateMachine:MyETL',
         name=f'execution-{datetime.utcnow().strftime("%Y%m%d%H%M%S")}',
         input=json.dumps(input_data)
     )
-    
+
     return {
         'executionArn': response['executionArn'],
         'startDate': response['startDate'].isoformat()
@@ -537,10 +537,10 @@ def lambda_handler(event, context):
     # event contiene el output del state anterior
     source = event['source']
     validation = event.get('validation', {})
-    
+
     # Procesar
     result = transform_data(source)
-    
+
     # Return será el input del siguiente state
     return {
         'transformed_data': result,
@@ -561,7 +561,7 @@ def lambda_handler(event, context):
 # Lambda que publica custom event
 def lambda_handler(event, context):
     eventbridge = boto3.client('events')
-    
+
     eventbridge.put_events(
         Entries=[{
             'Source': 'my.data.pipeline',
@@ -619,7 +619,7 @@ def lambda_handler(event, context):
     for record in event['Records']:
         message_id = record['messageId']
         body = json.loads(record['body'])
-        
+
         try:
             process_message(body)
             print(f"Mensaje {message_id} procesado exitosamente")
@@ -627,7 +627,7 @@ def lambda_handler(event, context):
             # Si raise exception, mensaje vuelve a la cola
             print(f"Error procesando {message_id}: {e}")
             raise e
-    
+
     # Si return exitoso, mensajes se eliminan de la cola
     return {'statusCode': 200}
 ```
@@ -639,7 +639,7 @@ resource "aws_sqs_queue" "processing_queue" {
   name                       = "data-processing-queue"
   visibility_timeout_seconds = 300  # 5 min (debe ser >= lambda timeout)
   message_retention_seconds  = 1209600  # 14 días
-  
+
   # Dead Letter Queue
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
@@ -687,24 +687,24 @@ def lambda_handler(event, context):
     s3 = boto3.client('s3')
     sqs = boto3.client('sqs')
     dynamodb = boto3.resource('dynamodb')
-    
+
     # Tabla para tracking de archivos procesados
     table = dynamodb.Table('processed-files')
-    
+
     # Listar archivos en S3
     response = s3.list_objects_v2(
         Bucket='my-bucket',
         Prefix='landing/'
     )
-    
+
     for obj in response.get('Contents', []):
         key = obj['Key']
-        
+
         # Check si ya fue procesado
         item = table.get_item(Key={'file_key': key})
         if 'Item' in item:
             continue  # Ya procesado
-        
+
         # Enviar a SQS para procesamiento
         sqs.send_message(
             QueueUrl='https://sqs.us-east-1.amazonaws.com/123/processing-queue',
@@ -741,22 +741,22 @@ S3 (resultado final)
 def lambda_handler(event, context):
     bucket = event['bucket']
     key = event['key']
-    
+
     s3 = boto3.client('s3')
     lambda_client = boto3.client('lambda')
-    
+
     # Obtener tamaño
     head = s3.head_object(Bucket=bucket, Key=key)
     file_size = head['ContentLength']
-    
+
     chunk_size = 100 * 1024 * 1024  # 100 MB
     num_chunks = (file_size // chunk_size) + 1
-    
+
     # Invocar Lambda por cada chunk (async)
     for i in range(num_chunks):
         start_byte = i * chunk_size
         end_byte = min(start_byte + chunk_size - 1, file_size - 1)
-        
+
         lambda_client.invoke(
             FunctionName='chunk-processor',
             InvocationType='Event',  # Async
@@ -768,7 +768,7 @@ def lambda_handler(event, context):
                 'chunk_id': i
             })
         )
-    
+
     return {'chunks_created': num_chunks}
 ```
 
@@ -776,19 +776,19 @@ def lambda_handler(event, context):
 # Lambda Processor (procesa un chunk)
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
-    
+
     # Descargar chunk con Range
     response = s3.get_object(
         Bucket=event['bucket'],
         Key=event['key'],
         Range=f"bytes={event['start_byte']}-{event['end_byte']}"
     )
-    
+
     chunk_data = response['Body'].read()
-    
+
     # Procesar chunk
     processed_data = process_chunk(chunk_data)
-    
+
     # Guardar chunk procesado
     output_key = f"processed/chunk_{event['chunk_id']}.parquet"
     s3.put_object(
@@ -796,7 +796,7 @@ def lambda_handler(event, context):
         Key=output_key,
         Body=processed_data
     )
-    
+
     return {'chunk_id': event['chunk_id'], 'output': output_key}
 ```
 
@@ -812,11 +812,11 @@ EventBridge → Lambda → DynamoDB (atomic counters)
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('metrics')
-    
+
     # Timestamp truncado a minuto
     now = datetime.utcnow()
     minute_key = now.strftime('%Y-%m-%d %H:%M:00')
-    
+
     # Incrementar counter atómicamente
     table.update_item(
         Key={'timestamp': minute_key, 'metric': 'events'},
@@ -836,10 +836,10 @@ def lambda_handler(event, context):
 ```python
 def lambda_handler(event, context):
     glue = boto3.client('glue')
-    
+
     # Después de guardar datos en S3, iniciar crawler
     glue.start_crawler(Name='my-data-crawler')
-    
+
     return {'status': 'Crawler started'}
 ```
 
@@ -850,10 +850,10 @@ def lambda_handler(event, context):
 ```python
 def lambda_handler(event, context):
     glue = boto3.client('glue')
-    
+
     # Si archivo es pequeño (<100 MB), procesar con Lambda
     file_size = event['file_size']
-    
+
     if file_size < 100 * 1024 * 1024:  # 100 MB
         process_with_lambda(event)
     else:
@@ -874,14 +874,14 @@ def lambda_handler(event, context):
 ```python
 def lambda_handler(event, context):
     athena = boto3.client('athena')
-    
+
     query = """
         SELECT category, SUM(amount) as total
         FROM sales
         WHERE date = CURRENT_DATE
         GROUP BY category
     """
-    
+
     # Iniciar query
     response = athena.start_query_execution(
         QueryString=query,
@@ -890,21 +890,21 @@ def lambda_handler(event, context):
             'OutputLocation': 's3://my-bucket/athena-results/'
         }
     )
-    
+
     query_execution_id = response['QueryExecutionId']
-    
+
     # Esperar resultado (polling)
     while True:
         status = athena.get_query_execution(
             QueryExecutionId=query_execution_id
         )
         state = status['QueryExecution']['Status']['State']
-        
+
         if state in ['SUCCEEDED', 'FAILED', 'CANCELLED']:
             break
-        
+
         time.sleep(1)
-    
+
     if state == 'SUCCEEDED':
         # Obtener resultados
         results = athena.get_query_results(
@@ -940,7 +940,7 @@ cloudwatch = boto3.client('cloudwatch')
 def lambda_handler(event, context):
     # Tu lógica...
     records_processed = 1000
-    
+
     # Publicar custom metric
     cloudwatch.put_metric_data(
         Namespace='MyDataPipeline',
@@ -968,7 +968,7 @@ def lambda_handler(event, context):
     with xray_recorder.in_subsegment('ProcessData') as subsegment:
         result = process_data(event)
         subsegment.put_annotation('record_count', len(result))
-    
+
     return result
 ```
 
@@ -986,24 +986,24 @@ def lambda_handler(event, context):
     s3 = boto3.client('s3')
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('processed-files')
-    
+
     file_key = event['key']
-    
+
     # Check si ya fue procesado
     response = table.get_item(Key={'file_key': file_key})
     if 'Item' in response:
         return {'status': 'already_processed'}
-    
+
     # Procesar
     result = process_file(file_key)
-    
+
     # Marcar como procesado
     table.put_item(Item={
         'file_key': file_key,
         'processed_at': datetime.utcnow().isoformat(),
         'result': result
     })
-    
+
     return {'status': 'processed', 'result': result}
 ```
 
@@ -1014,18 +1014,18 @@ def lambda_handler(event, context):
     try:
         result = process_data(event)
         return {'statusCode': 200, 'body': json.dumps(result)}
-    
+
     except ClientError as e:
         # Error de AWS (permisos, recurso no encontrado)
         error_code = e.response['Error']['Code']
         if error_code == 'NoSuchKey':
             return {'statusCode': 404, 'body': 'File not found'}
         raise
-    
+
     except ValueError as e:
         # Error de validación (no reintentar)
         return {'statusCode': 400, 'body': f'Invalid data: {e}'}
-    
+
     except Exception as e:
         # Error inesperado (raise para retry)
         print(f"Unexpected error: {e}")
@@ -1051,7 +1051,7 @@ def get_secret(secret_name):
 def lambda_handler(event, context):
     # Obtener credenciales
     db_creds = get_secret('prod/database/credentials')
-    
+
     # Usar credenciales
     conn = connect_to_db(
         host=db_creds['host'],
@@ -1073,7 +1073,7 @@ def test_lambda_handler_success(mock_boto3):
     # Mock S3 client
     mock_s3 = MagicMock()
     mock_boto3.return_value = mock_s3
-    
+
     event = {
         'Records': [{
             's3': {
@@ -1082,9 +1082,9 @@ def test_lambda_handler_success(mock_boto3):
             }
         }]
     }
-    
+
     result = lambda_handler(event, {})
-    
+
     assert result['statusCode'] == 200
     mock_s3.get_object.assert_called_once()
 ```

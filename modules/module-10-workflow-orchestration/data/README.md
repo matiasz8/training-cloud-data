@@ -19,7 +19,7 @@ data/
 ## 📊 Descripción de Datasets
 
 ### 1. users.csv
-**Registros**: 10 usuarios  
+**Registros**: 10 usuarios
 **Campos**: id, name, email, age, city, registration_date, status
 
 Datos de usuarios para ejercicios de:
@@ -38,7 +38,7 @@ def load_users():
 ```
 
 ### 2. sales.csv
-**Registros**: 15 órdenes  
+**Registros**: 15 órdenes
 **Campos**: order_id, customer_id, product, category, amount, quantity, order_date, status
 
 Datos de ventas para:
@@ -52,16 +52,16 @@ import pandas as pd
 
 def analyze_sales():
     df = pd.read_csv('data/sample/sales.csv')
-    
+
     # Calcular totales por categoría
     category_totals = df.groupby('category')['amount'].sum()
-    
+
     print(f"Total Electronics: ${category_totals['Electronics']:.2f}")
     print(f"Total Furniture: ${category_totals['Furniture']:.2f}")
 ```
 
 ### 3. sensor_data.json
-**Registros**: 5 lecturas  
+**Registros**: 5 lecturas
 **Campos**: sensor_id, location, temperature, humidity, timestamp, status
 
 Datos de sensores IoT para:
@@ -76,7 +76,7 @@ import json
 def process_sensors():
     with open('data/sample/sensor_data.json', 'r') as f:
         data = json.load(f)
-    
+
     # Detectar alertas
     warnings = [s for s in data if s['status'] == 'warning']
     print(f"⚠️  {len(warnings)} sensores en estado warning")
@@ -133,9 +133,9 @@ import pandera as pa
 def validate_with_schema(df, table_name):
     with open('data/schemas/data_schema.json', 'r') as f:
         schemas = json.load(f)
-    
+
     schema_def = schemas[table_name]
-    
+
     # Crear schema Pandera dinámicamente
     # ... validación ...
 ```
@@ -153,7 +153,7 @@ import os
 def process_csv():
     # Path relativo desde dags/
     data_path = os.path.join(
-        os.path.dirname(__file__), 
+        os.path.dirname(__file__),
         '../data/sample/users.csv'
     )
     df = pd.read_csv(data_path)
@@ -171,13 +171,13 @@ with DAG('process_users', ...) as dag:
 ```python
 def load_and_process():
     import shutil
-    
+
     # Copiar a /tmp para procesamiento
     shutil.copy(
         'data/sample/sales.csv',
         '/tmp/sales.csv'
     )
-    
+
     # Procesar desde /tmp
     df = pd.read_csv('/tmp/sales.csv')
     # ...
@@ -236,7 +236,7 @@ from datetime import datetime, timedelta
 def generate_users(n=100):
     names = ['Ana', 'Carlos', 'María', 'Juan', 'Laura', 'Pedro']
     cities = ['Madrid', 'Barcelona', 'Valencia', 'Sevilla', 'Bilbao']
-    
+
     data = {
         'id': range(1, n+1),
         'name': np.random.choice(names, n),
@@ -249,7 +249,7 @@ def generate_users(n=100):
         ],
         'status': np.random.choice(['active', 'inactive'], n, p=[0.8, 0.2])
     }
-    
+
     df = pd.DataFrame(data)
     df.to_csv('data/sample/users_extended.csv', index=False)
     print(f"✓ Generados {n} usuarios")

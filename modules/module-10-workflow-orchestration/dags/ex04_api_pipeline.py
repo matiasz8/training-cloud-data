@@ -5,7 +5,6 @@ Pipeline completo: API → Transform → Database
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-import json
 
 default_args = {
     'owner': 'data_engineer',
@@ -19,20 +18,20 @@ def extract_from_api(**context):
     Extrae datos de una API pública (JSONPlaceholder)
     """
     import requests
-    
+
     print("📥 Extrayendo datos de API...")
-    
+
     # Extraer usuarios
     users_response = requests.get('https://jsonplaceholder.typicode.com/users')
     users = users_response.json()
-    
+
     # Extraer posts
     posts_response = requests.get('https://jsonplaceholder.typicode.com/posts')
     posts = posts_response.json()
-    
+
     print(f"✓ Extraídos {len(users)} usuarios")
     print(f"✓ Extraídos {len(posts)} posts")
-    
+
     return {
         'users': users,
         'posts': posts,
@@ -45,14 +44,14 @@ def transform_data(**context):
     """
     ti = context['ti']
     data = ti.xcom_pull(task_ids='extract')
-    
+
     print("🔄 Transformando datos...")
-    
+
     # Calcular estadísticas por usuario
     users_stats = []
     for user in data['users']:
         user_posts = [p for p in data['posts'] if p['userId'] == user['id']]
-        
+
         stats = {
             'user_id': user['id'],
             'username': user['username'],
@@ -63,9 +62,9 @@ def transform_data(**context):
             'processed_at': datetime.now().isoformat()
         }
         users_stats.append(stats)
-    
+
     print(f"✓ Transformados datos de {len(users_stats)} usuarios")
-    
+
     return users_stats
 
 def load_to_database(**context):
@@ -75,15 +74,15 @@ def load_to_database(**context):
     """
     ti = context['ti']
     data = ti.xcom_pull(task_ids='transform')
-    
+
     print("💾 Cargando datos a base de datos...")
-    
+
     # Simular INSERT statements
     for record in data:
         print(f"  INSERT INTO user_stats VALUES ({record['user_id']}, '{record['username']}', {record['total_posts']} posts)")
-    
+
     print(f"✓ Cargados {len(data)} registros exitosamente")
-    
+
     return {
         'records_loaded': len(data),
         'loaded_at': datetime.now().isoformat()
@@ -96,7 +95,7 @@ def generate_report(**context):
     ti = context['ti']
     extract_info = ti.xcom_pull(task_ids='extract')
     load_info = ti.xcom_pull(task_ids='load')
-    
+
     report = f"""
     📊 REPORTE DEL PIPELINE ETL
     ════════════════════════════
@@ -104,14 +103,14 @@ def generate_report(**context):
        - Usuarios extraídos: {len(extract_info['users'])}
        - Posts extraídos: {len(extract_info['posts'])}
        - Hora extracción: {extract_info['extracted_at']}
-    
+
     💾 Carga:
        - Registros cargados: {load_info['records_loaded']}
        - Hora carga: {load_info['loaded_at']}
-    
+
     ✅ Pipeline completado exitosamente
     """
-    
+
     print(report)
     return report
 

@@ -34,7 +34,7 @@ def sla_miss_callback(dag, task_list, blocking_task_list, slas, blocking_tis):
     """
     Callback ejecutado cuando se viola un SLA
     """
-    print(f"⚠️  SLA VIOLATION!")
+    print("⚠️  SLA VIOLATION!")
     for sla in slas:
         print(f"   Task: {sla.task_id}")
         print(f"   Expected: {sla.timestamp}")
@@ -57,17 +57,17 @@ def critical_task():
     """
     import time
     import random
-    
+
     print("🔧 Ejecutando tarea crítica...")
-    
+
     # Simular procesamiento
     processing_time = random.uniform(1, 3)
     time.sleep(processing_time)
-    
+
     # Simular posible fallo (10% de probabilidad)
     if random.random() < 0.1:
         raise Exception("Error simulado en procesamiento")
-    
+
     print(f"✓ Procesamiento completado en {processing_time:.2f}s")
     return "success"
 
@@ -76,13 +76,13 @@ def data_quality_check(**context):
     Verifica calidad de datos
     """
     import random
-    
+
     quality_score = random.uniform(0.7, 1.0)
     print(f"📊 Score de calidad: {quality_score:.2%}")
-    
+
     if quality_score < 0.85:
         print("⚠️  Advertencia: Calidad de datos por debajo del umbral (85%)")
-    
+
     return quality_score
 
 def performance_monitoring(**context):
@@ -91,14 +91,14 @@ def performance_monitoring(**context):
     """
     ti = context['ti']
     task_instances = context['dag_run'].get_task_instances()
-    
+
     print("📈 MÉTRICAS DE PERFORMANCE")
     print("═" * 40)
-    
+
     for task_instance in task_instances:
         if task_instance.duration:
             print(f"  {task_instance.task_id}: {task_instance.duration:.2f}s")
-    
+
     # En producción: enviar a Prometheus, DataDog, etc.
     return "monitoring_complete"
 

@@ -43,7 +43,7 @@ dag = DAG(
 # Define tasks
 def extract():
     print("Extracting data...")
-    
+
 task1 = PythonOperator(
     task_id='extract',
     python_callable=extract,
@@ -61,17 +61,17 @@ with DAG(
     start_date=datetime(2024, 1, 1),
     catchup=False,
 ) as dag:
-    
+
     task1 = PythonOperator(
         task_id='extract',
         python_callable=extract,
     )
-    
+
     task2 = PythonOperator(
         task_id='transform',
         python_callable=transform,
     )
-    
+
     task1 >> task2
 ```
 
@@ -88,22 +88,22 @@ from datetime import datetime
     catchup=False,
 )
 def data_pipeline_taskflow():
-    
+
     @task
     def extract():
         print("Extracting data...")
         return {"records": 100}
-    
+
     @task
     def transform(data):
         records = data['records']
         print(f"Transforming {records} records")
         return records * 2
-    
+
     @task
     def load(processed_records):
         print(f"Loading {processed_records} records")
-    
+
     # Define flow
     data = extract()
     processed = transform(data)
@@ -120,16 +120,16 @@ dag = DAG(
     # === REQUIRED ===
     dag_id='my_dag',                    # Unique identifier
     start_date=datetime(2024, 1, 1),   # When DAG starts
-    
+
     # === SCHEDULE ===
     schedule='@daily',                  # How often to run
     # schedule='0 0 * * *',            # Cron expression
     # schedule=timedelta(hours=2),     # Timedelta
     # schedule=None,                   # Manual only
-    
+
     # === CATCH-UP ===
     catchup=False,                      # Run missed runs?
-    
+
     # === DEFAULT ARGS ===
     default_args={
         'owner': 'datateam',
@@ -141,27 +141,27 @@ dag = DAG(
         'retry_delay': timedelta(minutes=5),
         'execution_timeout': timedelta(hours=2),
     },
-    
+
     # === CONCURRENCY ===
     max_active_runs=3,                  # Max concurrent runs
     concurrency=16,                     # Max tasks per DAG run
-    
+
     # === DOCUMENTATION ===
     description='ETL pipeline for customer data',
     doc_md="""
     # Customer Data Pipeline
-    
+
     ## Purpose
     Extract, transform, and load customer data daily.
-    
+
     ## Dependencies
     - Source: PostgreSQL database
     - Destination: S3 bucket
     """,
-    
+
     # === TAGS ===
     tags=['etl', 'customer', 'daily'],
-    
+
     # === ADVANCED ===
     dagrun_timeout=timedelta(hours=4), # Max DAG run duration
     sla_miss_callback=notify_sla_miss,
@@ -313,10 +313,10 @@ def my_function_with_context(**context):
     execution_date = context['execution_date']
     dag_run = context['dag_run']
     task_instance = context['ti']
-    
+
     print(f"Execution date: {execution_date}")
     print(f"Run ID: {dag_run.run_id}")
-    
+
     # Push value to XCom
     task_instance.xcom_push(key='result', value=42)
 
@@ -466,7 +466,7 @@ task = PostgresOperator(
     task_id='insert_data',
     postgres_conn_id='postgres_default',
     sql="""
-        INSERT INTO users (name) 
+        INSERT INTO users (name)
         VALUES (%(name)s);
     """,
     parameters={'name': 'John Doe'},
@@ -682,12 +682,12 @@ class MyCustomSensor(BaseSensorOperator):
     def __init__(self, threshold, **kwargs):
         super().__init__(**kwargs)
         self.threshold = threshold
-    
+
     def poke(self, context):
         # Return True if condition met, False otherwise
         value = self.check_condition()
         return value > self.threshold
-    
+
     def check_condition(self):
         # Custom logic
         return 42
@@ -766,7 +766,7 @@ def pull_multiple(**context):
     count = ti.xcom_pull(key='count', task_ids='push_task')
     status = ti.xcom_pull(key='status', task_ids='push_task')
     data = ti.xcom_pull(key='data', task_ids='push_task')
-    
+
     print(f"Count: {count}, Status: {status}, Data: {data}")
 ```
 
@@ -775,20 +775,20 @@ def pull_multiple(**context):
 ```python
 def aggregate(**context):
     ti = context['ti']
-    
+
     # Pull from multiple tasks
     results = ti.xcom_pull(task_ids=['task1', 'task2', 'task3'])
     # Returns: [result1, result2, result3]
-    
+
     total = sum(results)
     print(f"Total: {total}")
 ```
 
 ### XCom Limitations
 
-⚠️ **Size**: XComs stored in metadata DB, keep small (< 1MB)  
-⚠️ **Serialization**: Must be JSON-serializable  
-⚠️ **Performance**: Large XComs slow down DAG  
+⚠️ **Size**: XComs stored in metadata DB, keep small (< 1MB)
+⚠️ **Serialization**: Must be JSON-serializable
+⚠️ **Performance**: Large XComs slow down DAG
 
 **Alternative for Large Data:**
 ```python
@@ -928,7 +928,7 @@ from airflow.operators.python import BranchPythonOperator
 
 def choose_branch(**context):
     execution_date = context['execution_date']
-    
+
     if execution_date.weekday() < 5:  # Weekday
         return 'weekday_task'
     else:  # Weekend
@@ -952,7 +952,7 @@ branch >> [weekday_task, weekend_task] >> join
 def choose_processing_type(**context):
     ti = context['ti']
     data_size = ti.xcom_pull(key='data_size', task_ids='check_data')
-    
+
     if data_size < 1000:
         return 'small_processing'
     elif data_size < 100000:
@@ -1068,34 +1068,34 @@ DATASETS = ['users', 'orders', 'products']
 
 for dataset in DATASETS:
     dag_id = f'etl_{dataset}'
-    
+
     dag = DAG(
         dag_id=dag_id,
         schedule='@daily',
         start_date=datetime(2024, 1, 1),
     )
-    
+
     extract = PythonOperator(
         task_id='extract',
         python_callable=extract_data,
         op_kwargs={'dataset': dataset},
         dag=dag,
     )
-    
+
     transform = PythonOperator(
         task_id='transform',
         python_callable=transform_data,
         dag=dag,
     )
-    
+
     load = PythonOperator(
         task_id='load',
         python_callable=load_data,
         dag=dag,
     )
-    
+
     extract >> transform >> load
-    
+
     # Register DAG
     globals()[dag_id] = dag
 ```
@@ -1119,23 +1119,23 @@ from datetime import datetime
     catchup=False,
 )
 def etl_pipeline():
-    
+
     @task
     def extract():
         data = [1, 2, 3, 4, 5]
         return data
-    
+
     @task
     def transform(data):
         transformed = [x * 2 for x in data]
         return transformed
-    
+
     @task
     def load(data):
         print(f"Loading {len(data)} records")
         for record in data:
             print(record)
-    
+
     # Define flow
     data = extract()
     transformed_data = transform(data)
@@ -1150,15 +1150,15 @@ dag = etl_pipeline()
 ```python
 @dag(...)
 def multi_input_output():
-    
+
     @task
     def extract_users():
         return [{'id': 1, 'name': 'Alice'}, {'id': 2, 'name': 'Bob'}]
-    
+
     @task
     def extract_orders():
         return [{'user_id': 1, 'amount': 100}, {'user_id': 2, 'amount': 200}]
-    
+
     @task
     def join_data(users, orders):
         # Join users and orders
@@ -1167,13 +1167,13 @@ def multi_input_output():
             user_orders = [o for o in orders if o['user_id'] == user['id']]
             result.append({'user': user, 'orders': user_orders})
         return result
-    
+
     @task
     def calculate_total(data):
         for item in data:
             total = sum(order['amount'] for order in item['orders'])
             print(f"{item['user']['name']}: ${total}")
-    
+
     users = extract_users()
     orders = extract_orders()
     joined = join_data(users, orders)
@@ -1189,21 +1189,21 @@ from airflow.operators.bash import BashOperator
 
 @dag(...)
 def mixed_operators():
-    
+
     @task
     def extract():
         return {'records': 100}
-    
+
     # Traditional operator
     transform_bash = BashOperator(
         task_id='transform',
         bash_command='echo "Transforming..."',
     )
-    
+
     @task
     def load(data):
         print(f"Loading {data['records']} records")
-    
+
     data = extract()
     data >> transform_bash  # TaskFlow output to traditional
     transform_bash >> load(data)  # Traditional to TaskFlow
@@ -1213,10 +1213,10 @@ dag = mixed_operators()
 
 ### TaskFlow Benefits
 
-✅ **Automatic XCom**: Return values automatically pushed/pulled  
-✅ **Type Hints**: Better IDE support, documentation  
-✅ **Less Boilerplate**: No manual context handling  
-✅ **Cleaner Code**: More Pythonic syntax  
+✅ **Automatic XCom**: Return values automatically pushed/pulled
+✅ **Type Hints**: Better IDE support, documentation
+✅ **Less Boilerplate**: No manual context handling
+✅ **Cleaner Code**: More Pythonic syntax
 
 ---
 
@@ -1320,22 +1320,22 @@ task = BashOperator(
 
 **Key Takeaways:**
 
-✅ **DAG Creation**: Classic, context manager, TaskFlow API  
-✅ **Dependencies**: `>>`, `<<`, trigger rules  
-✅ **Operators**: Python, Bash, Database, Cloud, Docker, K8s  
-✅ **Sensors**: Wait for conditions  
-✅ **XComs**: Pass small data between tasks  
-✅ **Variables/Connections**: Configuration and credentials  
-✅ **Branching**: Conditional logic  
-✅ **Dynamic DAGs**: Generate tasks/DAGs programmatically  
-✅ **TaskFlow API**: Modern, Pythonic syntax  
-✅ **Templating**: Dynamic values with Jinja  
+✅ **DAG Creation**: Classic, context manager, TaskFlow API
+✅ **Dependencies**: `>>`, `<<`, trigger rules
+✅ **Operators**: Python, Bash, Database, Cloud, Docker, K8s
+✅ **Sensors**: Wait for conditions
+✅ **XComs**: Pass small data between tasks
+✅ **Variables/Connections**: Configuration and credentials
+✅ **Branching**: Conditional logic
+✅ **Dynamic DAGs**: Generate tasks/DAGs programmatically
+✅ **TaskFlow API**: Modern, Pythonic syntax
+✅ **Templating**: Dynamic values with Jinja
 
 **Next**: [03-production-patterns.md](03-production-patterns.md)
 
 ---
 
-**Document**: 02-dags-and-operators.md  
-**Words**: ~5,500  
-**Level**: Intermediate-Advanced  
+**Document**: 02-dags-and-operators.md
+**Words**: ~5,500
+**Level**: Intermediate-Advanced
 **Prerequisites**: 01-airflow-fundamentals.md

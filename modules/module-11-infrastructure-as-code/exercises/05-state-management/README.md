@@ -1,7 +1,7 @@
 # Ejercicio 05: Gestión de Estado (State Management)
 
-⏱️ **Duración estimada**: 2-3 horas  
-🎯 **Nivel**: Intermedio-Avanzado  
+⏱️ **Duración estimada**: 2-3 horas
+🎯 **Nivel**: Intermedio-Avanzado
 📋 **Prerequisitos**: Ejercicios 01-04 completados
 
 ## 🎓 Objetivos de Aprendizaje
@@ -55,7 +55,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "state_demo" {
   bucket = "state-demo-local-${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  
+
   tags = {
     Purpose = "State Management Demo"
   }
@@ -214,7 +214,7 @@ Ahora actualiza `main.tf` agregando el backend:
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   # Backend configuration para remote state
   backend "s3" {
     bucket         = "terraform-state-backend-shared"  # Del output anterior
@@ -223,7 +223,7 @@ terraform {
     dynamodb_table = "terraform-state-backend-lock"  # Del output anterior
     encrypt        = true                            # Cifrado en reposo
   }
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -314,17 +314,17 @@ locals {
       enable_monitoring = true
     }
   }
-  
+
   # Obtener configuración del workspace actual
   config = local.workspace_config[terraform.workspace]
-  
+
   # Sufijo basado en workspace
   name_suffix = terraform.workspace == "default" ? "" : "-${terraform.workspace}"
 }
 
 resource "aws_s3_bucket" "app_data" {
   bucket = "my-app-data${local.name_suffix}-${formatdate("YYYYMMDD", timestamp())}"
-  
+
   tags = {
     Environment = terraform.workspace
     ManagedBy   = "Terraform"
@@ -504,7 +504,7 @@ terraform workspace select development
 terraform apply -auto-approve
 # Output:
 # Error: Error acquiring the state lock
-# 
+#
 # Error message: ConditionalCheckFailedException: The conditional request failed
 # Lock Info:
 #   ID:        a1b2c3d4-5e6f-7890-abcd-ef1234567890
@@ -513,8 +513,8 @@ terraform apply -auto-approve
 #   Who:       user@hostname
 #   Version:   1.7.0
 #   Created:   2024-03-07 10:30:15.123456789 +0000 UTC
-#   Info:      
-# 
+#   Info:
+#
 # Terraform acquires a state lock to protect the state from being written
 # by multiple users concurrently. Please resolve the issue above and try
 # again. For most commands, you can disable locking with the "-lock=false"
@@ -666,7 +666,7 @@ resource "aws_s3_bucket_policy" "terraform_state" {
 
 2. **Habilitar versionado en S3**
    - Permite rollback si el state se corrompe
-   
+
 3. **Usar workspaces o directorios separados para entornos**
    ```
    environments/

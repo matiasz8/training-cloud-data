@@ -47,7 +47,7 @@ echo "2️⃣  Verificando Terraform..."
 if command -v terraform &> /dev/null; then
     TF_VERSION=$(terraform version -json | jq -r '.terraform_version' 2>/dev/null || terraform version | head -n1 | awk '{print $2}')
     success "Terraform instalado: $TF_VERSION"
-    
+
     # Verificar versión mínima
     REQUIRED_VERSION="1.0.0"
     if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$TF_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ]; then
@@ -80,7 +80,7 @@ echo "3️⃣  Verificando AWS CLI..."
 if command -v aws &> /dev/null; then
     AWS_VERSION=$(aws --version | awk '{print $1}' | cut -d'/' -f2)
     success "AWS CLI instalado: $AWS_VERSION"
-    
+
     # Verificar credenciales
     if aws sts get-caller-identity &>/dev/null; then
         AWS_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
@@ -102,7 +102,7 @@ echo "4️⃣  Verificando Docker..."
 if command -v docker &> /dev/null; then
     DOCKER_VERSION=$(docker --version | awk '{print $3}' | tr -d ',')
     success "Docker instalado: $DOCKER_VERSION"
-    
+
     if docker ps &>/dev/null; then
         success "Docker daemon activo"
     else
@@ -163,7 +163,7 @@ echo "6️⃣  Verificando Python..."
 if command -v python3 &> /dev/null; then
     PYTHON_VERSION=$(python3 --version | awk '{print $2}')
     success "Python instalado: $PYTHON_VERSION"
-    
+
     # Instalar dependencias
     if [ -f "../requirements.txt" ]; then
         info "Instalando dependencias Python..."

@@ -37,7 +37,7 @@ Los patrones de Infrastructure as Code son **soluciones probadas y reutilizables
 resource "aws_instance" "app" {
   ami           = "ami-old-version"
   instance_type = "t2.micro"
-  
+
   # Cambiar el AMI causa que Terraform intente actualizar in-place
   # Esto puede fallar y dejar el servidor en estado inconsistente
 }
@@ -47,7 +47,7 @@ resource "aws_launch_template" "app" {
   name_prefix   = "app-"
   image_id      = "ami-new-version"
   instance_type = "t2.micro"
-  
+
   # Combinado con Auto Scaling Group, esto crea instancias nuevas
   # y termina las viejas automáticamente
 }
@@ -57,10 +57,10 @@ resource "aws_autoscaling_group" "app" {
     id      = aws_launch_template.app.id
     version = "$Latest"
   }
-  
+
   min_size = 2
   max_size = 5
-  
+
   # Blue/green deployment
   lifecycle {
     create_before_destroy = true
@@ -124,13 +124,13 @@ resource "aws_s3_bucket" "data_staging" {
 # ✅ BIEN: Usar módulos
 module "data_bucket" {
   source = "./modules/s3-bucket"
-  
+
   for_each = {
     dev     = { retention = 30 }
     staging = { retention = 90 }
     prod    = { retention = 365 }
   }
-  
+
   bucket_name = "company-data-${each.key}"
   environment = each.key
   retention_days = each.value.retention
@@ -226,31 +226,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
+
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check -recursive
         continue-on-error: true
-      
+
       - name: Terraform Init
         run: terraform init -backend=false
         working-directory: terraform
-      
+
       - name: Terraform Validate
         run: terraform validate
         working-directory: terraform
-      
+
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
-      
+
       - name: TFLint
         run: tflint --recursive
-      
+
       - name: tfsec Security Scan
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
@@ -265,40 +265,40 @@ jobs:
     strategy:
       matrix:
         environment: [dev, staging, prod]
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: terraform-${{ matrix.environment }}
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
+
       - name: Terraform Init
         run: |
           terraform init \
             -backend-config="key=terraform/${{ matrix.environment }}/terraform.tfstate"
         working-directory: terraform/environments/${{ matrix.environment }}
-      
+
       - name: Terraform Plan
         id: plan
         run: terraform plan -out=tfplan -no-color
         working-directory: terraform/environments/${{ matrix.environment }}
-      
+
       - name: Save Plan Artifact
         uses: actions/upload-artifact@v3
         with:
           name: tfplan-${{ matrix.environment }}
           path: terraform/environments/${{ matrix.environment }}/tfplan
           retention-days: 5
-      
+
       - name: Comment Plan on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -306,19 +306,19 @@ jobs:
           script: |
             const fs = require('fs');
             const plan = `${{ steps.plan.outputs.stdout }}`;
-            
+
             const output = `### Terraform Plan: \`${{ matrix.environment }}\` 📝
-            
+
             <details>
             <summary>Show Plan</summary>
-            
+
             \`\`\`terraform
             ${plan}
             \`\`\`
-            
+
             </details>
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -333,33 +333,33 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: dev  # GitHub Environment protection
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
+
       - name: Download Plan
         uses: actions/download-artifact@v3
         with:
           name: tfplan-dev
           path: terraform/environments/dev
-      
+
       - name: Terraform Init
         run: terraform init -backend-config="key=terraform/dev/terraform.tfstate"
         working-directory: terraform/environments/dev
-      
+
       - name: Terraform Apply
         run: terraform apply tfplan
         working-directory: terraform/environments/dev
-      
+
       - name: Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v1
@@ -385,7 +385,7 @@ jobs:
     needs: [apply-dev]
     runs-on: ubuntu-latest
     environment: staging  # Requiere aprobación manual en GitHub
-    
+
     steps:
       # Similar a apply-dev pero para staging
       - uses: actions/checkout@v4
@@ -396,20 +396,20 @@ jobs:
     needs: [apply-staging]
     runs-on: ubuntu-latest
     environment: production  # Requiere aprobación manual + mayor seguridad
-    
+
     steps:
       # Similar a apply-dev pero con extra validaciones
       - uses: actions/checkout@v4
-      
+
       # ... terraform init, download plan ...
-      
+
       - name: Require Explicit Confirmation
         run: |
           echo "⚠️  DEPLOYING TO PRODUCTION"
           echo "Environment: production"
           echo "Commit: ${{ github.sha }}"
           # GitHub Environment protection rules ya requieren aprobación manual
-      
+
       - name: Terraform Apply
         run: terraform apply tfplan
         working-directory: terraform/environments/prod
@@ -435,11 +435,11 @@ variables:
   image:
     name: hashicorp/terraform:${TF_VERSION}
     entrypoint: [""]
-  
+
   before_script:
     - cd ${TF_ROOT}/environments/${CI_ENVIRONMENT_NAME}
     - terraform init
-  
+
   cache:
     key: "${CI_COMMIT_REF_SLUG}"
     paths:
@@ -466,7 +466,7 @@ terraform:validate:
     paths:
       - ${TF_ROOT}/environments/${CI_ENVIRONMENT_NAME}/tfplan
     expire_in: 7 days
-  
+
 terraform:plan:dev:
   extends: .terraform_plan
   variables:
@@ -524,7 +524,7 @@ resource "aws_db_instance" "db" {
 # ✅ Usar Secrets Manager
 resource "aws_secretsmanager_secret" "db_password" {
   name = "${var.project}-db-password"
-  
+
   recovery_window_in_days = 30
 }
 
@@ -545,7 +545,7 @@ data "aws_secretsmanager_secret_version" "db_password" {
 resource "aws_db_instance" "db" {
   username = "admin"
   password = data.aws_secretsmanager_secret_version.db_password.secret_string
-  
+
   # ✅ Password se almacena en Secrets Manager
   # ✅ State file contiene referencia, no el valor
   # ✅ Rotación posible sin tocar Terraform
@@ -583,7 +583,7 @@ terraform output -raw database_password
 # ❌ MAL: Permisos demasiado amplios
 resource "aws_iam_role_policy" "terraform" {
   role = aws_iam_role.terraform.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -597,7 +597,7 @@ resource "aws_iam_role_policy" "terraform" {
 # ✅ BIEN: Permisos específicos
 resource "aws_iam_role_policy" "terraform" {
   role = aws_iam_role.terraform.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -638,7 +638,7 @@ terraform {
     encrypt        = true                    # ✅ Cifrado en reposo
     kms_key_id     = "arn:aws:kms:..."      # ✅ KMS en lugar de AES256
     dynamodb_table = "terraform-lock"        # ✅ State locking
-    
+
     # ✅ Server-side encryption
     # ✅ Versioning habilitado
     # ✅ MFA delete habilitado
@@ -649,7 +649,7 @@ terraform {
 # Bucket configuration
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "terraform-state-production"
-  
+
   tags = {
     Name        = "Terraform State"
     Sensitivity = "High"
@@ -659,7 +659,7 @@ resource "aws_s3_bucket" "terraform_state" {
 # Versionado (permite rollback)
 resource "aws_s3_bucket_versioning" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   versioning_configuration {
     status     = "Enabled"
     mfa_delete = "Enabled"  # Requiere MFA para eliminar versiones
@@ -669,7 +669,7 @@ resource "aws_s3_bucket_versioning" "terraform_state" {
 # Cifrado obligatorio
 resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -684,7 +684,7 @@ resource "aws_kms_key" "terraform_state" {
   description             = "KMS key for Terraform state encryption"
   deletion_window_in_days = 30
   enable_key_rotation     = true  # Rotación automática anual
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -717,7 +717,7 @@ resource "aws_kms_key" "terraform_state" {
 # Bloquear acceso público
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -727,7 +727,7 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
 # Logging de accesos
 resource "aws_s3_bucket_logging" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   target_bucket = aws_s3_bucket.terraform_state_logs.id
   target_prefix = "state-access-logs/"
 }
@@ -735,21 +735,21 @@ resource "aws_s3_bucket_logging" "terraform_state" {
 # Lifecycle policy
 resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   rule {
     id     = "archive-old-versions"
     status = "Enabled"
-    
+
     noncurrent_version_transition {
       noncurrent_days = 90
       storage_class   = "STANDARD_IA"
     }
-    
+
     noncurrent_version_transition {
       noncurrent_days = 180
       storage_class   = "GLACIER"
     }
-    
+
     # Mantener versiones por 2 años
     noncurrent_version_expiration {
       noncurrent_days = 730
@@ -771,15 +771,15 @@ tfsec .
 
 # Output ejemplo:
 # Result 1
-# 
+#
 # [AWS003][ERROR]  Resource 'aws_s3_bucket.data' has no encryption
 # /terraform/main.tf:15-20
-# 
+#
 # Result 2
-# 
+#
 # [AWS017][WARNING] Resource 'aws_s3_bucket.data' does not have versioning enabled
 # /terraform/main.tf:15-20
-# 
+#
 # 2 potential problems detected.
 ```
 
@@ -794,13 +794,13 @@ checkov -d terraform/
 
 # Output:
 # Passed checks: 45, Failed checks: 3, Skipped checks: 0
-# 
+#
 # Failed checks:
-# 
+#
 # Check: CKV_AWS_19: "Ensure the S3 bucket has server-side encryption enabled"
 #         FAILED for resource: aws_s3_bucket.data
 #         File: /main.tf:15-20
-# 
+#
 # Check: CKV_AWS_21: "Ensure the S3 bucket has versioning enabled"
 #         FAILED for resource: aws_s3_bucket.data
 #         File: /main.tf:15-20
@@ -811,11 +811,11 @@ checkov -d terraform/
 ```hcl
 resource "aws_s3_bucket" "public_website" {
   bucket = "my-public-website"
-  
+
   # checkov:skip=CKV_AWS_18:Public bucket is intentional for static website
   # tfsec:ignore:AWS002  # Skip public access warning
   acl = "public-read"
-  
+
   website {
     index_document = "index.html"
   }
@@ -840,7 +840,7 @@ terraform workspace new prod
 ```hcl
 locals {
   environment = terraform.workspace
-  
+
   config = {
     dev = {
       instance_type   = "t2.micro"
@@ -858,14 +858,14 @@ locals {
       enable_backups  = true
     }
   }
-  
+
   env_config = local.config[local.environment]
 }
 
 resource "aws_instance" "app" {
   count         = local.env_config.instance_count
   instance_type = local.env_config.instance_type
-  
+
   tags = {
     Environment = local.environment
   }
@@ -916,7 +916,7 @@ terraform {
 
 module "app" {
   source = "../../modules/app"
-  
+
   environment    = "dev"
   instance_type  = "t2.micro"
   instance_count = 1
@@ -933,12 +933,12 @@ terraform {
 
 module "app" {
   source = "../../modules/app"
-  
+
   environment    = "production"
   instance_type  = "t2.large"
   instance_count = 10
   enable_backups = true
-  
+
   # Configuraciones adicionales solo para prod
   enable_multi_az     = true
   enable_monitoring   = true
@@ -1023,11 +1023,11 @@ echo "🔄 Backing up Terraform state..."
 
 for env in dev staging prod; do
   echo "📦 Backing up ${env}..."
-  
+
   aws s3 cp \
     "s3://${PROJECT}-terraform-state/${env}/terraform.tfstate" \
     "${BACKUP_BUCKET}/${DATE}/${env}/terraform.tfstate"
-  
+
   aws s3 cp \
     "s3://${PROJECT}-terraform-state/${env}/terraform.tfstate" \
     "${BACKUP_BUCKET}/latest/${env}/terraform.tfstate"
@@ -1063,15 +1063,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
-      
+
       - name: Run Backup Script
         run: ./scripts/backup-state.sh
-      
+
       - name: Verify Backups
         run: |
           aws s3 ls s3://my-project-disaster-recovery/state-backups/latest/
@@ -1295,13 +1295,13 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  
+
   sourceRef:
     kind: GitRepository
     name: infrastructure-repo
-  
+
   path: ./terraform/environments/prod
-  
+
   backendConfig:
     customConfiguration: |
       backend "s3" {
@@ -1309,18 +1309,18 @@ spec:
         key    = "prod/terraform.tfstate"
         region = "us-east-1"
       }
-  
+
   vars:
     - name: environment
       value: production
-  
+
   varsFrom:
     - kind: Secret
       name: aws-credentials
-  
+
   writeOutputsToSecret:
     name: terraform-outputs
-  
+
   runnerPodTemplate:
     spec:
       serviceAccountName: terraform-runner
@@ -1344,7 +1344,7 @@ deny[msg] {
     resource := tfplan.resource_changes[_]
     resource.type == "aws_s3_bucket"
     not resource.change.after.server_side_encryption_configuration
-    
+
     msg := sprintf("S3 bucket '%s' must have encryption enabled", [resource.name])
 }
 
@@ -1353,7 +1353,7 @@ deny[msg] {
     resource := tfplan.resource_changes[_]
     resource.type == "aws_db_instance"
     resource.change.after.publicly_accessible == true
-    
+
     msg := sprintf("RDS instance '%s' must not be publicly accessible", [resource.name])
 }
 
@@ -1364,7 +1364,7 @@ warn[msg] {
     environment := tfplan.variables.environment.value
     environment == "dev"
     startswith(resource.change.after.instance_type, "m5.large")
-    
+
     msg := sprintf("Instance '%s' uses large type in dev environment", [resource.name])
 }
 
@@ -1376,7 +1376,7 @@ deny[msg] {
     resource.change.after.tags
     missing_tags := [tag | tag := required_tags[_]; not resource.change.after.tags[tag]]
     count(missing_tags) > 0
-    
+
     msg := sprintf("Resource '%s' missing required tags: %v", [resource.name, missing_tags])
 }
 ```
@@ -1415,13 +1415,13 @@ resource "datadog_monitor" "terraform_apply_failed" {
   name    = "Terraform Apply Failed"
   type    = "metric alert"
   message = "Terraform apply has failed. Check GitHub Actions logs. @platform-team"
-  
+
   query = "sum(last_5m):sum:terraform.apply.failed{env:production} > 0"
-  
+
   monitor_thresholds {
     critical = 0
   }
-  
+
   tags = ["terraform", "infrastructure", "critical"]
 }
 ```
@@ -1445,10 +1445,10 @@ if [ $EXIT_CODE -eq 0 ]; then
   echo "✅ No drift detected"
 elif [ $EXIT_CODE -eq 2 ]; then
   echo "⚠️  DRIFT DETECTED!"
-  
+
   # Generate human-readable diff
   terraform show drift.plan > drift-report.txt
-  
+
   # Send alert
   curl -X POST $SLACK_WEBHOOK \
     -H 'Content-Type: application/json' \
@@ -1459,7 +1459,7 @@ elif [ $EXIT_CODE -eq 2 ]; then
         "text": "'"$(cat drift-report.txt)"'"
       }]
     }'
-  
+
   exit 1
 else
   echo "❌ Terraform plan failed with error"
@@ -1482,9 +1482,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: hashicorp/setup-terraform@v3
-      
+
       - name: Check for Drift
         run: ./scripts/drift-detection.sh
 ```
@@ -1511,31 +1511,31 @@ jobs:
   - [ ] Variables validadas
   - [ ] Outputs documentados
   - [ ] Código formateado (`terraform fmt`)
-  
+
 - [ ] **Testing**
   - [ ] Tests unitarios (terratest)
   - [ ] Tests de integración
   - [ ] Validación de policies (OPA/Sentinel)
-  
+
 - [ ] **CI/CD**
   - [ ] Pipeline de plan en PRs
   - [ ] Pipeline de apply protegido
   - [ ] Aprobaciones manuales para prod
   - [ ] Notificaciones (Slack/Teams)
-  
+
 - [ ] **Seguridad**
   - [ ] State cifrado con KMS
   - [ ] Secrets en Secrets Manager
   - [ ] IAM least privilege
   - [ ] tfsec/checkov en pipeline
   - [ ] MFA para prod
-  
+
 - [ ] **Disaster Recovery**
   - [ ] Backups automatizados
   - [ ] Runbook documentado
   - [ ] DR testing quarterly
   - [ ] Versionado de state
-  
+
 - [ ] **Observabilidad**
   - [ ] Drift detection
   - [ ] Métricas de Terraform

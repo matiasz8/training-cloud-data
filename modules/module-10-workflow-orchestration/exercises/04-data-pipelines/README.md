@@ -67,7 +67,7 @@ Create an ETL pipeline for CSV files:
 1. **Sensor**: Wait for CSV file in `/tmp/data/`
 2. **Extract**: Read CSV with pandas
 3. **Validate**: Data quality checks (schema, nulls, duplicates)
-4. **Transform**: 
+4. **Transform**:
    - Clean data (remove nulls, fix types)
    - Calculate aggregates
    - Add derived columns
@@ -202,84 +202,84 @@ with DAG(
     catchup=False,
     tags=['exercise', 'etl', 'ex04'],
 ) as dag:
-    
+
     def extract_users():
         """Extract users from API"""
         logger.info("Extracting users from API")
-        
+
         response = requests.get('https://jsonplaceholder.typicode.com/users')
         response.raise_for_status()
-        
+
         users = response.json()
         logger.info(f"Extracted {len(users)} users")
-        
+
         # Convert to DataFrame
         df = pd.DataFrame(users)
         df = df[['id', 'name', 'email', 'company']]
         df['company'] = df['company'].apply(lambda x: x['name'] if isinstance(x, dict) else x)
-        
+
         # Save temporarily
         df.to_csv('/tmp/users.csv', index=False)
-        
+
         return len(df)
-    
+
     def extract_posts():
         """Extract posts from API"""
         logger.info("Extracting posts from API")
-        
+
         response = requests.get('https://jsonplaceholder.typicode.com/posts')
         response.raise_for_status()
-        
+
         posts = response.json()
         logger.info(f"Extracted {len(posts)} posts")
-        
+
         # Convert to DataFrame
         df = pd.DataFrame(posts)
         df = df[['id', 'userId', 'title', 'body']]
         df.rename(columns={'userId': 'user_id'}, inplace=True)
-        
+
         # Save temporarily
         df.to_csv('/tmp/posts.csv', index=False)
-        
+
         return len(df)
-    
+
     def transform_data():
         """Transform and join data"""
         logger.info("Transforming data")
-        
+
         # Load data
         users_df = pd.read_csv('/tmp/users.csv')
         posts_df = pd.read_csv('/tmp/posts.csv')
-        
+
         logger.info(f"Loaded {len(users_df)} users, {len(posts_df)} posts")
-        
+
         # Calculate user stats
         user_stats = posts_df.groupby('user_id').agg({
             'id': 'count',
             'body': lambda x: x.str.len().mean()
         }).reset_index()
-        
+
         user_stats.columns = ['user_id', 'post_count', 'avg_post_length']
-        
+
         logger.info(f"Calculated stats for {len(user_stats)} users")
-        
+
         # Save transformed data
         users_df.to_csv('/tmp/users_transformed.csv', index=False)
         posts_df.to_csv('/tmp/posts_transformed.csv', index=False)
         user_stats.to_csv('/tmp/user_stats.csv', index=False)
-        
+
         return {
             'users': len(users_df),
             'posts': len(posts_df),
             'stats': len(user_stats)
         }
-    
+
     def load_to_database():
         """Load data to PostgreSQL"""
         logger.info("Loading data to PostgreSQL")
-        
+
         pg_hook = PostgresHook(postgres_conn_id='postgres_default')
-        
+
         # Create tables
         create_tables_sql = """
         CREATE TABLE IF NOT EXISTS users (
@@ -289,7 +289,7 @@ with DAG(
             company VARCHAR(100),
             created_at TIMESTAMP DEFAULT NOW()
         );
-        
+
         CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY,
             user_id INTEGER REFERENCES users(id),
@@ -297,7 +297,7 @@ with DAG(
             body TEXT,
             created_at TIMESTAMP DEFAULT NOW()
         );
-        
+
         CREATE TABLE IF NOT EXISTS user_stats (
             user_id INTEGER PRIMARY KEY,
             post_count INTEGER,
@@ -305,10 +305,10 @@ with DAG(
             last_updated TIMESTAMP DEFAULT NOW()
         );
         """
-        
+
         pg_hook.run(create_tables_sql)
         logger.info("Tables created successfully")
-        
+
         # Load users
         users_df = pd.read_csv('/tmp/users_transformed.csv')
         for _, row in users_df.iterrows():
@@ -323,9 +323,9 @@ with DAG(
             pg_hook.run(insert_sql, parameters=(
                 int(row['id']), row['name'], row['email'], row['company']
             ))
-        
+
         logger.info(f"Loaded {len(users_df)} users")
-        
+
         # Load posts
         posts_df = pd.read_csv('/tmp/posts_transformed.csv')
         for _, row in posts_df.iterrows():
@@ -340,9 +340,9 @@ with DAG(
             pg_hook.run(insert_sql, parameters=(
                 int(row['id']), int(row['user_id']), row['title'], row['body']
             ))
-        
+
         logger.info(f"Loaded {len(posts_df)} posts")
-        
+
         # Load stats
         stats_df = pd.read_csv('/tmp/user_stats.csv')
         for _, row in stats_df.iterrows():
@@ -357,19 +357,19 @@ with DAG(
             pg_hook.run(insert_sql, parameters=(
                 int(row['user_id']), int(row['post_count']), float(row['avg_post_length'])
             ))
-        
+
         logger.info(f"Loaded {len(stats_df)} user stats")
-        
+
         return {
             'users_loaded': len(users_df),
             'posts_loaded': len(posts_df),
             'stats_loaded': len(stats_df)
         }
-    
+
     def cleanup():
         """Clean up temporary files"""
         import os
-        
+
         files = [
             '/tmp/users.csv',
             '/tmp/posts.csv',
@@ -377,39 +377,39 @@ with DAG(
             '/tmp/posts_transformed.csv',
             '/tmp/user_stats.csv'
         ]
-        
+
         for file in files:
             if os.path.exists(file):
                 os.remove(file)
                 logger.info(f"Removed {file}")
-    
+
     # Create tasks
     extract_users_task = PythonOperator(
         task_id='extract_users',
         python_callable=extract_users,
     )
-    
+
     extract_posts_task = PythonOperator(
         task_id='extract_posts',
         python_callable=extract_posts,
     )
-    
+
     transform_task = PythonOperator(
         task_id='transform',
         python_callable=transform_data,
     )
-    
+
     load_task = PythonOperator(
         task_id='load',
         python_callable=load_to_database,
     )
-    
+
     cleanup_task = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup,
         trigger_rule='all_done',
     )
-    
+
     # Dependencies
     [extract_users_task, extract_posts_task] >> transform_task >> load_task >> cleanup_task
 ```
@@ -439,7 +439,7 @@ with DAG(
     catchup=False,
     tags=['exercise', 'etl', 'csv', 'ex04'],
 ) as dag:
-    
+
     # Wait for file
     wait_for_file = FileSensor(
         task_id='wait_for_file',
@@ -447,94 +447,94 @@ with DAG(
         poke_interval=30,
         timeout=300,
     )
-    
+
     def extract_csv():
         """Extract data from CSV"""
         logger.info("Extracting CSV")
         df = pd.read_csv('/tmp/data/sales.csv')
         logger.info(f"Extracted {len(df)} records")
         return len(df)
-    
+
     extract = PythonOperator(
         task_id='extract',
         python_callable=extract_csv,
     )
-    
+
     def validate_data():
         """Validate data quality"""
         logger.info("Validating data")
-        
+
         df = pd.read_csv('/tmp/data/sales.csv')
-        
+
         # Check schema
         required_columns = ['order_id', 'customer_id', 'product', 'amount', 'order_date']
         missing = set(required_columns) - set(df.columns)
         if missing:
             raise ValueError(f"Missing columns: {missing}")
-        
+
         # Check nulls
         null_counts = df.isnull().sum()
         if null_counts.any():
             logger.warning(f"Null values found:\n{null_counts[null_counts > 0]}")
-        
+
         # Check duplicates
         duplicates = df.duplicated(subset=['order_id']).sum()
         if duplicates > 0:
             logger.warning(f"Found {duplicates} duplicate orders")
             df = df.drop_duplicates(subset=['order_id'])
-        
+
         # Type validation
         df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
         df['order_date'] = pd.to_datetime(df['order_date'], errors='coerce')
-        
+
         # Save cleaned
         df.to_csv('/tmp/data/sales_cleaned.csv', index=False)
-        
+
         logger.info(f"Validation complete: {len(df)} valid records")
         return len(df)
-    
+
     validate = PythonOperator(
         task_id='validate',
         python_callable=validate_data,
     )
-    
+
     def transform_data():
         """Transform data"""
         logger.info("Transforming data")
-        
+
         df = pd.read_csv('/tmp/data/sales_cleaned.csv')
-        
+
         # Add derived columns
         df['year'] = pd.to_datetime(df['order_date']).dt.year
         df['month'] = pd.to_datetime(df['order_date']).dt.month
         df['day'] = pd.to_datetime(df['order_date']).dt.day
-        
+
         # Aggregates
         daily_stats = df.groupby('order_date').agg({
             'order_id': 'count',
             'amount': ['sum', 'mean', 'max']
         }).reset_index()
-        
+
         daily_stats.columns = ['order_date', 'order_count', 'total_amount', 'avg_amount', 'max_amount']
-        
+
         # Save transformed
         df.to_csv('/tmp/data/sales_transformed.csv', index=False)
         daily_stats.to_csv('/tmp/data/daily_stats.csv', index=False)
-        
+
         logger.info(f"Transformation complete")
         return {'records': len(df), 'days': len(daily_stats)}
-    
+
     transform = PythonOperator(
         task_id='transform',
         python_callable=transform_data,
     )
-    
+
     def load_to_warehouse():
         """Load to warehouse"""
         logger.info("Loading to warehouse")
-        
+
         pg_hook = PostgresHook(postgres_conn_id='postgres_default')
-        
+
         # Create tables
         pg_hook.run("""
             CREATE TABLE IF NOT EXISTS sales_staging (
@@ -548,7 +548,7 @@ with DAG(
                 day INTEGER,
                 loaded_at TIMESTAMP DEFAULT NOW()
             );
-            
+
             CREATE TABLE IF NOT EXISTS sales_final (
                 order_id VARCHAR(50) PRIMARY KEY,
                 customer_id VARCHAR(50),
@@ -560,7 +560,7 @@ with DAG(
                 day INTEGER,
                 loaded_at TIMESTAMP
             );
-            
+
             CREATE TABLE IF NOT EXISTS daily_sales_stats (
                 order_date DATE PRIMARY KEY,
                 order_count INTEGER,
@@ -570,31 +570,31 @@ with DAG(
                 updated_at TIMESTAMP DEFAULT NOW()
             );
         """)
-        
+
         # Load staging
         df = pd.read_csv('/tmp/data/sales_transformed.csv')
         # ... load logic ...
-        
+
         logger.info(f"Loaded {len(df)} records to warehouse")
-    
+
     load = PythonOperator(
         task_id='load',
         python_callable=load_to_warehouse,
     )
-    
+
     def cleanup():
         import os
         files = ['/tmp/data/sales_cleaned.csv', '/tmp/data/sales_transformed.csv', '/tmp/data/daily_stats.csv']
         for f in files:
             if os.path.exists(f):
                 os.remove(f)
-    
+
     cleanup_task = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup,
         trigger_rule=TriggerRule.ALL_DONE,
     )
-    
+
     # Pipeline
     wait_for_file >> extract >> validate >> transform >> load >> cleanup_task
 ```
@@ -636,15 +636,15 @@ airflow dags trigger ex04_csv_to_warehouse
 
 ## 🎓 Learning Objectives
 
-✅ Real ETL pattern (Extract → Transform → Load)  
-✅ API integration with error handling  
-✅ Data validation and quality checks  
-✅ Pandas transformations  
-✅ Database operations (upsert, transactions)  
-✅ File sensors for data arrival  
-✅ Incremental loading patterns  
-✅ Data partitioning  
-✅ Production best practices  
+✅ Real ETL pattern (Extract → Transform → Load)
+✅ API integration with error handling
+✅ Data validation and quality checks
+✅ Pandas transformations
+✅ Database operations (upsert, transactions)
+✅ File sensors for data arrival
+✅ Incremental loading patterns
+✅ Data partitioning
+✅ Production best practices
 
 ---
 

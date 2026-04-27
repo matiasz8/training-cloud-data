@@ -19,9 +19,9 @@ def check_data_size(**context):
     """
     import random
     data_size = random.randint(1, 1000)
-    
+
     print(f"Tamaño de datos: {data_size} MB")
-    
+
     # Branch basado en tamaño
     if data_size < 100:
         print("→ Ruta: Procesamiento PEQUEÑO")
@@ -50,14 +50,14 @@ def consolidate_results(**context):
     Consolida resultados de cualquier rama
     """
     ti = context['ti']
-    
+
     # Intentar obtener resultado de cada rama
     for task_id in ['small_processing', 'medium_processing', 'large_processing']:
         result = ti.xcom_pull(task_ids=task_id)
         if result:
             print(f"✓ Resultado consolidado: {result}")
             return result
-    
+
     return "consolidation_complete"
 
 with DAG(

@@ -36,7 +36,7 @@ def transform(**context):
     # Pull data from XCom
     ti = context['ti']
     data = ti.xcom_pull(task_ids='extract')
-    
+
     # Transformar: agregar campo processed y filtrar por edad
     transformed = []
     for user in data['users']:
@@ -44,7 +44,7 @@ def transform(**context):
             user['processed'] = True
             user['category'] = 'senior'
             transformed.append(user)
-    
+
     print(f"Transformados {len(transformed)} usuarios (edad >= 30)")
     return {'users': transformed}
 
@@ -54,11 +54,11 @@ def load(**context):
     """
     ti = context['ti']
     data = ti.xcom_pull(task_ids='transform')
-    
+
     print(f"Cargando {len(data['users'])} usuarios a destino")
     for user in data['users']:
         print(f"  → Usuario {user['id']}: {user['name']} ({user['category']})")
-    
+
     return f"Cargados {len(data['users'])} usuarios exitosamente"
 
 with DAG(

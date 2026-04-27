@@ -2,9 +2,9 @@
 
 ## 📋 Información General
 
-- **Nivel**: Intermedio  
+- **Nivel**: Intermedio
 - **Duración estimada**: 3-4 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicios 01-03 completados
   - Conocimiento básico de REST APIs
   - DynamoDB fundamentals
@@ -91,18 +91,18 @@ def lambda_handler(event, context):
     """
     Router principal para todos los endpoints
     """
-    
+
     logger.info(json.dumps({
         'event': 'api_request',
         'method': event['httpMethod'],
         'path': event['path'],
         'request_id': context.aws_request_id
     }))
-    
+
     # Router
     method = event['httpMethod']
     path = event['path']
-    
+
     try:
         if method == 'GET' and path == '/users':
             return list_users(event)
@@ -116,7 +116,7 @@ def lambda_handler(event, context):
             return delete_user(event)
         else:
             return response(404, {'error': 'Endpoint not found'})
-    
+
     except ValueError as e:
         return response(400, {'error': str(e)})
     except Exception as e:
@@ -129,29 +129,29 @@ def list_users(event: Dict[str, Any]) -> Dict[str, Any]:
     GET /users - List all users with pagination
     Query params: limit, next_token
     """
-    
+
     # Parámetros de query
     query_params = event.get('queryStringParameters') or {}
     limit = int(query_params.get('limit', 20))
-    
+
     # Scan con limit
     scan_kwargs = {'Limit': limit}
-    
+
     # Pagination
     if 'next_token' in query_params:
         scan_kwargs['ExclusiveStartKey'] = json.loads(query_params['next_token'])
-    
+
     result = table.scan(**scan_kwargs)
-    
+
     response_body = {
         'users': result['Items'],
         'count': len(result['Items'])
     }
-    
+
     # Next page token
     if 'LastEvaluatedKey' in result:
         response_body['next_token'] = json.dumps(result['LastEvaluatedKey'])
-    
+
     return response(200, response_body)
 
 
@@ -159,14 +159,14 @@ def get_user(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     GET /users/{id} - Get user by ID
     """
-    
+
     user_id = event['pathParameters']['id']
-    
+
     result = table.get_item(Key={'user_id': user_id})
-    
+
     if 'Item' not in result:
         return response(404, {'error': 'User not found'})
-    
+
     return response(200, result['Item'])
 
 
@@ -175,21 +175,21 @@ def create_user(event: Dict[str, Any]) -> Dict[str, Any]:
     POST /users - Create new user
     Body: {email, name, age (optional)}
     """
-    
+
     body = json.loads(event['body'])
-    
+
     # Validation
     validate_user_input(body, required=['email', 'name'])
-    
+
     # Check if email exists
     existing = table.scan(
         FilterExpression='email = :email',
         ExpressionAttributeValues={':email': body['email']}
     )
-    
+
     if existing['Items']:
         return response(409, {'error': 'User with this email already exists'})
-    
+
     # Create user
     user = {
         'user_id': str(uuid.uuid4()),
@@ -199,11 +199,11 @@ def create_user(event: Dict[str, Any]) -> Dict[str, Any]:
         'created_at': datetime.utcnow().isoformat(),
         'updated_at': datetime.utcnow().isoformat()
     }
-    
+
     table.put_item(Item=user)
-    
+
     logger.info(f"User created: {user['user_id']}")
-    
+
     return response(201, user)
 
 
@@ -212,30 +212,30 @@ def update_user(event: Dict[str, Any]) -> Dict[str, Any]:
     PUT /users/{id} - Update user
     Body: {name, age}
     """
-    
+
     user_id = event['pathParameters']['id']
     body = json.loads(event['body'])
-    
+
     # Validation
     validate_user_input(body, required=[])
-    
+
     # Check if user exists
     existing = table.get_item(Key={'user_id': user_id})
     if 'Item' not in existing:
         return response(404, {'error': 'User not found'})
-    
+
     # Build update expression
     update_expr = "SET updated_at = :updated_at"
     expr_values = {':updated_at': datetime.utcnow().isoformat()}
-    
+
     if 'name' in body:
         update_expr += ", #name = :name"
         expr_values[':name'] = body['name']
-    
+
     if 'age' in body:
         update_expr += ", age = :age"
         expr_values[':age'] = body['age']
-    
+
     # Update
     result = table.update_item(
         Key={'user_id': user_id},
@@ -244,9 +244,9 @@ def update_user(event: Dict[str, Any]) -> Dict[str, Any]:
         ExpressionAttributeValues=expr_values,
         ReturnValues='ALL_NEW'
     )
-    
+
     logger.info(f"User updated: {user_id}")
-    
+
     return response(200, result['Attributes'])
 
 
@@ -254,35 +254,35 @@ def delete_user(event: Dict[str, Any]) -> Dict[str, Any]:
     """
     DELETE /users/{id} - Delete user
     """
-    
+
     user_id = event['pathParameters']['id']
-    
+
     # Check if exists
     existing = table.get_item(Key={'user_id': user_id})
     if 'Item' not in existing:
         return response(404, {'error': 'User not found'})
-    
+
     # Delete
     table.delete_item(Key={'user_id': user_id})
-    
+
     logger.info(f"User deleted: {user_id}")
-    
+
     return response(204, {})
 
 
 def validate_user_input(data: Dict[str, Any], required: list = []):
     """Validate user input"""
-    
+
     # Required fields
     for field in required:
         if field not in data or not data[field]:
             raise ValueError(f"Missing required field: {field}")
-    
+
     # Email format
     if 'email' in data:
         if '@' not in data['email']:
             raise ValueError("Invalid email format")
-    
+
     # Age range
     if 'age' in data:
         if not isinstance(data['age'], int) or data['age'] < 0 or data['age'] > 150:
@@ -293,7 +293,7 @@ def response(status_code: int, body: Dict[str, Any]) -> Dict[str, Any]:
     """
     Create HTTP response
     """
-    
+
     return {
         'statusCode': status_code,
         'headers': {
@@ -552,19 +552,19 @@ def test_create_user():
         },
         headers=HEADERS
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert 'user_id' in data
     assert data['email'] == 'test@example.com'
-    
+
     return data['user_id']
 
 def test_get_user():
     user_id = test_create_user()
-    
+
     response = requests.get(f"{API_URL}/{user_id}", headers=HEADERS)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data['user_id'] == user_id
@@ -576,7 +576,7 @@ def test_rate_limiting():
         if response.status_code == 429:
             print(f"Rate limited after {i} requests")
             break
-    
+
     assert response.status_code == 429
 ```
 

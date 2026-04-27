@@ -4,7 +4,7 @@
 
 - **Nivel**: Intermedio
 - **Duración estimada**: 3-4 horas
-- **Prerequisitos**: 
+- **Prerequisitos**:
   - Ejercicio 01 completado
   - Conocimiento de Parquet y particionado de datos
   - Comprensión de SQS queues
@@ -120,51 +120,51 @@ def lambda_handler(event, context):
     """
     Procesar batch de mensajes SQS (cada uno con info de archivo S3)
     """
-    
+
     results = {
         'processed': 0,
         'failed': 0,
         'quarantined': 0
     }
-    
+
     for record in event['Records']:
         try:
             # Parsear mensaje SQS
             message_body = json.loads(record['body'])
-            
+
             # Extraer info del evento S3 (dentro del mensaje)
             s3_event = message_body['Records'][0]
             bucket = s3_event['s3']['bucket']['name']
             key = s3_event['s3']['object']['key']
-            
+
             logger.info(json.dumps({
                 'event': 'processing_file',
                 'bucket': bucket,
                 'key': key,
                 'message_id': record['messageId']
             }))
-            
+
             # Procesar archivo
             process_file(bucket, key)
             results['processed'] += 1
-            
+
         except ValidationError as e:
             # Error de validación → mover a quarantine
             logger.warning(f"Validation error: {e}")
             move_to_quarantine(bucket, key, str(e))
             results['quarantined'] += 1
-            
+
         except Exception as e:
             # Error inesperado → raise para retry
             logger.error(f"Processing error: {e}")
             results['failed'] += 1
             raise e
-    
+
     logger.info(json.dumps({
         'event': 'batch_processed',
         'results': results
     }))
-    
+
     return results
 
 
@@ -172,24 +172,24 @@ def process_file(bucket: str, key: str):
     """
     Procesar un archivo CSV
     """
-    
+
     # 1. Descargar y leer CSV
     logger.info(f"Downloading s3://{bucket}/{key}")
     response = s3.get_object(Bucket=bucket, Key=key)
     df = pd.read_csv(BytesIO(response['Body'].read()))
-    
+
     # 2. Validar schema
     validate_dataframe(df)
-    
+
     # 3. Transformaciones
     df = transform_data(df)
-    
+
     # 4. Particionar y guardar como Parquet
     save_partitioned_parquet(df, TARGET_BUCKET)
-    
+
     # 5. Actualizar Glue Catalog (async)
     trigger_glue_crawler()
-    
+
     logger.info(f"Successfully processed {len(df)} records from {key}")
 
 
@@ -197,15 +197,15 @@ def validate_dataframe(df: pd.DataFrame):
     """
     Validar que DataFrame cumple con el schema esperado
     """
-    
+
     # Verificar columnas requeridas
     required_cols = set(SALES_SCHEMA['required'])
     actual_cols = set(df.columns)
-    
+
     if not required_cols.issubset(actual_cols):
         missing = required_cols - actual_cols
         raise ValidationError(f"Missing required columns: {missing}")
-    
+
     # Validar cada fila contra schema
     errors = []
     for idx, row in df.head(10).iterrows():  # Validar primeras 10 filas
@@ -213,14 +213,14 @@ def validate_dataframe(df: pd.DataFrame):
             jsonschema.validate(row.to_dict(), SALES_SCHEMA)
         except jsonschema.ValidationError as e:
             errors.append(f"Row {idx}: {e.message}")
-    
+
     if errors:
         raise ValidationError(f"Schema validation failed: {errors[:3]}")
-    
+
     # Validaciones de calidad
     if df['amount'].isna().any():
         raise ValidationError("Null values found in 'amount' column")
-    
+
     if df.duplicated(subset=['transaction_id']).any():
         raise ValidationError("Duplicate transaction IDs found")
 
@@ -229,22 +229,22 @@ def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Aplicar transformaciones al DataFrame
     """
-    
+
     # Convertir date a datetime
     df['date'] = pd.to_datetime(df['date'])
-    
+
     # Extraer componentes de fecha para particionado
     df['year'] = df['date'].dt.year
     df['month'] = df['date'].dt.month
     df['day'] = df['date'].dt.day
-    
+
     # Normalizar categorías
     df['category'] = df['category'].str.lower().str.strip()
-    
+
     # Agregar metadata
     df['ingestion_timestamp'] = pd.Timestamp.utcnow()
     df['file_source'] = 'csv_import'
-    
+
     return df
 
 
@@ -252,18 +252,18 @@ def save_partitioned_parquet(df: pd.DataFrame, bucket: str):
     """
     Guardar DataFrame como Parquet particionado por year/month/category
     """
-    
+
     # Agrupar por particiones
     partition_cols = ['year', 'month', 'category']
-    
+
     for keys, group in df.groupby(partition_cols):
         year, month, category = keys
-        
+
         # Path particionado
         partition_path = f"processed/year={year}/month={month:02d}/category={category}/"
         file_name = f"data_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.parquet"
         s3_key = partition_path + file_name
-        
+
         # Convertir a Parquet
         table = pa.Table.from_pandas(group)
         parquet_buffer = BytesIO()
@@ -273,7 +273,7 @@ def save_partitioned_parquet(df: pd.DataFrame, bucket: str):
             compression='snappy',
             use_dictionary=True
         )
-        
+
         # Subir a S3
         s3.put_object(
             Bucket=bucket,
@@ -281,7 +281,7 @@ def save_partitioned_parquet(df: pd.DataFrame, bucket: str):
             Body=parquet_buffer.getvalue(),
             ContentType='application/octet-stream'
         )
-        
+
         logger.info(json.dumps({
             'event': 'partition_saved',
             's3_uri': f's3://{bucket}/{s3_key}',
@@ -294,9 +294,9 @@ def move_to_quarantine(bucket: str, key: str, error_message: str):
     """
     Mover archivo inválido a quarantine con metadata de error
     """
-    
+
     quarantine_key = key.replace('landing/', 'quarantine/')
-    
+
     # Copiar archivo
     s3.copy_object(
         Bucket=bucket,
@@ -308,10 +308,10 @@ def move_to_quarantine(bucket: str, key: str, error_message: str):
         },
         MetadataDirective='REPLACE'
     )
-    
+
     # Eliminar original
     s3.delete_object(Bucket=bucket, Key=key)
-    
+
     logger.warning(json.dumps({
         'event': 'file_quarantined',
         'original': f's3://{bucket}/{key}',
@@ -358,7 +358,7 @@ jsonschema==4.20.0
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"

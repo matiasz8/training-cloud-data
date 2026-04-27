@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.email import EmailOperator
 
 default_args = {
     'owner': 'data_engineer',
@@ -33,12 +32,12 @@ def validate_data(**context):
     """
     ti = context['ti']
     records = ti.xcom_pull(task_ids='process')
-    
+
     if records < 500:
         print(f"⚠️  Advertencia: Solo {records} registros procesados (< 500)")
     else:
         print(f"✅ Validación exitosa: {records} registros")
-    
+
     return records >= 100  # Retorna True si pasó validación
 
 with DAG(

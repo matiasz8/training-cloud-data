@@ -172,7 +172,7 @@ Crearás tu primera configuración de Terraform para provisionar un bucket S3 en
 
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -317,7 +317,7 @@ variable "bucket_name" {
   description = "Nombre del bucket S3 a crear"
   type        = string
   default     = "mi-bucket-terraform"
-  
+
   validation {
     condition     = length(var.bucket_name) <= 63 && length(var.bucket_name) >= 3
     error_message = "El nombre del bucket debe tener entre 3 y 63 caracteres."
@@ -328,7 +328,7 @@ variable "environment" {
   description = "Ambiente de despliegue"
   type        = string
   default     = "development"
-  
+
   validation {
     condition     = contains(["development", "staging", "production"], var.environment)
     error_message = "El ambiente debe ser: development, staging, o production."
@@ -406,7 +406,7 @@ output "bucket_tags" {
 
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -1472,7 +1472,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "test" {
   bucket = "modification-test-v1"
-  
+
   tags = {
     Name    = "Original"
     Version = "1"

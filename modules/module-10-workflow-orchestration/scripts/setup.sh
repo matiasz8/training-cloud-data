@@ -90,7 +90,7 @@ while [ $attempt -lt $max_attempts ]; do
         echo "${GREEN}✓ Services are healthy${NC}"
         break
     fi
-    
+
     echo "Waiting for services... ($((attempt+1))/$max_attempts)"
     sleep 10
     attempt=$((attempt+1))

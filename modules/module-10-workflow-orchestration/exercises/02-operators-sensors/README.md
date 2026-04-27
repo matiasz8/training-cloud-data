@@ -205,7 +205,7 @@ with DAG(
     catchup=False,
     tags=['exercise', 'operators', 'ex02'],
 ) as dag:
-    
+
     # 1. BashOperator: Setup
     setup = BashOperator(
         task_id='setup',
@@ -215,26 +215,26 @@ with DAG(
             date
         ''',
     )
-    
+
     # 2. PythonOperator: Process
     def process_data(**context):
         import pandas as pd
-        
+
         data = {'id': [1, 2, 3], 'value': [10, 20, 30]}
         df = pd.DataFrame(data)
-        
+
         logger.info(f"Processing {len(df)} records")
         summary = df['value'].sum()
-        
+
         # Push to XCom
         context['ti'].xcom_push(key='summary', value=summary)
         return summary
-    
+
     process = PythonOperator(
         task_id='process',
         python_callable=process_data,
     )
-    
+
     # 3. HttpOperator: Fetch API data
     fetch_api = SimpleHttpOperator(
         task_id='fetch_api',
@@ -244,7 +244,7 @@ with DAG(
         response_filter=lambda response: json.loads(response.text),
         log_response=True,
     )
-    
+
     # 4. PostgresOperator: Database operations
     create_table = PostgresOperator(
         task_id='create_table',
@@ -258,7 +258,7 @@ with DAG(
             );
         ''',
     )
-    
+
     insert_data = PostgresOperator(
         task_id='insert_data',
         postgres_conn_id='postgres_default',
@@ -267,7 +267,7 @@ with DAG(
             VALUES ('{{ ds }}', 42);
         ''',
     )
-    
+
     # 5. EmailOperator: Notify (configure SMTP in airflow.cfg)
     # Commented out if SMTP not configured
     # send_email = EmailOperator(
@@ -276,7 +276,7 @@ with DAG(
     #     subject='DAG ex02 Completed',
     #     html_content='Pipeline completed successfully on {{ ds }}',
     # )
-    
+
     # Dependencies
     setup >> [process, fetch_api]
     fetch_api >> create_table >> insert_data
@@ -306,7 +306,7 @@ with DAG(
     catchup=False,
     tags=['exercise', 'sensor', 'ex02'],
 ) as dag:
-    
+
     # Wait for file
     wait_for_file = FileSensor(
         task_id='wait_for_file',
@@ -315,31 +315,31 @@ with DAG(
         timeout=600,       # 10 minutes timeout
         mode='poke',       # poke vs reschedule
     )
-    
+
     # Process file
     def process_file():
         import pandas as pd
-        
+
         try:
             df = pd.read_csv('/tmp/input_data.csv')
             logger.info(f"Read {len(df)} rows")
             logger.info(f"Columns: {df.columns.tolist()}")
             logger.info(f"Summary:\n{df.describe()}")
-            
+
             # Save processed
             df['processed'] = True
             df.to_csv('/tmp/output_data.csv', index=False)
-            
+
             return len(df)
         except Exception as e:
             logger.error(f"Error processing file: {e}")
             raise
-    
+
     process = PythonOperator(
         task_id='process',
         python_callable=process_file,
     )
-    
+
     # Move to processed folder
     move_file = BashOperator(
         task_id='move_file',
@@ -349,12 +349,12 @@ with DAG(
             echo "File moved to processed/"
         ''',
     )
-    
+
     # Generate report
     def generate_report(**context):
         ti = context['ti']
         row_count = ti.xcom_pull(task_ids='process')
-        
+
         report = f"""
         Processing Report
         =================
@@ -362,17 +362,17 @@ with DAG(
         Rows Processed: {row_count}
         Status: Success
         """
-        
+
         logger.info(report)
-        
+
         with open('/tmp/report.txt', 'w') as f:
             f.write(report)
-    
+
     report = PythonOperator(
         task_id='report',
         python_callable=generate_report,
     )
-    
+
     # Pipeline
     wait_for_file >> process >> move_file >> report
 ```
@@ -398,7 +398,7 @@ with DAG(
     catchup=False,
     tags=['exercise', 's3', 'ex02'],
 ) as dag:
-    
+
     # Upload data to S3
     upload_to_s3 = S3CreateObjectOperator(
         task_id='upload_to_s3',
@@ -408,7 +408,7 @@ with DAG(
         replace=True,
         aws_conn_id='aws_default',
     )
-    
+
     # Wait for another file
     wait_for_s3_file = S3KeySensor(
         task_id='wait_for_s3_file',
@@ -418,27 +418,27 @@ with DAG(
         poke_interval=30,
         timeout=300,
     )
-    
+
     # Process S3 file
     def process_s3_file(**context):
         from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-        
+
         s3_hook = S3Hook(aws_conn_id='aws_default')
-        
+
         # Download file
         key = f"data/input_{context['ds_nodash']}.json"
         obj = s3_hook.read_key(
             key=key,
             bucket_name='airflow-exercise-bucket'
         )
-        
+
         data = json.loads(obj)
         print(f"Downloaded data: {data}")
-        
+
         # Process
         data['processed'] = True
         data['processed_at'] = str(datetime.now())
-        
+
         # Upload processed
         s3_hook.load_string(
             string_data=json.dumps(data),
@@ -446,14 +446,14 @@ with DAG(
             bucket_name='airflow-exercise-bucket',
             replace=True
         )
-        
+
         return data
-    
+
     process = PythonOperator(
         task_id='process_s3_file',
         python_callable=process_s3_file,
     )
-    
+
     # Pipeline
     upload_to_s3 >> wait_for_s3_file >> process
 ```
@@ -510,14 +510,14 @@ aws --endpoint-url=http://localhost:4566 s3 cp s3://airflow-exercise-bucket/data
 
 After completing this exercise, you should understand:
 
-✅ Different operator types and when to use them  
-✅ How sensors wait for conditions  
-✅ FileSensor for file-based workflows  
-✅ S3 operations (upload, sensor, download)  
-✅ Database operations with PostgresOperator  
-✅ HTTP API interactions  
-✅ Sensor timeout and retry configuration  
-✅ Multi-sensor coordination  
+✅ Different operator types and when to use them
+✅ How sensors wait for conditions
+✅ FileSensor for file-based workflows
+✅ S3 operations (upload, sensor, download)
+✅ Database operations with PostgresOperator
+✅ HTTP API interactions
+✅ Sensor timeout and retry configuration
+✅ Multi-sensor coordination
 
 ---
 

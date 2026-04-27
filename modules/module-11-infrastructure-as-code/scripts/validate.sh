@@ -47,20 +47,20 @@ for exercise in exercises/*/; do
     if [ -f "$exercise/main.tf" ] || [ -f "$exercise/README.md" ]; then
         exercise_name=$(basename "$exercise")
         echo "  Validando $exercise_name..."
-        
+
         cd "$exercise"
-        
+
         # Solo validar si hay archivos .tf
         if ls *.tf > /dev/null 2>&1; then
             terraform init -backend=false > /dev/null 2>&1 || true
-            
+
             if terraform validate > /dev/null 2>&1; then
                 success "  $exercise_name válido"
             else
                 error "  $exercise_name tiene errores"
             fi
         fi
-        
+
         cd - > /dev/null
     fi
 done
@@ -73,16 +73,16 @@ if [ -d "infrastructure/modules" ]; then
         if [ -f "$module/main.tf" ]; then
             module_name=$(basename "$module")
             echo "  Validando módulo: $module_name..."
-            
+
             cd "$module"
             terraform init -backend=false > /dev/null 2>&1 || true
-            
+
             if terraform validate > /dev/null 2>&1; then
                 success "  $module_name válido"
             else
                 error "  $module_name tiene errores"
             fi
-            
+
             cd - > /dev/null
         fi
     done

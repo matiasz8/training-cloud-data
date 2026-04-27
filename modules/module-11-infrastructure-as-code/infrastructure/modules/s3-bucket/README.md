@@ -15,26 +15,26 @@ Módulo reutilizable para crear un bucket S3 con seguridad por defecto.
 ```hcl
 module "my_bucket" {
   source = "./modules/s3-bucket"
-  
+
   bucket_name       = "my-app-data"
   environment       = "production"
   enable_versioning = true
   enable_logging    = true
-  
+
   lifecycle_rules = [{
     id      = "archive-old-data"
     enabled = true
-    
+
     transition = [{
       days          = 90
       storage_class = "GLACIER"
     }]
-    
+
     expiration = {
       days = 365
     }
   }]
-  
+
   tags = {
     Project    = "DataPlatform"
     CostCenter = "Engineering"

@@ -3,7 +3,7 @@ Pytest configuration and fixtures for serverless testing
 """
 import pytest
 import boto3
-from moto import mock_s3, mock_dynamodb, mock_sqs, mock_sns, mock_lambda
+from moto import mock_s3, mock_dynamodb, mock_sqs
 import os
 
 @pytest.fixture

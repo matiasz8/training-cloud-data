@@ -61,21 +61,21 @@ resource "aws_subnet" "staging_subnet_1" {
 # Con módulos: DRY (Don't Repeat Yourself)
 module "dev_vpc" {
   source = "./modules/vpc"
-  
+
   environment = "dev"
   cidr_block  = "10.0.0.0/16"
 }
 
 module "staging_vpc" {
   source = "./modules/vpc"
-  
+
   environment = "staging"
   cidr_block  = "10.1.0.0/16"
 }
 
 module "prod_vpc" {
   source = "./modules/vpc"
-  
+
   environment = "prod"
   cidr_block  = "10.2.0.0/16"
 }
@@ -160,18 +160,18 @@ variable "tags" {
 ```hcl
 locals {
   name_prefix = "${var.project}-${var.environment}"
-  
+
   # Calculate subnet CIDR blocks
   private_subnets = [
     for i in range(var.private_subnet_count) :
     cidrsubnet(var.cidr_block, 8, i + 10)
   ]
-  
+
   public_subnets = [
     for i in range(var.public_subnet_count) :
     cidrsubnet(var.cidr_block, 8, i)
   ]
-  
+
   # Common tags
   common_tags = merge(
     {
@@ -189,7 +189,7 @@ resource "aws_vpc" "main" {
   cidr_block           = var.cidr_block
   enable_dns_hostnames = true
   enable_dns_support   = true
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -201,7 +201,7 @@ resource "aws_vpc" "main" {
 # Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -217,7 +217,7 @@ resource "aws_subnet" "public" {
   cidr_block              = local.public_subnets[count.index]
   availability_zone       = var.availability_zones[count.index % length(var.availability_zones)]
   map_public_ip_on_launch = true
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -233,7 +233,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = local.private_subnets[count.index]
   availability_zone = var.availability_zones[count.index % length(var.availability_zones)]
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -247,9 +247,9 @@ resource "aws_subnet" "private" {
 resource "aws_eip" "nat" {
   count  = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : var.private_subnet_count) : 0
   domain = "vpc"
-  
+
   depends_on = [aws_internet_gateway.main]
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -263,9 +263,9 @@ resource "aws_nat_gateway" "main" {
   count         = var.enable_nat_gateway ? (var.single_nat_gateway ? 1 : var.private_subnet_count) : 0
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index % var.public_subnet_count].id
-  
+
   depends_on = [aws_internet_gateway.main]
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -277,7 +277,7 @@ resource "aws_nat_gateway" "main" {
 # Public Route Table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -304,7 +304,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_route_table" "private" {
   count  = var.private_subnet_count
   vpc_id = aws_vpc.main.id
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -332,7 +332,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_vpn_gateway" "main" {
   count  = var.enable_vpn_gateway ? 1 : 0
   vpc_id = aws_vpc.main.id
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -399,7 +399,7 @@ output "availability_zones" {
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -416,7 +416,7 @@ terraform {
 ```hcl
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -435,18 +435,18 @@ data "aws_availability_zones" "available" {
 
 module "vpc" {
   source = "../../modules/vpc"
-  
+
   environment        = "dev"
   project            = "dataplatform"
   cidr_block         = "10.0.0.0/16"
   availability_zones = slice(data.aws_availability_zones.available.names, 0, 2)
-  
+
   private_subnet_count = 2
   public_subnet_count  = 2
-  
+
   enable_nat_gateway = true
   single_nat_gateway = true  # Dev: usar un solo NAT para ahorrar costos
-  
+
   tags = {
     CostCenter = "Engineering"
     Team       = "DataEngineering"
@@ -487,7 +487,7 @@ variable "instance_type" {
     Must be a t3 instance type.
   EOT
   type        = string
-  
+
   validation {
     condition     = can(regex("^t3\\.", var.instance_type))
     error_message = "Instance type must be a t3 instance."
@@ -539,7 +539,7 @@ variable "enable_encryption" {
 variable "environment" {
   description = "Environment name"
   type        = string
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment must be dev, staging, or prod."
@@ -549,7 +549,7 @@ variable "environment" {
 variable "instance_count" {
   description = "Number of instances"
   type        = number
-  
+
   validation {
     condition     = var.instance_count >= 1 && var.instance_count <= 10
     error_message = "Instance count must be between 1 and 10."
@@ -586,18 +586,18 @@ root/
 # modules/networking/main.tf
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  
+
   name = "${var.project}-${var.environment}"
   cidr = var.vpc_cidr
-  
+
   azs             = var.availability_zones
   private_subnets = var.private_subnet_cidrs
   public_subnets  = var.public_subnet_cidrs
-  
+
   enable_nat_gateway   = var.enable_nat_gateway
   enable_dns_hostnames = true
   enable_dns_support   = true
-  
+
   tags = var.tags
 }
 
@@ -605,28 +605,28 @@ resource "aws_security_group" "alb" {
   name        = "${var.project}-${var.environment}-alb-sg"
   description = "Security group for ALB"
   vpc_id      = module.vpc.vpc_id
-  
+
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-alb-sg" })
 }
 
@@ -655,21 +655,21 @@ resource "aws_security_group" "app" {
   name        = "${var.project}-${var.environment}-app-sg"
   description = "Security group for application servers"
   vpc_id      = var.vpc_id
-  
+
   ingress {
     from_port       = var.app_port
     to_port         = var.app_port
     protocol        = "tcp"
     security_groups = [var.alb_security_group_id]
   }
-  
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-app-sg" })
 }
 
@@ -677,18 +677,18 @@ resource "aws_launch_template" "app" {
   name_prefix   = "${var.project}-${var.environment}-"
   image_id      = var.ami_id
   instance_type = var.instance_type
-  
+
   vpc_security_group_ids = [aws_security_group.app.id]
-  
+
   user_data = base64encode(templatefile("${path.module}/user-data.sh", {
     app_port = var.app_port
     environment = var.environment
   }))
-  
+
   iam_instance_profile {
     name = aws_iam_instance_profile.app.name
   }
-  
+
   tag_specifications {
     resource_type = "instance"
     tags = merge(var.tags, { Name = "${var.project}-${var.environment}-app" })
@@ -699,25 +699,25 @@ resource "aws_autoscaling_group" "app" {
   name                = "${var.project}-${var.environment}-asg"
   vpc_zone_identifier = var.private_subnet_ids
   target_group_arns   = [aws_lb_target_group.app.arn]
-  
+
   min_size         = var.min_size
   max_size         = var.max_size
   desired_capacity = var.desired_capacity
-  
+
   launch_template {
     id      = aws_launch_template.app.id
     version = "$Latest"
   }
-  
+
   health_check_type         = "ELB"
   health_check_grace_period = 300
-  
+
   tag {
     key                 = "Name"
     value               = "${var.project}-${var.environment}-asg"
     propagate_at_launch = true
   }
-  
+
   dynamic "tag" {
     for_each = var.tags
     content {
@@ -734,7 +734,7 @@ resource "aws_lb" "app" {
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group_id]
   subnets            = var.public_subnet_ids
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-alb" })
 }
 
@@ -743,7 +743,7 @@ resource "aws_lb_target_group" "app" {
   port     = var.app_port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
-  
+
   health_check {
     enabled             = true
     healthy_threshold   = 2
@@ -755,7 +755,7 @@ resource "aws_lb_target_group" "app" {
     timeout             = 5
     unhealthy_threshold = 2
   }
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-tg" })
 }
 
@@ -763,7 +763,7 @@ resource "aws_lb_listener" "app" {
   load_balancer_arn = aws_lb.app.arn
   port              = "80"
   protocol          = "HTTP"
-  
+
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.app.arn
@@ -779,61 +779,61 @@ resource "aws_security_group" "rds" {
   name        = "${var.project}-${var.environment}-rds-sg"
   description = "Security group for RDS"
   vpc_id      = var.vpc_id
-  
+
   ingress {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
     security_groups = [var.app_security_group_id]
   }
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-rds-sg" })
 }
 
 resource "aws_db_subnet_group" "main" {
   name       = "${var.project}-${var.environment}-db-subnet"
   subnet_ids = var.private_subnet_ids
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-db-subnet" })
 }
 
 resource "aws_db_instance" "main" {
   identifier = "${var.project}-${var.environment}-db"
-  
+
   engine         = "postgres"
   engine_version = var.engine_version
   instance_class = var.instance_class
-  
+
   allocated_storage     = var.allocated_storage
   max_allocated_storage = var.max_allocated_storage
   storage_type          = "gp3"
   storage_encrypted     = true
-  
+
   db_name  = var.database_name
   username = var.master_username
   password = var.master_password
-  
+
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
-  
+
   backup_retention_period = var.backup_retention_period
   backup_window           = var.backup_window
   maintenance_window      = var.maintenance_window
-  
+
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
   monitoring_interval             = 60
   monitoring_role_arn             = aws_iam_role.rds_monitoring.arn
-  
+
   deletion_protection       = var.deletion_protection
   skip_final_snapshot       = var.skip_final_snapshot
   final_snapshot_identifier = var.skip_final_snapshot ? null : "${var.project}-${var.environment}-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
-  
+
   tags = merge(var.tags, { Name = "${var.project}-${var.environment}-db" })
 }
 
 resource "aws_iam_role" "rds_monitoring" {
   name = "${var.project}-${var.environment}-rds-monitoring"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -844,7 +844,7 @@ resource "aws_iam_role" "rds_monitoring" {
       }
     }]
   })
-  
+
   tags = var.tags
 }
 
@@ -875,7 +875,7 @@ output "security_group_id" {
 # environments/prod/main.tf
 terraform {
   required_version = ">= 1.0"
-  
+
   backend "s3" {
     bucket         = "mycompany-terraform-state"
     key            = "prod/data-platform/terraform.tfstate"
@@ -905,77 +905,77 @@ data "aws_availability_zones" "available" {
 # Networking
 module "networking" {
   source = "../../modules/networking"
-  
+
   project            = "dataplatform"
   environment        = "prod"
   vpc_cidr           = "10.0.0.0/16"
   availability_zones = slice(data.aws_availability_zones.available.names, 0, 3)
-  
+
   private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24", "10.0.12.0/24"]
   public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  
+
   enable_nat_gateway = true
-  
+
   tags = local.common_tags
 }
 
 # Compute
 module "compute" {
   source = "../../modules/compute"
-  
+
   project     = "dataplatform"
   environment = "prod"
-  
+
   vpc_id                 = module.networking.vpc_id
   private_subnet_ids     = module.networking.private_subnet_ids
   public_subnet_ids      = module.networking.public_subnet_ids
   alb_security_group_id  = module.networking.alb_security_group_id
-  
+
   ami_id        = data.aws_ami.amazon_linux.id
   instance_type = "t3.large"
-  
+
   min_size         = 3
   max_size         = 10
   desired_capacity = 5
-  
+
   app_port = 8080
-  
+
   tags = local.common_tags
 }
 
 # Database
 module "database" {
   source = "../../modules/database"
-  
+
   project     = "dataplatform"
   environment = "prod"
-  
+
   vpc_id                = module.networking.vpc_id
   private_subnet_ids    = module.networking.private_subnet_ids
   app_security_group_id = module.compute.app_security_group_id
-  
+
   engine_version    = "14.7"
   instance_class    = "db.r6g.xlarge"
   allocated_storage = 500
-  
+
   database_name   = "dataplatform"
   master_username = var.db_username
   master_password = var.db_password
-  
+
   backup_retention_period = 30
   deletion_protection     = true
   skip_final_snapshot     = false
-  
+
   tags = local.common_tags
 }
 
 # Storage
 module "storage" {
   source = "../../modules/storage"
-  
+
   project     = "dataplatform"
   environment = "prod"
-  
+
   buckets = {
     raw = {
       versioning = true
@@ -999,7 +999,7 @@ module "storage" {
       lifecycle_rules = []
     }
   }
-  
+
   tags = local.common_tags
 }
 
@@ -1031,17 +1031,17 @@ El **Terraform Registry** es un repositorio público de módulos de Terraform ve
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.2"
-  
+
   name = "my-vpc"
   cidr = "10.0.0.0/16"
-  
+
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
-  
+
   enable_nat_gateway = true
   enable_vpn_gateway = true
-  
+
   tags = {
     Terraform   = "true"
     Environment = "dev"
@@ -1056,12 +1056,12 @@ module "vpc" {
 module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "5.5.0"
-  
+
   name = "my-instance"
-  
+
   instance_type = "t3.micro"
   ami           = data.aws_ami.amazon_linux.id
-  
+
   subnet_id              = module.vpc.private_subnets[0]
   vpc_security_group_ids = [module.security_group.security_group_id]
 }
@@ -1070,14 +1070,14 @@ module "ec2_instance" {
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "3.15.1"
-  
+
   bucket = "my-bucket"
   acl    = "private"
-  
+
   versioning = {
     enabled = true
   }
-  
+
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
@@ -1091,23 +1091,23 @@ module "s3_bucket" {
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "6.3.0"
-  
+
   identifier = "mydb"
-  
+
   engine            = "postgres"
   engine_version    = "14"
   instance_class    = "db.t3.medium"
   allocated_storage = 20
-  
+
   db_name  = "mydb"
   username = "dbadmin"
   password = var.db_password
-  
+
   vpc_security_group_ids = [module.security_group_db.security_group_id]
-  
+
   maintenance_window = "Mon:00:00-Mon:03:00"
   backup_window      = "03:00-06:00"
-  
+
   tags = {
     Environment = "dev"
   }
@@ -1117,11 +1117,11 @@ module "rds" {
 module "security_group" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.0"
-  
+
   name        = "web-server-sg"
   description = "Security group for web servers"
   vpc_id      = module.vpc.vpc_id
-  
+
   ingress_cidr_blocks = ["0.0.0.0/0"]
   ingress_rules       = ["http-80-tcp", "https-443-tcp"]
   egress_rules        = ["all-all"]
@@ -1131,15 +1131,15 @@ module "security_group" {
 module "alb" {
   source  = "terraform-aws-modules/alb/aws"
   version = "9.2.0"
-  
+
   name = "my-alb"
-  
+
   load_balancer_type = "application"
-  
+
   vpc_id          = module.vpc.vpc_id
   subnets         = module.vpc.public_subnets
   security_groups = [module.security_group_alb.security_group_id]
-  
+
   target_groups = [
     {
       name_prefix      = "web-"
@@ -1148,7 +1148,7 @@ module "alb" {
       target_type      = "instance"
     }
   ]
-  
+
   http_tcp_listeners = [
     {
       port               = 80
@@ -1236,7 +1236,7 @@ module "vpc" {
 resource "aws_s3_bucket" "example" {
   count  = 3
   bucket = "my-bucket-${count.index}"
-  
+
   tags = {
     Name  = "Bucket ${count.index}"
     Index = count.index
@@ -1280,11 +1280,11 @@ variable "instance_count" {
 
 resource "aws_instance" "web" {
   count = var.instance_count
-  
+
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public[count.index % length(aws_subnet.public)].id
-  
+
   tags = {
     Name = "web-${count.index + 1}"
   }
@@ -1304,9 +1304,9 @@ variable "bucket_names" {
 
 resource "aws_s3_bucket" "example" {
   for_each = var.bucket_names
-  
+
   bucket = "mycompany-${each.value}"
-  
+
   tags = {
     Name = each.value
   }
@@ -1329,7 +1329,7 @@ variable "instances" {
     instance_type = string
     ami           = string
   }))
-  
+
   default = {
     web = {
       instance_type = "t3.small"
@@ -1348,10 +1348,10 @@ variable "instances" {
 
 resource "aws_instance" "servers" {
   for_each = var.instances
-  
+
   ami           = each.value.ami
   instance_type = each.value.instance_type
-  
+
   tags = {
     Name = each.key
     Role = each.key
@@ -1381,11 +1381,11 @@ locals {
 
 resource "aws_subnet" "private" {
   for_each = local.azs
-  
+
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, index(tolist(local.azs), each.value) + 10)
   availability_zone = each.value
-  
+
   tags = {
     Name = "private-${each.value}"
     AZ   = each.value
@@ -1484,7 +1484,7 @@ locals {
   # Extraer primer octeto
   first_octets = [for s in var.subnets : split(".", s)[0]]
   # Resultado: ["10", "10", "10"]
-  
+
   # Crear subnet names
   subnet_names = [for i, s in var.subnets : "subnet-${i}"]
   # Resultado: ["subnet-0", "subnet-1", "subnet-2"]
@@ -1535,13 +1535,13 @@ locals {
     for k, v in var.instances : upper(k) => v
   }
   # Resultado: { WEB = "t3.small", APP = "t3.medium", ... }
-  
+
   # Filtrar por valor
   large_instances = {
     for k, v in var.instances : k => v if v == "t3.large"
   }
   # Resultado: { worker = "t3.large" }
-  
+
   # Transformar valores
   instance_families = {
     for k, v in var.instances : k => split(".", v)[0]
@@ -1559,7 +1559,7 @@ variable "servers" {
     size = string
     env  = string
   }))
-  
+
   default = [
     { name = "web-1", size = "small", env = "prod" },
     { name = "web-2", size = "small", env = "prod" },
@@ -1572,12 +1572,12 @@ locals {
   servers_by_name = {
     for server in var.servers : server.name => server
   }
-  
+
   # Solo servers de prod
   prod_servers = [
     for server in var.servers : server if server.env == "prod"
   ]
-  
+
   # Group por environment
   servers_by_env = {
     for server in var.servers :
@@ -1594,7 +1594,7 @@ locals {
 
 resource "aws_instance" "web" {
   count = 3
-  
+
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
 }
@@ -1659,7 +1659,7 @@ regexall("[0-9]+", "a1b2c3")                  # ["1", "2", "3"]
 locals {
   environment = "Production"
   region      = "us-east-1"
-  
+
   # Crear resource name normalizado
   resource_prefix = lower(replace("${var.environment}-${var.region}", "_", "-"))
   # Resultado: "production-us-east-1"
@@ -1760,7 +1760,7 @@ locals {
     medium = 2
     large  = 4
   }
-  
+
   instance_count = lookup(local.tier_multiplier, var.tier, 1) * 2
   storage_size   = lookup(local.tier_multiplier, var.tier, 1) * 50
 }
@@ -1795,7 +1795,7 @@ pathexpand("~/.ssh/id_rsa")    # "/home/user/.ssh/id_rsa"
 resource "aws_instance" "web" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
-  
+
   user_data = templatefile("${path.module}/user-data.sh", {
     environment = var.environment
     app_port    = var.app_port
@@ -1901,7 +1901,7 @@ locals {
     for i in range(var.az_count) :
     cidrsubnet(var.vpc_cidr, 8, i)
   ]
-  
+
   # Crear subnets privadas: 10.0.10.0/24, 10.0.11.0/24, 10.0.12.0/24
   private_subnets = [
     for i in range(var.az_count) :
@@ -1939,7 +1939,7 @@ variable "port" {
 locals {
   # Convertir a número si es posible, sino usar default
   port_number = try(tonumber(var.port), 8080)
-  
+
   # Validar que puerto está en rango válido
   valid_port = local.port_number >= 1 && local.port_number <= 65535
 }
@@ -2001,12 +2001,12 @@ resource "aws_s3_bucket" "data" {
 
 resource "aws_s3_bucket_public_access_block" "data" {
   bucket = aws_s3_bucket.data.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-  
+
   # Explícita: asegurar que bucket esté completo
   depends_on = [aws_s3_bucket.data]
 }
@@ -2014,7 +2014,7 @@ resource "aws_s3_bucket_public_access_block" "data" {
 resource "aws_s3_bucket_policy" "data" {
   bucket = aws_s3_bucket.data.id
   policy = data.aws_iam_policy_document.data_bucket.json
-  
+
   # Debe esperar a que public access block esté configurado
   depends_on = [aws_s3_bucket_public_access_block.data]
 }
@@ -2024,7 +2024,7 @@ resource "aws_s3_bucket_policy" "data" {
 # Ejemplo: IAM role debe existir antes de usarlo
 resource "aws_iam_role" "lambda" {
   name = "lambda-execution-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -2046,7 +2046,7 @@ resource "aws_lambda_function" "processor" {
   function_name = "data-processor"
   role          = aws_iam_role.lambda.arn
   # ...
-  
+
   # Asegurar que policies estén attached antes de crear función
   depends_on = [aws_iam_role_policy_attachment.lambda_basic]
 }
@@ -2057,7 +2057,7 @@ resource "aws_lambda_function" "processor" {
 resource "aws_instance" "app" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
-  
+
   # Múltiples dependencies explícitas
   depends_on = [
     aws_security_group.app,
@@ -2094,7 +2094,7 @@ resource "aws_launch_template" "app" {
   name_prefix   = "app-"
   image_id      = var.ami_id
   instance_type = var.instance_type
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -2112,7 +2112,7 @@ resource "aws_launch_template" "app" {
   name_prefix   = "app-"
   image_id      = var.ami_id
   instance_type = var.instance_type
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -2120,15 +2120,15 @@ resource "aws_launch_template" "app" {
 
 resource "aws_autoscaling_group" "app" {
   name = "app-asg"
-  
+
   launch_template {
     id      = aws_launch_template.app.id
     version = "$Latest"
   }
-  
+
   min_size = 2
   max_size = 10
-  
+
   # ASG debe recrearse cuando launch template cambia
   lifecycle {
     create_before_destroy = true
@@ -2145,7 +2145,7 @@ resource "aws_db_instance" "production" {
   identifier = "prod-database"
   engine     = "postgres"
   # ... otras configuraciones
-  
+
   lifecycle {
     prevent_destroy = true  # ¡No destruir este recurso!
   }
@@ -2164,11 +2164,11 @@ resource "aws_db_instance" "production" {
 ```hcl
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "mycompany-terraform-state"
-  
+
   versioning {
     enabled = true
   }
-  
+
   lifecycle {
     prevent_destroy = true
   }
@@ -2183,11 +2183,11 @@ Ignora cambios a atributos específicos (útil cuando son modificados externamen
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = var.instance_type
-  
+
   tags = {
     Name = "web-server"
   }
-  
+
   lifecycle {
     # Ignorar cambios a tags (pueden ser modificados por otros sistemas)
     ignore_changes = [tags]
@@ -2201,7 +2201,7 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = var.instance_type
-  
+
   lifecycle {
     ignore_changes = [
       tags,
@@ -2218,7 +2218,7 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = var.instance_type
-  
+
   lifecycle {
     ignore_changes = all  # Ignorar TODOS los cambios
   }
@@ -2233,7 +2233,7 @@ resource "aws_autoscaling_group" "app" {
   min_size         = 2
   max_size         = 10
   desired_capacity = 5
-  
+
   lifecycle {
     # ASG puede scale automáticamente, no forzar desired_capacity
     ignore_changes = [desired_capacity]
@@ -2255,7 +2255,7 @@ resource "aws_ami_copy" "app" {
 resource "aws_instance" "app" {
   ami           = aws_ami_copy.app.id
   instance_type = "t3.micro"
-  
+
   lifecycle {
     # Reemplazar instance cuando AMI cambia
     replace_triggered_by = [
@@ -2271,19 +2271,19 @@ resource "aws_instance" "app" {
 resource "aws_db_instance" "main" {
   identifier = "mydb"
   engine     = "postgres"
-  
+
   instance_class = var.instance_class
   allocated_storage = var.storage_size
-  
+
   tags = var.tags
-  
+
   lifecycle {
     # No destruir accidentalmente
     prevent_destroy = true
-    
+
     # Crear nueva DB antes de destruir vieja (para migration)
     create_before_destroy = false
-    
+
     # Ignorar cambios externos a tags
     ignore_changes = [tags]
   }
@@ -2328,7 +2328,7 @@ Ejecuta comando en la máquina donde se ejecuta Terraform.
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   provisioner "local-exec" {
     command = "echo ${self.private_ip} >> private_ips.txt"
   }
@@ -2341,10 +2341,10 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   provisioner "local-exec" {
     command = "./scripts/configure-monitoring.sh ${self.id} ${self.private_ip}"
-    
+
     environment = {
       INSTANCE_ID = self.id
       ENVIRONMENT = var.environment
@@ -2359,7 +2359,7 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   provisioner "local-exec" {
     when    = destroy
     command = "./scripts/deregister-from-monitoring.sh ${self.id}"
@@ -2376,14 +2376,14 @@ resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
   key_name      = var.key_name
-  
+
   connection {
     type        = "ssh"
     user        = "ec2-user"
     private_key = file("~/.ssh/id_rsa")
     host        = self.public_ip
   }
-  
+
   provisioner "remote-exec" {
     inline = [
       "sudo yum update -y",
@@ -2392,7 +2392,7 @@ resource "aws_instance" "web" {
       "sudo systemctl enable httpd"
     ]
   }
-  
+
   # ⚠️ MEJOR: Usar user_data para esto
 }
 ```
@@ -2403,7 +2403,7 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
@@ -2423,19 +2423,19 @@ resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
   key_name      = var.key_name
-  
+
   connection {
     type        = "ssh"
     user        = "ec2-user"
     private_key = file("~/.ssh/id_rsa")
     host        = self.public_ip
   }
-  
+
   provisioner "file" {
     source      = "configs/app.conf"
     destination = "/tmp/app.conf"
   }
-  
+
   provisioner "remote-exec" {
     inline = [
       "sudo mv /tmp/app.conf /etc/app.conf",
@@ -2451,10 +2451,10 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   provisioner "remote-exec" {
     inline = ["sudo ./install.sh"]
-    
+
     # Comportamiento al fallar
     on_failure = continue  # continue = continuar, fail = abortar (default)
   }
@@ -2471,10 +2471,10 @@ resource "null_resource" "configure_monitoring" {
   triggers = {
     instance_ids = join(",", aws_instance.web[*].id)
   }
-  
+
   provisioner "local-exec" {
     command = "./scripts/configure-monitoring.sh"
-    
+
     environment = {
       INSTANCE_IDS = join(",", aws_instance.web[*].id)
       ENVIRONMENT  = var.environment
@@ -2490,7 +2490,7 @@ resource "null_resource" "configure_monitoring" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   user_data = templatefile("${path.module}/user-data.sh", {
     environment = var.environment
   })
@@ -2500,7 +2500,7 @@ resource "aws_instance" "web" {
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   provisioner "remote-exec" {
     inline = [
       "echo 'environment=${var.environment}' > /etc/environment"
@@ -2526,7 +2526,7 @@ terraform {
     region         = "us-east-1"
     encrypt        = true
     dynamodb_table = "terraform-state-lock"
-    
+
     # Optional: KMS encryption
     kms_key_id = "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
   }
@@ -2541,11 +2541,11 @@ terraform {
 # bootstrap/main.tf
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "mycompany-terraform-state"
-  
+
   lifecycle {
     prevent_destroy = true
   }
-  
+
   tags = {
     Name      = "Terraform State"
     ManagedBy = "Terraform"
@@ -2554,7 +2554,7 @@ resource "aws_s3_bucket" "terraform_state" {
 
 resource "aws_s3_bucket_versioning" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -2562,7 +2562,7 @@ resource "aws_s3_bucket_versioning" "terraform_state" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -2572,7 +2572,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" 
 
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -2587,12 +2587,12 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
   name           = "terraform-state-lock"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "LockID"
-  
+
   attribute {
     name = "LockID"
     type = "S"
   }
-  
+
   tags = {
     Name      = "Terraform State Lock"
     ManagedBy = "Terraform"
@@ -2753,7 +2753,7 @@ output "private_subnet_ids" {
 # Leer outputs de Project A
 data "terraform_remote_state" "networking" {
   backend = "s3"
-  
+
   config = {
     bucket = "mycompany-terraform-state"
     key    = "prod/networking/terraform.tfstate"
@@ -2766,7 +2766,7 @@ resource "aws_instance" "app" {
   ami           = var.ami_id
   instance_type = "t3.micro"
   subnet_id     = data.terraform_remote_state.networking.outputs.private_subnet_ids[0]
-  
+
   # ...
 }
 ```
@@ -2943,7 +2943,7 @@ terraform workspace delete dev
 resource "aws_instance" "web" {
   ami           = var.ami_id
   instance_type = "t3.micro"
-  
+
   tags = {
     Name        = "web-${terraform.workspace}"
     Environment = terraform.workspace
@@ -2957,7 +2957,7 @@ locals {
     staging = 2
     prod    = 5
   }
-  
+
   instance_type = {
     dev     = "t3.small"
     staging = "t3.medium"
@@ -2967,10 +2967,10 @@ locals {
 
 resource "aws_instance" "web" {
   count = local.instance_count[terraform.workspace]
-  
+
   ami           = var.ami_id
   instance_type = local.instance_type[terraform.workspace]
-  
+
   tags = {
     Name        = "web-${terraform.workspace}-${count.index + 1}"
     Environment = terraform.workspace
@@ -3088,7 +3088,7 @@ resource "aws_instance" "imported" {
   ami           = "ami-abc123"
   instance_type = "t3.micro"
   subnet_id     = "subnet-xyz789"
-  
+
   tags = {
     Name = "Imported Instance"
   }
@@ -3136,7 +3136,7 @@ INSTANCES=(
 for instance in "${INSTANCES[@]}"; do
   NAME="${instance%%:*}"
   ID="${instance##*:}"
-  
+
   echo "Importing $NAME ($ID)..."
   terraform import "aws_instance.servers[\"$NAME\"]" "$ID"
 done
@@ -3199,7 +3199,7 @@ resource "aws_iam_role_policy_attachment" "lambda" {
 resource "aws_lambda_function" "processor" {
   function_name = "processor"
   role          = aws_iam_role.lambda.arn
-  
+
   depends_on = [aws_iam_role_policy_attachment.lambda]
 }
 ```
@@ -3214,7 +3214,7 @@ variable "create_monitoring" {
 
 resource "aws_cloudwatch_dashboard" "main" {
   count = var.create_monitoring ? 1 : 0
-  
+
   dashboard_name = "my-dashboard"
   # ...
 }
@@ -3228,7 +3228,7 @@ variable "buckets" {
     versioning = bool
     encryption = bool
   }))
-  
+
   default = {
     logs = {
       versioning = true
@@ -3243,9 +3243,9 @@ variable "buckets" {
 
 resource "aws_s3_bucket" "buckets" {
   for_each = var.buckets
-  
+
   bucket = each.key
-  
+
   tags = {
     Name       = each.key
     Versioning = each.value.versioning
@@ -3283,7 +3283,7 @@ resource "aws_s3_bucket" "backup" {
 ```hcl
 resource "aws_db_instance" "main" {
   identifier = "mydb"
-  
+
   lifecycle {
     create_before_destroy = true
     prevent_destroy       = true
@@ -3304,21 +3304,21 @@ Dynamic blocks generan bloques nested dinámicamente.
 # Sin dynamic (repetitivo)
 resource "aws_security_group" "web" {
   name = "web-sg"
-  
+
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   ingress {
     from_port   = 22
     to_port     = 22
@@ -3338,7 +3338,7 @@ variable "ingress_rules" {
 
 resource "aws_security_group" "web" {
   name = "web-sg"
-  
+
   dynamic "ingress" {
     for_each = var.ingress_rules
     content {
@@ -3363,7 +3363,7 @@ variable "security_rules" {
     cidr_blocks = list(string)
     description = string
   }))
-  
+
   default = {
     http = {
       type        = "ingress"
@@ -3396,7 +3396,7 @@ resource "aws_security_group" "web" {
   name        = "web-sg"
   description = "Security group for web servers"
   vpc_id      = var.vpc_id
-  
+
   dynamic "ingress" {
     for_each = { for k, v in var.security_rules : k => v if v.type == "ingress" }
     content {
@@ -3407,7 +3407,7 @@ resource "aws_security_group" "web" {
       cidr_blocks = ingress.value.cidr_blocks
     }
   }
-  
+
   dynamic "egress" {
     for_each = { for k, v in var.security_rules : k => v if v.type == "egress" }
     content {
@@ -3434,7 +3434,7 @@ variable "s3_lifecycle_rules" {
     }))
     expiration_days = number
   }))
-  
+
   default = [
     {
       id      = "log-retention"
@@ -3450,13 +3450,13 @@ variable "s3_lifecycle_rules" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
-  
+
   dynamic "rule" {
     for_each = var.s3_lifecycle_rules
     content {
       id     = rule.value.id
       status = rule.value.enabled ? "Enabled" : "Disabled"
-      
+
       dynamic "transition" {
         for_each = rule.value.transitions
         content {
@@ -3464,7 +3464,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
           storage_class = transition.value.storage_class
         }
       }
-      
+
       expiration {
         days = rule.value.expiration_days
       }
@@ -3502,33 +3502,33 @@ provider "aws" {
 
 module "infrastructure_us_east" {
   source = "./modules/regional-infrastructure"
-  
+
   providers = {
     aws = aws.us_east_1
   }
-  
+
   region      = "us-east-1"
   environment = var.environment
 }
 
 module "infrastructure_us_west" {
   source = "./modules/regional-infrastructure"
-  
+
   providers = {
     aws = aws.us_west_2
   }
-  
+
   region      = "us-west-2"
   environment = var.environment
 }
 
 module "infrastructure_eu_west" {
   source = "./modules/regional-infrastructure"
-  
+
   providers = {
     aws = aws.eu_west_1
   }
-  
+
   region      = "eu-west-1"
   environment = var.environment
 }
@@ -3540,10 +3540,10 @@ module "infrastructure_eu_west" {
 locals {
   # Crear ALB solo en prod o si explicitly habilitado
   create_alb = var.environment == "prod" || var.force_alb
-  
+
   # Usar RDS multi-AZ solo en prod
   rds_multi_az = var.environment == "prod"
-  
+
   # Auto-scaling config basado en environment
   asg_config = {
     dev = {
@@ -3562,13 +3562,13 @@ locals {
       desired = 10
     }
   }
-  
+
   current_asg_config = lookup(local.asg_config, var.environment, local.asg_config.dev)
 }
 
 resource "aws_lb" "main" {
   count = local.create_alb ? 1 : 0
-  
+
   name               = "${var.project}-${var.environment}-alb"
   load_balancer_type = "application"
   subnets            = var.public_subnet_ids
@@ -3576,18 +3576,18 @@ resource "aws_lb" "main" {
 
 resource "aws_db_instance" "main" {
   identifier = "${var.project}-${var.environment}-db"
-  
+
   engine         = "postgres"
   instance_class = var.db_instance_class
-  
+
   multi_az = local.rds_multi_az
-  
+
   backup_retention_period = var.environment == "prod" ? 30 : 7
 }
 
 resource "aws_autoscaling_group" "app" {
   name = "${var.project}-${var.environment}-asg"
-  
+
   min_size         = local.current_asg_config.min
   max_size         = local.current_asg_config.max
   desired_capacity = local.current_asg_config.desired
@@ -3601,7 +3601,7 @@ variable "active_env" {
   description = "Currently active environment (blue or green)"
   type        = string
   default     = "blue"
-  
+
   validation {
     condition     = contains(["blue", "green"], var.active_env)
     error_message = "Active environment must be blue or green."
@@ -3624,7 +3624,7 @@ locals {
 # Blue environment
 module "blue_environment" {
   source = "./modules/app-environment"
-  
+
   name           = "${var.project}-blue"
   instance_count = local.environments.blue.instance_count
   ami_id         = var.blue_ami_id
@@ -3633,7 +3633,7 @@ module "blue_environment" {
 # Green environment
 module "green_environment" {
   source = "./modules/app-environment"
-  
+
   name           = "${var.project}-green"
   instance_count = local.environments.green.instance_count
   ami_id         = var.green_ami_id
@@ -3642,24 +3642,24 @@ module "green_environment" {
 # ALB with weighted routing
 resource "aws_lb_listener_rule" "blue" {
   listener_arn = aws_lb_listener.main.arn
-  
+
   action {
     type             = "forward"
     target_group_arn = module.blue_environment.target_group_arn
-    
+
     forward {
       target_group {
         arn    = module.blue_environment.target_group_arn
         weight = local.environments.blue.weight
       }
-      
+
       target_group {
         arn    = module.green_environment.target_group_arn
         weight = local.environments.green.weight
       }
     }
   }
-  
+
   condition {
     path_pattern {
       values = ["/*"]
@@ -3674,10 +3674,10 @@ resource "aws_lb_listener_rule" "blue" {
 # Data pipeline con múltiples stages
 module "data_lake" {
   source = "./modules/data-lake"
-  
+
   environment = var.environment
   project     = var.project
-  
+
   buckets = {
     raw = {
       versioning = true
@@ -3712,16 +3712,16 @@ module "data_lake" {
 
 module "glue_catalog" {
   source = "./modules/glue-catalog"
-  
+
   environment = var.environment
   project     = var.project
-  
+
   databases = {
     raw       = { location = module.data_lake.bucket_arns.raw }
     processed = { location = module.data_lake.bucket_arns.processed }
     curated   = { location = module.data_lake.bucket_arns.curated }
   }
-  
+
   crawlers = {
     raw_data = {
       database_name = "raw"
@@ -3733,33 +3733,33 @@ module "glue_catalog" {
 
 module "emr_cluster" {
   source = "./modules/emr"
-  
+
   environment = var.environment
   project     = var.project
-  
+
   cluster_config = {
     release_label = "emr-6.14.0"
     applications  = ["Spark", "Hadoop", "Hive"]
-    
+
     master_instance_type = var.environment == "prod" ? "m5.xlarge" : "m5.large"
     core_instance_type   = var.environment == "prod" ? "m5.xlarge" : "m5.large"
     core_instance_count  = var.environment == "prod" ? 5 : 2
   }
-  
+
   s3_bucket_arn = module.data_lake.bucket_arns.processed
 }
 
 module "athena_workgroup" {
   source = "./modules/athena"
-  
+
   environment = var.environment
   project     = var.project
-  
+
   workgroups = {
     analytics = {
       output_location = "s3://${module.data_lake.bucket_names.curated}/athena-results/"
       enforce_config  = true
-      
+
       configuration = {
         bytes_scanned_cutoff_per_query = 1000000000000  # 1TB
         result_configuration_updates = {
@@ -3823,7 +3823,7 @@ modules/
 # ✅ BIEN: Componer módulos pequeños
 module "app" {
   source = "./modules/app"
-  
+
   vpc_id     = module.networking.vpc_id
   subnet_ids = module.networking.private_subnet_ids
   db_endpoint = module.database.endpoint
@@ -3835,7 +3835,7 @@ module "app" {
 ```hcl
 variable "environment" {
   type = string
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment must be dev, staging, or prod."
@@ -3844,7 +3844,7 @@ variable "environment" {
 
 variable "instance_count" {
   type = number
-  
+
   validation {
     condition     = var.instance_count >= 1 && var.instance_count <= 100
     error_message = "Instance count must be between 1 and 100."
@@ -3853,7 +3853,7 @@ variable "instance_count" {
 
 variable "cidr_block" {
   type = string
-  
+
   validation {
     condition     = can(cidrhost(var.cidr_block, 0))
     error_message = "Must be valid IPv4 CIDR block."
@@ -3894,7 +3894,7 @@ locals {
     Compliance   = var.compliance_level
     CreatedDate  = formatdate("YYYY-MM-DD", timestamp())
   }
-  
+
   # Merge con tags específicos
   all_tags = merge(local.common_tags, var.additional_tags)
 }
@@ -3915,16 +3915,16 @@ resource "aws_instance" "web" {
 
 En este módulo avanzado has aprendido:
 
-✅ **Módulos**: Crear, usar y componer módulos reutilizables  
-✅ **Count y For Each**: Crear múltiples recursos dinámicamente  
-✅ **Funciones**: Manipular datos con funciones built-in  
-✅ **Dependencies**: Gestionar dependencies explícitas e implícitas  
-✅ **Lifecycle**: Controlar comportamiento de resources  
-✅ **Remote State**: Gestionar state compartido y collaboration  
-✅ **State Commands**: Manipular state de forma avanzada  
-✅ **Workspaces**: Gestionar múltiples environments  
-✅ **Import**: Traer recursos existentes a Terraform  
-✅ **Dynamic Blocks**: Generar bloques nested dinámicamente  
+✅ **Módulos**: Crear, usar y componer módulos reutilizables
+✅ **Count y For Each**: Crear múltiples recursos dinámicamente
+✅ **Funciones**: Manipular datos con funciones built-in
+✅ **Dependencies**: Gestionar dependencies explícitas e implícitas
+✅ **Lifecycle**: Controlar comportamiento de resources
+✅ **Remote State**: Gestionar state compartido y collaboration
+✅ **State Commands**: Manipular state de forma avanzada
+✅ **Workspaces**: Gestionar múltiples environments
+✅ **Import**: Traer recursos existentes a Terraform
+✅ **Dynamic Blocks**: Generar bloques nested dinámicamente
 ✅ **Patrones Avanzados**: Blue-green, multi-region, data pipelines
 
 En el siguiente módulo (`03-iac-patterns.md`), veremos patrones de organización, testing, CI/CD, y governance de Infrastructure as Code.

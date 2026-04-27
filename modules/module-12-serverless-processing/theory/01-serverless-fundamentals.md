@@ -102,10 +102,10 @@ def lambda_handler(event, context):
     context: Metadata sobre la invocación y el runtime
     """
     print(f"Evento recibido: {event}")
-    
+
     # Tu lógica de negocio
     result = process_data(event)
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps(result)
@@ -170,28 +170,28 @@ def lambda_handler(event, context):
     Lambda que se dispara cuando se sube un CSV a S3,
     lo procesa con pandas, y guarda el resultado.
     """
-    
+
     # 1. Obtener información del evento
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
-    
+
     print(f"Procesando archivo: s3://{bucket}/{key}")
-    
+
     try:
         # 2. Descargar archivo de S3
         response = s3.get_object(Bucket=bucket, Key=key)
         csv_content = response['Body'].read().decode('utf-8')
-        
+
         # 3. Procesar con pandas
         df = pd.read_csv(StringIO(csv_content))
-        
+
         # Transformación: calcular estadísticas
         stats = {
             'row_count': len(df),
             'columns': list(df.columns),
             'numeric_stats': df.describe().to_dict()
         }
-        
+
         # 4. Guardar resultado
         output_key = key.replace('.csv', '_stats.json')
         s3.put_object(
@@ -200,7 +200,7 @@ def lambda_handler(event, context):
             Body=json.dumps(stats, indent=2),
             ContentType='application/json'
         )
-        
+
         return {
             'statusCode': 200,
             'body': json.dumps({
@@ -210,7 +210,7 @@ def lambda_handler(event, context):
                 'stats': stats
             })
         }
-        
+
     except Exception as e:
         print(f"Error: {str(e)}")
         raise e
@@ -256,7 +256,7 @@ def lambda_handler(event, context):
 def lambda_handler(event, context):
     import pandas as pd  # Se importa en CADA invocación
     import boto3
-    
+
     s3 = boto3.client('s3')  # Se crea cliente en CADA invocación
     # ...
 
@@ -404,7 +404,7 @@ def lambda_handler(event, context):
     db_host = os.environ['DB_HOST']
     api_key = os.environ['API_KEY']  # ⚠️ Cifrar con KMS
     environment = os.environ['ENVIRONMENT']  # dev, staging, prod
-    
+
     print(f"Conectando a {db_host} en entorno {environment}")
 ```
 
@@ -550,9 +550,9 @@ def lambda_handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
         event_name = record['eventName']  # ObjectCreated:Put
-        
+
         print(f"Evento: {event_name} en s3://{bucket}/{key}")
-        
+
         if key.endswith('.csv'):
             process_csv(bucket, key)
         elif key.endswith('.json'):
@@ -592,9 +592,9 @@ def lambda_handler(event, context):
     for record in event['Records']:
         message_id = record['messageId']
         body = json.loads(record['body'])
-        
+
         print(f"Procesando mensaje {message_id}: {body}")
-        
+
         try:
             process_message(body)
         except Exception as e:
@@ -639,12 +639,12 @@ def lambda_handler(event, context):
         if record['eventName'] == 'INSERT':
             new_item = record['dynamodb']['NewImage']
             print(f"Nuevo item: {new_item}")
-        
+
         elif record['eventName'] == 'MODIFY':
             old_item = record['dynamodb']['OldImage']
             new_item = record['dynamodb']['NewImage']
             print(f"Modificado: {old_item} → {new_item}")
-        
+
         elif record['eventName'] == 'REMOVE':
             old_item = record['dynamodb']['OldImage']
             print(f"Eliminado: {old_item}")

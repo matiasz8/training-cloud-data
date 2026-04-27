@@ -1,7 +1,7 @@
 variable "bucket_name" {
   description = "Nombre base del bucket (sin sufijo de entorno)"
   type        = string
-  
+
   validation {
     condition     = length(var.bucket_name) >= 3 && length(var.bucket_name) <= 50
     error_message = "Bucket name debe tener entre 3 y 50 caracteres."
@@ -11,7 +11,7 @@ variable "bucket_name" {
 variable "environment" {
   description = "Entorno (dev, staging, prod)"
   type        = string
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment debe ser: dev, staging o prod."

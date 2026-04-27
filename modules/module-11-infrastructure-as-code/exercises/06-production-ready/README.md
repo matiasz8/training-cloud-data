@@ -1,7 +1,7 @@
 # Ejercicio 06: Infrastructure Production-Ready
 
-⏱️ **Duración estimada**: 3-4 horas  
-🎯 **Nivel**: Avanzado  
+⏱️ **Duración estimada**: 3-4 horas
+🎯 **Nivel**: Avanzado
 📋 **Prerequisitos**: Ejercicios 01-05 completados
 
 ## 🎓 Objetivos de Aprendizaje
@@ -180,9 +180,9 @@ locals {
 # Buckets para cada capa
 resource "aws_s3_bucket" "data_lake" {
   for_each = toset(local.layers)
-  
+
   bucket = "${var.project_name}-datalake-${each.key}-${var.environment}"
-  
+
   tags = merge(
     local.common_tags,
     {
@@ -194,9 +194,9 @@ resource "aws_s3_bucket" "data_lake" {
 # Versionado
 resource "aws_s3_bucket_versioning" "data_lake" {
   for_each = aws_s3_bucket.data_lake
-  
+
   bucket = each.value.id
-  
+
   versioning_configuration {
     status = var.enable_versioning ? "Enabled" : "Suspended"
   }
@@ -205,9 +205,9 @@ resource "aws_s3_bucket_versioning" "data_lake" {
 # Cifrado
 resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake" {
   for_each = aws_s3_bucket.data_lake
-  
+
   bucket = each.value.id
-  
+
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = var.kms_key_id != null ? "aws:kms" : "AES256"
@@ -220,9 +220,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake" {
 # Block public access
 resource "aws_s3_bucket_public_access_block" "data_lake" {
   for_each = aws_s3_bucket.data_lake
-  
+
   bucket = each.value.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -232,41 +232,41 @@ resource "aws_s3_bucket_public_access_block" "data_lake" {
 # Lifecycle rules para optimización de costos
 resource "aws_s3_bucket_lifecycle_configuration" "data_lake" {
   for_each = var.enable_lifecycle ? aws_s3_bucket.data_lake : {}
-  
+
   bucket = each.value.id
-  
+
   # Rule para bronze (datos crudos)
   rule {
     id     = "bronze-transition"
     status = "Enabled"
-    
+
     filter {
       prefix = "raw/"
     }
-    
+
     transition {
       days          = 90
       storage_class = "STANDARD_IA"
     }
-    
+
     transition {
       days          = 365
       storage_class = "GLACIER"
     }
-    
+
     expiration {
       days = var.bronze_retention_days
     }
   }
-  
+
   # Rule para silver/gold
   dynamic "rule" {
     for_each = each.key == "bronze" ? [] : [1]
-    
+
     content {
       id     = "${each.key}-archive"
       status = "Enabled"
-      
+
       noncurrent_version_expiration {
         noncurrent_days = 30
       }
@@ -281,7 +281,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "data_lake" {
 variable "project_name" {
   description = "Nombre del proyecto"
   type        = string
-  
+
   validation {
     condition     = length(var.project_name) > 3 && length(var.project_name) < 30
     error_message = "Project name debe tener entre 3 y 30 caracteres."
@@ -291,7 +291,7 @@ variable "project_name" {
 variable "environment" {
   description = "Entorno (dev, staging, prod)"
   type        = string
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "Environment debe ser dev, staging o prod."
@@ -369,12 +369,12 @@ Módulo reutilizable para crear un Data Lake con capas bronze/silver/gold.
 \`\`\`hcl
 module "data_lake" {
   source = "../../modules/data/s3-data-lake"
-  
+
   project_name     = "analytics"
   environment      = "prod"
   enable_versioning = true
   enable_lifecycle  = true
-  
+
   tags = {
     CostCenter = "DataEngineering"
     Owner      = "data-team"
@@ -408,10 +408,10 @@ module "data_lake" {
 ```hcl
 terraform {
   required_version = ">= 1.7.0"
-  
+
   # Partial backend config (completado en backend.hcl)
   backend "s3" {}
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -422,7 +422,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = var.project_name
@@ -437,14 +437,14 @@ provider "aws" {
 # Data Lake módulo
 module "data_lake" {
   source = "../../modules/data/s3-data-lake"
-  
+
   project_name          = var.project_name
   environment           = "prod"
   enable_versioning     = true
   enable_lifecycle      = true
   bronze_retention_days = 1095  # 3 años para prod
   kms_key_id           = aws_kms_key.data_lake.arn
-  
+
   tags = {
     Compliance = "GDPR,SOC2"
     Backup     = "enabled"
@@ -456,7 +456,7 @@ resource "aws_kms_key" "data_lake" {
   description             = "KMS key for ${var.project_name} data lake encryption"
   deletion_window_in_days = 30
   enable_key_rotation     = true
-  
+
   tags = {
     Name = "${var.project_name}-datalake-key"
   }
@@ -544,19 +544,19 @@ package test
 
 import (
 	"testing"
-	
+
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDataLakeModule(t *testing.T) {
 	t.Parallel()
-	
+
 	// Configuración del módulo a testear
 	terraformOptions := &terraform.Options{
 		// Path al módulo
 		TerraformDir: "../modules/data/s3-data-lake",
-		
+
 		// Variables para el test
 		Vars: map[string]interface{}{
 			"project_name":     "terratest",
@@ -564,37 +564,37 @@ func TestDataLakeModule(t *testing.T) {
 			"enable_versioning": true,
 			"enable_lifecycle":  false,  // Simplificar para testing
 		},
-		
+
 		// Variables de entorno para AWS (usa LocalStack o cuenta de testing)
 		EnvVars: map[string]string{
 			"AWS_DEFAULT_REGION": "us-east-1",
 		},
 	}
-	
+
 	// Cleanup al final del test
 	defer terraform.Destroy(t, terraformOptions)
-	
+
 	// Init y Apply
 	terraform.InitAndApply(t, terraformOptions)
-	
+
 	// TESTS
-	
+
 	// Test 1: Verificar que se crearon 3 buckets (bronze, silver, gold)
 	bucketNames := terraform.OutputMap(t, terraformOptions, "bucket_names")
 	assert.Equal(t, 3, len(bucketNames), "Should create 3 buckets")
-	
+
 	// Test 2: Verificar que existen las capas esperadas
 	assert.Contains(t, bucketNames, "bronze")
 	assert.Contains(t, bucketNames, "silver")
 	assert.Contains(t, bucketNames, "gold")
-	
+
 	// Test 3: Verificar formato de los nombres
 	for layer, name := range bucketNames {
 		assert.Contains(t, name, "terratest-datalake")
 		assert.Contains(t, name, layer)
 		assert.Contains(t, name, "dev")
 	}
-	
+
 	// Test 4: Verificar que los buckets tienen ARN
 	bucketArns := terraform.OutputMap(t, terraformOptions, "bucket_arns")
 	for layer, arn := range bucketArns {
@@ -632,14 +632,14 @@ package test
 
 import (
 	"testing"
-	
+
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestProjectNameValidation(t *testing.T) {
 	t.Parallel()
-	
+
 	testCases := []struct {
 		name        string
 		projectName string
@@ -650,12 +650,12 @@ func TestProjectNameValidation(t *testing.T) {
 		{"too-long", "this-is-a-very-long-project-name-that-exceeds-limits", true},
 		{"valid-max", "project-name-max-length-ok", false},
 	}
-	
+
 	for _, tc := range testCases {
 		tc := tc  // capture range variable
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			
+
 			terraformOptions := &terraform.Options{
 				TerraformDir: "../modules/data/s3-data-lake",
 				Vars: map[string]interface{}{
@@ -663,11 +663,11 @@ func TestProjectNameValidation(t *testing.T) {
 					"environment":  "dev",
 				},
 			}
-			
+
 			defer terraform.Destroy(t, terraformOptions)
-			
+
 			_, err := terraform.InitAndApplyE(t, terraformOptions)
-			
+
 			if tc.expectError {
 				assert.Error(t, err, "Expected validation error for: %s", tc.projectName)
 			} else {
@@ -709,49 +709,49 @@ jobs:
     strategy:
       matrix:
         environment: [dev, staging, prod]
-    
+
     defaults:
       run:
         working-directory: environments/${{ matrix.environment }}
-    
+
     permissions:
       id-token: write   # For OIDC
       contents: read
       pull-requests: write  # Para comentar en PR
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
+
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check -recursive
         continue-on-error: true
-      
+
       - name: Terraform Init
         id: init
         run: terraform init -backend-config=backend.hcl
-      
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-      
+
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color -out=tfplan
         continue-on-error: true
-      
+
       - name: Comment Plan on PR
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
@@ -760,24 +760,24 @@ jobs:
         with:
           script: |
             const output = `#### Terraform Plan 📝 \`${{ matrix.environment }}\`
-            
+
             <details><summary>Show Plan</summary>
-            
+
             \`\`\`terraform
             ${process.env.PLAN}
             \`\`\`
-            
+
             </details>
-            
+
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             })
-      
+
       - name: Fail if Plan Failed
         if: steps.plan.outcome == 'failure'
         run: exit 1
@@ -817,36 +817,36 @@ jobs:
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'dev' }}
-    
+
     defaults:
       run:
         working-directory: environments/${{ github.event.inputs.environment || 'dev' }}
-    
+
     permissions:
       id-token: write
       contents: read
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
+
       - name: Terraform Init
         run: terraform init -backend-config=backend.hcl
-      
+
       - name: Terraform Apply
         run: terraform apply -auto-approve
-      
+
       - name: Notify Success
         if: success()
         run: |
@@ -880,25 +880,25 @@ repos:
       - id: terraform_fmt
         name: Terraform format
         description: Rewrites all Terraform files to canonical format
-      
+
       - id: terraform_validate
         name: Terraform validate
         description: Validates all Terraform configuration files
-      
+
       - id: terraform_docs
         name: Terraform docs
         description: Inserts input/output documentation into README.md
         args:
           - '--args=--lockfile=false'
-      
+
       - id: terraform_tflint
         name: Terraform lint
         description: Lints Terraform code
-      
+
       - id: terraform_tfsec
         name: Terraform security scan
         description: Static analysis for security issues
-  
+
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -952,7 +952,7 @@ resource "aws_secretsmanager_secret" "db_password" {
   name                    = "${var.project_name}-db-password-prod"
   description             = "Database password for production"
   recovery_window_in_days = 30
-  
+
   tags = {
     Environment = "production"
     Sensitive   = "true"
@@ -966,7 +966,7 @@ resource "aws_secretsmanager_secret_version" "db_password" {
     username = "admin"
     password = random_password.db_password.result
   })
-  
+
   lifecycle {
     ignore_changes = [secret_string]  # Permitir rotación externa
   }

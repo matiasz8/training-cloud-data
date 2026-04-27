@@ -154,6 +154,24 @@ pytest -m integration
 
 ---
 
-**Estado**: ✅ Módulo 100% Completo  
-**Tiempo Estimado**: 25-34 horas  
+**Estado**: ✅ Módulo 100% Completo
+**Tiempo Estimado**: 25-34 horas
 **Próximo Módulo**: [Módulo 11: Infraestructura como Código](../module-11-infrastructure-as-code/README.md)
+
+## Objective
+
+This module focuses on one core concept and its practical implementation path.
+
+## Learning Objectives
+
+- Understand the core concept boundaries for this module.
+- Apply the concept through guided exercises.
+- Validate outcomes using module checks.
+
+## Prerequisites
+
+Review previous dependent modules according to LEARNING-PATH.md before starting.
+
+## Validation
+
+Run the corresponding module validation and confirm expected outputs.

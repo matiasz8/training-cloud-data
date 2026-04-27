@@ -2,7 +2,6 @@
 
 import pytest
 import os
-import json
 
 
 @pytest.fixture(scope="session")
