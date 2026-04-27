@@ -80,7 +80,7 @@
      - module-07-batch-processing
      - module-08-streaming-basics
      - module-09-data-quality
-   - Next: Continue with modules 06-07 in next execution phase
+   - Next: Continue with modules 08-09 in next execution phase
   - Effort: ~6-8h (distributed)
 
 - [ ] **5.3 - Re-validate After Migration**
@@ -193,7 +193,7 @@
 | Phase | Title | Priority | Time | Status | Next Action |
 |-------|-------|----------|------|--------|------------|
 | 4 | Pre-commit & CI | 🔴 HIGH | 4-6h | 🟨 IN PROGRESS (2/3) | Run end-to-end PR flow test (4.3) |
-| 5 | English Migration | 🟡 MED | 8-10h | 🟨 IN PROGRESS (5/9 complete) | Continue with modules 06-07 |
+| 5 | English Migration | 🟡 MED | 8-10h | 🟨 IN PROGRESS (7/9 complete) | Continue with modules 08-09 |
 | 6 | Skills Playbook | 🟡 MED | 6-8h | ⬜ TODO | Draft `SKILLS-PLAYBOOK.md` |
 | 7 | Learner Tracking | 🟢 LOW | 8-12h | ⬜ OPTIONAL | Extend progress.py (nice-to-have) |
 
