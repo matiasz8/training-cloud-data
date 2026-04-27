@@ -34,9 +34,9 @@
 - Event sourcing: Chapter 11
 - CAP theorem: Chapter 9
 
-**Level**: Advanced (requires CS fundamentals)  
-**Time**: 40-60 hours  
-**Price**: $40 (Kindle), $60 (paperback)  
+**Level**: Advanced (requires CS fundamentals)
+**Time**: 40-60 hours
+**Price**: $40 (Kindle), $60 (paperback)
 **Link**: https://dataintensive.net/
 
 ### 2. **Data Mesh** (Zhamak Dehghani, 2022)
@@ -58,9 +58,9 @@
 - Governance models: All exercises
 - Organizational challenges
 
-**Level**: Intermediate (less technical, more organizational)  
-**Time**: 20-30 hours  
-**Price**: $35 (Kindle), $50 (paperback)  
+**Level**: Intermediate (less technical, more organizational)
+**Time**: 20-30 hours
+**Price**: $35 (Kindle), $50 (paperback)
 **Link**: https://martinfowler.com/books/data-mesh.html
 
 ### 3. **Building Microservices** (Sam Newman, 2021 - 2nd Edition)
@@ -79,9 +79,9 @@
 - Polyglot persistence: Exercise 06
 - Resilience: All exercises
 
-**Level**: Intermediate  
-**Time**: 30-40 hours  
-**Price**: $40 (Kindle)  
+**Level**: Intermediate
+**Time**: 30-40 hours
+**Price**: $40 (Kindle)
 **Link**: https://samnewman.io/books/building_microservices_2nd_edition/
 
 ### 4. **Streaming Systems** (Tyler Akidau et al., 2018)
@@ -99,9 +99,9 @@
 - Kappa architecture: Chapter 9
 - Stream processing: Exercises 01-02
 
-**Level**: Advanced  
-**Time**: 40 hours  
-**Price**: $50  
+**Level**: Advanced
+**Time**: 40 hours
+**Price**: $50
 **Link**: https://www.oreilly.com/library/view/streaming-systems/9781491983867/
 
 ### 5. **Big Data** (Nathan Marz, 2015)
@@ -118,9 +118,9 @@
 - Lambda architecture: Exercise 01
 - Batch processing patterns
 
-**Level**: Intermediate  
-**Time**: 20 hours  
-**Price**: $35  
+**Level**: Intermediate
+**Time**: 20 hours
+**Price**: $35
 **Link**: https://www.manning.com/books/big-data
 
 ---
@@ -167,7 +167,7 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.
 - Streams (CDC pattern)
 - DynamoDB Accelerator (DAX) for caching
 
-**Time**: 4 hours  
+**Time**: 4 hours
 **Relevance**: Exercises 03-05
 
 #### **Kinesis Best Practices**
@@ -179,7 +179,7 @@ https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html
 - Record aggregation (reduce costs)
 - Enhanced fan-out (2 MB/sec per consumer)
 
-**Time**: 3 hours  
+**Time**: 3 hours
 **Relevance**: Exercises 01-02, 04-05
 
 #### **Redshift Best Practices**
@@ -192,7 +192,7 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 - Vacuum & Analyze (maintain performance)
 - Workload Management (WLM) queues
 
-**Time**: 5 hours  
+**Time**: 5 hours
 **Relevance**: Exercise 06, Lambda serving layer
 
 ---
@@ -211,7 +211,7 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 - Module 5: Scalability (auto-scaling, caching)
 - Module 6: High availability (multi-region, disaster recovery)
 
-**Cost**: $600 (instructor-led), Free (self-paced)  
+**Cost**: $600 (instructor-led), Free (self-paced)
 **Certification Prep**: Solutions Architect Professional
 
 ### 2. **Coursera**: Data Engineering on Google Cloud (specialization)
@@ -227,7 +227,7 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 4. Building Resilient Streaming Analytics Systems on GCP
 5. Smart Analytics, Machine Learning, and AI on GCP
 
-**Cost**: $49/month (Coursera Plus), Free (audit mode)  
+**Cost**: $49/month (Coursera Plus), Free (audit mode)
 **Certification**: Google Professional Data Engineer
 
 ### 3. **A Cloud Guru**: AWS Certified Solutions Architect Professional
@@ -241,7 +241,7 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 - High availability (Route 53, multi-region)
 - Cost optimization
 
-**Cost**: $49/month  
+**Cost**: $49/month
 **Certification Prep**: SA Pro (most difficult AWS cert)
 
 ---
@@ -307,7 +307,7 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 - Quorum reads/writes (N, R, W)
 - Gossip protocol
 
-**Reading Time**: 2 hours (16 pages, dense)  
+**Reading Time**: 2 hours (16 pages, dense)
 **Level**: PhD-level distributed systems
 
 ---
@@ -316,36 +316,36 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 ### AWS Blogs
 
-1. **AWS Big Data Blog**  
-   https://aws.amazon.com/blogs/big-data/  
-   **Topics**: Glue, EMR, Kinesis, Redshift  
-   **Frequency**: 3-4 articles/week  
+1. **AWS Big Data Blog**
+   https://aws.amazon.com/blogs/big-data/
+   **Topics**: Glue, EMR, Kinesis, Redshift
+   **Frequency**: 3-4 articles/week
    **Subscription**: RSS feed available
 
-2. **AWS Database Blog**  
-   https://aws.amazon.com/blogs/database/  
-   **Topics**: Aurora, DynamoDB, migration patterns  
+2. **AWS Database Blog**
+   https://aws.amazon.com/blogs/database/
+   **Topics**: Aurora, DynamoDB, migration patterns
    **Relevance**: Exercise 05-06
 
-3. **AWS Architecture Blog**  
-   https://aws.amazon.com/blogs/architecture/  
-   **Topics**: Reference architectures, case studies  
+3. **AWS Architecture Blog**
+   https://aws.amazon.com/blogs/architecture/
+   **Topics**: Reference architectures, case studies
    **Recommended**: "Multi-Region Application Architecture" series
 
 ### Personal Blogs
 
-1. **Martin Kleppmann** (Author of DDIA)  
-   https://martin.kleppmann.com/  
+1. **Martin Kleppmann** (Author of DDIA)
+   https://martin.kleppmann.com/
    **Deep Dives**: CRDTs, event sourcing, distributed transactions
 
-2. **High Scalability**  
-   http://highscalability.com/  
-   **Topics**: Case studies (Netflix, Uber, Airbnb scale)  
+2. **High Scalability**
+   http://highscalability.com/
+   **Topics**: Case studies (Netflix, Uber, Airbnb scale)
    **Format**: "X is Y" (e.g., "How Instagram scaled to 14M users with only 3 engineers")
 
-3. **Netflix Tech Blog**  
-   https://netflixtechblog.com/  
-   **Topics**: Cassandra, microservices, chaos engineering  
+3. **Netflix Tech Blog**
+   https://netflixtechblog.com/
+   **Topics**: Cassandra, microservices, chaos engineering
    **Recommended**: "Streaming data platform" series
 
 ---
@@ -358,19 +358,19 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 **Recommended Sessions**:
 
-1. **DAT401: Amazon DynamoDB Deep Dive** (2023)  
+1. **DAT401: Amazon DynamoDB Deep Dive** (2023)
    - Global tables architecture
    - Conflict resolution strategies
    - Performance optimization
    **Time**: 60 minutes
 
-2. **ANT346: Advanced Architectures for Multi-Region Applications** (2022)  
+2. **ANT346: Advanced Architectures for Multi-Region Applications** (2022)
    - Route 53 routing policies
    - Aurora global database
    - Cross-region disaster recovery
    **Time**: 60 minutes
 
-3. **DAT323: Building Streaming Data Platforms with Kappa Architecture** (2021)  
+3. **DAT323: Building Streaming Data Platforms with Kappa Architecture** (2021)
    - Kinesis vs MSK comparison
    - Flink on Kinesis Analytics
    - Reprocessing patterns
@@ -378,12 +378,12 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 ### Tech Company Engineering Blogs
 
-1. **Uber Engineering**  
-   https://www.youtube.com/@UberEngineering  
+1. **Uber Engineering**
+   https://www.youtube.com/@UberEngineering
    **Topics**: Data platform evolution, Kafka at scale
 
-2. **Netflix Engineering**  
-   https://www.youtube.com/c/NetflixOpenSource  
+2. **Netflix Engineering**
+   https://www.youtube.com/c/NetflixOpenSource
    **Topics**: Microservices, chaos engineering, data platform
 
 ---
@@ -392,32 +392,32 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 ### Forums
 
-1. **AWS re:Post**  
-   https://repost.aws/  
-   **Description**: Official AWS Q&A (replaced forums)  
-   **Activity**: 1,000+ questions/day  
+1. **AWS re:Post**
+   https://repost.aws/
+   **Description**: Official AWS Q&A (replaced forums)
+   **Activity**: 1,000+ questions/day
    **Response Time**: <24 hours for most questions
 
-2. **Stack Overflow**  
-   https://stackoverflow.com/questions/tagged/amazon-web-services  
-   **Tags**: `amazon-dynamodb`, `amazon-kinesis`, `aws-lambda`, `apache-spark`  
+2. **Stack Overflow**
+   https://stackoverflow.com/questions/tagged/amazon-web-services
+   **Tags**: `amazon-dynamodb`, `amazon-kinesis`, `aws-lambda`, `apache-spark`
    **Questions**: 400K+ AWS-related
 
-3. **Reddit**  
+3. **Reddit**
    - r/aws (300K members)
    - r/dataengineering (180K members)
    - r/bigdata (50K members)
 
 ### Slack/Discord Communities
 
-1. **Data Engineering Discord**  
-   https://discord.gg/dataengineering  
-   **Members**: 10K+  
+1. **Data Engineering Discord**
+   https://discord.gg/dataengineering
+   **Members**: 10K+
    **Channels**: #architecture, #aws, #streaming, #lakehouse
 
-2. **Locally Optimistic (Data Slack)**  
-   http://locallyoptimistic.com/community/  
-   **Members**: 8K+ data professionals  
+2. **Locally Optimistic (Data Slack)**
+   http://locallyoptimistic.com/community/
+   **Members**: 8K+ data professionals
    **Channels**: Technical discussions, career advice
 
 ---
@@ -428,25 +428,25 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 #### **AWS Certified Solutions Architect – Professional**
 
-**Exam Code**: SAP-C02  
-**Cost**: $300  
-**Duration**: 180 minutes  
-**Questions**: 75 (scenario-based, complex)  
+**Exam Code**: SAP-C02
+**Cost**: $300
+**Duration**: 180 minutes
+**Questions**: 75 (scenario-based, complex)
 **Passing Score**: 750/1000
 
 **Domains**:
 1. Design for Organizational Complexity (26%)
    - Multi-account strategies
    - Hybrid architectures
-   
+
 2. Design for New Solutions (29%)
    - Architecture patterns ← **This Module**
    - Database selection
-   
+
 3. Continuous Improvement (25%)
    - Migration strategies
    - Performance optimization
-   
+
 4. Accelerate Workload Migration (20%)
    - Data migration (DMS, Snowball)
 
@@ -464,25 +464,25 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 #### **AWS Certified Data Engineer – Associate**
 
-**Exam Code**: DEA-C01 (NEW - released November 2023)  
-**Cost**: $150  
-**Duration**: 170 minutes  
-**Questions**: 85  
+**Exam Code**: DEA-C01 (NEW - released November 2023)
+**Cost**: $150
+**Duration**: 170 minutes
+**Questions**: 85
 **Passing Score**: 720/1000
 
 **Domains**:
 1. Data Ingestion and Transformation (34%)
    - Kinesis, Glue, EMR
    - Batch vs streaming
-   
+
 2. Data Store Management (26%)
    - S3, DynamoDB, Redshift, Athena
    - Partitioning, optimization
-   
+
 3. Data Operations and Support (22%)
    - Monitoring, troubleshooting
    - Security, compliance
-   
+
 4. Data Security and Governance (18%)
    - Encryption, Lake Formation
    - Data quality, lineage
@@ -504,25 +504,25 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 
 ### AWS Workshops
 
-1. **Serverless Data Lake Workshop**  
-   https://catalog.workshops.aws/serverless-data-lake/en-US  
-   **Time**: 4 hours  
-   **Topics**: S3, Glue, Athena, QuickSight  
-   **Cost**: Free (AWS Free Tier)  
+1. **Serverless Data Lake Workshop**
+   https://catalog.workshops.aws/serverless-data-lake/en-US
+   **Time**: 4 hours
+   **Topics**: S3, Glue, Athena, QuickSight
+   **Cost**: Free (AWS Free Tier)
    **Relevance**: Lambda batch layer
 
-2. **Streaming Data Workshop**  
-   https://catalog.workshops.aws/real-time-streaming/en-US  
-   **Time**: 3 hours  
-   **Topics**: Kinesis, Flink, Lambda  
-   **Cost**: ~$10 (past Free Tier)  
+2. **Streaming Data Workshop**
+   https://catalog.workshops.aws/real-time-streaming/en-US
+   **Time**: 3 hours
+   **Topics**: Kinesis, Flink, Lambda
+   **Cost**: ~$10 (past Free Tier)
    **Relevance**: Kappa architecture, speed layer
 
-3. **Multi-Region Workshop**  
-   https://disaster-recovery.workshop.aws/  
-   **Time**: 5 hours  
-   **Topics**: Aurora global, Route 53, active-active  
-   **Cost**: ~$20  
+3. **Multi-Region Workshop**
+   https://disaster-recovery.workshop.aws/
+   **Time**: 5 hours
+   **Topics**: Aurora global, Route 53, active-active
+   **Cost**: ~$20
    **Relevance**: Exercise 05
 
 ### Qwiklabs (Hands-on Labs)
@@ -534,7 +534,7 @@ https://docs.aws.amazon.com/redshift/latest/dg/best-practices.html
 2. **Serverless Architecture on AWS** (8 labs, 10 hours)
 3. **Advanced Solutions Architect** (12 labs, 16 hours)
 
-**Cost**: $55/month (unlimited labs)  
+**Cost**: $55/month (unlimited labs)
 **Benefit**: Real AWS environment (no credit card needed)
 
 ---
@@ -859,7 +859,7 @@ Shift from managed systems → serverless:
 - **From**: RDS (patch OS) → **To**: Aurora Serverless v2 (auto-scale)
 - **From**: OpenSearch (size cluster) → **To**: OpenSearch Serverless
 
-**Benefits**: Pay-per-use, zero management, auto-scaling  
+**Benefits**: Pay-per-use, zero management, auto-scaling
 **Trade-off**: Less control (can't tune deep settings)
 
 ### 5. **AI/ML Integration**

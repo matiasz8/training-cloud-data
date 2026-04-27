@@ -14,7 +14,7 @@
 # - IAM roles and policies
 # - EventBridge event bus
 #
-# Usage: 
+# Usage:
 #   ./infrastructure/init-aws.sh [--env localstack|aws] [--region us-east-1]
 ###############################################################################
 
@@ -210,7 +210,7 @@ $AWS_CMD events create-event-bus \
 
 if [ "$ENVIRONMENT" = "aws" ]; then
     log_info "Creating IAM roles..."
-    
+
     # Lambda execution role
     LAMBDA_TRUST_POLICY=$(cat <<EOF
 {
@@ -227,23 +227,23 @@ if [ "$ENVIRONMENT" = "aws" ]; then
 }
 EOF
 )
-    
+
     aws iam create-role \
         --role-name AdvancedArchLambdaRole \
         --assume-role-policy-document "$LAMBDA_TRUST_POLICY" \
         2>/dev/null && log_success "Created role: AdvancedArchLambdaRole" || log_info "Role exists: AdvancedArchLambdaRole"
-    
+
     # Attach policies
     aws iam attach-role-policy \
         --role-name AdvancedArchLambdaRole \
         --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaKinesisExecutionRole \
         2>/dev/null
-    
+
     aws iam attach-role-policy \
         --role-name AdvancedArchLambdaRole \
         --policy-arn arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess \
         2>/dev/null
-    
+
     log_success "Attached policies to Lambda role"
 fi
 

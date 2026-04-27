@@ -67,7 +67,7 @@ def place_order(order):
     shipping.create(order.address)      # Coupling #3
     notification.send_email(order.user) # Coupling #4
     analytics.track(order)              # Coupling #5
-    
+
     # If any service is down, entire order fails
     # If add new service (fraud detection), must modify this code
 ```
@@ -150,7 +150,7 @@ WHERE year=2026 AND month=03 AND day=01
 def process_order(order):
     order_id = generate_uuid()  # Different ID on retry!
     db.insert(order_id, order)
-    
+
 # Result: Retries create duplicate orders
 ```
 
@@ -208,14 +208,14 @@ class CircuitBreaker:
         self.timeout = timeout
         self.last_failure_time = None
         self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
-    
+
     def call(self, func, *args, **kwargs):
         if self.state == 'OPEN':
             if time.time() - self.last_failure_time > self.timeout:
                 self.state = 'HALF_OPEN'  # Try again
             else:
                 raise CircuitBreakerOpenError("Circuit breaker open")
-        
+
         try:
             result = func(*args, **kwargs)
             self.on_success()
@@ -223,11 +223,11 @@ class CircuitBreaker:
         except Exception as e:
             self.on_failure()
             raise
-    
+
     def on_success(self):
         self.failure_count = 0
         self.state = 'CLOSED'
-    
+
     def on_failure(self):
         self.failure_count += 1
         self.last_failure_time = time.time()
@@ -260,7 +260,7 @@ Order Service → calls → Inventory Service (sync HTTP)
               → calls → Payment Service (sync HTTP)
               → calls → Shipping Service (sync HTTP)
 
-Result: 
+Result:
 - All services must be up (no resilience)
 - Slow (sequential calls: 50ms + 50ms + 50ms = 150ms)
 - Changes require coordinated deploys
@@ -430,7 +430,7 @@ kinesis.create_event_source_mapping(
 }
 ```
 
-✅ **Old reader reads v2 data**: Works (ignores "phone")  
+✅ **Old reader reads v2 data**: Works (ignores "phone")
 ✅ **New reader reads v1 data**: Works (uses default for "phone")
 
 #### **Forward Compatible** (Remove Fields with Defaults)
@@ -518,7 +518,7 @@ s3://data-lake/orders/
   region=eu/date=2026-03-09/hour=10/data.parquet
 
 # Query: Orders from EU today
-SELECT * FROM orders 
+SELECT * FROM orders
 WHERE region='eu' AND date='2026-03-09'
 # Scans only EU partition (50% reduction)
 ```
@@ -527,7 +527,7 @@ WHERE region='eu' AND date='2026-03-09'
 ```
 ❌ Too granular: year/month/day/hour/minute/second
    (10M partitions, slow to list)
-   
+
 ✅ Right balance: year/month/day or date/hour
    (~1,000 partitions, fast queries)
 ```
@@ -536,11 +536,11 @@ WHERE region='eu' AND date='2026-03-09'
 
 #### **Events Should Be**:
 
-✅ **Immutable**: Never modify published events  
-✅ **Self-Contained**: All context needed to process  
-✅ **Versioned**: Schema version in event  
-✅ **Timestamped**: Include event_time and ingestion_time  
-✅ **Idempotent**: Include unique event_id for deduplication  
+✅ **Immutable**: Never modify published events
+✅ **Self-Contained**: All context needed to process
+✅ **Versioned**: Schema version in event
+✅ **Timestamped**: Include event_time and ingestion_time
+✅ **Idempotent**: Include unique event_id for deduplication
 
 **Example Event**:
 
@@ -657,10 +657,10 @@ lambda_function.update_function_configuration(
 def handle_failed_events(event):
     # Log to CloudWatch
     logger.error(f"Failed event: {event}")
-    
+
     # Send to manual review
     send_alert(f"Manual review needed: {event['event_id']}")
-    
+
     # Optional: Retry with different strategy
     reprocess_with_fallback(event)
 ```
@@ -678,7 +678,7 @@ def get_product_recommendations(user_id):
         # Fallback: Popular products (fast, simple)
         recommendations = get_popular_products()
         logger.warning(f"ML service unavailable, using fallback")
-    
+
     return recommendations
 
 # Result: Users still get recommendations (even if not personalized)
@@ -845,14 +845,14 @@ def place_order(order):
     # Trace external calls
     with xray_recorder.capture('check_inventory'):
         inventory_api.check(order['items'])
-    
+
     with xray_recorder.capture('process_payment'):
         payment_api.charge(order['amount'])
-    
+
     with xray_recorder.capture('create_shipment'):
         shipping_api.create(order['address'])
 
-# X-Ray shows: 
+# X-Ray shows:
 # - place_order: 850ms
 #   - check_inventory: 300ms ← Bottleneck found!
 #   - process_payment: 200ms
@@ -1012,11 +1012,11 @@ s3.put_bucket_lifecycle_configuration(
 1. Encryption at Rest (S3, EBS, RDS)
    - S3: AES-256 (SSE-S3 or SSE-KMS)
    - RDS: Transparent Data Encryption (TDE)
-   
+
 2. Encryption in Transit (TLS 1.2+)
    - HTTPS for all API calls
    - SSL for database connections
-   
+
 3. Encryption in Use (Future: AWS Nitro Enclaves)
    - Process data in secure enclave
 ```
@@ -1156,14 +1156,14 @@ def test_place_order():
         KeySchema=[{'AttributeName': 'order_id', 'KeyType': 'HASH'}],
         AttributeDefinitions=[{'AttributeName': 'order_id', 'AttributeType': 'S'}]
     )
-    
+
     # Test function
     order_service = OrderService(dynamodb_table=table)
     result = order_service.place_order({
         'user_id': 'user_123',
         'items': [{'product_id': 'prod_456', 'quantity': 2}]
     })
-    
+
     # Assert
     assert result['status'] == 'success'
     assert table.item_count == 1
@@ -1179,18 +1179,18 @@ def test_end_to_end_order_flow():
         'user_id': 'test-user',
         'items': [{'product_id': 'test-product', 'quantity': 1}]
     })
-    
+
     # Wait for async processing
     time.sleep(5)
-    
+
     # Verify: Inventory decremented
     inventory = inventory_api.get(product_id='test-product')
     assert inventory['quantity'] == initial_quantity - 1
-    
+
     # Verify: Payment processed
     payment = payment_api.get(order_id=order['order_id'])
     assert payment['status'] == 'completed'
-    
+
     # Cleanup
     cleanup_test_data(order['order_id'])
 ```
@@ -1203,16 +1203,16 @@ def test_end_to_end_order_flow():
 def test_dynamodb_failure_resilience():
     # Inject failure (block DynamoDB traffic)
     chaos.block_service('dynamodb.amazonaws.com')
-    
+
     try:
         # Attempt order placement
         response = place_order({'user_id': 'user_123'})
-        
+
         # Should fail gracefully (not crash)
         assert response['status'] == 'error'
         assert response['message'] == 'Service temporarily unavailable'
         assert 'retry_after' in response
-        
+
     finally:
         chaos.restore_service('dynamodb.amazonaws.com')
 ```
@@ -1271,7 +1271,7 @@ def save_order(order):
         "INSERT INTO orders (order_id, data) VALUES (%s, %s)",
         (order['order_id'], json.dumps(order))
     )
-    
+
     # Write to DynamoDB (new)
     try:
         dynamodb.put_item(
@@ -1292,12 +1292,12 @@ def backfill_dynamodb():
         )
         if not orders:
             break
-        
+
         # Write to DynamoDB
         with dynamodb_table.batch_writer() as batch:
             for order in orders:
                 batch.put_item(Item=order)
-        
+
         offset += batch_size
 ```
 
@@ -1407,28 +1407,28 @@ def process_order_with_saga(order):
     try:
         # Step 1: Reserve inventory
         reservation_id = inventory.reserve(order['items'])
-        
+
         try:
             # Step 2: Process payment
             payment_id = payment.charge(order['amount'])
-            
+
             try:
                 # Step 3: Create shipment
                 shipment_id = shipping.create(order)
-                
+
                 # All succeeded!
                 return {'status': 'success'}
-                
+
             except ShippingError:
                 # Compensate: Refund payment
                 payment.refund(payment_id)
                 raise
-                
+
         except PaymentError:
             # Compensate: Release inventory
             inventory.release(reservation_id)
             raise
-            
+
     except InventoryError:
         # First step failed, nothing to compensate
         raise
@@ -1453,12 +1453,12 @@ import great_expectations as ge
 def calculate_revenue(orders_df):
     # Wrap in GE DataFrame
     df = ge.dataset.PandasDataset(orders_df)
-    
+
     # Validate expectations
     assert df.expect_column_values_to_not_be_null('amount').success
     assert df.expect_column_values_to_be_between('amount', 0, 1000000).success
     assert df.expect_column_values_to_be_of_type('amount', 'float64').success
-    
+
     # Now safe to calculate
     return df['amount'].sum()
 ```

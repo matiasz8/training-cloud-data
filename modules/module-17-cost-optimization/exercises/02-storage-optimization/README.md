@@ -1,7 +1,7 @@
 # Exercise 02: S3 Storage Cost Optimization
 
-⏱️ **Estimated Time:** 2.5 hours  
-🎯 **Difficulty:** ⭐⭐⭐ Intermediate  
+⏱️ **Estimated Time:** 2.5 hours
+🎯 **Difficulty:** ⭐⭐⭐ Intermediate
 💰 **Potential Savings:** 40-70% on S3 storage costs
 
 ## Learning Objectives
@@ -39,7 +39,7 @@
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │      S3 Intelligent-Tiering (automatic)             │   │
 │  │  Monitors access → Moves between tiers automatically│   │
-│  │  $0.023 Frequent + $0.0125 Infrequent + $0.004 Archive│  
+│  │  $0.023 Frequent + $0.0125 Infrequent + $0.004 Archive│
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -121,14 +121,14 @@ def analyze_bucket_storage(bucket_name):
         Period=86400,  # 1 day
         Statistics=['Average']
     )
-    
+
     if response['Datapoints']:
         size_bytes = response['Datapoints'][0]['Average']
         size_gb = size_bytes / (1024**3)
-        
+
         # Calculate monthly cost (Standard class: $0.023/GB)
         monthly_cost = size_gb * 0.023
-        
+
         return {
             'bucket': bucket_name,
             'size_gb': size_gb,
@@ -144,7 +144,7 @@ print("\n📦 S3 Storage Analysis:\n")
 for bucket in buckets:
     bucket_name = bucket['Name']
     analysis = analyze_bucket_storage(bucket_name)
-    
+
     if analysis:
         storage_analysis.append(analysis)
         print(f"  {bucket_name}:")
@@ -248,10 +248,10 @@ def calculate_lifecycle_savings(size_gb, days_standard, days_ia, days_glacier, d
     ia = 0.0125
     glacier_ir = 0.004
     deep_archive = 0.00099
-    
+
     # Current cost (all in Standard)
     current_cost = size_gb * standard
-    
+
     # Optimized cost (lifecycle transitions)
     days_total = days_standard + days_ia + days_glacier + days_deep
     optimized_cost = (
@@ -260,10 +260,10 @@ def calculate_lifecycle_savings(size_gb, days_standard, days_ia, days_glacier, d
         size_gb * glacier_ir * (days_glacier / days_total) +
         size_gb * deep_archive * (days_deep / days_total)
     )
-    
+
     savings = current_cost - optimized_cost
     savings_pct = (savings / current_cost) * 100
-    
+
     return current_cost, optimized_cost, savings, savings_pct
 
 # Example: 1000 GB with lifecycle policy
@@ -360,14 +360,14 @@ def query_athena(query, database='default'):
         QueryExecutionContext={'Database': database},
         ResultConfiguration={'OutputLocation': 's3://athena-results/'}
     )
-    
+
     query_id = response['QueryExecutionId']
-    
+
     # Wait for completion
     while True:
         execution = athena.get_query_execution(QueryExecutionId=query_id)
         state = execution['QueryExecution']['Status']['State']
-        
+
         if state == 'SUCCEEDED':
             stats = execution['QueryExecution']['Statistics']
             return {
@@ -377,7 +377,7 @@ def query_athena(query, database='default'):
             }
         elif state in ['FAILED', 'CANCELLED']:
             raise Exception(f"Query failed: {execution['QueryExecution']['Status'].get('StateChangeReason', '')}")
-        
+
         time.sleep(1)
 
 # Compare CSV vs Parquet query costs
@@ -424,7 +424,7 @@ from dateutil import parser
 def analyze_access_patterns(bucket_name):
     """Analyze S3 access logs to determine object access frequency"""
     s3 = boto3.client('s3')
-    
+
     # Enable S3 access logging first
     s3.put_bucket_logging(
         Bucket=bucket_name,
@@ -435,19 +435,19 @@ def analyze_access_patterns(bucket_name):
             }
         }
     )
-    
+
     # Analyze access patterns (simplified - would parse actual logs)
     access_counts = defaultdict(int)
     last_access = {}
-    
+
     # Example: Simulate access pattern analysis
     objects = s3.list_objects_v2(Bucket=bucket_name)
-    
+
     for obj in objects.get('Contents', []):
         key = obj['Key']
         last_modified = obj['LastModified']
         days_since_modified = (datetime.now(timezone.utc) - last_modified).days
-        
+
         # Categorize by age
         if days_since_modified < 30:
             category = 'Hot Data (< 30 days)'
@@ -457,9 +457,9 @@ def analyze_access_patterns(bucket_name):
             category = 'Cool Data (90-180 days)'
         else:
             category = 'Cold Data (> 180 days)'
-        
+
         access_counts[category] += 1
-    
+
     return access_counts
 
 # Analyze
@@ -534,24 +534,24 @@ def project_lifecycle_savings(current_storage_gb, rules):
     warm_pct = 0.3  # 30% accessed 30-90 days ago
     cool_pct = 0.3  # 30% accessed 90-180 days ago
     cold_pct = 0.2  # 20% accessed > 180 days ago
-    
+
     # Standard: $0.023/GB
-    # IA: $0.0125/GB  
+    # IA: $0.0125/GB
     # Glacier IR: $0.004/GB
     # Deep Archive: $0.00099/GB
-    
+
     current_cost = current_storage_gb * 0.023
-    
+
     optimized_cost = (
         current_storage_gb * hot_pct * 0.023 +      # Hot stays in Standard
         current_storage_gb * warm_pct * 0.0125 +    # Warm → IA
         current_storage_gb * cool_pct * 0.004 +     # Cool → Glacier IR
         current_storage_gb * cold_pct * 0.00099     # Cold → Deep Archive
     )
-    
+
     savings = current_cost - optimized_cost
     savings_pct = (savings / current_cost) * 100
-    
+
     return current_cost, optimized_cost, savings, savings_pct
 
 # Project savings for your data lake
@@ -628,10 +628,10 @@ print("\n  Monitoring fee: $0.0025 per 1000 objects (small price for auto-optimi
 
 ## Key Learnings
 
-✅ **Storage Classes**: 95% cost reduction possible (Standard → Deep Archive)  
-✅ **Lifecycle Policies**: Automate transitions, eliminate manual management  
-✅ **Intelligent-Tiering**: Best for unknown patterns, automatic optimization  
-✅ **Parquet + Compression**: 80-90% reduction vs CSV, faster queries  
+✅ **Storage Classes**: 95% cost reduction possible (Standard → Deep Archive)
+✅ **Lifecycle Policies**: Automate transitions, eliminate manual management
+✅ **Intelligent-Tiering**: Best for unknown patterns, automatic optimization
+✅ **Parquet + Compression**: 80-90% reduction vs CSV, faster queries
 ✅ **Cost Allocation**: Tagging enables showback/chargeback
 
 ## Real-World Impact

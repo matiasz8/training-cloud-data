@@ -4,8 +4,8 @@
 
 Master data security, encryption, access control, compliance frameworks, and governance in AWS. Learn to implement defense-in-depth strategies, data protection mechanisms, audit trails, and meet regulatory requirements (GDPR, HIPAA, SOC 2, PCI-DSS).
 
-**Duration**: 16-18 hours  
-**Difficulty**: ⭐⭐⭐⭐ Expert  
+**Duration**: 16-18 hours
+**Difficulty**: ⭐⭐⭐⭐ Expert
 **Prerequisites**: Modules 02 (Storage), 05 (Data Lakehouse), 14 (Data Catalog)
 
 ## Learning Objectives

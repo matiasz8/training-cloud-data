@@ -61,11 +61,11 @@
 Raw Storage:
   - S3 (Standard tier): Unlimited scale, $0.023/GB-month
   - Format: Parquet with Snappy compression (5x smaller than JSON)
-  
+
 Processing:
   - AWS Glue: Serverless Spark ($0.44/DPU-hour)
   - EMR: Managed Hadoop/Spark (from $0.096/hour for m5.xlarge)
-  
+
 Serving:
   - Redshift: Data warehouse (from $0.25/hour for dc2.large)
   - S3 + Athena: Query in place ($5/TB scanned)
@@ -77,11 +77,11 @@ Serving:
 Ingestion:
   - Kinesis Data Streams: $0.015/shard-hour + $0.014/GB ingested
   - MSK (Kafka): From $0.21/broker-hour
-  
+
 Processing:
   - Lambda: Serverless functions ($0.20/1M requests)
   - Kinesis Data Analytics (Flink): $0.11/KPU-hour
-  
+
 Storage:
   - DynamoDB: $0.25/GB-month + $0.25/WCU per hour
   - ElastiCache: From $0.017/hour (cache.t3.micro)
@@ -121,11 +121,11 @@ Result: Real-time (last 5 seconds)
 **Serving Layer** (Unified Query):
 ```sql
 -- Merge batch + real-time
-SELECT 
+SELECT
     c.customer_id,
     c.lifetime_value_batch,  -- From Redshift (accurate, yesterday)
     r.revenue_today           -- From DynamoDB (real-time, today)
-FROM 
+FROM
     redshift.customers c
     LEFT JOIN dynamodb.realtime_revenue r ON c.customer_id = r.customer_id
 ```
@@ -264,15 +264,15 @@ Materialized Views:
 
 # Flink SQL (Kinesis Analytics)
 CREATE VIEW device_metrics AS
-SELECT 
+SELECT
     device_id,
     AVG(temperature) as avg_temp,
     MAX(temperature) as max_temp,
     COUNT(*) as reading_count,
     TUMBLE_START(event_time, INTERVAL '1' MINUTE) as window_start
 FROM devices_stream
-GROUP BY 
-    device_id, 
+GROUP BY
+    device_id,
     TUMBLE(event_time, INTERVAL '1' MINUTE);
 
 # Alert on anomalies
@@ -465,16 +465,16 @@ Data Standards:
   naming_convention: snake_case
   required_fields: [created_at, updated_at, domain, version]
   timestamp_format: ISO 8601 (UTC)
-  
+
 Schema Evolution:
   compatibility: BACKWARD  # Old readers work with new schema
   breaking_changes: Require major version bump
-  
+
 Security:
   encryption: AES-256 (rest + transit)
   access_control: Lake Formation (column-level)
   pii_handling: Tokenization mandatory
-  
+
 Quality:
   completeness: >95%
   freshness: Domain-specific SLA
@@ -488,11 +488,11 @@ Technology Choice:
   storage: S3, DynamoDB, Redshift (any)
   processing: Glue, EMR, Lambda (any)
   format: Parquet, Avro, JSON (must document)
-  
+
 Update Frequency:
   batch: Daily, hourly (domain decides)
   streaming: Real-time, near-real-time
-  
+
 Query Interface:
   api_type: REST, GraphQL, SQL (domain decides)
 ```
@@ -511,7 +511,7 @@ Query Interface:
 
 ```sql
 -- Analytics team queries multiple domains
-SELECT 
+SELECT
     r.trip_id,
     r.fare_amount,        -- From Rides domain
     p.payment_method,     -- From Payments domain
@@ -834,7 +834,7 @@ if not check_region_health('us-east-1'):
         GlobalClusterIdentifier='global-db',
         TargetDbClusterIdentifier='eu-cluster'
     )
-    
+
     # Update Route 53 (remove us-east-1)
     route53.change_resource_record_sets(
         HostedZoneId=zone_id,
@@ -845,7 +845,7 @@ if not check_region_health('us-east-1'):
             }]
         }
     )
-    
+
     # Alert team
     sns.publish(
         TopicArn=alert_topic,
@@ -975,7 +975,7 @@ return product
 
 ```sql
 -- Efficient columnar scan (only reads 3 columns)
-SELECT 
+SELECT
     DATE_TRUNC('month', order_date) as month,
     SUM(amount) as total_revenue,
     COUNT(DISTINCT customer_id) as unique_customers

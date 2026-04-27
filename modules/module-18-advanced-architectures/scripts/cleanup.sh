@@ -11,7 +11,7 @@
 # - Cleans up data directories
 # - Removes temporary files
 #
-# Usage: 
+# Usage:
 #   ./scripts/cleanup.sh [--keep-data] [--env localstack|aws]
 ###############################################################################
 
@@ -97,47 +97,47 @@ fi
 
 if [ "$ENVIRONMENT" = "localstack" ]; then
     log_info "Cleaning LocalStack resources..."
-    
+
     AWS_CMD="aws --endpoint-url=http://localhost:4566 --region=us-east-1"
-    
+
     # Note: When LocalStack container is stopped, resources are automatically cleaned
     log_success "LocalStack resources cleaned (container stopped)"
-    
+
 elif [ "$ENVIRONMENT" = "aws" ]; then
     log_warning "Cleaning AWS resources..."
-    
+
     read -p "Delete AWS resources? This costs money! (yes/no): " -r
     echo
     if [[ $REPLY =~ ^[Yy]es$ ]]; then
-        
+
         # Delete S3 buckets
         log_info "Deleting S3 buckets..."
         for bucket in advanced-arch-raw advanced-arch-processed advanced-arch-curated advanced-arch-batch-views advanced-arch-stream-checkpoints; do
             aws s3 rb "s3://$bucket" --force 2>/dev/null && log_success "Deleted bucket: $bucket" || log_info "Bucket not found: $bucket"
         done
-        
+
         # Delete DynamoDB tables
         log_info "Deleting DynamoDB tables..."
         for table in event_store event_snapshots speed_layer_metrics materialized_views data_product_catalog; do
             aws dynamodb delete-table --table-name "$table" 2>/dev/null && log_success "Deleted table: $table" || log_info "Table not found: $table"
         done
-        
+
         # Delete Kinesis streams
         log_info "Deleting Kinesis streams..."
         for stream in raw-events-stream processed-events-stream aggregate-metrics-stream; do
             aws kinesis delete-stream --stream-name "$stream" 2>/dev/null && log_success "Deleted stream: $stream" || log_info "Stream not found: $stream"
         done
-        
+
         # Delete Glue databases
         log_info "Deleting Glue databases..."
         for db in raw_zone processed_zone curated_zone batch_views product_domain sales_domain customer_domain; do
             aws glue delete-database --name "$db" 2>/dev/null && log_success "Deleted database: $db" || log_info "Database not found: $db"
         done
-        
+
         # Delete EventBridge event bus
         log_info "Deleting EventBridge event bus..."
         aws events delete-event-bus --name data-mesh-events 2>/dev/null && log_success "Deleted event bus" || log_info "Event bus not found"
-        
+
         log_success "AWS resources cleaned"
     else
         log_info "Skipped AWS cleanup"
@@ -150,9 +150,9 @@ fi
 
 if [ "$KEEP_DATA" = false ]; then
     log_info "Cleaning data directories..."
-    
+
     cd "$MODULE_DIR"
-    
+
     rm -rf data/raw/*
     rm -rf data/processed/*
     rm -rf data/curated/*
@@ -160,7 +160,7 @@ if [ "$KEEP_DATA" = false ]; then
     rm -rf data/stream-checkpoints/*
     rm -rf data/localstack/*
     rm -rf logs/*
-    
+
     log_success "Data directories cleaned"
 else
     log_info "Keeping data directories (--keep-data flag)"

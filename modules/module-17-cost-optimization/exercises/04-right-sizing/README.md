@@ -1,7 +1,7 @@
 # Exercise 04: Resource Right-Sizing
 
-⏱️ **Estimated Time:** 2.5 hours  
-🎯 **Difficulty:** ⭐⭐⭐ Intermediate  
+⏱️ **Estimated Time:** 2.5 hours
+🎯 **Difficulty:** ⭐⭐⭐ Intermediate
 💰 **Potential Savings:** 20-40% on compute costs
 
 ## Learning Objectives
@@ -74,25 +74,25 @@ for rec in rec_response.get('instanceRecommendations', []):
     instance_arn = rec['instanceArn']
     instance_id = instance_arn.split('/')[-1]
     current_type = rec['currentInstanceType']
-    
+
     # Get current utilization
     utilization = rec['utilizationMetrics']
     cpu_avg = next((m['value'] for m in utilization if m['name'] == 'CPU'), 0)
     mem_avg = next((m['value'] for m in utilization if m['name'] == 'MEMORY'), 0)
-    
+
     # Get recommendation
     if rec['finding'] == 'OVER_PROVISIONED':
         options = rec['recommendationOptions']
         best_option = options[0]  # Usually lowest cost option
         recommended_type = best_option['instanceType']
-        
+
         # Parse savings
         savings_opportunity = best_option.get('savingsOpportunity', {})
         estimated_monthly_savings = float(savings_opportunity.get('estimatedMonthlySavings', 0))
         savings_pct = float(savings_opportunity.get('savingsOpportunityPercentage', 0))
-        
+
         total_savings += estimated_monthly_savings
-        
+
         recommendations_list.append({
             'instance_id': instance_id,
             'current': current_type,
@@ -102,7 +102,7 @@ for rec in rec_response.get('instanceRecommendations', []):
             'monthly_savings': estimated_monthly_savings,
             'savings_pct': savings_pct
         })
-        
+
         print(f"  Instance: {instance_id}")
         print(f"    Current: {current_type} (CPU: {cpu_avg:.1f}%, Mem: {mem_avg:.1f}%)")
         print(f"    Recommended: {recommended_type}")
@@ -134,9 +134,9 @@ def get_instance_utilization(instance_id, days=30):
     """Get detailed utilization metrics for EC2 instance"""
     end_time = datetime.now()
     start_time = end_time - timedelta(days=days)
-    
+
     metrics = {}
-    
+
     # CPU Utilization
     cpu_response = cloudwatch.get_metric_statistics(
         Namespace='AWS/EC2',
@@ -147,13 +147,13 @@ def get_instance_utilization(instance_id, days=30):
         Period=3600,  # 1 hour
         Statistics=['Average', 'Maximum']
     )
-    
+
     if cpu_response['Datapoints']:
         cpu_values = [dp['Average'] for dp in cpu_response['Datapoints']]
         metrics['cpu_avg'] = sum(cpu_values) / len(cpu_values)
         metrics['cpu_max'] = max(dp['Maximum'] for dp in cpu_response['Datapoints'])
         metrics['cpu_p95'] = np.percentile(cpu_values, 95)
-    
+
     # Network In (for right-sizing network-intensive workloads)
     network_response = cloudwatch.get_metric_statistics(
         Namespace='AWS/EC2',
@@ -164,12 +164,12 @@ def get_instance_utilization(instance_id, days=30):
         Period=3600,
         Statistics=['Average', 'Maximum']
     )
-    
+
     if network_response['Datapoints']:
         network_values = [dp['Average'] / (1024**2) for dp in network_response['Datapoints']]  # MB
         metrics['network_avg_mbps'] = sum(network_values) / len(network_values)
         metrics['network_max_mbps'] = max(dp['Maximum'] / (1024**2) for dp in network_response['Datapoints'])
-    
+
     return metrics
 
 # Analyze all running instances
@@ -183,12 +183,12 @@ for reservation in instances['Reservations']:
     for instance in reservation['Instances']:
         instance_id = instance['InstanceId']
         instance_type = instance['InstanceType']
-        
+
         metrics = get_instance_utilization(instance_id)
-        
+
         print(f"  {instance_id} ({instance_type}):")
         print(f"    CPU Avg/P95/Max: {metrics.get('cpu_avg', 0):.1f}% / {metrics.get('cpu_p95', 0):.1f}% / {metrics.get('cpu_max', 0):.1f}%")
-        
+
         # Right-sizing recommendation logic
         if metrics.get('cpu_avg', 0) < 20 and metrics.get('cpu_p95', 0) < 40:
             print(f"    ⚠️  OVER-PROVISIONED: Consider downsizing")
@@ -209,7 +209,7 @@ def plot_utilization_dashboard(instance_id, metrics_data):
     """Create utilization dashboard for an instance"""
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle(f'Resource Utilization: {instance_id}', fontsize=16)
-    
+
     # CPU utilization over time
     axes[0, 0].plot(metrics_data['timestamps'], metrics_data['cpu'], label='CPU %')
     axes[0, 0].axhline(y=80, color='orange', linestyle='--', label='Target Max (80%)')
@@ -218,7 +218,7 @@ def plot_utilization_dashboard(instance_id, metrics_data):
     axes[0, 0].set_ylabel('Percentage')
     axes[0, 0].legend()
     axes[0, 0].grid(True, alpha=0.3)
-    
+
     # Memory utilization (requires CloudWatch agent)
     if 'memory' in metrics_data:
         axes[0, 1].plot(metrics_data['timestamps'], metrics_data['memory'], label='Memory %', color='green')
@@ -227,23 +227,23 @@ def plot_utilization_dashboard(instance_id, metrics_data):
         axes[0, 1].set_ylabel('Percentage')
         axes[0, 1].legend()
         axes[0, 1].grid(True, alpha=0.3)
-    
+
     # Network throughput
     axes[1, 0].plot(metrics_data['timestamps'], metrics_data['network_in'], label='Network In')
     axes[1, 0].set_title('Network Throughput')
     axes[1, 0].set_ylabel('MB/s')
     axes[1, 0].legend()
     axes[1, 0].grid(True, alpha=0.3)
-    
+
     # Utilization distribution (histogram)
     axes[1, 1].hist(metrics_data['cpu'], bins=20, color='skyblue', edgecolor='black')
-    axes[1, 1].axvline(x=np.mean(metrics_data['cpu']), color='red', 
+    axes[1, 1].axvline(x=np.mean(metrics_data['cpu']), color='red',
                        linestyle='--', label=f'Mean: {np.mean(metrics_data["cpu"]):.1f}%')
     axes[1, 1].set_title('CPU Distribution')
     axes[1, 1].set_xlabel('CPU %')
     axes[1, 1].set_ylabel('Frequency')
     axes[1, 1].legend()
-    
+
     plt.tight_layout()
     plt.savefig(f'utilization-{instance_id}.png', dpi=300)
     print(f"✓ Dashboard saved: utilization-{instance_id}.png")
@@ -262,9 +262,9 @@ def analyze_rds_utilization(db_instance_id, days=14):
     """Analyze RDS instance utilization"""
     end_time = datetime.now()
     start_time = end_time - timedelta(days=days)
-    
+
     metrics = {}
-    
+
     # CPU
     cpu_response = cloudwatch.get_metric_statistics(
         Namespace='AWS/RDS',
@@ -275,13 +275,13 @@ def analyze_rds_utilization(db_instance_id, days=14):
         Period=3600,
         Statistics=['Average', 'Maximum']
     )
-    
+
     if cpu_response['Datapoints']:
         cpu_values = [dp['Average'] for dp in cpu_response['Datapoints']]
         metrics['cpu_avg'] = np.mean(cpu_values)
         metrics['cpu_p95'] = np.percentile(cpu_values, 95)
         metrics['cpu_max'] = max(dp['Maximum'] for dp in cpu_response['Datapoints'])
-    
+
     # Connections
     conn_response = cloudwatch.get_metric_statistics(
         Namespace='AWS/RDS',
@@ -292,12 +292,12 @@ def analyze_rds_utilization(db_instance_id, days=14):
         Period=3600,
         Statistics=['Average', 'Maximum']
     )
-    
+
     if conn_response['Datapoints']:
         conn_values = [dp['Average'] for dp in conn_response['Datapoints']]
         metrics['connections_avg'] = np.mean(conn_values)
         metrics['connections_max'] = max(dp['Maximum'] for dp in conn_response['Datapoints'])
-    
+
     # Read/Write IOPS
     iops_read = cloudwatch.get_metric_statistics(
         Namespace='AWS/RDS',
@@ -308,10 +308,10 @@ def analyze_rds_utilization(db_instance_id, days=14):
         Period=3600,
         Statistics=['Average']
     )
-    
+
     if iops_read['Datapoints']:
         metrics['read_iops_avg'] = np.mean([dp['Average'] for dp in iops_read['Datapoints']])
-    
+
     return metrics
 
 # Analyze RDS instances
@@ -323,19 +323,19 @@ for db in db_instances['DBInstances']:
     db_id = db['DBInstanceIdentifier']
     instance_class = db['DBInstanceClass']
     engine = db['Engine']
-    
+
     metrics = analyze_rds_utilization(db_id)
-    
+
     print(f"  {db_id} ({instance_class} - {engine}):")
     print(f"    CPU Avg/P95/Max: {metrics.get('cpu_avg', 0):.1f}% / {metrics.get('cpu_p95', 0):.1f}% / {metrics.get('cpu_max', 0):.1f}%")
     print(f"    Connections Avg/Max: {metrics.get('connections_avg', 0):.0f} / {metrics.get('connections_max', 0):.0f}")
     print(f"    IOPS Avg: {metrics.get('read_iops_avg', 0):.0f}")
-    
+
     # Recommendation logic
     if metrics.get('cpu_p95', 0) < 40:
         # Over-provisioned
         current_size = instance_class.split('.')[-1]  # e.g., 'xlarge'
-        
+
         if current_size == '2xlarge':
             suggested = instance_class.replace('2xlarge', 'xlarge')
             savings_pct = 50
@@ -348,12 +348,12 @@ for db in db_instances['DBInstances']:
         else:
             suggested = instance_class
             savings_pct = 0
-        
+
         if suggested != instance_class:
             print(f"    💡 RECOMMENDATION: Downsize to {suggested}")
             print(f"       Expected Savings: ~{savings_pct}%")
             total_savings += savings_pct
-    
+
     elif metrics.get('cpu_p95', 0) > 80:
         print(f"    ⚠️  HIGH UTILIZATION: Consider upsizing")
     else:
@@ -373,7 +373,7 @@ for db in db_instances['DBInstances']:
 def right_size_instance(instance_id, new_instance_type, dry_run=True):
     """
     Resize EC2 instance to optimize costs
-    
+
     Steps:
     1. Stop instance
     2. Change instance type
@@ -381,34 +381,34 @@ def right_size_instance(instance_id, new_instance_type, dry_run=True):
     4. Verify new type
     """
     ec2 = boto3.client('ec2')
-    
+
     # Get current instance details
     response = ec2.describe_instances(InstanceIds=[instance_id])
     instance = response['Reservations'][0]['Instances'][0]
     current_type = instance['InstanceType']
     current_state = instance['State']['Name']
-    
+
     print(f"\n🔧 Right-Sizing: {instance_id}")
     print(f"  Current Type: {current_type}")
     print(f"  New Type: {new_instance_type}")
     print(f"  Current State: {current_state}")
-    
+
     if dry_run:
         print(f"\n  ⚠️  DRY RUN MODE - No changes made")
         print(f"  To apply: Set dry_run=False")
         return
-    
+
     try:
         # Step 1: Stop instance
         if current_state == 'running':
             print(f"\n  Stopping instance...")
             ec2.stop_instances(InstanceIds=[instance_id])
-            
+
             # Wait for stopped state
             waiter = ec2.get_waiter('instance_stopped')
             waiter.wait(InstanceIds=[instance_id])
             print(f"  ✓ Instance stopped")
-        
+
         # Step 2: Modify instance type
         print(f"\n  Changing instance type to {new_instance_type}...")
         ec2.modify_instance_attribute(
@@ -416,25 +416,25 @@ def right_size_instance(instance_id, new_instance_type, dry_run=True):
             InstanceType={'Value': new_instance_type}
         )
         print(f"  ✓ Instance type modified")
-        
+
         # Step 3: Start instance
         print(f"\n  Starting instance...")
         ec2.start_instances(InstanceIds=[instance_id])
-        
+
         # Wait for running state
         waiter = ec2.get_waiter('instance_running')
         waiter.wait(InstanceIds=[instance_id])
         print(f"  ✓ Instance running")
-        
+
         # Step 4: Verify
         response = ec2.describe_instances(InstanceIds=[instance_id])
         new_type = response['Reservations'][0]['Instances'][0]['InstanceType']
-        
+
         print(f"\n✓ Right-sizing complete!")
         print(f"  Verified Type: {new_type}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"\n❌ Error during right-sizing: {e}")
         return False
@@ -449,23 +449,23 @@ right_size_instance('i-0123456789abcdef', 'm5.large', dry_run=True)
 def bulk_right_size_instances(recommendations, auto_approve=False):
     """Apply right-sizing to multiple instances with confirmation"""
     print("\n📋 Bulk Right-Sizing Plan:\n")
-    
+
     total_monthly_savings = 0
-    
+
     for i, rec in enumerate(recommendations, 1):
         print(f"{i}. {rec['instance_id']}: {rec['current']} → {rec['recommended']}")
         print(f"   Savings: ${rec['monthly_savings']:.2f}/month")
         total_monthly_savings += rec['monthly_savings']
-    
+
     print(f"\n💰 Total Monthly Savings: ${total_monthly_savings:.2f}")
     print(f"💰 Annual Savings: ${total_monthly_savings * 12:.2f}")
-    
+
     if not auto_approve:
         response = input("\n  Proceed with right-sizing? (yes/no): ")
         if response.lower() != 'yes':
             print("  Cancelled")
             return
-    
+
     # Apply changes
     print("\n  Applying changes...")
     for rec in recommendations:
@@ -474,12 +474,12 @@ def bulk_right_size_instances(recommendations, auto_approve=False):
             rec['recommended'],
             dry_run=False
         )
-        
+
         if success:
             print(f"  ✓ {rec['instance_id']} resized")
         else:
             print(f"  ❌ {rec['instance_id']} failed")
-    
+
     print(f"\n✓ Bulk right-sizing complete")
 
 # Apply recommendations (DRY RUN by default)
@@ -499,9 +499,9 @@ def analyze_redshift_utilization(cluster_id, days=14):
     """Analyze Redshift cluster utilization"""
     end_time = datetime.now()
     start_time = end_time - timedelta(days=days)
-    
+
     metrics = {}
-    
+
     # CPU
     cpu_response = cloudwatch.get_metric_statistics(
         Namespace='AWS/Redshift',
@@ -512,12 +512,12 @@ def analyze_redshift_utilization(cluster_id, days=14):
         Period=3600,
         Statistics=['Average', 'Maximum']
     )
-    
+
     if cpu_response['Datapoints']:
         cpu_values = [dp['Average'] for dp in cpu_response['Datapoints']]
         metrics['cpu_avg'] = np.mean(cpu_values)
         metrics['cpu_p95'] = np.percentile(cpu_values, 95)
-    
+
     # Disk space
     disk_response = cloudwatch.get_metric_statistics(
         Namespace='AWS/Redshift',
@@ -528,11 +528,11 @@ def analyze_redshift_utilization(cluster_id, days=14):
         Period=3600,
         Statistics=['Average']
     )
-    
+
     if disk_response['Datapoints']:
         disk_values = [dp['Average'] for dp in disk_response['Datapoints']]
         metrics['disk_avg'] = np.mean(disk_values)
-    
+
     return metrics
 
 # Analyze Redshift clusters
@@ -544,14 +544,14 @@ for cluster in clusters['Clusters']:
     cluster_id = cluster['ClusterIdentifier']
     node_type = cluster['NodeType']
     num_nodes = cluster['NumberOfNodes']
-    
+
     metrics = analyze_redshift_utilization(cluster_id)
-    
+
     print(f"  {cluster_id}:")
     print(f"    Configuration: {num_nodes}x {node_type}")
     print(f"    CPU Avg/P95: {metrics.get('cpu_avg', 0):.1f}% / {metrics.get('cpu_p95', 0):.1f}%")
     print(f"    Disk Usage: {metrics.get('disk_avg', 0):.1f}%")
-    
+
     # Recommendations
     if metrics.get('cpu_p95', 0) < 40 and num_nodes > 2:
         new_nodes = max(2, num_nodes // 2)
@@ -569,16 +569,16 @@ def elastic_resize_redshift(cluster_id, new_node_count):
     """Perform elastic resize (fast, minimal downtime)"""
     print(f"\n🔧 Elastic Resize: {cluster_id}")
     print(f"  New Node Count: {new_node_count}")
-    
+
     response = redshift.resize_cluster(
         ClusterIdentifier=cluster_id,
         NumberOfNodes=new_node_count,
         Classic=False  # Elastic resize (fast)
     )
-    
+
     print(f"  ✓ Resize initiated (5-15 minutes)")
     print(f"  Cluster will be read-only during resize")
-    
+
     return response
 ```
 
@@ -608,12 +608,12 @@ def create_target_tracking_policy(asg_name, target_cpu=70):
             'ScaleOutCooldown': 60   # 1 minute
         }
     )
-    
+
     print(f"✓ Target tracking policy created")
     print(f"  Target: {target_cpu}% CPU")
     print(f"  Scale out when CPU > {target_cpu}%")
     print(f"  Scale in when CPU < {target_cpu}%")
-    
+
     return response['PolicyARN']
 
 # Example 2: DynamoDB Auto Scaling (similar for ECS, Aurora, EMR)
@@ -627,7 +627,7 @@ def setup_dynamodb_autoscaling(table_name):
         MinCapacity=5,
         MaxCapacity=100
     )
-    
+
     # Target tracking policy
     app_autoscaling.put_scaling_policy(
         PolicyName='ddb-read-scaling',
@@ -644,7 +644,7 @@ def setup_dynamodb_autoscaling(table_name):
             'ScaleOutCooldown': 60
         }
     )
-    
+
     print(f"✓ DynamoDB auto scaling configured")
     print(f"  Table: {table_name}")
     print(f"  Read Capacity: 5-100 units (auto-adjust)")
@@ -664,49 +664,49 @@ def setup_dynamodb_autoscaling(table_name):
 ```python
 def generate_right_sizing_report(before_analysis, after_analysis):
     """Generate comprehensive savings report"""
-    
+
     print("\n" + "="*60)
     print("          RIGHT-SIZING SAVINGS REPORT")
     print("="*60)
-    
+
     # EC2 Savings
     ec2_before_cost = sum(a['monthly_cost'] for a in before_analysis['ec2'])
     ec2_after_cost = sum(a['monthly_cost'] for a in after_analysis['ec2'])
     ec2_savings = ec2_before_cost - ec2_after_cost
     ec2_savings_pct = (ec2_savings / ec2_before_cost * 100) if ec2_before_cost > 0 else 0
-    
+
     print(f"\n1. EC2 Instances:")
     print(f"   Before: ${ec2_before_cost:,.2f}/month")
     print(f"   After:  ${ec2_after_cost:,.2f}/month")
     print(f"   Savings: ${ec2_savings:,.2f}/month ({ec2_savings_pct:.1f}%)")
-    
+
     # RDS Savings
     rds_before_cost = sum(a['monthly_cost'] for a in before_analysis['rds'])
     rds_after_cost = sum(a['monthly_cost'] for a in after_analysis['rds'])
     rds_savings = rds_before_cost - rds_after_cost
     rds_savings_pct = (rds_savings / rds_before_cost * 100) if rds_before_cost > 0 else 0
-    
+
     print(f"\n2. RDS Instances:")
     print(f"   Before: ${rds_before_cost:,.2f}/month")
     print(f"   After:  ${rds_after_cost:,.2f}/month")
     print(f"   Savings: ${rds_savings:,.2f}/month ({rds_savings_pct:.1f}%)")
-    
+
     # Redshift Savings
     redshift_before_cost = sum(a['monthly_cost'] for a in before_analysis.get('redshift', []))
     redshift_after_cost = sum(a['monthly_cost'] for a in after_analysis.get('redshift', []))
     redshift_savings = redshift_before_cost - redshift_after_cost
-    
+
     print(f"\n3. Redshift Clusters:")
     print(f"   Before: ${redshift_before_cost:,.2f}/month")
     print(f"   After:  ${redshift_after_cost:,.2f}/month")
     print(f"   Savings: ${redshift_savings:,.2f}/month")
-    
+
     # Total
     total_before = ec2_before_cost + rds_before_cost + redshift_before_cost
     total_after = ec2_after_cost + rds_after_cost + redshift_after_cost
     total_savings = total_before - total_after
     total_savings_pct = (total_savings / total_before * 100) if total_before > 0 else 0
-    
+
     print(f"\n" + "="*60)
     print(f"TOTAL SAVINGS")
     print(f"="*60)
@@ -715,13 +715,13 @@ def generate_right_sizing_report(before_analysis, after_analysis):
     print(f"  Monthly Savings: ${total_savings:,.2f} ({total_savings_pct:.1f}%)")
     print(f"  Annual Savings: ${total_savings * 12:,.2f}")
     print(f"="*60)
-    
+
     # ROI calculation
     implementation_time = 8  # hours
     hourly_rate = 100  # $/hour for engineer
     implementation_cost = implementation_time * hourly_rate
     payback_period = implementation_cost / total_savings if total_savings > 0 else 999
-    
+
     print(f"\n📊 ROI Analysis:")
     print(f"  Implementation Cost: ${implementation_cost:.2f} ({implementation_time}h)")
     print(f"  Payback Period: {payback_period:.1f} months")
@@ -792,10 +792,10 @@ generate_right_sizing_report(before, after)
 
 ## Key Learnings
 
-✅ **Over-provisioning Common**: 40-60% of instances over-provisioned by 2x  
-✅ **P95 Metrics**: Use 95th percentile, not average, for sizing decisions  
-✅ **Gradual Approach**: Downsize incrementally (2xl → xl → large)  
-✅ **Auto Scaling**: Better than manual right-sizing for variable workloads  
+✅ **Over-provisioning Common**: 40-60% of instances over-provisioned by 2x
+✅ **P95 Metrics**: Use 95th percentile, not average, for sizing decisions
+✅ **Gradual Approach**: Downsize incrementally (2xl → xl → large)
+✅ **Auto Scaling**: Better than manual right-sizing for variable workloads
 ✅ **Quick Wins**: Development environments often 2-4x over-sized
 
 ## Right-Sizing Best Practices
@@ -810,7 +810,7 @@ generate_right_sizing_report(before, after)
 
 ## Real-World Impact
 
-**Case Study**: SaaS company with 50 EC2 instances  
+**Case Study**: SaaS company with 50 EC2 instances
 - **Before**: $15,000/month (mix of m5.2xlarge, m5.xlarge)
 - **Analysis**: Avg CPU 25%, P95 CPU 45%
 - **Action**: Downsized 30 instances (2xlarge → xlarge), 15 instances (xlarge → large)

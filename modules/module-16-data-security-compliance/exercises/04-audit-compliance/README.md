@@ -3,8 +3,8 @@
 ## Overview
 Implement comprehensive audit logging with CloudTrail, automated compliance checking with AWS Config, compliance dashboards, and automated remediation for GDPR, HIPAA, and SOC 2 requirements.
 
-**Difficulty**: ⭐⭐⭐ Advanced  
-**Duration**: ~2.5 hours  
+**Difficulty**: ⭐⭐⭐ Advanced
+**Duration**: ~2.5 hours
 **Prerequisites**: AWS CloudTrail, Config, compliance frameworks knowledge
 
 ## Learning Objectives
@@ -30,9 +30,9 @@ Implement comprehensive audit logging with CloudTrail, automated compliance chec
 
 ## Expected Results
 
-**CloudTrail**: All API calls logged to encrypted S3 + CloudWatch  
-**Config Rules**: 15+ compliance rules evaluating resources  
-**Compliance Score**: >85% resources compliant  
+**CloudTrail**: All API calls logged to encrypted S3 + CloudWatch
+**Config Rules**: 15+ compliance rules evaluating resources
+**Compliance Score**: >85% resources compliant
 **Audit Dashboard**: Real-time compliance visualization
 
 ## Key Learnings

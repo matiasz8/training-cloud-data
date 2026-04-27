@@ -89,9 +89,9 @@ done
 
 if [ "$ENVIRONMENT" = "localstack" ]; then
     log_info "Checking AWS resources..."
-    
+
     AWS_CMD="aws --endpoint-url=http://localhost:4566 --region=us-east-1"
-    
+
     # S3 Buckets
     if $AWS_CMD s3 ls | grep -q "advanced-arch-raw"; then
         log_success "S3 buckets exist"
@@ -100,7 +100,7 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
         log_error "S3 buckets not found"
         ((tests_failed++))
     fi
-    
+
     # DynamoDB Tables
     if $AWS_CMD dynamodb list-tables | grep -q "event_store"; then
         log_success "DynamoDB tables exist"
@@ -109,7 +109,7 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
         log_error "DynamoDB tables not found"
         ((tests_failed++))
     fi
-    
+
     # Kinesis Streams
     if $AWS_CMD kinesis list-streams | grep -q "raw-events-stream"; then
         log_success "Kinesis streams exist"
@@ -118,7 +118,7 @@ if [ "$ENVIRONMENT" = "localstack" ]; then
         log_error "Kinesis streams not found"
         ((tests_failed++))
     fi
-    
+
     # Glue Databases
     if $AWS_CMD glue get-databases | grep -q "raw_zone"; then
         log_success "Glue databases exist"

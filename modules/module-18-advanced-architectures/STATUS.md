@@ -476,15 +476,15 @@ pip install -r requirements.txt
 1. **Exercise 01: Lambda Architecture** (3-4 hours)
    - Learn batch + speed + serving layers
    - Handle 90-day historical + real-time data
-   
+
 2. **Exercise 02: Kappa Architecture** (3-4 hours)
    - Implement stream-only processing
    - Learn reprocessing patterns
-   
+
 3. **Exercise 03: Data Mesh** (4-5 hours)
    - Build multi-domain architecture
    - Implement federated governance
-   
+
 4. **Exercise 04: Event-Driven CQRS** (4-5 hours)
    - Implement event sourcing
    - Build separate read/write models
@@ -578,9 +578,9 @@ pip install -r requirements.txt
 
 ## Module Completion Certificate
 
-**Student**: [Your Name]  
-**Module**: 18 - Advanced Architectures  
-**Date**: [Completion Date]  
+**Student**: [Your Name]
+**Module**: 18 - Advanced Architectures
+**Date**: [Completion Date]
 **Status**: ✅ CORE COMPLETE (97%)
 
 **Exercises Completed**:
@@ -663,5 +663,5 @@ pip install -r requirements.txt
 
 ---
 
-**Status**: ✅ Module 18 FULLY COMPLETE - Ready for Training Delivery (v2.0)  
+**Status**: ✅ Module 18 FULLY COMPLETE - Ready for Training Delivery (v2.0)
 **Last Updated**: 2025-01-XX

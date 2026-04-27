@@ -108,17 +108,17 @@ Query → Merge Batch Views + Real-time Views → Combined Result
 
 ### Advantages
 
-✅ **Accuracy**: Batch layer corrects errors in speed layer  
-✅ **Fault Tolerance**: Immutable data allows reprocessing  
-✅ **Scalability**: Separate scaling for batch and streaming  
-✅ **Flexibility**: Different technologies optimized for each layer  
+✅ **Accuracy**: Batch layer corrects errors in speed layer
+✅ **Fault Tolerance**: Immutable data allows reprocessing
+✅ **Scalability**: Separate scaling for batch and streaming
+✅ **Flexibility**: Different technologies optimized for each layer
 
 ### Disadvantages
 
-❌ **Complexity**: Two processing paradigms (batch + streaming)  
-❌ **Operational Overhead**: Maintain two separate code bases  
-❌ **Storage Costs**: Duplicate data in batch and speed layers  
-❌ **Merge Logic**: Complex query logic to combine layers  
+❌ **Complexity**: Two processing paradigms (batch + streaming)
+❌ **Operational Overhead**: Maintain two separate code bases
+❌ **Storage Costs**: Duplicate data in batch and speed layers
+❌ **Merge Logic**: Complex query logic to combine layers
 
 ### When to Use
 
@@ -231,17 +231,17 @@ Event Log → Stream Processor v2 → Materialized View v2
 
 ### Advantages
 
-✅ **Simplicity**: Single processing paradigm (streaming only)  
-✅ **Consistency**: One code base for all data  
-✅ **Replayability**: Easy reprocessing from event log  
-✅ **Real-time by Default**: All data available immediately  
+✅ **Simplicity**: Single processing paradigm (streaming only)
+✅ **Consistency**: One code base for all data
+✅ **Replayability**: Easy reprocessing from event log
+✅ **Real-time by Default**: All data available immediately
 
 ### Disadvantages
 
-❌ **Retention Limits**: Event log storage costs (Kafka: $$, Kinesis: $$$)  
-❌ **Complex Analytics**: Streaming harder than batch for complex joins  
-❌ **Reprocessing Performance**: Slower than batch for full historical reprocessing  
-❌ **Stream Expertise**: Team needs strong streaming knowledge  
+❌ **Retention Limits**: Event log storage costs (Kafka: $$, Kinesis: $$$)
+❌ **Complex Analytics**: Streaming harder than batch for complex joins
+❌ **Reprocessing Performance**: Slower than batch for full historical reprocessing
+❌ **Stream Expertise**: Team needs strong streaming knowledge
 
 ### When to Use
 
@@ -366,17 +366,17 @@ Global policies enforced across all domains:
 
 ### Advantages
 
-✅ **Scalability**: Teams work independently (parallelization)  
-✅ **Domain Expertise**: Teams closest to data understand it best  
-✅ **Autonomy**: Faster feature development (no central bottleneck)  
-✅ **Clear Ownership**: Accountability for data quality  
+✅ **Scalability**: Teams work independently (parallelization)
+✅ **Domain Expertise**: Teams closest to data understand it best
+✅ **Autonomy**: Faster feature development (no central bottleneck)
+✅ **Clear Ownership**: Accountability for data quality
 
 ### Disadvantages
 
-❌ **Coordination Cost**: Need strong governance to prevent silos  
-❌ **Duplication**: Domains may reimplement common pipelines  
-❌ **Discovery**: Harder to find data across domains  
-❌ **Skill Requirements**: All teams need data engineering skills  
+❌ **Coordination Cost**: Need strong governance to prevent silos
+❌ **Duplication**: Domains may reimplement common pipelines
+❌ **Discovery**: Harder to find data across domains
+❌ **Skill Requirements**: All teams need data engineering skills
 
 ### When to Use
 
@@ -476,17 +476,17 @@ Workflow:
 
 ### Advantages
 
-✅ **Decoupling**: Services don't know about each other  
-✅ **Scalability**: Add consumers without modifying producers  
-✅ **Resilience**: Services can fail independently  
-✅ **Audit Trail**: All events logged  
+✅ **Decoupling**: Services don't know about each other
+✅ **Scalability**: Add consumers without modifying producers
+✅ **Resilience**: Services can fail independently
+✅ **Audit Trail**: All events logged
 
 ### Disadvantages
 
-❌ **Debugging**: Distributed tracing required (X-Ray)  
-❌ **Eventual Consistency**: No immediate guarantees  
-❌ **Complexity**: Many moving parts  
-❌ **Testing**: Need to mock event flows  
+❌ **Debugging**: Distributed tracing required (X-Ray)
+❌ **Eventual Consistency**: No immediate guarantees
+❌ **Complexity**: Many moving parts
+❌ **Testing**: Need to mock event flows
 
 ---
 
@@ -516,10 +516,10 @@ Current State: Replay all 303 events → Balance = $1,500
 
 #### Benefits
 
-✅ **Complete Audit Trail**: Every change recorded  
-✅ **Temporal Queries**: "What was balance on March 1?"  
-✅ **Replay**: Fix bugs by reprocessing events  
-✅ **Event-Driven**: Events trigger downstream systems  
+✅ **Complete Audit Trail**: Every change recorded
+✅ **Temporal Queries**: "What was balance on March 1?"
+✅ **Replay**: Fix bugs by reprocessing events
+✅ **Event-Driven**: Events trigger downstream systems
 
 #### Implementation with DynamoDB
 
@@ -596,17 +596,17 @@ def on_order_placed(event):
 
 ### Advantages
 
-✅ **Optimized Reads**: Read models tuned for specific queries  
-✅ **Scalability**: Read/write scale independently  
-✅ **Flexibility**: Multiple read models from same events  
-✅ **Performance**: Precomputed views (no joins at query time)  
+✅ **Optimized Reads**: Read models tuned for specific queries
+✅ **Scalability**: Read/write scale independently
+✅ **Flexibility**: Multiple read models from same events
+✅ **Performance**: Precomputed views (no joins at query time)
 
 ### Disadvantages
 
-❌ **Eventual Consistency**: Writes not immediately visible in reads  
-❌ **Complexity**: More infrastructure (event store + read models)  
-❌ **Storage**: Duplicate data in multiple read models  
-❌ **Synchronization**: Projections must stay up-to-date  
+❌ **Eventual Consistency**: Writes not immediately visible in reads
+❌ **Complexity**: More infrastructure (event store + read models)
+❌ **Storage**: Duplicate data in multiple read models
+❌ **Synchronization**: Projections must stay up-to-date
 
 ### When to Use
 
@@ -646,8 +646,8 @@ Replication (async)
 Secondary (us-west-2) → Read-only
 ```
 
-**Failover**: Manual switch to secondary (minutes to hours)  
-**Cost**: 50% extra (storage only, minimal compute)  
+**Failover**: Manual switch to secondary (minutes to hours)
+**Cost**: 50% extra (storage only, minimal compute)
 **Use Case**: Disaster recovery, not performance
 
 #### 2. **Active-Active** (Multi-Master)
@@ -659,9 +659,9 @@ US Region (us-east-1) ← → EU Region (eu-west-1)
   (Write + Read)            (Write + Read)
 ```
 
-**Replication**: Bidirectional, near-real-time (<1 second)  
-**Conflicts**: Possible when same item written in both regions  
-**Cost**: 100%+ extra (full infrastructure × regions)  
+**Replication**: Bidirectional, near-real-time (<1 second)
+**Conflicts**: Possible when same item written in both regions
+**Cost**: 100%+ extra (full infrastructure × regions)
 **Use Case**: Global applications with local writes
 
 #### 3. **Active-Active-Active** (Multi-Region)
@@ -695,7 +695,7 @@ dynamodb_us.put_item(TableName='orders', Item=order)
 # Automatically replicated to eu-west-1 and ap-southeast-1 (<1 sec)
 ```
 
-**Consistency**: Strong consistency within region, eventual across regions  
+**Consistency**: Strong consistency within region, eventual across regions
 **Conflict Resolution**: Last-Write-Wins (LWW) by timestamp
 
 #### **Aurora Global Database**
@@ -718,9 +718,9 @@ rds.create_db_cluster(
 )
 ```
 
-**Replication**: <1 second lag  
-**Reads**: Local reads from each region (low latency)  
-**Writes**: Sent to primary region (single-master)  
+**Replication**: <1 second lag
+**Reads**: Local reads from each region (low latency)
+**Writes**: Sent to primary region (single-master)
 **Failover**: Promote secondary to primary (<1 minute)
 
 #### **S3 Cross-Region Replication**
@@ -894,17 +894,17 @@ def handle_stream_record(record):
 
 ### Advantages
 
-✅ **Performance**: Each database optimized for use case  
-✅ **Cost**: Cheaper specialized databases (vs one expensive RDBMS)  
-✅ **Scalability**: Scale independently per workload  
-✅ **Resilience**: Failure in one database doesn't affect others  
+✅ **Performance**: Each database optimized for use case
+✅ **Cost**: Cheaper specialized databases (vs one expensive RDBMS)
+✅ **Scalability**: Scale independently per workload
+✅ **Resilience**: Failure in one database doesn't affect others
 
 ### Disadvantages
 
-❌ **Complexity**: Multiple databases to manage  
-❌ **Consistency**: Eventual consistency across databases  
-❌ **Data Synchronization**: CDC pipelines add latency  
-❌ **Operational Burden**: More monitoring, backups, upgrades  
+❌ **Complexity**: Multiple databases to manage
+❌ **Consistency**: Eventual consistency across databases
+❌ **Data Synchronization**: CDC pipelines add latency
+❌ **Operational Burden**: More monitoring, backups, upgrades
 
 ---
 
@@ -1104,7 +1104,7 @@ Data written once, never modified:
 
 ```
 ❌ UPDATE orders SET status='shipped' WHERE id=123
-✅ INSERT INTO order_events (event_type, order_id, timestamp) 
+✅ INSERT INTO order_events (event_type, order_id, timestamp)
    VALUES ('OrderShipped', 123, NOW())
 ```
 
@@ -1139,7 +1139,7 @@ class CircuitBreaker:
     def call(self, func):
         if self.failure_rate > 0.5:  # 50% failures
             raise CircuitOpenError("Service unavailable")
-        
+
         try:
             return func()
         except Exception:

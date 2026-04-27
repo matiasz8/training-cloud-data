@@ -83,7 +83,7 @@ This document presents reference architectures designed for cost optimization wh
 | **Catalog** | Glue Data Catalog | $20 | Fixed cost |
 | **Total** | | **$1,100/month** | |
 
-**Traditional Alternative**: EMR 24/7 cluster = $13,000/month  
+**Traditional Alternative**: EMR 24/7 cluster = $13,000/month
 **Savings**: $11,900/month (91.5%)
 
 ### Implementation Checklist
@@ -250,16 +250,16 @@ For smaller workloads (<100 GB/day):
 def allocate_shared_costs(shared_costs, team_usage):
     """
     Allocate shared service costs based on usage
-    
+
     shared_costs: Monthly cost of shared services
     team_usage: Dict of team usage percentages
     """
     allocations = {}
-    
+
     for team, usage_pct in team_usage.items():
         allocated = shared_costs * (usage_pct / 100)
         allocations[team] = allocated
-    
+
     return allocations
 
 # Example
@@ -505,7 +505,7 @@ SCALING_POLICY = {
     'target_value': 60,  # Target 60% CPU
     'scale_out_cooldown': 60,   # seconds
     'scale_in_cooldown': 300,   # seconds (conservative)
-    
+
     'estimated_scenarios': {
         'low_traffic': {'instances': 2, 'hours': 400},
         'medium_traffic': {'instances': 5, 'hours': 250},
@@ -619,30 +619,30 @@ lifecycle_policy = {
 def calculate_optimal_ri_coverage(usage_data):
     """
     Calculate optimal RI coverage based on usage patterns
-    
+
     Principle: Cover baseline, leave peaks for On-Demand
     """
     # Analyze 90 days of hourly usage
     hourly_usage = usage_data['hourly_instance_counts']
-    
+
     # Calculate percentiles
     p50_usage = np.percentile(hourly_usage, 50)  # Median
     p75_usage = np.percentile(hourly_usage, 75)
     p95_usage = np.percentile(hourly_usage, 95)
     max_usage = np.max(hourly_usage)
-    
+
     # Strategy: RI coverage at P50-P75 percentile
     recommended_ri_count = int(np.ceil(p50_usage))
-    
+
     # Calculate savings
     on_demand_cost = np.mean(hourly_usage) * 730 * 0.192  # m5.xlarge
     ri_cost = recommended_ri_count * 730 * 0.125  # RI hourly
     remaining_on_demand = (np.mean(hourly_usage) - recommended_ri_count) * 730 * 0.192
-    
+
     total_hybrid_cost = ri_cost + remaining_on_demand
     savings = on_demand_cost - total_hybrid_cost
     savings_pct = (savings / on_demand_cost) * 100
-    
+
     return {
         'recommended_ri_count': recommended_ri_count,
         'coverage_pct': (recommended_ri_count / max_usage) * 100,

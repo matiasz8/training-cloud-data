@@ -1,18 +1,18 @@
 # Exercise 02: Kappa Architecture Implementation
 
-⏱️ **Estimated Time:** 2.5 hours  
-🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced  
+⏱️ **Estimated Time:** 2.5 hours
+🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced
 🏗️ **Pattern:** Stream-Only Processing with Reprocessing Capability
 
 ## Learning Objectives
 
 By completing this exercise, you will:
 
-✅ Implement Kappa Architecture (stream-only alternative to Lambda)  
-✅ Build stream processing with Kinesis + Flink SQL  
-✅ Manage materialized views with blue-green deployments  
-✅ Implement reprocessing by replaying stream  
-✅ Compare Kappa vs Lambda complexity/cost  
+✅ Implement Kappa Architecture (stream-only alternative to Lambda)
+✅ Build stream processing with Kinesis + Flink SQL
+✅ Manage materialized views with blue-green deployments
+✅ Implement reprocessing by replaying stream
+✅ Compare Kappa vs Lambda complexity/cost
 
 ## Architecture Overview
 
@@ -173,7 +173,7 @@ GROUP BY window_start, window_end, category;
 def write_to_dynamodb_sink(window_result):
     """
     Write Flink window result to DynamoDB.
-    
+
     Args:
         window_result: Dict with aggregated metrics
     """
@@ -231,7 +231,7 @@ python stream_processor.py --mode query --category Electronics
    [10:00-10:05] Electronics:  142 orders, $8,492.50 revenue
    [10:00-10:05] Clothing:     89 orders, $4,231.00 revenue
    [10:00-10:05] Home:         67 orders, $3,125.75 revenue
-   
+
    [10:05-10:10] Electronics:  156 orders, $9,284.25 revenue
    [10:05-10:10] Clothing:     92 orders, $4,512.00 revenue
    ...
@@ -256,19 +256,19 @@ Manage multiple versions of materialized views for blue-green deployments.
 ```python
 class MaterializedViewManager:
     """Manage versioned materialized views."""
-    
+
     def create_view_version(self, version: int) -> str:
         """
         Create new DynamoDB table for materialized view.
-        
+
         Args:
             version: View version number
-            
+
         Returns:
             Table name
         """
         table_name = f"category_metrics_v{version}"
-        
+
         dynamodb.create_table(
             TableName=table_name,
             KeySchema=[
@@ -281,14 +281,14 @@ class MaterializedViewManager:
             ],
             BillingMode='PAY_PER_REQUEST'
         )
-        
+
         logger.info(f"✅ Created view: {table_name}")
         return table_name
-    
+
     def swap_active_view(self, old_version: int, new_version: int) -> None:
         """
         Blue-green deployment: Switch API to use new view.
-        
+
         Args:
             old_version: Current version
             new_version: New version to activate
@@ -300,12 +300,12 @@ class MaterializedViewManager:
             Type='String',
             Overwrite=True
         )
-        
+
         logger.info(f"✅ Swapped active view: v{old_version} → v{new_version}")
-        
+
         # Wait 5 minutes (ensure API picked up change)
         time.sleep(300)
-        
+
         # Delete old view
         dynamodb.delete_table(TableName=f"category_metrics_v{old_version}")
         logger.info(f"🗑️  Deleted old view: v{old_version}")
@@ -355,13 +355,13 @@ def replay_stream(
 ) -> Dict[str, Any]:
     """
     Replay events from Kinesis stream.
-    
+
     Args:
         stream_name: Kinesis stream name
         start_timestamp: Start time
         end_timestamp: End time
         target_table: DynamoDB table for output
-        
+
     Returns:
         Dict with replay statistics
     """
@@ -369,16 +369,16 @@ def replay_stream(
     logger.info(f"   Stream: {stream_name}")
     logger.info(f"   Time Range: {start_timestamp} to {end_timestamp}")
     logger.info(f"   Target: {target_table}")
-    
+
     # Get shard iterator at timestamp
     response = kinesis.describe_stream(StreamName=stream_name)
     shards = response['StreamDescription']['Shards']
-    
+
     total_replayed = 0
-    
+
     for shard in shards:
         shard_id = shard['ShardId']
-        
+
         # Get iterator at start timestamp
         iterator_response = kinesis.get_shard_iterator(
             StreamName=stream_name,
@@ -386,21 +386,21 @@ def replay_stream(
             ShardIteratorType='AT_TIMESTAMP',
             Timestamp=start_timestamp
         )
-        
+
         shard_iterator = iterator_response['ShardIterator']
-        
+
         # Read until end timestamp
         while shard_iterator:
             records_response = kinesis.get_records(
                 ShardIterator=shard_iterator,
                 Limit=1000
             )
-            
+
             records = records_response['Records']
-            
+
             if not records:
                 break
-            
+
             # Check if we've passed end timestamp
             last_record_time = records[-1]['ApproximateArrivalTimestamp']
             if last_record_time >= end_timestamp:
@@ -409,22 +409,22 @@ def replay_stream(
                     r for r in records
                     if r['ApproximateArrivalTimestamp'] <= end_timestamp
                 ]
-            
+
             # Process records (same logic as stream processor)
             for record in records:
                 event = json.loads(record['Data'])
                 process_event(event, target_table)
                 total_replayed += 1
-            
+
             # Update iterator
             shard_iterator = records_response.get('NextShardIterator')
-            
+
             # Stop if past end time
             if last_record_time >= end_timestamp:
                 break
-    
+
     logger.info(f"✅ Replayed {total_replayed:,} events")
-    
+
     return {'replayed_events': total_replayed}
 ```
 
@@ -494,10 +494,10 @@ python replay_handler.py \
 
 🔄 Replay Progress:
    [========================================] 100%
-   
+
    Shard 0: 35,241,823 events replayed
    Shard 1: 34,892,451 events replayed
-   
+
    Total: 70,134,274 events
 
 💾 Materialized View: category_metrics_v2
@@ -631,10 +631,10 @@ def process_event(event):
     # Old schema (legacy events)
     if 'discount_percent' not in event:
         event['discount_percent'] = 0.0  # Default for old events
-    
+
     # New schema (current events)
     # Has discount_percent field
-    
+
     # Process unified schema
     update_metrics(event)
 ```
@@ -665,7 +665,7 @@ def process_event(event):
 
 **Total**: $668/month
 
-**vs Lambda Architecture**: $1,335/month  
+**vs Lambda Architecture**: $1,335/month
 **Savings**: $667/month (50% cheaper) ✅
 
 ---
@@ -868,5 +868,5 @@ After completing Exercise 02:
 
 ---
 
-**Status**: 🚧 Ready to Implement  
+**Status**: 🚧 Ready to Implement
 **Next Exercise**: Exercise 03 - Data Mesh (decentralized architecture)

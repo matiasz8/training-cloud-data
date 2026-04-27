@@ -5,8 +5,8 @@ This directory contains comprehensive Mermaid diagrams illustrating AWS cost opt
 ## 📊 Diagram Index
 
 ### 1. Cost Analysis Pipeline (`cost-analysis-pipeline.mmd`)
-**Focus**: Cost Explorer API, Cost and Usage Reports (CUR), cost dashboards  
-**Exercise**: Exercise 01 - Cost Analysis with Cost Explorer & CUR  
+**Focus**: Cost Explorer API, Cost and Usage Reports (CUR), cost dashboards
+**Exercise**: Exercise 01 - Cost Analysis with Cost Explorer & CUR
 **Key Components**:
 - Cost and Usage Report (CUR) setup with S3 export
 - Athena queries for cost analysis
@@ -15,8 +15,8 @@ This directory contains comprehensive Mermaid diagrams illustrating AWS cost opt
 - Cost anomaly detection queries
 
 ### 2. S3 Storage Lifecycle Optimization (`s3-lifecycle-optimization.mmd`)
-**Focus**: S3 storage classes, lifecycle policies, Intelligent-Tiering  
-**Exercise**: Exercise 02 - S3 Storage Cost Optimization  
+**Focus**: S3 storage classes, lifecycle policies, Intelligent-Tiering
+**Exercise**: Exercise 02 - S3 Storage Cost Optimization
 **Key Components**:
 - Storage class comparison (Standard, IA, Glacier, Deep Archive)
 - Lifecycle transition rules
@@ -25,8 +25,8 @@ This directory contains comprehensive Mermaid diagrams illustrating AWS cost opt
 - Cost savings calculations
 
 ### 3. Reserved Instances & Savings Plans (`ri-savings-plans-comparison.mmd`)
-**Focus**: Compute purchasing options decision matrix  
-**Exercise**: Exercise 03 - Compute Purchasing Options  
+**Focus**: Compute purchasing options decision matrix
+**Exercise**: Exercise 03 - Compute Purchasing Options
 **Key Components**:
 - Reserved Instances (Standard, Convertible)
 - Savings Plans (Compute, EC2, SageMaker)
@@ -35,8 +35,8 @@ This directory contains comprehensive Mermaid diagrams illustrating AWS cost opt
 - ROI calculator and decision tree
 
 ### 4. Right-Sizing Workflow (`right-sizing-workflow.mmd`)
-**Focus**: AWS Compute Optimizer, CloudWatch metrics, auto-scaling  
-**Exercise**: Exercise 04 - Right-Sizing and Auto Scaling  
+**Focus**: AWS Compute Optimizer, CloudWatch metrics, auto-scaling
+**Exercise**: Exercise 04 - Right-Sizing and Auto Scaling
 **Key Components**:
 - CloudWatch metrics collection (CPU, Memory, Network)
 - AWS Compute Optimizer recommendations
@@ -45,8 +45,8 @@ This directory contains comprehensive Mermaid diagrams illustrating AWS cost opt
 - RDS and Redshift resize strategies
 
 ### 5. Serverless Cost Comparison (`serverless-cost-comparison.mmd`)
-**Focus**: Lambda/Fargate vs EC2/ECS cost models  
-**Exercise**: Exercise 05 - Serverless vs Traditional Cost Analysis  
+**Focus**: Lambda/Fargate vs EC2/ECS cost models
+**Exercise**: Exercise 05 - Serverless vs Traditional Cost Analysis
 **Key Components**:
 - Lambda pricing (requests + duration + memory)
 - Fargate vs EC2 for containers
@@ -55,8 +55,8 @@ This directory contains comprehensive Mermaid diagrams illustrating AWS cost opt
 - TCO breakeven calculations
 
 ### 6. Cost Governance Automation (`cost-governance-automation.mmd`)
-**Focus**: AWS Budgets, anomaly detection, automated resource cleanup  
-**Exercise**: Exercise 06 - Automated Cost Governance  
+**Focus**: AWS Budgets, anomaly detection, automated resource cleanup
+**Exercise**: Exercise 06 - Automated Cost Governance
 **Key Components**:
 - AWS Budgets with SNS alerts
 - Cost Anomaly Detection ML
@@ -162,27 +162,27 @@ CustomService[Your Service] --> CostAllocation[Cost Allocation Tags]
 ## 🔍 Cost Optimization Patterns
 
 ### Pattern 1: Tiered Storage with Lifecycle
-**Problem**: Large data lakes with high storage costs  
-**Solution**: Implement S3 lifecycle policies (Standard → IA → Glacier)  
-**Diagram**: `s3-lifecycle-optimization.mmd`  
+**Problem**: Large data lakes with high storage costs
+**Solution**: Implement S3 lifecycle policies (Standard → IA → Glacier)
+**Diagram**: `s3-lifecycle-optimization.mmd`
 **Expected Savings**: 50-70%
 
 ### Pattern 2: Reserved Capacity for Stable Workloads
-**Problem**: Continuous production workloads on On-Demand pricing  
-**Solution**: Purchase RIs or Savings Plans for predictable usage  
-**Diagram**: `ri-savings-plans-comparison.mmd`  
+**Problem**: Continuous production workloads on On-Demand pricing
+**Solution**: Purchase RIs or Savings Plans for predictable usage
+**Diagram**: `ri-savings-plans-comparison.mmd`
 **Expected Savings**: 40-72%
 
 ### Pattern 3: Serverless for Variable Workloads
-**Problem**: Over-provisioned EC2 instances for bursty workloads  
-**Solution**: Migrate to Lambda/Fargate for true pay-per-use  
-**Diagram**: `serverless-cost-comparison.mmd`  
+**Problem**: Over-provisioned EC2 instances for bursty workloads
+**Solution**: Migrate to Lambda/Fargate for true pay-per-use
+**Diagram**: `serverless-cost-comparison.mmd`
 **Expected Savings**: 30-80% (workload-dependent)
 
 ### Pattern 4: Automated Resource Cleanup
-**Problem**: Orphaned resources (idle instances, snapshots, unattached volumes)  
-**Solution**: Lambda functions + CloudWatch Events for automated cleanup  
-**Diagram**: `cost-governance-automation.mmd`  
+**Problem**: Orphaned resources (idle instances, snapshots, unattached volumes)
+**Solution**: Lambda functions + CloudWatch Events for automated cleanup
+**Diagram**: `cost-governance-automation.mmd`
 **Expected Savings**: 15-25%
 
 ## 🏷️ Cost Allocation Tagging Strategy
@@ -206,7 +206,7 @@ graph LR
     C --> D[Implement Changes]
     D --> E[Validate Savings]
     E --> A
-    
+
     style A fill:#4a90e2
     style E fill:#7ed321
 ```
@@ -217,6 +217,6 @@ graph LR
 
 ---
 
-**Maintained by**: Module 17 - Cost Optimization  
-**Last Updated**: January 2025  
+**Maintained by**: Module 17 - Cost Optimization
+**Last Updated**: January 2025
 **Mermaid Version**: 10.6+

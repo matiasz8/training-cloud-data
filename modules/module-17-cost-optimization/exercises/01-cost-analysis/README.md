@@ -1,7 +1,7 @@
 # Exercise 01: Cost Analysis with Cost Explorer & CUR
 
-⏱️ **Estimated Time:** 2.5 hours  
-🎯 **Difficulty:** ⭐⭐⭐ Intermediate  
+⏱️ **Estimated Time:** 2.5 hours
+🎯 **Difficulty:** ⭐⭐⭐ Intermediate
 💰 **AWS Cost:** ~$5 for CUR setup (S3 storage + Athena queries)
 
 ## Learning Objectives
@@ -100,12 +100,12 @@ response = ce.get_cost_and_usage(
 costs = []
 for result in response['ResultsByTime']:
     period = result['TimePeriod']['Start']
-    
+
     for group in result['Groups']:
         service = group['Keys'][0]
         cost = float(group['Metrics']['UnblendedCost']['Amount'])
         usage = float(group['Metrics']['UsageQuantity']['Amount'])
-        
+
         costs.append({
             'Period': period,
             'Service': service,
@@ -182,7 +182,7 @@ for result in response['ResultsByTime']:
         team = group['Keys'][0].split('$')[1] if '$' in group['Keys'][0] else 'No Tag'
         project = group['Keys'][1].split('$')[1] if '$' in group['Keys'][1] else 'No Tag'
         cost = float(group['Metrics']['UnblendedCost']['Amount'])
-        
+
         print(f"  Team: {team}, Project: {project} → ${cost:.2f}")
 ```
 
@@ -274,21 +274,21 @@ def execute_athena_query(query):
         QueryExecutionContext={'Database': database},
         ResultConfiguration={'OutputLocation': output_location}
     )
-    
+
     query_id = response['QueryExecutionId']
-    
+
     # Wait for completion
     while True:
         status = athena.get_query_execution(QueryExecutionId=query_id)
         state = status['QueryExecution']['Status']['State']
-        
+
         if state == 'SUCCEEDED':
             break
         elif state in ['FAILED', 'CANCELLED']:
             raise Exception(f"Query {state}: {status['QueryExecution']['Status'].get('StateChangeReason', '')}")
-        
+
         time.sleep(2)
-    
+
     # Get results
     results = athena.get_query_results(QueryExecutionId=query_id)
     return results
@@ -336,13 +336,13 @@ def validate_tags(resource_tags):
     """Validate resource has required tags"""
     missing = []
     invalid = []
-    
+
     for tag_key in REQUIRED_TAGS:
         if tag_key not in resource_tags:
             missing.append(tag_key)
         elif REQUIRED_TAGS[tag_key] and resource_tags[tag_key] not in REQUIRED_TAGS[tag_key]:
             invalid.append(f"{tag_key}={resource_tags[tag_key]}")
-    
+
     return missing, invalid
 
 # Example usage
@@ -382,22 +382,22 @@ print("  After activation, tags appear in Cost Explorer and CUR")
 def tag_all_s3_buckets():
     """Apply cost allocation tags to all S3 buckets"""
     s3 = boto3.client('s3')
-    
+
     buckets = s3.list_buckets()['Buckets']
-    
+
     for bucket in buckets:
         bucket_name = bucket['Name']
-        
+
         # Determine tags based on bucket name patterns
         tags = {'Owner': 'data-team@example.com'}
-        
+
         if 'prod' in bucket_name:
             tags['Environment'] = 'prod'
         elif 'staging' in bucket_name or 'stg' in bucket_name:
             tags['Environment'] = 'staging'
         else:
             tags['Environment'] = 'dev'
-        
+
         # Apply tags
         try:
             s3.put_bucket_tagging(
@@ -452,7 +452,7 @@ axes[1, 0].set_ylabel('Cost ($)')
 
 # 4. Cost by team (if tags available)
 # Placeholder - would query CUR for tag-based costs
-axes[1, 1].text(0.5, 0.5, 'Cost by Team\n(Requires cost allocation tags)', 
+axes[1, 1].text(0.5, 0.5, 'Cost by Team\n(Requires cost allocation tags)',
                 ha='center', va='center', fontsize=12)
 axes[1, 1].set_title('Cost by Team')
 
@@ -479,7 +479,7 @@ def detect_anomalies(costs, threshold=2.5):
     """
     mean = np.mean(costs)
     std = np.std(costs)
-    
+
     anomalies = []
     for i, cost in enumerate(costs):
         z_score = abs((cost - mean) / std)
@@ -490,7 +490,7 @@ def detect_anomalies(costs, threshold=2.5):
                 'z_score': z_score,
                 'deviation': cost - mean
             })
-    
+
     return anomalies, mean, std
 
 # Apply to daily costs
@@ -577,10 +577,10 @@ print("  Email alerts will be sent for anomalies > $100")
 
 ## Key Learnings
 
-✅ **Cost Explorer API**: Programmatic cost queries with filters and grouping  
-✅ **CUR**: Most detailed billing data, queryable with Athena (Parquet for performance)  
-✅ **Cost Allocation Tags**: Foundation for showback/chargeback, team accountability  
-✅ **Anomaly Detection**: Statistical methods + AWS managed service  
+✅ **Cost Explorer API**: Programmatic cost queries with filters and grouping
+✅ **CUR**: Most detailed billing data, queryable with Athena (Parquet for performance)
+✅ **Cost Allocation Tags**: Foundation for showback/chargeback, team accountability
+✅ **Anomaly Detection**: Statistical methods + AWS managed service
 ✅ **Dashboards**: Visualize trends, identify optimization opportunities
 
 ## Cost Optimization Insights

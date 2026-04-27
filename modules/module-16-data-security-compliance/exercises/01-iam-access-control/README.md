@@ -3,8 +3,8 @@
 ## Overview
 Implement least-privilege IAM policies for data teams, configure cross-account access, set up permission boundaries, and validate policies with IAM Access Analyzer.
 
-**Difficulty**: ⭐⭐⭐ Advanced  
-**Duration**: ~3 hours  
+**Difficulty**: ⭐⭐⭐ Advanced
+**Duration**: ~3 hours
 **Prerequisites**: Basic AWS IAM knowledge, AWS CLI configured
 
 ## Learning Objectives
@@ -369,7 +369,7 @@ iam = boto3.client('iam')
 
 def create_role_with_policy(role_name, assume_role_policy, policy_file):
     """Create IAM role and attach custom policy"""
-    
+
     # Create role
     try:
         response = iam.create_role(
@@ -384,16 +384,16 @@ def create_role_with_policy(role_name, assume_role_policy, policy_file):
         )
         print(f"✓ Created role: {role_name}")
         print(f"  ARN: {response['Role']['Arn']}")
-        
+
     except iam.exceptions.EntityAlreadyExistsException:
         print(f"  Role already exists: {role_name}")
-    
+
     # Create policy
     with open(policy_file, 'r') as f:
         policy_document = json.load(f)
-    
+
     policy_name = f"{role_name}-policy"
-    
+
     try:
         policy_response = iam.create_policy(
             PolicyName=policy_name,
@@ -402,13 +402,13 @@ def create_role_with_policy(role_name, assume_role_policy, policy_file):
         )
         policy_arn = policy_response['Policy']['Arn']
         print(f"✓ Created policy: {policy_name}")
-        
+
     except iam.exceptions.EntityAlreadyExistsException:
         # Get existing policy ARN
         account_id = boto3.client('sts').get_caller_identity()['Account']
         policy_arn = f"arn:aws:iam::{account_id}:policy/{policy_name}"
         print(f"  Policy already exists: {policy_name}")
-    
+
     # Attach policy to role
     try:
         iam.attach_role_policy(
@@ -418,13 +418,13 @@ def create_role_with_policy(role_name, assume_role_policy, policy_file):
         print(f"✓ Attached policy to role")
     except Exception as e:
         print(f"  Policy already attached: {e}")
-    
+
     return role_name
 
 
 def create_data_engineer_role():
     """Create Data Engineer role"""
-    
+
     assume_role_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -449,7 +449,7 @@ def create_data_engineer_role():
             }
         ]
     }
-    
+
     return create_role_with_policy(
         'DataEngineerRole',
         assume_role_policy,
@@ -459,7 +459,7 @@ def create_data_engineer_role():
 
 def create_data_scientist_role():
     """Create Data Scientist role"""
-    
+
     assume_role_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -484,7 +484,7 @@ def create_data_scientist_role():
             }
         ]
     }
-    
+
     return create_role_with_policy(
         'DataScientistRole',
         assume_role_policy,
@@ -494,7 +494,7 @@ def create_data_scientist_role():
 
 def create_data_analyst_role():
     """Create Data Analyst role"""
-    
+
     assume_role_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -514,7 +514,7 @@ def create_data_analyst_role():
             }
         ]
     }
-    
+
     return create_role_with_policy(
         'DataAnalystRole',
         assume_role_policy,
@@ -526,16 +526,16 @@ if __name__ == '__main__':
     print("="*60)
     print("CREATING IAM ROLES FOR DATA PERSONAS")
     print("="*60)
-    
+
     print("\n1. Data Engineer Role:")
     create_data_engineer_role()
-    
+
     print("\n2. Data Scientist Role:")
     create_data_scientist_role()
-    
+
     print("\n3. Data Analyst Role:")
     create_data_analyst_role()
-    
+
     print("\n" + "="*60)
     print("✓ ALL ROLES CREATED")
     print("="*60)
@@ -628,12 +628,12 @@ iam = boto3.client('iam')
 
 def create_permission_boundary():
     """Create permission boundary policy"""
-    
+
     with open('permission_boundary.json', 'r') as f:
         policy_document = json.load(f)
-    
+
     policy_name = 'DataTeamPermissionBoundary'
-    
+
     try:
         response = iam.create_policy(
             PolicyName=policy_name,
@@ -643,7 +643,7 @@ def create_permission_boundary():
         policy_arn = response['Policy']['Arn']
         print(f"✓ Created permission boundary: {policy_name}")
         return policy_arn
-        
+
     except iam.exceptions.EntityAlreadyExistsException:
         account_id = boto3.client('sts').get_caller_identity()['Account']
         policy_arn = f"arn:aws:iam::{account_id}:policy/{policy_name}"
@@ -653,14 +653,14 @@ def create_permission_boundary():
 
 def apply_boundary_to_role(role_name, boundary_arn):
     """Apply permission boundary to role"""
-    
+
     try:
         iam.put_role_permissions_boundary(
             RoleName=role_name,
             PermissionsBoundary=boundary_arn
         )
         print(f"✓ Applied boundary to {role_name}")
-        
+
     except Exception as e:
         print(f"✗ Error applying boundary: {e}")
 
@@ -669,17 +669,17 @@ if __name__ == '__main__':
     print("="*60)
     print("APPLYING PERMISSION BOUNDARIES")
     print("="*60)
-    
+
     # Create boundary
     boundary_arn = create_permission_boundary()
-    
+
     # Apply to all data roles
     roles = ['DataEngineerRole', 'DataScientistRole', 'DataAnalystRole']
-    
+
     print("\nApplying to roles:")
     for role in roles:
         apply_boundary_to_role(role, boundary_arn)
-    
+
     print("\n" + "="*60)
     print("✓ PERMISSION BOUNDARIES APPLIED")
     print("="*60)
@@ -729,7 +729,7 @@ iam = boto3.client('iam')
 
 def create_cross_account_role(trusted_account_id, external_id):
     """Create role for cross-account access"""
-    
+
     assume_role_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -747,9 +747,9 @@ def create_cross_account_role(trusted_account_id, external_id):
             }
         ]
     }
-    
+
     role_name = 'CrossAccountDataAccess'
-    
+
     try:
         response = iam.create_role(
             RoleName=role_name,
@@ -759,9 +759,9 @@ def create_cross_account_role(trusted_account_id, external_id):
         )
         print(f"✓ Created cross-account role: {role_name}")
         print(f"  ARN: {response['Role']['Arn']}")
-        
+
         return response['Role']['Arn']
-        
+
     except iam.exceptions.EntityAlreadyExistsException:
         print(f"  Role already exists: {role_name}")
         role = iam.get_role(RoleName=role_name)
@@ -770,7 +770,7 @@ def create_cross_account_role(trusted_account_id, external_id):
 
 def attach_s3_read_policy(role_name):
     """Attach S3 read-only policy"""
-    
+
     policy_document = {
         "Version": "2012-10-17",
         "Statement": [
@@ -795,33 +795,33 @@ def attach_s3_read_policy(role_name):
             }
         ]
     }
-    
+
     policy_name = 'CrossAccountS3ReadPolicy'
-    
+
     try:
         policy_response = iam.create_policy(
             PolicyName=policy_name,
             PolicyDocument=json.dumps(policy_document)
         )
         policy_arn = policy_response['Policy']['Arn']
-        
+
     except iam.exceptions.EntityAlreadyExistsException:
         account_id = boto3.client('sts').get_caller_identity()['Account']
         policy_arn = f"arn:aws:iam::{account_id}:policy/{policy_name}"
-    
+
     iam.attach_role_policy(
         RoleName=role_name,
         PolicyArn=policy_arn
     )
-    
+
     print(f"✓ Attached S3 read policy to {role_name}")
 
 
 def test_assume_role(role_arn, external_id):
     """Test assuming the cross-account role"""
-    
+
     sts = boto3.client('sts')
-    
+
     try:
         response = sts.assume_role(
             RoleArn=role_arn,
@@ -829,14 +829,14 @@ def test_assume_role(role_arn, external_id):
             ExternalId=external_id,
             DurationSeconds=3600
         )
-        
+
         print("\n✓ Successfully assumed role")
         print(f"  Access Key: {response['Credentials']['AccessKeyId']}")
         print(f"  Session Token: {response['Credentials']['SessionToken'][:50]}...")
         print(f"  Expiration: {response['Credentials']['Expiration']}")
-        
+
         return response['Credentials']
-        
+
     except Exception as e:
         print(f"\n✗ Failed to assume role: {e}")
         return None
@@ -844,32 +844,32 @@ def test_assume_role(role_arn, external_id):
 
 if __name__ == '__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--trusted-account', required=True,
                        help='AWS account ID to trust')
     parser.add_argument('--external-id', required=True,
                        help='External ID for added security')
-    
+
     args = parser.parse_args()
-    
+
     print("="*60)
     print("SETUP CROSS-ACCOUNT ACCESS")
     print("="*60)
-    
+
     # Create role
     role_arn = create_cross_account_role(
         args.trusted_account,
         args.external_id
     )
-    
+
     # Attach policies
     attach_s3_read_policy('CrossAccountDataAccess')
-    
+
     # Test
     print("\nTesting role assumption:")
     test_assume_role(role_arn, args.external_id)
-    
+
     print("\n" + "="*60)
     print("✓ CROSS-ACCOUNT ACCESS CONFIGURED")
     print("="*60)
@@ -893,9 +893,9 @@ iam = boto3.client('iam')
 
 def create_analyzer():
     """Create IAM Access Analyzer"""
-    
+
     analyzer_name = 'DataSecurityAnalyzer'
-    
+
     try:
         response = accessanalyzer.create_analyzer(
             analyzerName=analyzer_name,
@@ -904,9 +904,9 @@ def create_analyzer():
         )
         print(f"✓ Created analyzer: {analyzer_name}")
         print(f"  ARN: {response['arn']}")
-        
+
         return response['arn']
-        
+
     except accessanalyzer.exceptions.ConflictException:
         print(f"  Analyzer already exists: {analyzer_name}")
         analyzers = accessanalyzer.list_analyzers()['analyzers']
@@ -917,32 +917,32 @@ def create_analyzer():
 
 def validate_policy(policy_document, policy_type='IDENTITY_POLICY'):
     """Validate IAM policy"""
-    
+
     print(f"\nValidating policy:")
-    
+
     try:
         response = accessanalyzer.validate_policy(
             policyDocument=json.dumps(policy_document),
             policyType=policy_type
         )
-        
+
         findings = response.get('findings', [])
-        
+
         if not findings:
             print("  ✓ No issues found")
             return True
-        
+
         print(f"  Found {len(findings)} issue(s):")
         for finding in findings:
             severity = finding.get('findingType', 'UNKNOWN')
             message = finding.get('issueCode', 'No message')
             print(f"    [{severity}] {message}")
-            
+
             if 'learnMoreLink' in finding:
                 print(f"      Learn more: {finding['learnMoreLink']}")
-        
+
         return len(findings) == 0
-        
+
     except Exception as e:
         print(f"  ✗ Validation error: {e}")
         return False
@@ -950,29 +950,29 @@ def validate_policy(policy_document, policy_type='IDENTITY_POLICY'):
 
 def analyze_all_roles():
     """Analyze all IAM roles"""
-    
+
     print("\nAnalyzing IAM Roles:")
     print("="*60)
-    
+
     roles = iam.list_roles()['Roles']
-    
+
     for role in roles:
         role_name = role['RoleName']
-        
+
         # Skip AWS service roles
         if role_name.startswith('AWS'):
             continue
-        
+
         print(f"\n{role_name}:")
-        
+
         # Get attached policies
         attached_policies = iam.list_attached_role_policies(
             RoleName=role_name
         )['AttachedPolicies']
-        
+
         for policy in attached_policies:
             print(f"  Attached Policy: {policy['PolicyName']}")
-            
+
             # Get policy document
             policy_arn = policy['PolicyArn']
             policy_version = iam.get_policy(PolicyArn=policy_arn)['Policy']['DefaultVersionId']
@@ -980,43 +980,43 @@ def analyze_all_roles():
                 PolicyArn=policy_arn,
                 VersionId=policy_version
             )['PolicyVersion']['Document']
-            
+
             # Validate
             validate_policy(policy_doc)
 
 
 def check_external_access():
     """Check for external access findings"""
-    
+
     print("\nChecking for External Access:")
     print("="*60)
-    
+
     try:
         analyzers = accessanalyzer.list_analyzers()['analyzers']
-        
+
         for analyzer in analyzers:
             analyzer_arn = analyzer['arn']
-            
+
             findings = accessanalyzer.list_findings(
                 analyzerArn=analyzer_arn,
                 filter={
                     'status': {'eq': ['ACTIVE']}
                 }
             )['findings']
-            
+
             if not findings:
                 print("✓ No external access findings")
                 continue
-            
+
             print(f"\nFound {len(findings)} finding(s):")
-            
+
             for finding in findings:
                 print(f"\n  Resource: {finding.get('resource', 'Unknown')}")
                 print(f"  Type: {finding.get('resourceType', 'Unknown')}")
                 print(f"  External Principal: {finding.get('principal', {}).get('AWS', 'Unknown')}")
                 print(f"  Action: {finding.get('action', [])}")
                 print(f"  Condition: {finding.get('condition', {})}")
-                
+
     except Exception as e:
         print(f"✗ Error checking findings: {e}")
 
@@ -1025,16 +1025,16 @@ if __name__ == '__main__':
     print("="*60)
     print("IAM ACCESS ANALYZER")
     print("="*60)
-    
+
     # Create analyzer
     create_analyzer()
-    
+
     # Analyze roles
     analyze_all_roles()
-    
+
     # Check external access
     check_external_access()
-    
+
     print("\n" + "="*60)
     print("✓ ANALYSIS COMPLETE")
     print("="*60)

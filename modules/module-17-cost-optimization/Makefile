@@ -421,7 +421,7 @@ db-seed:
 	import psycopg2
 	import json
 	import sys
-	
+
 	conn = psycopg2.connect(
 	    host='localhost',
 	    port=5432,
@@ -430,7 +430,7 @@ db-seed:
 	    password='cost_password'
 	)
 	cur = conn.cursor()
-	
+
 	# Create tables
 	cur.execute("""
 	    CREATE TABLE IF NOT EXISTS cost_history (
@@ -443,7 +443,7 @@ db-seed:
 	        environment VARCHAR(20)
 	    )
 	""")
-	
+
 	# Insert sample data
 	cur.execute("""
 	    INSERT INTO cost_history (cost_date, service, cost_amount, cost_center, team, environment)
@@ -453,7 +453,7 @@ db-seed:
 	        ('2024-01-01', 'AmazonRDS', 200.00, 'CC-12345', 'Data', 'prod'),
 	        ('2024-01-01', 'AWSLambda', 50.00, 'CC-67890', 'Data', 'prod')
 	""")
-	
+
 	conn.commit()
 	cur.close()
 	conn.close()
@@ -466,7 +466,7 @@ db-reset:
 	@read -p "Are you sure? (yes/no): " confirm && [ "$$confirm" = "yes" ] || (echo "Aborted." && exit 1)
 	@$(PYTHON) - <<EOF
 	import psycopg2
-	
+
 	conn = psycopg2.connect(
 	    host='localhost',
 	    port=5432,

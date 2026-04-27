@@ -1,7 +1,7 @@
 # Module 18: Advanced Data Architectures
 
-⏱️ **Estimated Time:** 16-20 hours  
-🎯 **Difficulty:** ⭐⭐⭐⭐⭐ Expert  
+⏱️ **Estimated Time:** 16-20 hours
+🎯 **Difficulty:** ⭐⭐⭐⭐⭐ Expert
 🏗️ **Focus:** Enterprise-grade architectural patterns for data platforms
 
 ## Prerequisites
@@ -35,14 +35,14 @@ This advanced module explores enterprise-grade data architecture patterns used b
 
 By the end of this module, you will be able to:
 
-✅ **Design and implement Lambda Architecture** for batch + stream processing  
-✅ **Build Kappa Architecture** for stream-first data platforms  
-✅ **Apply Data Mesh principles** to decentralized data ownership  
-✅ **Create Event-Driven Architectures** with event sourcing and CQRS  
-✅ **Implement multi-region active-active** systems with conflict resolution  
-✅ **Optimize architectural decisions** based on CAP theorem trade-offs  
-✅ **Design hybrid cloud** data architectures with on-premise integration  
-✅ **Build feature stores** for ML with real-time and batch features  
+✅ **Design and implement Lambda Architecture** for batch + stream processing
+✅ **Build Kappa Architecture** for stream-first data platforms
+✅ **Apply Data Mesh principles** to decentralized data ownership
+✅ **Create Event-Driven Architectures** with event sourcing and CQRS
+✅ **Implement multi-region active-active** systems with conflict resolution
+✅ **Optimize architectural decisions** based on CAP theorem trade-offs
+✅ **Design hybrid cloud** data architectures with on-premise integration
+✅ **Build feature stores** for ML with real-time and batch features
 
 ## Architecture Patterns Covered
 
@@ -52,7 +52,7 @@ Raw Data → Batch Layer (Spark) → Serving Layer (Data Warehouse)
     ↓
 Speed Layer (Kinesis → Lambda) → Real-time Views
 ```
-**Use Case**: Historical accuracy + real-time insights  
+**Use Case**: Historical accuracy + real-time insights
 **Example**: E-commerce analytics (lifetime value + current session)
 
 ### 2. **Kappa Architecture** (Stream-Only)
@@ -61,7 +61,7 @@ Event Stream → Stream Processor → Materialized Views
          ↓
     Event Log (Kinesis/Kafka) = Source of Truth
 ```
-**Use Case**: Simplified architecture when batch isn't needed  
+**Use Case**: Simplified architecture when batch isn't needed
 **Example**: Real-time fraud detection, IoT monitoring
 
 ### 3. **Data Mesh** (Decentralized Ownership)
@@ -72,7 +72,7 @@ Domain C (Marketing Team) → Data Product API
          ↓
 Central Governance (Schema Registry, Catalog)
 ```
-**Use Case**: Large organizations (>50 engineers), domain expertise  
+**Use Case**: Large organizations (>50 engineers), domain expertise
 **Example**: Uber, Netflix, Airbnb data platforms
 
 ### 4. **Event-Driven Architecture** (Event Sourcing + CQRS)
@@ -81,7 +81,7 @@ Commands → Event Store → Event Handlers → Read Models
                 ↓
            Immutable Log (DynamoDB Streams, Kinesis)
 ```
-**Use Case**: Audit trails, complex business logic, temporal queries  
+**Use Case**: Audit trails, complex business logic, temporal queries
 **Example**: Financial transactions, order management
 
 ### 5. **Multi-Region Active-Active** (Global Scale)
@@ -90,7 +90,7 @@ US-East → DynamoDB Global Tables → EU-West
    ↓                                    ↓
 Users          Cross-region replication         Users
 ```
-**Use Case**: Global applications, disaster recovery, low latency  
+**Use Case**: Global applications, disaster recovery, low latency
 **Example**: Gaming leaderboards, IoT telemetry
 
 ### 6. **Polyglot Persistence** (Right Tool, Right Job)
@@ -103,51 +103,51 @@ Search → OpenSearch (full-text)
 Graph → Neptune (relationships)
 Time-series → Timestream (sensors)
 ```
-**Use Case**: Optimize cost and performance per use case  
+**Use Case**: Optimize cost and performance per use case
 **Example**: Modern SaaS applications
 
 ## Exercises
 
 ### Exercise 01: Lambda Architecture Implementation
-**Time**: 3 hours | **Difficulty**: ⭐⭐⭐⭐  
+**Time**: 3 hours | **Difficulty**: ⭐⭐⭐⭐
 Build a complete Lambda Architecture with batch (Spark), speed (Kinesis), and serving layers. Implement query logic that merges historical + real-time data.
 
-**Files**: `batch_layer.py`, `speed_layer.py`, `serving_layer.py`  
+**Files**: `batch_layer.py`, `speed_layer.py`, `serving_layer.py`
 **Savings**: 40% faster insights vs batch-only (hours → seconds for recent data)
 
 ### Exercise 02: Kappa Architecture with Kinesis
-**Time**: 2.5 hours | **Difficulty**: ⭐⭐⭐⭐  
+**Time**: 2.5 hours | **Difficulty**: ⭐⭐⭐⭐
 Implement stream-only architecture using Kinesis Data Streams as the source of truth. Build reprocessing capability by replaying events from retention.
 
-**Files**: `stream_processor.py`, `materialized_views.py`, `replay_handler.py`  
+**Files**: `stream_processor.py`, `materialized_views.py`, `replay_handler.py`
 **Savings**: 30% operational complexity vs Lambda (one processing paradigm)
 
 ### Exercise 03: Data Mesh with Domain Data Products
-**Time**: 3.5 hours | **Difficulty**: ⭐⭐⭐⭐⭐  
+**Time**: 3.5 hours | **Difficulty**: ⭐⭐⭐⭐⭐
 Design Data Mesh architecture with 3 domains (Product, Sales, Customer). Implement data product APIs, schema registry, and federated governance.
 
-**Files**: `domain_api.py`, `schema_registry.py`, `data_catalog_federation.py`  
+**Files**: `domain_api.py`, `schema_registry.py`, `data_catalog_federation.py`
 **Savings**: 50% faster time-to-insight for domain teams (decentralized ownership)
 
 ### Exercise 04: Event-Driven Architecture (CQRS + Event Sourcing)
-**Time**: 3 hours | **Difficulty**: ⭐⭐⭐⭐⭐  
+**Time**: 3 hours | **Difficulty**: ⭐⭐⭐⭐⭐
 Build event-sourced system with DynamoDB Streams. Implement CQRS pattern with separate command and query models. Enable temporal queries (point-in-time state).
 
-**Files**: `event_store.py`, `command_handler.py`, `query_projections.py`  
+**Files**: `event_store.py`, `command_handler.py`, `query_projections.py`
 **Savings**: 100% audit compliance (immutable event log), 70% faster queries (read models)
 
 ### Exercise 05: Multi-Region Active-Active
-**Time**: 2.5 hours | **Difficulty**: ⭐⭐⭐⭐  
+**Time**: 2.5 hours | **Difficulty**: ⭐⭐⭐⭐
 Implement global data platform with DynamoDB Global Tables and Aurora Global Database. Handle conflict resolution with Last-Write-Wins and custom resolvers.
 
-**Files**: `global_replication.py`, `conflict_resolution.py`, `failover_automation.py`  
+**Files**: `global_replication.py`, `conflict_resolution.py`, `failover_automation.py`
 **Savings**: 60% latency reduction for global users, 99.99% availability
 
 ### Exercise 06: Polyglot Persistence Strategy
-**Time**: 2.5 hours | **Difficulty**: ⭐⭐⭐⭐  
+**Time**: 2.5 hours | **Difficulty**: ⭐⭐⭐⭐
 Design multi-database architecture selecting optimal database per use case. Implement data synchronization between operational and analytical stores (CDC pattern).
 
-**Files**: `database_selector.py`, `cdc_pipeline.py`, `data_synchronization.py`  
+**Files**: `database_selector.py`, `cdc_pipeline.py`, `data_synchronization.py`
 **Savings**: 50% cost optimization (right-sized databases), 80% query performance
 
 ## Real-World Case Studies
@@ -335,23 +335,23 @@ pytest validation/test_advanced_architectures.py -v
 ## Key Architectural Decisions
 
 ### When to Use Lambda Architecture?
-✅ **Yes**: Need batch accuracy + real-time speed, complex analytics, reprocessing capability  
+✅ **Yes**: Need batch accuracy + real-time speed, complex analytics, reprocessing capability
 ❌ **No**: Operational complexity too high, team lacks expertise in both batch and streaming
 
 ### When to Use Kappa Architecture?
-✅ **Yes**: Stream-first mindset, data naturally streams, simple reprocessing  
+✅ **Yes**: Stream-first mindset, data naturally streams, simple reprocessing
 ❌ **No**: Complex batch analytics, historical reprocessing at scale
 
 ### When to Use Data Mesh?
-✅ **Yes**: Large org (>50 data engineers), clear domain boundaries, domain expertise  
+✅ **Yes**: Large org (>50 data engineers), clear domain boundaries, domain expertise
 ❌ **No**: Small teams, centralized data team works well, high coordination cost
 
 ### When to Use Event Sourcing?
-✅ **Yes**: Audit requirements, temporal queries, complex workflows, undo/replay  
+✅ **Yes**: Audit requirements, temporal queries, complex workflows, undo/replay
 ❌ **No**: Simple CRUD, storage costs concern, team unfamiliar with pattern
 
 ### When to Use Multi-Region?
-✅ **Yes**: Global users, <100ms latency SLA, disaster recovery, compliance  
+✅ **Yes**: Global users, <100ms latency SLA, disaster recovery, compliance
 ❌ **No**: Single region sufficient, consistency critical, replication costs high
 
 ## CAP Theorem Trade-offs
@@ -391,14 +391,14 @@ pytest validation/test_advanced_architectures.py -v
 
 After completing this module, you will have:
 
-✅ **6 Reference Architectures** with production-ready Python implementations  
-✅ **18 Python Scripts** (~8,000+ lines) demonstrating advanced patterns  
-✅ **Real-world Trade-off Analysis** for architectural decisions  
-✅ **Performance Benchmarks** for each architecture pattern  
-✅ **Cost Models** to evaluate architecture choices  
-✅ **Multi-region Deployment** strategies with failover automation  
-✅ **Schema Evolution** patterns for backward compatibility  
-✅ **Monitoring Dashboards** for distributed systems  
+✅ **6 Reference Architectures** with production-ready Python implementations
+✅ **18 Python Scripts** (~8,000+ lines) demonstrating advanced patterns
+✅ **Real-world Trade-off Analysis** for architectural decisions
+✅ **Performance Benchmarks** for each architecture pattern
+✅ **Cost Models** to evaluate architecture choices
+✅ **Multi-region Deployment** strategies with failover automation
+✅ **Schema Evolution** patterns for backward compatibility
+✅ **Monitoring Dashboards** for distributed systems
 
 ## Expert-Level Topics
 
@@ -435,16 +435,16 @@ After mastering advanced architectures, proceed to:
 
 ## Additional Resources
 
-- **Books**: 
+- **Books**:
   - "Designing Data-Intensive Applications" by Martin Kleppmann
   - "Building Microservices" by Sam Newman
   - "Data Mesh" by Zhamak Dehghani
-  
-- **AWS**: 
+
+- **AWS**:
   - AWS Architecture Center
   - AWS Well-Architected Framework
   - AWS This Is My Architecture (video series)
-  
+
 - **Papers**:
   - Lambda Architecture (Nathan Marz, 2011)
   - Kappa Architecture (Jay Kreps, 2014)
@@ -452,6 +452,6 @@ After mastering advanced architectures, proceed to:
 
 ---
 
-**Module Status**: 🚧 In Development  
-**Last Updated**: 2026-03-09  
+**Module Status**: 🚧 In Development
+**Last Updated**: 2026-03-09
 **Maintainer**: Cloud Data Training Team

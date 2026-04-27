@@ -72,7 +72,7 @@ log_test "Cost and Usage Report bucket"
 CUR_BUCKET="cost-usage-report-${ACCOUNT_ID}"
 if aws s3api head-bucket --bucket "$CUR_BUCKET" 2>/dev/null; then
     log_pass "CUR bucket exists: s3://$CUR_BUCKET"
-    
+
     # Check if CUR data exists
     OBJECT_COUNT=$(aws s3 ls "s3://${CUR_BUCKET}/reports/" --recursive 2>/dev/null | wc -l)
     if [ "$OBJECT_COUNT" -gt 0 ]; then
@@ -164,7 +164,7 @@ fi
 log_test "Python virtual environment"
 if [ -d "$MODULE_DIR/venv" ]; then
     log_pass "Virtual environment exists"
-    
+
     # Check key packages
     if "$MODULE_DIR/venv/bin/python" -c "import boto3, pandas, matplotlib" 2>/dev/null; then
         log_pass "Key Python packages installed"
@@ -208,10 +208,10 @@ cd "$MODULE_DIR"
 if [ -f "validation/test_cost_optimization.py" ]; then
     if [ -d "venv" ]; then
         source venv/bin/activate
-        
+
         # Run tests
         pytest validation/test_cost_optimization.py -v --tb=short &>/tmp/pytest-output.txt
-        
+
         if [ $? -eq 0 ]; then
             TEST_COUNT=$(grep -c "PASSED" /tmp/pytest-output.txt || echo "0")
             log_pass "All pytest tests passed ($TEST_COUNT tests)"

@@ -450,10 +450,10 @@ Architecture:
 
 ## Key Takeaways
 
-✅ **Multi-account strategy**: Isolate workloads, enforce governance with SCPs  
-✅ **Network security**: VPC design, security groups, PrivateLink, endpoints  
-✅ **Data lake security**: Encryption, Lake Formation, fine-grained access  
-✅ **Zero Trust**: Never trust, always verify, least privilege  
+✅ **Multi-account strategy**: Isolate workloads, enforce governance with SCPs
+✅ **Network security**: VPC design, security groups, PrivateLink, endpoints
+✅ **Data lake security**: Encryption, Lake Formation, fine-grained access
+✅ **Zero Trust**: Never trust, always verify, least privilege
 ✅ **Reference architectures**: HIPAA, PCI-DSS, GDPR patterns
 
 ---

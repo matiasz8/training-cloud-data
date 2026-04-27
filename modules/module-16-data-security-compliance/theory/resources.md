@@ -340,10 +340,10 @@ results = analyzer.analyze(text="My SSN is 123-45-6789", language='en')
 
 ## Next Steps
 
-✅ **Complete this module's exercises** (hands-on practice)  
-✅ **Read AWS Security Best Practices** (foundational knowledge)  
-✅ **Join AWS Security community** (networking, learning)  
-✅ **Set up security tooling** (Prowler, git-secrets, etc.)  
+✅ **Complete this module's exercises** (hands-on practice)
+✅ **Read AWS Security Best Practices** (foundational knowledge)
+✅ **Join AWS Security community** (networking, learning)
+✅ **Set up security tooling** (Prowler, git-secrets, etc.)
 ✅ **Plan certification path** (Security Specialty recommended)
 
 ---

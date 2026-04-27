@@ -8,7 +8,7 @@
 - Replay capability (rebuild state from events)
 - Multiple read models (optimized for different queries)
 
-**Time**: 4-5 hours  
+**Time**: 4-5 hours
 **Difficulty**: ⭐⭐⭐⭐⭐ Advanced
 
 ## Learning Objectives
@@ -411,18 +411,18 @@ AccountOpened → DepositMade → WithdrawalMade → InterestCredited
 
 ### Advantages of CQRS + Event Sourcing
 
-✅ **Complete Audit Trail**: Every change recorded (compliance, debugging)  
-✅ **Temporal Queries**: Query state at any time ("What was inventory on Jan 1?")  
-✅ **Multiple Read Models**: Same events → different projections (no duplicate writes)  
-✅ **Flexibility**: Add new projections without changing write side  
+✅ **Complete Audit Trail**: Every change recorded (compliance, debugging)
+✅ **Temporal Queries**: Query state at any time ("What was inventory on Jan 1?")
+✅ **Multiple Read Models**: Same events → different projections (no duplicate writes)
+✅ **Flexibility**: Add new projections without changing write side
 ✅ **Replay Capability**: Fix bugs by replaying events with corrected logic
 
 ### Disadvantages
 
-❌ **Complexity**: More complex than CRUD (events, projections, eventual consistency)  
-❌ **Eventual Consistency**: Read models lag behind writes (50-200ms)  
-❌ **Storage**: 10-100x more storage (keep all events forever)  
-❌ **Learning Curve**: Team needs to understand event sourcing patterns  
+❌ **Complexity**: More complex than CRUD (events, projections, eventual consistency)
+❌ **Eventual Consistency**: Read models lag behind writes (50-200ms)
+❌ **Storage**: 10-100x more storage (keep all events forever)
+❌ **Learning Curve**: Team needs to understand event sourcing patterns
 ❌ **No Ad-Hoc Deletes**: Can't delete events (only compensating events)
 
 ## Cost Analysis
@@ -816,5 +816,5 @@ After completing this exercise:
 
 ---
 
-**Estimated Completion Time**: 4-5 hours  
+**Estimated Completion Time**: 4-5 hours
 **Key Takeaway**: CQRS + Event Sourcing provides complete audit trail and temporal queries, but adds complexity - only adopt when requirements justify the extra overhead.

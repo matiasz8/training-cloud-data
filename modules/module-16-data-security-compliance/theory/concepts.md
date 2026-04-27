@@ -51,8 +51,8 @@ The foundation of information security:
 └────────────────────────────────┘
 ```
 
-**Confidentiality**: Only authorized users can access data  
-**Integrity**: Data accuracy and consistency maintained  
+**Confidentiality**: Only authorized users can access data
+**Integrity**: Data accuracy and consistency maintained
 **Availability**: Data accessible when needed
 
 ### Defense in Depth
@@ -133,9 +133,9 @@ Layered security approach:
 
 ### IAM Components
 
-**IAM User**: Individual AWS account  
-**IAM Group**: Collection of users  
-**IAM Role**: Assumable identity for services/applications  
+**IAM User**: Individual AWS account
+**IAM Group**: Collection of users
+**IAM Role**: Assumable identity for services/applications
 **IAM Policy**: JSON document defining permissions
 
 **Policy Types**:
@@ -156,8 +156,8 @@ Layered security approach:
 
 ### Federated Access
 
-**SAML 2.0**: Enterprise SSO (Active Directory → AWS)  
-**OIDC**: Web identity federation (Google, Facebook)  
+**SAML 2.0**: Enterprise SSO (Active Directory → AWS)
+**OIDC**: Web identity federation (Google, Facebook)
 **AWS SSO**: Centralized access management
 
 **Benefits**:
@@ -207,8 +207,8 @@ Layered security approach:
 
 ### AWS KMS Concepts
 
-**Customer Master Key (CMK)**: Top-level key resource  
-**Data Key**: Key used to encrypt data  
+**Customer Master Key (CMK)**: Top-level key resource
+**Data Key**: Key used to encrypt data
 **Envelope Encryption**: CMK encrypts data keys, data keys encrypt data
 
 **Key Types**:
@@ -247,9 +247,9 @@ Layered security approach:
 
 ### Data Classification
 
-**Public**: No harm if disclosed  
-**Internal**: Internal use only  
-**Confidential**: Limited access, harm if disclosed  
+**Public**: No harm if disclosed
+**Internal**: Internal use only
+**Confidential**: Limited access, harm if disclosed
 **Restricted**: Strict controls, severe harm if disclosed
 
 ### Data Masking Techniques
@@ -298,7 +298,7 @@ SELECT ssn FROM customers; -- 'XXX-XX-6789'
 
 ### GDPR (General Data Protection Regulation)
 
-**Scope**: EU residents' data  
+**Scope**: EU residents' data
 **Effective**: May 25, 2018
 
 **Key Requirements**:

@@ -422,14 +422,14 @@ guardduty.update_detector(
 def respond_to_compromised_credentials(access_key_id):
     """Automated response to compromised credentials"""
     iam = boto3.client('iam')
-    
+
     # 1. Disable access key
     iam.update_access_key(
         AccessKeyId=access_key_id,
         Status='Inactive'
     )
     print(f"✓ Disabled access key: {access_key_id}")
-    
+
     # 2. Attach deny-all policy
     user = iam.get_access_key_last_used(AccessKeyId=access_key_id)['UserName']
     iam.put_user_policy(
@@ -441,7 +441,7 @@ def respond_to_compromised_credentials(access_key_id):
         })
     )
     print(f"✓ Applied deny-all policy to user: {user}")
-    
+
     # 3. Notify security team
     sns = boto3.client('sns')
     sns.publish(
@@ -494,14 +494,14 @@ users = iam.list_users()['Users']
 
 for user in users:
     keys = iam.list_access_keys(UserName=user['UserName'])['AccessKeyMetadata']
-    
+
     for key in keys:
         last_used = iam.get_access_key_last_used(AccessKeyId=key['AccessKeyId'])
-        
+
         if 'LastUsedDate' in last_used['AccessKeyLastUsed']:
-            days = (datetime.datetime.now(datetime.timezone.utc) - 
+            days = (datetime.datetime.now(datetime.timezone.utc) -
                     last_used['AccessKeyLastUsed']['LastUsedDate']).days
-            
+
             if days > 90:
                 print(f"⚠️  {user['UserName']}: Access key {key['AccessKeyId']} unused for {days} days")
 ```
@@ -555,10 +555,10 @@ repos:
 
 ## Key Takeaways
 
-✅ **IAM**: Use roles, enable MFA, rotate keys, least privilege  
-✅ **Data Protection**: Encrypt at rest/transit, versioning, Object Lock  
-✅ **Network**: Security groups, VPC endpoints, Flow Logs  
-✅ **Monitoring**: CloudTrail, GuardDuty, CloudWatch alarms  
-✅ **Incident Response**: Automated playbooks, isolation, notification  
-✅ **Compliance**: CIS Benchmark, automated checks  
+✅ **IAM**: Use roles, enable MFA, rotate keys, least privilege
+✅ **Data Protection**: Encrypt at rest/transit, versioning, Object Lock
+✅ **Network**: Security groups, VPC endpoints, Flow Logs
+✅ **Monitoring**: CloudTrail, GuardDuty, CloudWatch alarms
+✅ **Incident Response**: Automated playbooks, isolation, notification
+✅ **Compliance**: CIS Benchmark, automated checks
 ✅ **DevSecOps**: Scan IaC, dependencies, pre-commit hooks

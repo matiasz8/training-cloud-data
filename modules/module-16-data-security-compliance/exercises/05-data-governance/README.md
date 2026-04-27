@@ -3,8 +3,8 @@
 ## Overview
 Implement fine-grained data access control using AWS Lake Formation, including table-level, column-level, and row-level security, tag-based access control (TBAC), cross-account data sharing, and data lineage tracking.
 
-**Difficulty**: ⭐⭐⭐⭐ Expert  
-**Duration**: ~3 hours  
+**Difficulty**: ⭐⭐⭐⭐ Expert
+**Duration**: ~3 hours
 **Prerequisites**: AWS Lake Formation, Glue Data Catalog, IAM advanced
 
 ## Learning Objectives
@@ -122,33 +122,33 @@ sts = boto3.client('sts')
 
 def create_data_lake_buckets():
     """Create S3 buckets for data lake"""
-    
+
     account_id = sts.get_caller_identity()['Account']
     buckets = [
         f'datalake-raw-{account_id}',
         f'datalake-processed-{account_id}',
         f'datalake-curated-{account_id}'
     ]
-    
+
     print("\n1. Creating Data Lake Buckets")
     print("="*60)
-    
+
     for bucket in buckets:
         try:
             s3.create_bucket(Bucket=bucket)
             print(f"✓ Created: {bucket}")
         except s3.exceptions.BucketAlreadyOwnedByYou:
             print(f"  Exists: {bucket}")
-    
+
     return buckets
 
 
 def register_s3_locations(buckets):
     """Register S3 locations with Lake Formation"""
-    
+
     print("\n2. Registering S3 Locations")
     print("="*60)
-    
+
     for bucket in buckets:
         try:
             lakeformation.register_resource(
@@ -162,12 +162,12 @@ def register_s3_locations(buckets):
 
 def create_glue_database():
     """Create Glue database"""
-    
+
     print("\n3. Creating Glue Database")
     print("="*60)
-    
+
     database_name = 'finance_analytics_db'
-    
+
     try:
         glue.create_database(
             DatabaseInput={
@@ -179,16 +179,16 @@ def create_glue_database():
         print(f"✓ Created database: {database_name}")
     except glue.exceptions.AlreadyExistsException:
         print(f"  Database exists: {database_name}")
-    
+
     return database_name
 
 
 def create_sample_tables(database_name):
     """Create sample tables in Glue catalog"""
-    
+
     print("\n4. Creating Sample Tables")
     print("="*60)
-    
+
     # Transactions table
     try:
         glue.create_table(
@@ -216,7 +216,7 @@ def create_sample_tables(database_name):
         print(f"✓ Created table: transactions")
     except glue.exceptions.AlreadyExistsException:
         print(f"  Table exists: transactions")
-    
+
     # Customers table (with PII)
     try:
         glue.create_table(
@@ -252,19 +252,19 @@ if __name__ == '__main__':
     print("="*60)
     print("SETTING UP LAKE FORMATION DATA LAKE")
     print("="*60)
-    
+
     # Create buckets
     buckets = create_data_lake_buckets()
-    
+
     # Register with Lake Formation
     register_s3_locations(buckets)
-    
+
     # Create database
     database = create_glue_database()
-    
+
     # Create tables
     create_sample_tables(database)
-    
+
     print("\n" + "="*60)
     print("✓ LAKE FORMATION SETUP COMPLETE")
     print("="*60)
@@ -286,9 +286,9 @@ sts = boto3.client('sts')
 
 def grant_table_permissions(principal, database, table, permissions):
     """Grant table-level permissions"""
-    
+
     print(f"\nGranting {permissions} on {database}.{table} to {principal}")
-    
+
     try:
         lakeformation.grant_permissions(
             Principal={'DataLakePrincipalIdentifier': principal},
@@ -307,9 +307,9 @@ def grant_table_permissions(principal, database, table, permissions):
 
 def grant_column_permissions(principal, database, table, columns, permissions):
     """Grant column-level permissions"""
-    
+
     print(f"\nGranting {permissions} on columns {columns}")
-    
+
     try:
         lakeformation.grant_permissions(
             Principal={'DataLakePrincipalIdentifier': principal},
@@ -329,12 +329,12 @@ def grant_column_permissions(principal, database, table, columns, permissions):
 
 def create_data_filter(database, table, filter_name, filter_expression):
     """Create row-level security filter"""
-    
+
     print(f"\nCreating data filter: {filter_name}")
     print(f"  Expression: {filter_expression}")
-    
+
     account_id = sts.get_caller_identity()['Account']
-    
+
     try:
         lakeformation.create_data_cells_filter(
             TableData={
@@ -355,15 +355,15 @@ def create_data_filter(database, table, filter_name, filter_expression):
 
 def configure_data_engineer_access():
     """Configure full access for data engineers"""
-    
+
     print("\n" + "="*60)
     print("Configuring Data Engineer Access (Full)")
     print("="*60)
-    
+
     account_id = sts.get_caller_identity()['Account']
     principal = f"arn:aws:iam::{account_id}:role/DataEngineerRole"
     database = 'finance_analytics_db'
-    
+
     # Full access to all tables
     for table in ['transactions', 'customers']:
         grant_table_permissions(
@@ -376,15 +376,15 @@ def configure_data_engineer_access():
 
 def configure_data_scientist_access():
     """Configure restricted access for data scientists"""
-    
+
     print("\n" + "="*60)
     print("Configuring Data Scientist Access (Column-Level)")
     print("="*60)
-    
+
     account_id = sts.get_caller_identity()['Account']
     principal = f"arn:aws:iam::{account_id}:role/DataScientistRole"
     database = 'finance_analytics_db'
-    
+
     # Access to transactions (all columns)
     grant_table_permissions(
         principal,
@@ -392,7 +392,7 @@ def configure_data_scientist_access():
         'transactions',
         ['SELECT', 'DESCRIBE']
     )
-    
+
     # Access to customers (excluding sensitive columns)
     allowed_columns = ['customer_id', 'name', 'email', 'phone', 'department']
     grant_column_permissions(
@@ -402,40 +402,40 @@ def configure_data_scientist_access():
         allowed_columns,
         ['SELECT', 'DESCRIBE']
     )
-    
+
     print("\n  Note: SSN and salary columns are excluded")
 
 
 def configure_analyst_access():
     """Configure row-level filtered access for analysts"""
-    
+
     print("\n" + "="*60)
     print("Configuring Analyst Access (Row-Level)")
     print("="*60)
-    
+
     database = 'finance_analytics_db'
-    
+
     # Create row filters for different regions
     filters = [
         ('us_analyst_filter', "region = 'US'"),
         ('eu_analyst_filter', "region = 'EU'"),
         ('engineering_filter', "department = 'engineering'")
     ]
-    
+
     for filter_name, expression in filters:
         create_data_filter(database, 'transactions', filter_name, expression)
-    
+
     # Grant access with filter
     account_id = sts.get_caller_identity()['Account']
     us_analyst = f"arn:aws:iam::{account_id}:role/USAnalystRole"
-    
+
     grant_table_permissions(
         us_analyst,
         database,
         'transactions',
         ['SELECT', 'DESCRIBE']
     )
-    
+
     print("\n  Note: Analysts only see rows matching their region")
 
 
@@ -443,11 +443,11 @@ if __name__ == '__main__':
     print("="*60)
     print("CONFIGURING LAKE FORMATION PERMISSIONS")
     print("="*60)
-    
+
     configure_data_engineer_access()
     configure_data_scientist_access()
     configure_analyst_access()
-    
+
     print("\n" + "="*60)
     print("✓ PERMISSIONS CONFIGURED")
     print("="*60)
@@ -473,12 +473,12 @@ sts = boto3.client('sts')
 
 def create_lf_tags():
     """Create LF-Tags for classification"""
-    
+
     print("\n1. Creating LF-Tags")
     print("="*60)
-    
+
     account_id = sts.get_caller_identity()['Account']
-    
+
     tags = [
         {
             'key': 'DataClassification',
@@ -493,7 +493,7 @@ def create_lf_tags():
             'values': ['Yes', 'No']
         }
     ]
-    
+
     for tag in tags:
         try:
             lakeformation.create_lf_tag(
@@ -509,13 +509,13 @@ def create_lf_tags():
 
 def assign_tags_to_resources():
     """Assign LF-Tags to tables"""
-    
+
     print("\n2. Assigning Tags to Tables")
     print("="*60)
-    
+
     account_id = sts.get_caller_identity()['Account']
     database = 'finance_analytics_db'
-    
+
     # Tag transactions table
     try:
         lakeformation.add_lf_tags_to_resource(
@@ -535,7 +535,7 @@ def assign_tags_to_resources():
         print(f"✓ Tagged: transactions")
     except Exception as e:
         print(f"  Error: {e}")
-    
+
     # Tag customers table (contains PII)
     try:
         lakeformation.add_lf_tags_to_resource(
@@ -559,13 +559,13 @@ def assign_tags_to_resources():
 
 def grant_tag_based_permissions():
     """Grant permissions based on LF-Tags"""
-    
+
     print("\n3. Granting Tag-Based Permissions")
     print("="*60)
-    
+
     account_id = sts.get_caller_identity()['Account']
     analyst_role = f"arn:aws:iam::{account_id}:role/DataAnalystRole"
-    
+
     # Grant access to all resources tagged as "Internal"
     try:
         lakeformation.grant_permissions(
@@ -593,11 +593,11 @@ if __name__ == '__main__':
     print("="*60)
     print("SETTING UP LF-TAGS (TBAC)")
     print("="*60)
-    
+
     create_lf_tags()
     assign_tags_to_resources()
     grant_tag_based_permissions()
-    
+
     print("\n" + "="*60)
     print("✓ LF-TAGS CONFIGURED")
     print("="*60)
@@ -617,9 +617,9 @@ if __name__ == '__main__':
 
 ## Expected Results
 
-**Governance**: Centralized access control for entire data lake  
-**Fine-Grained Security**: Table, column, and row-level controls  
-**Tag-Based Access**: Automated permissions via LF-Tags  
+**Governance**: Centralized access control for entire data lake
+**Fine-Grained Security**: Table, column, and row-level controls
+**Tag-Based Access**: Automated permissions via LF-Tags
 **Auditing**: All data access logged in CloudTrail
 
 ## Key Learnings

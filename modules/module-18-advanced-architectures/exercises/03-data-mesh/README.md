@@ -4,7 +4,7 @@
 
 Data Mesh is a **decentralized approach** to data architecture that treats **data as a product** and distributes ownership to **domain teams**. Instead of a centralized data lake/warehouse, each business domain (Product, Sales, Customer) owns its data products.
 
-**Time**: 4-5 hours  
+**Time**: 4-5 hours
 **Difficulty**: ⭐⭐⭐⭐⭐ Advanced
 
 ## Learning Objectives
@@ -218,7 +218,7 @@ products = federation.discover_data_products(
 
 # Cross-domain query
 sql = """
-    SELECT 
+    SELECT
         p.category,
         SUM(o.amount) as revenue,
         COUNT(DISTINCT o.customer_id) as buyers
@@ -279,7 +279,7 @@ python domain_api.py --mode check-slas
 # Revenue by category for high-value customers
 python catalog_federation.py \
     --mode federated-query \
-    --sql "SELECT p.category, SUM(o.amount) as revenue 
+    --sql "SELECT p.category, SUM(o.amount) as revenue
            FROM sales_domain_db.orders o
            JOIN product_domain_db.catalog p ON o.product_id = p.product_id
            JOIN customer_domain_db.profiles c ON o.customer_id = c.customer_id
@@ -391,19 +391,19 @@ Payments Domain (2 teams, 10 engineers)
 
 ### Advantages of Data Mesh
 
-✅ **Scalability**: Each domain scales independently (add engineers without coordination)  
-✅ **Faster Innovation**: Teams deploy data products without waiting for central team  
-✅ **Domain Expertise**: Teams understand their data better (higher quality)  
-✅ **Fault Isolation**: Issues in Sales Domain don't affect Product Domain  
+✅ **Scalability**: Each domain scales independently (add engineers without coordination)
+✅ **Faster Innovation**: Teams deploy data products without waiting for central team
+✅ **Domain Expertise**: Teams understand their data better (higher quality)
+✅ **Fault Isolation**: Issues in Sales Domain don't affect Product Domain
 ✅ **Clear Ownership**: Accountability clear (no "not my problem")
 
 ### Disadvantages of Data Mesh
 
-❌ **Complexity**: Distributed system harder to debug (30 APIs vs 1 data lake)  
-❌ **Duplication**: Common logic duplicated across domains (customer segmentation)  
-❌ **Learning Curve**: Teams need to learn platform (Glue, Lake Formation, Athena)  
-❌ **Discovery Challenge**: 10,000+ data products hard to find (need catalog tooling)  
-❌ **Cross-Domain Coordination**: Breaking changes require synchronization  
+❌ **Complexity**: Distributed system harder to debug (30 APIs vs 1 data lake)
+❌ **Duplication**: Common logic duplicated across domains (customer segmentation)
+❌ **Learning Curve**: Teams need to learn platform (Glue, Lake Formation, Athena)
+❌ **Discovery Challenge**: 10,000+ data products hard to find (need catalog tooling)
+❌ **Cross-Domain Coordination**: Breaking changes require synchronization
 ❌ **Cost**: Higher infrastructure cost per domain ($10K-20K/domain/month)
 
 ## Cost Analysis
@@ -773,5 +773,5 @@ After completing this exercise:
 
 ---
 
-**Estimated Completion Time**: 4-5 hours  
+**Estimated Completion Time**: 4-5 hours
 **Key Takeaway**: Data Mesh scales data teams by distributing ownership, but adds complexity - only adopt when centralized approach is bottleneck.

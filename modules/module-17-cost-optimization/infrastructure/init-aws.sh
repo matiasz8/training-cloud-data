@@ -2,7 +2,7 @@
 
 ###############################################################################
 # AWS Cost Optimization Infrastructure Initialization
-# 
+#
 # This script sets up all AWS services required for cost optimization:
 # - Enable Cost Explorer
 # - Create Cost and Usage Report (CUR)
@@ -54,26 +54,26 @@ log_error() {
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
-    
+
     # Check AWS CLI
     if ! command -v aws &> /dev/null; then
         log_error "AWS CLI not found. Install: https://aws.amazon.com/cli/"
         exit 1
     fi
-    
+
     # Check AWS credentials
     if [ -z "$ACCOUNT_ID" ]; then
         log_error "AWS credentials not configured. Run: aws configure"
         exit 1
     fi
-    
+
     log_success "Prerequisites OK (Account: $ACCOUNT_ID)"
 }
 
 # Enable Cost Explorer
 enable_cost_explorer() {
     log_info "Enabling Cost Explorer..."
-    
+
     # Note: Cost Explorer must be enabled via AWS Console first time
     # After that, this API call will work
     aws ce get-cost-and-usage \
@@ -82,7 +82,7 @@ enable_cost_explorer() {
         --metrics UnblendedCost \
         --region us-east-1 \
         &>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         log_success "Cost Explorer already enabled"
     else
@@ -94,10 +94,10 @@ enable_cost_explorer() {
 # Create Cost and Usage Report (CUR)
 create_cur_report() {
     log_info "Creating Cost and Usage Report..."
-    
+
     # Create S3 bucket for CUR
     CUR_BUCKET="cost-usage-report-${ACCOUNT_ID}"
-    
+
     # Check if bucket exists
     if aws s3api head-bucket --bucket "$CUR_BUCKET" 2>/dev/null; then
         log_success "CUR bucket already exists: $CUR_BUCKET"
@@ -111,7 +111,7 @@ create_cur_report() {
                 --region "$AWS_REGION" \
                 --create-bucket-configuration LocationConstraint="$AWS_REGION"
         fi
-        
+
         # Apply bucket policy for CUR delivery
         cat > /tmp/cur-bucket-policy.json <<EOF
 {
@@ -139,14 +139,14 @@ create_cur_report() {
   ]
 }
 EOF
-        
+
         aws s3api put-bucket-policy \
             --bucket "$CUR_BUCKET" \
             --policy file:///tmp/cur-bucket-policy.json
-        
+
         log_success "Created CUR bucket: $CUR_BUCKET"
     fi
-    
+
     # Create CUR report definition
     cat > /tmp/cur-definition.json <<EOF
 {
@@ -167,12 +167,12 @@ EOF
   "ReportVersioning": "OVERWRITE_REPORT"
 }
 EOF
-    
+
     # Put report definition (note: CUR API is only in us-east-1)
     aws cur put-report-definition \
         --report-definition file:///tmp/cur-definition.json \
         --region us-east-1 2>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         log_success "Cost and Usage Report created"
         log_info "First report will be available within 24 hours"
@@ -184,37 +184,37 @@ EOF
 # Activate cost allocation tags
 activate_cost_tags() {
     log_info "Activating cost allocation tags..."
-    
+
     for tag in "${COST_ALLOCATION_TAGS[@]}"; do
         aws ce update-cost-allocation-tags-status \
             --cost-allocation-tags-status TagKey="$tag",Status=Active \
             --region us-east-1 \
             2>/dev/null
-        
+
         if [ $? -eq 0 ]; then
             log_success "Activated tag: $tag"
         else
             log_warning "Could not activate tag: $tag (may already be active)"
         fi
     done
-    
+
     log_info "Cost allocation tags will be visible in Cost Explorer after 24 hours"
 }
 
 # Create AWS Budget with alerts
 create_budget() {
     log_info "Creating monthly budget ($${MONTHLY_BUDGET})..."
-    
+
     # Create SNS topic for budget alerts
     SNS_TOPIC_ARN=$(aws sns create-topic \
         --name cost-optimization-budget-alerts \
         --region "$AWS_REGION" \
         --query 'TopicArn' \
         --output text 2>/dev/null)
-    
+
     if [ $? -eq 0 ]; then
         log_success "Created SNS topic: $SNS_TOPIC_ARN"
-        
+
         # Subscribe your email (optional - comment out if not needed)
         # aws sns subscribe \
         #     --topic-arn "$SNS_TOPIC_ARN" \
@@ -225,7 +225,7 @@ create_budget() {
         log_warning "SNS topic may already exist"
         SNS_TOPIC_ARN="arn:aws:sns:${AWS_REGION}:${ACCOUNT_ID}:cost-optimization-budget-alerts"
     fi
-    
+
     # Create budget
     cat > /tmp/budget.json <<EOF
 {
@@ -253,7 +253,7 @@ create_budget() {
   "TimeStart": "2024-01-01T00:00:00Z"
 }
 EOF
-    
+
     # Create notifications (4 thresholds)
     cat > /tmp/notifications.json <<EOF
 [
@@ -304,7 +304,7 @@ EOF
   }
 ]
 EOF
-    
+
     # Create budget (Note: First 2 budgets are free)
     aws budgets create-budget \
         --account-id "$ACCOUNT_ID" \
@@ -312,7 +312,7 @@ EOF
         --notifications-with-subscribers file:///tmp/notifications.json \
         --region us-east-1 \
         2>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         log_success "Budget created: monthly-cost-budget"
     else
@@ -323,20 +323,20 @@ EOF
 # Configure Cost Anomaly Detection
 setup_anomaly_detection() {
     log_info "Setting up Cost Anomaly Detection..."
-    
+
     # Create SNS topic for anomalies
     ANOMALY_TOPIC_ARN=$(aws sns create-topic \
         --name cost-anomaly-alerts \
         --region "$AWS_REGION" \
         --query 'TopicArn' \
         --output text 2>/dev/null)
-    
+
     if [ $? -eq 0 ]; then
         log_success "Created anomaly SNS topic"
     else
         ANOMALY_TOPIC_ARN="arn:aws:sns:${AWS_REGION}:${ACCOUNT_ID}:cost-anomaly-alerts"
     fi
-    
+
     # Create anomaly monitor (AWS service-level)
     MONITOR_ARN=$(aws ce create-anomaly-monitor \
         --anomaly-monitor file:///dev/stdin <<EOF | jq -r '.AnomalyMonitorArn' 2>/dev/null
@@ -347,10 +347,10 @@ setup_anomaly_detection() {
 }
 EOF
 )
-    
+
     if [ -n "$MONITOR_ARN" ]; then
         log_success "Created anomaly monitor: $MONITOR_ARN"
-        
+
         # Create subscription
         aws ce create-anomaly-subscription \
             --anomaly-subscription file:///dev/stdin <<EOF >/dev/null 2>&1
@@ -367,7 +367,7 @@ EOF
   ]
 }
 EOF
-        
+
         if [ $? -eq 0 ]; then
             log_success "Created anomaly subscription with daily alerts"
         fi
@@ -379,9 +379,9 @@ EOF
 # Create sample S3 bucket with lifecycle
 create_sample_bucket() {
     log_info "Creating sample S3 bucket with lifecycle policies..."
-    
+
     SAMPLE_BUCKET="cost-optimization-demo-${ACCOUNT_ID}"
-    
+
     # Create bucket
     if aws s3api head-bucket --bucket "$SAMPLE_BUCKET" 2>/dev/null; then
         log_success "Sample bucket already exists: $SAMPLE_BUCKET"
@@ -394,10 +394,10 @@ create_sample_bucket() {
                 --region "$AWS_REGION" \
                 --create-bucket-configuration LocationConstraint="$AWS_REGION"
         fi
-        
+
         log_success "Created bucket: $SAMPLE_BUCKET"
     fi
-    
+
     # Apply lifecycle policy
     cat > /tmp/lifecycle-policy.json <<EOF
 {
@@ -454,15 +454,15 @@ create_sample_bucket() {
   ]
 }
 EOF
-    
+
     aws s3api put-bucket-lifecycle-configuration \
         --bucket "$SAMPLE_BUCKET" \
         --lifecycle-configuration file:///tmp/lifecycle-policy.json
-    
+
     if [ $? -eq 0 ]; then
         log_success "Applied 4-tier lifecycle policy to bucket"
     fi
-    
+
     # Apply cost allocation tags
     aws s3api put-bucket-tagging \
         --bucket "$SAMPLE_BUCKET" \
@@ -473,11 +473,11 @@ EOF
             {Key=Project,Value=cost-optimization-training},
             {Key=Owner,Value=engineering@example.com}
         ]"
-    
+
     if [ $? -eq 0 ]; then
         log_success "Applied cost allocation tags to bucket"
     fi
-    
+
     echo ""
     echo "Sample bucket created: s3://$SAMPLE_BUCKET"
 }
@@ -485,23 +485,23 @@ EOF
 # Create CloudWatch billing alarm
 create_billing_alarm() {
     log_info "Creating CloudWatch billing alarm..."
-    
+
     # Create SNS topic for CloudWatch alarms (different from budget alerts)
     ALARM_TOPIC_ARN=$(aws sns create-topic \
         --name cloudwatch-billing-alarms \
         --region us-east-1 \
         --query 'TopicArn' \
         --output text 2>/dev/null)
-    
+
     if [ $? -eq 0 ]; then
         log_success "Created CloudWatch alarm topic"
     else
         ALARM_TOPIC_ARN="arn:aws:sns:us-east-1:${ACCOUNT_ID}:cloudwatch-billing-alarms"
     fi
-    
+
     # Create alarm for 90% of budget
     ALARM_THRESHOLD=$(echo "scale=2; $MONTHLY_BUDGET * 0.9" | bc)
-    
+
     aws cloudwatch put-metric-alarm \
         --alarm-name "monthly-cost-90pct" \
         --alarm-description "Alert when monthly cost reaches 90% of budget" \
@@ -516,7 +516,7 @@ create_billing_alarm() {
         --dimensions Name=Currency,Value=USD \
         --region us-east-1 \
         2>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         log_success "Created CloudWatch billing alarm (threshold: \$$ALARM_THRESHOLD)"
     else
@@ -527,12 +527,12 @@ create_billing_alarm() {
 # Enable Compute Optimizer
 enable_compute_optimizer() {
     log_info "Enrolling in AWS Compute Optimizer..."
-    
+
     aws compute-optimizer update-enrollment-status \
         --status Active \
         --region us-east-1 \
         2>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         log_success "Enrolled in Compute Optimizer"
         log_info "Recommendations will be available after 30 hours of resource usage"
@@ -544,15 +544,15 @@ enable_compute_optimizer() {
 # Create IAM role for Lambda cost optimization functions
 create_lambda_role() {
     log_info "Creating IAM role for cost optimization Lambda functions..."
-    
+
     ROLE_NAME="CostOptimizationLambdaRole"
-    
+
     # Check if role exists
     if aws iam get-role --role-name "$ROLE_NAME" &>/dev/null; then
         log_success "IAM role already exists: $ROLE_NAME"
         return
     fi
-    
+
     # Create trust policy
     cat > /tmp/lambda-trust-policy.json <<EOF
 {
@@ -568,18 +568,18 @@ create_lambda_role() {
   ]
 }
 EOF
-    
+
     # Create role
     aws iam create-role \
         --role-name "$ROLE_NAME" \
         --assume-role-policy-document file:///tmp/lambda-trust-policy.json \
         --description "Role for cost optimization Lambda functions"
-    
+
     # Attach policies
     aws iam attach-role-policy \
         --role-name "$ROLE_NAME" \
         --policy-arn "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-    
+
     # Create custom policy for cost optimization
     cat > /tmp/cost-optimization-policy.json <<EOF
 {
@@ -605,18 +605,18 @@ EOF
   ]
 }
 EOF
-    
+
     POLICY_ARN=$(aws iam create-policy \
         --policy-name CostOptimizationPolicy \
         --policy-document file:///tmp/cost-optimization-policy.json \
         --query 'Policy.Arn' \
         --output text 2>/dev/null)
-    
+
     if [ -n "$POLICY_ARN" ]; then
         aws iam attach-role-policy \
             --role-name "$ROLE_NAME" \
             --policy-arn "$POLICY_ARN"
-        
+
         log_success "Created IAM role with cost optimization permissions"
     else
         log_warning "Policy may already exist"
@@ -626,10 +626,10 @@ EOF
 # Create Athena database for CUR analysis
 setup_athena_cur() {
     log_info "Setting up Athena for CUR analysis..."
-    
+
     # Create Athena results bucket
     ATHENA_BUCKET="aws-athena-query-results-${ACCOUNT_ID}-${AWS_REGION}"
-    
+
     if ! aws s3api head-bucket --bucket "$ATHENA_BUCKET" 2>/dev/null; then
         if [ "$AWS_REGION" = "us-east-1" ]; then
             aws s3api create-bucket --bucket "$ATHENA_BUCKET" --region "$AWS_REGION"
@@ -639,19 +639,19 @@ setup_athena_cur() {
                 --region "$AWS_REGION" \
                 --create-bucket-configuration LocationConstraint="$AWS_REGION"
         fi
-        
+
         log_success "Created Athena results bucket: $ATHENA_BUCKET"
     else
         log_success "Athena results bucket already exists"
     fi
-    
+
     # Create Athena database
     aws athena start-query-execution \
         --query-string "CREATE DATABASE IF NOT EXISTS cur_analysis" \
         --result-configuration "OutputLocation=s3://${ATHENA_BUCKET}/cur-database/" \
         --region "$AWS_REGION" \
         >/dev/null 2>&1
-    
+
     if [ $? -eq 0 ]; then
         log_success "Created Athena database: cur_analysis"
         log_info "After CUR is generated, run the Athena table creation query from CUR bucket"
@@ -663,9 +663,9 @@ setup_athena_cur() {
 # Create sample cost data (for local testing)
 create_sample_data() {
     log_info "Creating sample cost data..."
-    
+
     mkdir -p data/sample
-    
+
     # This will be created by a separate script
     log_info "Sample data files will be created separately"
 }
@@ -726,40 +726,40 @@ main() {
     echo "╚════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
     echo ""
-    
+
     check_prerequisites
     echo ""
-    
+
     enable_cost_explorer
     echo ""
-    
+
     create_cur_report
     echo ""
-    
+
     activate_cost_tags
     echo ""
-    
+
     create_budget
     echo ""
-    
+
     setup_anomaly_detection
     echo ""
-    
+
     enable_compute_optimizer
     echo ""
-    
+
     create_sample_bucket
     echo ""
-    
+
     create_lambda_role
     echo ""
-    
+
     setup_athena_cur
     echo ""
-    
+
     create_sample_data
     echo ""
-    
+
     print_summary
 }
 

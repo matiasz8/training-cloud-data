@@ -38,9 +38,9 @@ log_error() { echo -e "${RED}[✗]${NC} $1"; }
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
-    
+
     local missing=0
-    
+
     # Python 3.9+
     if command -v python3 &> /dev/null; then
         PYTHON_VERSION=$(python3 --version | cut -d' ' -f2)
@@ -49,7 +49,7 @@ check_prerequisites() {
         log_error "Python 3.9+ required"
         missing=1
     fi
-    
+
     # AWS CLI
     if command -v aws &> /dev/null; then
         AWS_VERSION=$(aws --version | cut -d' ' -f1 | cut -d'/' -f2)
@@ -58,7 +58,7 @@ check_prerequisites() {
         log_error "AWS CLI required: https://aws.amazon.com/cli/"
         missing=1
     fi
-    
+
     # Docker
     if command -v docker &> /dev/null; then
         DOCKER_VERSION=$(docker --version | cut -d' ' -f3 | tr -d ',')
@@ -67,40 +67,40 @@ check_prerequisites() {
         log_error "Docker required: https://docs.docker.com/get-docker/"
         missing=1
     fi
-    
+
     # Docker Compose
     if command -v docker-compose &> /dev/null || docker compose version &> /dev/null; then
         log_success "Docker Compose available"
     else
         log_warning "Docker Compose not found (may need docker compose instead)"
     fi
-    
+
     # jq (optional but recommended)
     if command -v jq &> /dev/null; then
         log_success "jq available"
     else
         log_warning "jq not found (install for better JSON parsing)"
     fi
-    
+
     # bc (for calculations)
     if command -v bc &> /dev/null; then
         log_success "bc available"
     else
         log_warning "bc not found (install: apt-get install bc / brew install bc)"
     fi
-    
+
     if [ $missing -eq 1 ]; then
         log_error "Please install missing prerequisites"
         exit 1
     fi
-    
+
     echo ""
 }
 
 # Check AWS credentials
 check_aws_credentials() {
     log_info "Checking AWS credentials..."
-    
+
     if aws sts get-caller-identity &>/dev/null; then
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         AWS_USER=$(aws sts get-caller-identity --query Arn --output text)
@@ -112,7 +112,7 @@ check_aws_credentials() {
         log_info "Run: aws configure"
         exit 1
     fi
-    
+
     # Check Cost Explorer permissions
     log_info "Checking Cost Explorer permissions..."
     if aws ce get-cost-and-usage \
@@ -125,16 +125,16 @@ check_aws_credentials() {
         log_warning "Cost Explorer may not be enabled or you lack permissions"
         log_info "Enable at: https://console.aws.amazon.com/cost-management/home#/cost-explorer"
     fi
-    
+
     echo ""
 }
 
 # Create Python virtual environment
 setup_python_env() {
     log_info "Setting up Python environment..."
-    
+
     cd "$MODULE_DIR"
-    
+
     # Create venv if it doesn't exist
     if [ ! -d "venv" ]; then
         python3 -m venv venv
@@ -142,64 +142,64 @@ setup_python_env() {
     else
         log_success "Virtual environment exists"
     fi
-    
+
     # Activate venv
     source venv/bin/activate
-    
+
     # Upgrade pip
     pip install --upgrade pip setuptools wheel &>/dev/null
     log_success "Upgraded pip"
-    
+
     # Install dependencies
     log_info "Installing Python dependencies (this may take 2-3 minutes)..."
     pip install -r requirements.txt &>/dev/null
-    
+
     if [ $? -eq 0 ]; then
         log_success "Installed Python packages"
     else
         log_error "Failed to install dependencies"
         exit 1
     fi
-    
+
     echo ""
 }
 
 # Start Docker containers
 start_docker() {
     log_info "Starting Docker containers..."
-    
+
     cd "$MODULE_DIR/infrastructure"
-    
+
     # Check if containers are already running
     if docker ps | grep -q cost-optimization-localstack; then
         log_success "Docker containers already running"
         return
     fi
-    
+
     # Start containers
     docker-compose up -d
-    
+
     if [ $? -eq 0 ]; then
         log_success "Docker containers started"
-        
+
         # Wait for health checks
         log_info "Waiting for services to be healthy (30 seconds)..."
         sleep 30
-        
+
         # Check LocalStack
         if curl -s http://localhost:4566/_localstack/health | grep -q "running"; then
             log_success "LocalStack is healthy"
         else
             log_warning "LocalStack may not be fully ready yet"
         fi
-        
+
         # Check PostgreSQL
         if docker exec cost-optimization-postgres pg_isready -U cost_optimizer &>/dev/null; then
             log_success "PostgreSQL is healthy"
         else
             log_warning "PostgreSQL may not be fully ready yet"
         fi
-        
+
         # Check Jupyter
         if curl -s http://localhost:8888 &>/dev/null; then
             log_success "Jupyter is healthy"
@@ -211,43 +211,43 @@ start_docker() {
         log_error "Failed to start Docker containers"
         exit 1
     fi
-    
+
     echo ""
 }
 
 # Initialize sample data
 init_sample_data() {
     log_info "Initializing sample data..."
-    
+
     cd "$MODULE_DIR"
-    
+
     # Create directories
     mkdir -p data/sample
     mkdir -p data/reports
     mkdir -p data/localstack
-    
+
     # Check if sample data exists
     if [ -f "data/sample/cost-usage-report.csv" ]; then
         log_success "Sample data already exists"
     else
         log_info "Sample data will be created in next step"
     fi
-    
+
     echo ""
 }
 
 # Run AWS initialization (if credentials available)
 run_aws_init() {
     log_info "Running AWS infrastructure initialization..."
-    
+
     cd "$MODULE_DIR"
-    
+
     if [ -f "infrastructure/init-aws.sh" ]; then
         chmod +x infrastructure/init-aws.sh
-        
+
         read -p "Initialize AWS services? (Cost Explorer, Budgets, etc.) [y/N]: " -n 1 -r
         echo
-        
+
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             bash infrastructure/init-aws.sh
         else
@@ -256,16 +256,16 @@ run_aws_init() {
     else
         log_warning "init-aws.sh not found"
     fi
-    
+
     echo ""
 }
 
 # Create useful aliases
 create_aliases() {
     log_info "Creating command aliases..."
-    
+
     cd "$MODULE_DIR"
-    
+
     cat > venv/bin/cost-aliases.sh <<'EOF'
 # Cost Optimization Aliases
 alias cost-report='make cost-report'
@@ -287,10 +287,10 @@ echo "💰 Cost optimization aliases loaded"
 echo "   cost-report, cost-by-service, savings, waste, anomalies"
 echo "   ex01-ex06 for exercises"
 EOF
-    
+
     log_success "Created command aliases"
     log_info "Activate with: source venv/bin/cost-aliases.sh"
-    
+
     echo ""
 }
 
@@ -353,7 +353,7 @@ main() {
     echo -e "${BLUE}   Module 17: Cloud Cost Optimization - Setup          ${NC}"
     echo -e "${BLUE}════════════════════════════════════════════════════════${NC}"
     echo ""
-    
+
     check_prerequisites
     check_aws_credentials
     setup_python_env

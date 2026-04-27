@@ -48,30 +48,30 @@ This document provides actionable best practices for cloud cost optimization bas
 # Decision framework
 def recommend_pricing_model(workload_characteristics):
     """Recommend pricing model based on workload"""
-    
+
     uptime_pct = workload_characteristics['uptime_percentage']
     predictability = workload_characteristics['predictability']  # high, medium, low
     fault_tolerance = workload_characteristics['fault_tolerant']
     flexibility_needed = workload_characteristics['flexibility_needed']
-    
+
     if uptime_pct > 80 and predictability == 'high':
         if flexibility_needed:
             return 'Compute Savings Plan (60% savings, flexible)'
         else:
             return 'Reserved Instance (75% savings, locked)'
-    
+
     elif uptime_pct < 20:
         return 'Lambda or Fargate (serverless, pay per use)'
-    
+
     elif fault_tolerance and uptime_pct < 70:
         return 'Spot Instances (75% savings, interruptible)'
-    
+
     else:
         return 'On-Demand (0% savings, full flexibility)'
 
 # Example workloads
 workloads = [
-    {'name': 'Production API', 'uptime_percentage': 95, 'predictability': 'high', 
+    {'name': 'Production API', 'uptime_percentage': 95, 'predictability': 'high',
      'fault_tolerant': False, 'flexibility_needed': True},
     {'name': 'Batch ETL', 'uptime_percentage': 15, 'predictability': 'high',
      'fault_tolerant': True, 'flexibility_needed': False},
@@ -98,7 +98,7 @@ for workload in workloads:
 resource "aws_instance" "web" {
   ami           = "ami-12345"
   instance_type = "t3.micro"
-  
+
   tags = {
     Name        = "web-server-${var.environment}"
     CostCenter  = var.cost_center
@@ -121,7 +121,7 @@ data "aws_iam_policy_document" "require_tags" {
       "s3:CreateBucket"
     ]
     resources = ["*"]
-    
+
     condition {
       test     = "StringNotLike"
       variable = "aws:RequestTag/CostCenter"
@@ -137,7 +137,7 @@ data "aws_iam_policy_document" "require_tags" {
 def lambda_handler(event, context):
     """Stop all dev/test instances at night (8 PM)"""
     ec2 = boto3.client('ec2')
-    
+
     # Find dev/test instances
     response = ec2.describe_instances(
         Filters=[
@@ -145,19 +145,19 @@ def lambda_handler(event, context):
             {'Name': 'instance-state-name', 'Values': ['running']}
         ]
     )
-    
+
     instance_ids = []
     for reservation in response['Reservations']:
         for instance in reservation['Instances']:
             instance_ids.append(instance['InstanceId'])
-    
+
     if instance_ids:
         ec2.stop_instances(InstanceIds=instance_ids)
         print(f"Stopped {len(instance_ids)} dev/test instances")
-        
+
         # Calculate savings: 14 hours/night * 30 days = 420 hours/month
         # 10 instances * 420 hours * $0.096/hour = $403/month saved
-        
+
     return {'stopped': len(instance_ids)}
 
 # EventBridge schedule: Mon-Fri 8 PM, start at 8 AM
@@ -344,7 +344,7 @@ AURORA_SERVERLESS_COST = {
     'min_capacity': 0.5,  # ACU (Aurora Capacity Units)
     'max_capacity': 16,   # ACU
     'cost_per_acu_hour': 0.12,
-    
+
     'typical_usage': {
         'off_hours': 0.5,   # 14 hours/day * 30 = 420 hours
         'business': 8,      # 10 hours/day * 30 = 300 hours
@@ -379,25 +379,25 @@ monthly_cost = (
 # Break-even analysis
 def dynamodb_cost_comparison(requests_per_month):
     """Compare Provisioned vs On-Demand"""
-    
+
     # Provisioned (assumes 25% utilization of provisioned capacity)
     required_wcu = requests_per_month / (30 * 24 * 3600) / 0.25  # 25% util
     required_rcu = (requests_per_month * 5) / (30 * 24 * 3600) / 0.25  # 5x more reads
-    
+
     provisioned_cost = (
         required_wcu * 730 * 0.00065 +  # WCU
         required_rcu * 730 * 0.00013    # RCU
     )
-    
+
     # On-Demand
     writes = requests_per_month * 0.2  # Assume 20% writes
     reads = requests_per_month * 0.8   # 80% reads
-    
+
     on_demand_cost = (
         (writes / 1_000_000) * 1.25 +   # Write request units
         (reads / 1_000_000) * 0.25       # Read request units
     )
-    
+
     return {
         'provisioned': provisioned_cost,
         'on_demand': on_demand_cost,
@@ -458,12 +458,12 @@ SLACK_DEPLOYMENT_MESSAGE = """
 🚀 Deployment: api-service v1.2.3
   Environment: Production
   Deployed by: @alice
-  
+
 💰 Monthly Cost Impact:
   New Lambda functions: +$45/month
   New DynamoDB table: +$120/month
   Total increase: +$165/month (3% of team budget)
-  
+
 Approval: Auto-approved (<5% budget impact)
 """
 ```
@@ -481,16 +481,16 @@ Approval: Auto-approved (<5% budget impact)
 def get_monthly_right_sizing_tasks():
     """Get and prioritize right-sizing recommendations"""
     compute_optimizer = boto3.client('compute-optimizer')
-    
+
     response = compute_optimizer.get_ec2_instance_recommendations()
-    
+
     recommendations = []
     for rec in response['instanceRecommendations']:
         if rec['finding'] == 'OVER_PROVISIONED':
             current_cost = rec['currentInstanceType']['pricing']['monthlyCost']
             recommended_cost = rec['recommendationOptions'][0]['pricing']['monthlyCost']
             savings = current_cost - recommended_cost
-            
+
             recommendations.append({
                 'instance_id': rec['instanceArn'].split('/')[-1],
                 'current': rec['currentInstanceType']['instanceType'],
@@ -498,10 +498,10 @@ def get_monthly_right_sizing_tasks():
                 'monthly_savings': savings,
                 'risk': rec['recommendationOptions'][0]['performanceRisk']  # 0-4
             })
-    
+
     # Sort by savings (implement high-savings, low-risk first)
     recommendations.sort(key=lambda x: (-x['monthly_savings'], x['risk']))
-    
+
     return recommendations
 
 # Run monthly, create Jira tickets for top 20 recommendations
@@ -559,14 +559,14 @@ def tag_new_resource(event):
     """Auto-tag resources created without required tags"""
     resource_arn = event['detail']['responseElements']['resourceArn']
     creator_identity = event['detail']['userIdentity']['principalId']
-    
+
     # Extract account/team from IAM role/user
     tags = {
         'CreatedBy': creator_identity,
         'CreatedAt': event['detail']['eventTime'],
         'ManagedBy': 'AWS Console'  # or detect Terraform/CloudFormation
     }
-    
+
     # Apply tags
     tagging = boto3.client('resourcegroupstaggingapi')
     tagging.tag_resources(
@@ -582,43 +582,43 @@ def auto_right_size(dry_run=True):
     """Automatically right-size under-utilized instances"""
     compute_optimizer = boto3.client('compute-optimizer')
     ec2 = boto3.client('ec2')
-    
+
     recommendations = compute_optimizer.get_ec2_instance_recommendations()
-    
+
     actions_taken = []
     for rec in recommendations['instanceRecommendations']:
         if rec['finding'] == 'OVER_PROVISIONED':
             savings = rec['currentInstanceType']['pricing']['monthlyCost'] - \
                      rec['recommendationOptions'][0]['pricing']['monthlyCost']
-            
+
             # Auto-resize if savings >$20/month and low performance risk
             if savings > 20 and rec['recommendationOptions'][0]['performanceRisk'] < 2:
                 instance_id = rec['instanceArn'].split('/')[-1]
                 new_type = rec['recommendationOptions'][0]['instanceType']
-                
+
                 if not dry_run:
                     # Stop instance
                     ec2.stop_instances(InstanceIds=[instance_id])
-                    
+
                     # Wait for stopped
                     waiter = ec2.get_waiter('instance_stopped')
                     waiter.wait(InstanceIds=[instance_id])
-                    
+
                     # Modify instance type
                     ec2.modify_instance_attribute(
                         InstanceId=instance_id,
                         InstanceType={'Value': new_type}
                     )
-                    
+
                     # Start instance
                     ec2.start_instances(InstanceIds=[instance_id])
-                
+
                 actions_taken.append({
                     'instance_id': instance_id,
                     'action': f"Resize to {new_type}",
                     'savings': savings
                 })
-    
+
     return actions_taken
 ```
 
@@ -655,14 +655,14 @@ MANDATORY_TAGS = {
 def check_required_tags(resource):
     """AWS Config custom rule"""
     tags = {tag['Key']: tag['Value'] for tag in resource.get('Tags', [])}
-    
+
     for required_tag in MANDATORY_TAGS.keys():
         if required_tag not in tags:
             return {
                 'compliance_type': 'NON_COMPLIANT',
                 'annotation': f'Missing required tag: {required_tag}'
             }
-    
+
     return {'compliance_type': 'COMPLIANT'}
 ```
 
@@ -727,25 +727,25 @@ DATA_TRANSFER_PRICING = {
 def daily_cost_anomaly_report():
     """Generate daily anomaly report"""
     ce = boto3.client('ce-anomaly-detection')
-    
+
     # Get anomalies from last 24 hours
     end_date = datetime.now().strftime('%Y-%m-%d')
     start_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    
+
     response = ce.get_anomalies(
         DateInterval={'StartDate': start_date, 'EndDate': end_date},
         MaxResults=10
     )
-    
+
     anomalies = response['Anomalies']
-    
+
     if anomalies:
         report = "🚨 Cost Anomalies Detected:\n\n"
         for anomaly in anomalies:
             impact = anomaly['Impact']['TotalImpact']
             service = anomaly['DimensionValue']
             report += f"  • {service}: +${impact:.2f} ({anomaly['Impact']['TotalImpactPercentage']:.1f}%)\n"
-        
+
         # Send to Slack
         send_slack_alert(report)
     else:
@@ -764,7 +764,7 @@ def daily_cost_anomaly_report():
 # GitHub Actions: Use Spot runners
 runs-on:
   group: spot-runners  # 75% cheaper than standard runners
-  
+
 # Cache dependencies (reduce build time = lower cost)
 - uses: actions/cache@v3
   with:
@@ -801,30 +801,30 @@ services:
 def scan_untagged_resources():
     """Find resources without required tags"""
     tagging = boto3.client('resourcegroupstaggingapi')
-    
+
     required_tags = ['CostCenter', 'Team', 'Environment', 'Project']
-    
+
     # Get all tagged resources
     response = tagging.get_resources(
         TagFilters=[],
         ResourceTypeFilters=['ec2:instance', 'rds:db', 's3:bucket', 'lambda:function']
     )
-    
+
     untagged = []
     for resource in response['ResourceTagMappingList']:
         tags = {tag['Key']: tag['Value'] for tag in resource['Tags']}
-        
+
         missing_tags = [t for t in required_tags if t not in tags]
         if missing_tags:
             untagged.append({
                 'arn': resource['ResourceARN'],
                 'missing_tags': missing_tags
             })
-    
+
     # Calculate cost of untagged resources (can't allocate)
     print(f"\n⚠️  Untagged Resources: {len(untagged)}")
     print(f"    Target: <5% of resources")
-    
+
     return untagged
 ```
 
@@ -979,8 +979,8 @@ def scan_untagged_resources():
 4. RDS: Downsize to db.r5.2xlarge + 2 read replicas (vs 1 huge)
 5. EBS: gp2 → gp3 (20% savings)
 
-**After**: $8,200/month  
-**Savings**: $10,300/month (56%)  
+**After**: $8,200/month
+**Savings**: $10,300/month (56%)
 **Implementation**: 2 months
 
 ### Case Study 2: Data Analytics Startup
@@ -998,8 +998,8 @@ def scan_untagged_resources():
 4. Athena: Partition by date (scan only needed partitions)
 5. Glue Crawler: Weekly instead of daily
 
-**After**: $2,100/month  
-**Savings**: $12,900/month (86%)  
+**After**: $2,100/month
+**Savings**: $12,900/month (86%)
 **Payback**: Immediate
 
 ### Case Study 3: SaaS Company (500K users)
@@ -1018,9 +1018,9 @@ def scan_untagged_resources():
 4. DynamoDB for session storage (replaced ElastiCache)
 5. Implemented cost allocation tags (team/product)
 
-**After**: $9,500/month  
-**Savings**: $15,500/month (62%)  
-**Unit cost**: $0.019 per user per month (62% improvement)  
+**After**: $9,500/month
+**Savings**: $15,500/month (62%)
+**Unit cost**: $0.019 per user per month (62% improvement)
 **Business Impact**: Improved margins, lower CAC ratio
 
 ## Cost Optimization Roadmap
@@ -1138,12 +1138,12 @@ def cost_command(ack, command, say):
            /cost anomalies
     """
     ack()
-    
+
     query_type = command['text'].split()[0]
     query_value = ' '.join(command['text'].split()[1:])
-    
+
     ce = boto3.client('ce')
-    
+
     if query_type == 'service':
         # Get cost by service
         response = ce.get_cost_and_usage(
@@ -1160,10 +1160,10 @@ def cost_command(ack, command, say):
                 }
             }
         )
-        
+
         cost = response['ResultsByTime'][0]['Total']['UnblendedCost']['Amount']
         say(f"💰 {query_value}: ${float(cost):.2f} (last 30 days)")
-    
+
     elif query_type == 'anomalies':
         # Get recent anomalies
         ced = boto3.client('ce-anomaly-detection')

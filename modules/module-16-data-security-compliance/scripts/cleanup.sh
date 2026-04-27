@@ -106,20 +106,20 @@ BUCKET_PREFIXES="cloudtrail-logs- aws-config- data-lake-"
 
 for prefix in $BUCKET_PREFIXES; do
     BUCKETS=$(aws s3api list-buckets --query "Buckets[?starts_with(Name, '$prefix')].Name" --output text)
-    
+
     for bucket in $BUCKETS; do
         echo "  Deleting bucket: $bucket"
-        
+
         # Remove all objects (including versions)
         aws s3 rm s3://$bucket --recursive 2>/dev/null || true
-        
+
         # Delete all versions
         aws s3api list-object-versions --bucket $bucket --output json | \
             jq -r '.Versions[] | "\(.Key) \(.VersionId)"' | \
             while read key version; do
                 aws s3api delete-object --bucket $bucket --key "$key" --version-id "$version" 2>/dev/null || true
             done
-        
+
         # Delete bucket
         aws s3 rb s3://$bucket --force 2>/dev/null || true
     done
@@ -135,19 +135,19 @@ IAM_ROLES="DataEngineerRole DataScientistRole DataAnalystRole AWSConfigRole"
 for role in $IAM_ROLES; do
     if aws iam get-role --role-name $role &>/dev/null; then
         echo "  Deleting role: $role"
-        
+
         # Detach policies
         ATTACHED=$(aws iam list-attached-role-policies --role-name $role --query 'AttachedPolicies[*].PolicyArn' --output text)
         for policy in $ATTACHED; do
             aws iam detach-role-policy --role-name $role --policy-arn $policy || true
         done
-        
+
         # Delete inline policies
         INLINE=$(aws iam list-role-policies --role-name $role --query 'PolicyNames' --output text)
         for policy in $INLINE; do
             aws iam delete-role-policy --role-name $role --policy-name $policy || true
         done
-        
+
         # Delete role
         aws iam delete-role --role-name $role || true
     fi
@@ -162,13 +162,13 @@ KMS_ALIASES="alias/data-lake alias/database alias/application"
 
 for alias in $KMS_ALIASES; do
     KEY_ID=$(aws kms describe-key --key-id $alias --query 'KeyMetadata.KeyId' --output text 2>/dev/null || true)
-    
+
     if [ -n "$KEY_ID" ]; then
         echo "  Scheduling deletion for key: $KEY_ID ($alias)"
-        
+
         # Delete alias
         aws kms delete-alias --alias-name $alias 2>/dev/null || true
-        
+
         # Schedule key deletion (minimum 7 days)
         aws kms schedule-key-deletion --key-id $KEY_ID --pending-window-in-days 7 2>/dev/null || true
     fi

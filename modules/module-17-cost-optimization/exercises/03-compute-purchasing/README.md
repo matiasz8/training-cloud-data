@@ -1,7 +1,7 @@
 # Exercise 03: Compute Purchasing Options
 
-⏱️ **Estimated Time:** 2.5 hours  
-🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced  
+⏱️ **Estimated Time:** 2.5 hours
+🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced
 💰 **Potential Savings:** 30-75% on compute costs
 
 ## Learning Objectives
@@ -75,13 +75,13 @@ print("\n💡 Reserved Instance Recommendations:\n")
 for rec in response['Recommendations'][:5]:  # Top 5
     details = rec['RecommendationDetails'][0]
     instance_type = details['InstanceDetails']['EC2InstanceDetails']['InstanceType']
-    
+
     # Cost comparison
     on_demand_cost = float(rec['RecommendationSummary']['TotalRegionalOnDemandCost'])
     ri_cost = float(rec['RecommendationSummary']['TotalRegionalReservedInstanceCost'])
     savings = on_demand_cost - ri_cost
     savings_pct = (savings / on_demand_cost) * 100
-    
+
     print(f"  Instance: {instance_type}")
     print(f"    On-Demand Annual Cost: ${on_demand_cost:,.2f}")
     print(f"    RI Annual Cost: ${ri_cost:,.2f}")
@@ -110,7 +110,7 @@ for rec in sp_response['SavingsPlansEstimatedCommitmentRecommendation']['Savings
     hourly_commit = float(rec['HourlyCommitmentToPurchase'])
     estimated_savings = float(rec['EstimatedSavingsAmount'])
     savings_pct = float(rec['EstimatedSavingsPercentage'])
-    
+
     print(f"  Hourly Commitment: ${hourly_commit:.2f}/hour")
     print(f"    Annual Cost: ${hourly_commit * 24 * 365:,.2f}")
     print(f"    Estimated Annual Savings: ${estimated_savings:,.2f} ({savings_pct:.1f}%)")
@@ -129,7 +129,7 @@ import pandas as pd
 
 class ComputePricingCalculator:
     """Calculate costs for different EC2 purchasing options"""
-    
+
     # Example: m5.large pricing (us-east-1)
     PRICING = {
         'on_demand': 0.096,  # per hour
@@ -142,47 +142,47 @@ class ComputePricingCalculator:
         'savings_plan_1y': 0.064,  # per hour (33% discount)
         'savings_plan_3y': 0.038,  # per hour (60% discount)
     }
-    
+
     def __init__(self, instance_type='m5.large', region='us-east-1'):
         self.instance_type = instance_type
         self.region = region
-    
+
     def calculate_annual_cost(self, option, hours_per_month=730):
         """Calculate annual cost for a purchasing option"""
         hours_per_year = hours_per_month * 12
-        
+
         if option == 'on_demand':
             return self.PRICING['on_demand'] * hours_per_year
-        
+
         elif option == 'ri_1y_no_upfront':
             return self.PRICING['ri_1y_no_upfront'] * hours_per_year
-        
+
         elif option == 'ri_1y_partial_upfront':
             return (self.PRICING['ri_1y_partial_upfront'] * hours_per_year) + 330
-        
+
         elif option == 'ri_1y_all_upfront':
             return 490  # All upfront
-        
+
         elif option == 'ri_3y_all_upfront':
             return 1050  # All upfront (divide by 3 for annual)
-        
+
         elif option == 'spot_avg':
             return self.PRICING['spot_avg'] * hours_per_year
-        
+
         elif option == 'savings_plan_1y':
             return self.PRICING['savings_plan_1y'] * hours_per_year
-        
+
         elif option == 'savings_plan_3y':
             return self.PRICING['savings_plan_3y'] * hours_per_year
-        
+
         return 0
-    
+
     def compare_all_options(self, hours_per_month=730):
         """Compare all purchasing options"""
         results = []
-        
+
         on_demand_cost = self.calculate_annual_cost('on_demand', hours_per_month)
-        
+
         options = [
             'on_demand',
             'ri_1y_no_upfront',
@@ -193,12 +193,12 @@ class ComputePricingCalculator:
             'savings_plan_1y',
             'savings_plan_3y'
         ]
-        
+
         for option in options:
             annual_cost = self.calculate_annual_cost(option, hours_per_month)
             savings = on_demand_cost - annual_cost
             savings_pct = (savings / on_demand_cost) * 100
-            
+
             results.append({
                 'Option': option.replace('_', ' ').title(),
                 'Annual Cost': f'${annual_cost:,.2f}',
@@ -207,9 +207,9 @@ class ComputePricingCalculator:
                 'Commitment': self._get_commitment(option),
                 'Flexibility': self._get_flexibility(option)
             })
-        
+
         return pd.DataFrame(results)
-    
+
     def _get_commitment(self, option):
         if 'on_demand' in option or 'spot' in option:
             return 'None'
@@ -218,7 +218,7 @@ class ComputePricingCalculator:
         elif '3y' in option:
             return '3 Years'
         return 'Variable'
-    
+
     def _get_flexibility(self, option):
         if 'on_demand' in option:
             return 'Full'
@@ -355,82 +355,82 @@ print("  • Max 10 retries per task")
 ```python
 class CommitmentROICalculator:
     """Calculate ROI for Reserved Instances and Savings Plans"""
-    
+
     def __init__(self, instance_type='m5.xlarge', hours_per_month=730):
         self.instance_type = instance_type
         self.hours_per_month = hours_per_month
-        
+
         # m5.xlarge pricing (us-east-1)
         self.on_demand_rate = 0.192
-        
+
         # RI pricing (1-year)
         self.ri_1y_no_upfront = {'hourly': 0.125, 'upfront': 0}
         self.ri_1y_partial = {'hourly': 0.119, 'upfront': 330}
         self.ri_1y_all = {'hourly': 0.0, 'upfront': 1045}
-        
+
         # RI pricing (3-year)
         self.ri_3y_no_upfront = {'hourly': 0.083, 'upfront': 0}
         self.ri_3y_partial = {'hourly': 0.079, 'upfront': 550}
         self.ri_3y_all = {'hourly': 0.0, 'upfront': 2073}
-        
+
         # Savings Plans (more flexible)
         self.sp_1y_rate = 0.128  # 33% discount
         self.sp_3y_rate = 0.077  # 60% discount
-    
+
     def calculate_option_cost(self, option_name, term_years=1):
         """Calculate total cost for an option"""
         hours = self.hours_per_month * 12 * term_years
-        
+
         if option_name == 'on_demand':
             return self.on_demand_rate * hours
-        
+
         elif option_name == 'ri_1y_no_upfront':
-            return (self.ri_1y_no_upfront['hourly'] * hours + 
+            return (self.ri_1y_no_upfront['hourly'] * hours +
                     self.ri_1y_no_upfront['upfront'])
-        
+
         elif option_name == 'ri_1y_partial':
-            return (self.ri_1y_partial['hourly'] * hours + 
+            return (self.ri_1y_partial['hourly'] * hours +
                     self.ri_1y_partial['upfront'])
-        
+
         elif option_name == 'ri_1y_all':
             return self.ri_1y_all['upfront']
-        
+
         elif option_name == 'ri_3y_all':
             return self.ri_3y_all['upfront']
-        
+
         elif option_name == 'sp_1y':
             return self.sp_1y_rate * hours
-        
+
         elif option_name == 'sp_3y':
             return self.sp_3y_rate * hours
-        
+
         return 0
-    
+
     def calculate_break_even(self, option_name):
         """Calculate break-even point in months"""
         if option_name == 'on_demand':
             return 0
-        
+
         on_demand_monthly = self.on_demand_rate * self.hours_per_month
         option_cost_1y = self.calculate_option_cost(option_name, term_years=1)
         option_monthly = option_cost_1y / 12
-        
+
         # If upfront payment, factor that in
         upfront = 0
         if 'partial' in option_name:
             upfront = 330 if '1y' in option_name else 550
         elif 'all' in option_name:
             upfront = 1045 if '1y' in option_name else 2073
-        
+
         # Break-even when cumulative savings = upfront cost
         if upfront > 0:
             monthly_savings = on_demand_monthly - option_monthly
             break_even_months = upfront / monthly_savings if monthly_savings > 0 else 12
         else:
             break_even_months = 0  # Immediate savings
-        
+
         return break_even_months
-    
+
     def compare_all_options(self):
         """Generate comparison table"""
         options = [
@@ -442,10 +442,10 @@ class CommitmentROICalculator:
             ('sp_1y', 'Savings Plan 1Y'),
             ('sp_3y', 'Savings Plan 3Y')
         ]
-        
+
         results = []
         on_demand_1y = self.calculate_option_cost('on_demand', 1)
-        
+
         for option_key, option_label in options:
             term = 3 if '3y' in option_key else 1
             cost = self.calculate_option_cost(option_key, term)
@@ -453,7 +453,7 @@ class CommitmentROICalculator:
             savings = on_demand_1y - annual_cost
             savings_pct = (savings / on_demand_1y) * 100
             break_even = self.calculate_break_even(option_key)
-            
+
             results.append({
                 'Option': option_label,
                 'Annual Cost': f'${annual_cost:,.2f}',
@@ -462,9 +462,9 @@ class CommitmentROICalculator:
                 'Break-Even': f'{break_even:.1f} months' if break_even > 0 else 'Immediate',
                 'Flexibility': self._get_flexibility(option_key)
             })
-        
+
         return pd.DataFrame(results)
-    
+
     def _get_flexibility(self, option):
         if 'on_demand' in option:
             return '⭐⭐⭐⭐⭐'
@@ -513,14 +513,14 @@ used_hours = 0
 for day in ri_utilization['UtilizationsByTime']:
     date = day['TimePeriod']['Start']
     util = day['Total']
-    
+
     purchased = float(util.get('PurchasedHours', 0))
     used = float(util.get('UsedHours', 0))
     utilization_pct = float(util.get('UtilizationPercentage', 0))
-    
+
     total_hours += purchased
     used_hours += used
-    
+
     if utilization_pct < 90:
         print(f"  ⚠️  {date}: {utilization_pct:.1f}% utilization")
 
@@ -549,10 +549,10 @@ for period in ri_coverage['CoveragesByTime']:
     coverage = period['Total']
     covered_pct = float(coverage.get('CoverageHours', {}).get('CoverageHoursPercentage', 0))
     on_demand_cost = float(coverage.get('CoverageCost', {}).get('OnDemandCost', 0))
-    
+
     print(f"  Coverage: {covered_pct:.1f}%")
     print(f"  On-Demand Cost: ${on_demand_cost:.2f}")
-    
+
     if covered_pct < 70:
         print(f"  💡 Opportunity: {100 - covered_pct:.1f}% still on On-Demand")
         print(f"     Potential savings: ${on_demand_cost * 0.6:.2f} with RIs")
@@ -570,7 +570,7 @@ import numpy as np
 def recommend_purchase_strategy(workload_analysis):
     """
     Recommend optimal purchase strategy based on workload characteristics
-    
+
     workload_analysis = {
         'monthly_cost': 5000,
         'usage_pattern': 'steady|variable|spiky|batch',
@@ -584,14 +584,14 @@ def recommend_purchase_strategy(workload_analysis):
     consistency = workload_analysis['instance_consistency']
     commitment = workload_analysis['commitment_flexibility']
     fault_tolerant = workload_analysis.get('fault_tolerance', False)
-    
+
     recommendations = []
-    
+
     # Rule 1: Batch workloads → Spot first
     if pattern == 'batch' and fault_tolerant:
         spot_allocation = 0.8  # 80% on Spot
         savings = monthly_cost * spot_allocation * 0.75  # 75% discount
-        
+
         recommendations.append({
             'strategy': 'Spot Instances (80%) + On-Demand (20%)',
             'allocation': f'${monthly_cost * spot_allocation:.2f} Spot, ${monthly_cost * 0.2:.2f} On-Demand',
@@ -600,12 +600,12 @@ def recommend_purchase_strategy(workload_analysis):
             'risk': 'Medium (interruptions possible)',
             'implementation': 'Use EMR with capacity-optimized strategy'
         })
-    
+
     # Rule 2: Steady workload + high consistency → RIs
     if pattern == 'steady' and consistency > 0.7:
         discount = 0.63 if commitment >= 3 else 0.42  # 3Y vs 1Y
         savings = monthly_cost * discount
-        
+
         recommendations.append({
             'strategy': f'Reserved Instances ({commitment}Y)',
             'allocation': f'${monthly_cost:.2f} commitment',
@@ -614,12 +614,12 @@ def recommend_purchase_strategy(workload_analysis):
             'risk': 'Low (predictable)',
             'implementation': f'Purchase {commitment}Y RI All Upfront for max discount'
         })
-    
+
     # Rule 3: Flexible compute → Savings Plans
     if consistency < 0.7 or pattern == 'variable':
         discount = 0.60 if commitment >= 3 else 0.33  # 3Y vs 1Y
         savings = monthly_cost * discount
-        
+
         recommendations.append({
             'strategy': f'Compute Savings Plans ({commitment}Y)',
             'allocation': f'${monthly_cost:.2f} hourly commitment',
@@ -628,14 +628,14 @@ def recommend_purchase_strategy(workload_analysis):
             'risk': 'Low (flexible across instances)',
             'implementation': 'Purchase Compute SP for EC2, Fargate, Lambda coverage'
         })
-    
+
     # Rule 4: Spiky workload → Schedule On-Demand + Savings Plan base
     if pattern == 'spiky':
         base_cost = monthly_cost * 0.6  # 60% baseline
         peak_cost = monthly_cost * 0.4  # 40% On-Demand for peaks
         discount = 0.33
         savings = base_cost * discount
-        
+
         recommendations.append({
             'strategy': 'Hybrid: Savings Plan (base) + On-Demand (peaks)',
             'allocation': f'${base_cost:.2f} Savings Plan, ${peak_cost:.2f} On-Demand',
@@ -644,10 +644,10 @@ def recommend_purchase_strategy(workload_analysis):
             'risk': 'Low (covered for peaks)',
             'implementation': 'Buy Savings Plan for minimum usage, scale with On-Demand'
         })
-    
+
     # Sort by savings
     recommendations.sort(key=lambda x: x['annual_savings'], reverse=True)
-    
+
     return recommendations
 
 # Example: Analyze your workload
@@ -692,16 +692,16 @@ print("\n📊 Savings Plans Utilization:\n")
 
 for period in sp_utilization['SavingsPlansUtilizationsByTime']:
     util = period['Utilization']
-    
+
     utilization_pct = float(util.get('UtilizationPercentage', 0))
     used_commitment = float(util.get('UsedCommitment', 0))
     total_commitment = float(util.get('TotalCommitment', 0))
     unused = total_commitment - used_commitment
-    
+
     print(f"  Period: {period['TimePeriod']['Start']} to {period['TimePeriod']['End']}")
     print(f"  Utilization: {utilization_pct:.1f}%")
     print(f"  Used: ${used_commitment:.2f} / ${total_commitment:.2f}")
-    
+
     if utilization_pct < 80:
         print(f"  ⚠️  Wasted commitment: ${unused:.2f}")
         print(f"     Consider reducing commitment or increasing workload")
@@ -725,16 +725,16 @@ for period in sp_coverage['SavingsPlansCoverages']:
     on_demand_spend = float(coverage.get('OnDemandCost', 0))
     total_spend = spend_covered + on_demand_spend
     coverage_pct = (spend_covered / total_spend * 100) if total_spend > 0 else 0
-    
+
     print(f"  Coverage: {coverage_pct:.1f}%")
     print(f"  Covered by SP: ${spend_covered:.2f}")
     print(f"  On-Demand: ${on_demand_spend:.2f}")
-    
+
     if coverage_pct < 70:
         # Opportunity to purchase more
         additional_commitment = on_demand_spend * 0.6  # Cover 60% of on-demand
         potential_savings = additional_commitment * 0.33  # 33% discount
-        
+
         print(f"\n  💡 Opportunity:")
         print(f"     Increase commitment by ${additional_commitment:.2f}/month")
         print(f"     Potential additional savings: ${potential_savings:.2f}/month")
@@ -776,10 +776,10 @@ for period in sp_coverage['SavingsPlansCoverages']:
 
 ## Key Learnings
 
-✅ **Commitment Hierarchy**: 3Y All Upfront (highest discount) → 1Y Partial → No Upfront  
-✅ **Flexibility Trade-off**: Savings Plans (flexible) vs RIs (locked to instance type)  
-✅ **Spot Strategies**: Diversification + capacity-optimized = 95%+ availability  
-✅ **Break-Even**: Upfront RIs break even in 4-6 months with consistent usage  
+✅ **Commitment Hierarchy**: 3Y All Upfront (highest discount) → 1Y Partial → No Upfront
+✅ **Flexibility Trade-off**: Savings Plans (flexible) vs RIs (locked to instance type)
+✅ **Spot Strategies**: Diversification + capacity-optimized = 95%+ availability
+✅ **Break-Even**: Upfront RIs break even in 4-6 months with consistent usage
 ✅ **80/20 Rule**: Cover 70-80% with commitments, leave 20-30% On-Demand for flexibility
 
 ## Purchase Strategy Decision Tree
@@ -806,8 +806,8 @@ Is workload steady (24/7)?
 
 ## Real-World ROI Example
 
-**Company**: Mid-sized analytics team  
-**Compute Spend**: $10,000/month On-Demand  
+**Company**: Mid-sized analytics team
+**Compute Spend**: $10,000/month On-Demand
 **Workload**: 70% steady (data pipelines), 30% batch (ML training)
 
 **Optimization**:

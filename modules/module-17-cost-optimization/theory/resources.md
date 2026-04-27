@@ -162,7 +162,7 @@ This document provides curated resources for deepening your cloud cost optimizat
 
 **1. AWS Cost Explorer**
 - **Cost**: $0 (basic), $0.01 per API request
-- **Features**: 
+- **Features**:
   - 12 months historical data
   - Forecasting (next 12 months)
   - Filtering by service, account, tag
@@ -561,37 +561,37 @@ from datetime import datetime, timedelta
 def generate_cost_report():
     """Generate monthly cost report by service"""
     ce = boto3.client('ce')
-    
+
     end = datetime.now().strftime('%Y-%m-%d')
     start = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-    
+
     response = ce.get_cost_and_usage(
         TimePeriod={'Start': start, 'End': end},
         Granularity='MONTHLY',
         Metrics=['UnblendedCost'],
         GroupBy=[{'Type': 'DIMENSION', 'Key': 'SERVICE'}]
     )
-    
+
     # Parse and format results
     costs = []
     for result in response['ResultsByTime'][0]['Groups']:
         service = result['Keys'][0]
         cost = float(result['Metrics']['UnblendedCost']['Amount'])
         costs.append({'service': service, 'cost': cost})
-    
+
     # Sort by cost
     costs.sort(key=lambda x: x['cost'], reverse=True)
-    
+
     # Generate report
     print(f"\n💰 Cost Report ({start} to {end})\n")
     total = sum(c['cost'] for c in costs)
-    
+
     for item in costs[:10]:  # Top 10
         pct = (item['cost'] / total) * 100
         print(f"  {item['service']:<30} ${item['cost']:>10,.2f} ({pct:>5.1f}%)")
-    
+
     print(f"\n  {'Total':<30} ${total:>10,.2f}")
-    
+
     return costs
 ```
 
@@ -918,9 +918,9 @@ def estimate_s3_cost(storage_gb, put_requests, get_requests, storage_class='stan
     storage_cost = storage_gb * S3_PRICING['storage'][storage_class]
     put_cost = put_requests * S3_PRICING['requests']['put']
     get_cost = get_requests * S3_PRICING['requests']['get']
-    
+
     total = storage_cost + put_cost + get_cost
-    
+
     return {
         'storage': storage_cost,
         'requests': put_cost + get_cost,

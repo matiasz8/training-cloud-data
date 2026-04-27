@@ -44,21 +44,21 @@ def generate_event_store_data(num_events: int = DEFAULT_EVENTS) -> List[Dict[str
         ("OrderDelivered", 0.15),
         ("OrderCancelled", 0.1)
     ]
-    
+
     start_date = datetime(2024, 1, 1)
     aggregate_ids = [f"ORD_{i:06d}" for i in range(1, num_events // 3 + 1)]
-    
+
     for i in range(num_events):
         # Weighted random event type
         event_type = random.choices(
             [e[0] for e in event_types],
             weights=[e[1] for e in event_types]
         )[0]
-        
+
         aggregate_id = random.choice(aggregate_ids)
         days_offset = random.randint(0, 90)
         hours_offset = random.randint(0, 23)
-        
+
         event = {
             "event_id": f"EVT_{i+1:08d}",
             "aggregate_id": aggregate_id,
@@ -67,7 +67,7 @@ def generate_event_store_data(num_events: int = DEFAULT_EVENTS) -> List[Dict[str
             "version": random.randint(1, 5),
             "data": {}
         }
-        
+
         # Event-specific data
         if event_type == "OrderPlaced":
             event["data"] = {
@@ -111,9 +111,9 @@ def generate_event_store_data(num_events: int = DEFAULT_EVENTS) -> List[Dict[str
                 ]),
                 "refund_amount": round(random.uniform(50.0, 1000.0), 2)
             }
-        
+
         events.append(event)
-    
+
     # Sort by timestamp
     events.sort(key=lambda e: e["timestamp"])
     return events
@@ -130,17 +130,17 @@ def generate_kinesis_events(num_events: int = 100) -> List[Dict[str, Any]]:
         ("purchase", 0.15),
         ("add_to_cart", 0.05)
     ]
-    
+
     start_date = datetime(2024, 1, 15)
-    
+
     for i in range(num_events):
         event_type = random.choices(
             [e[0] for e in event_types],
             weights=[e[1] for e in event_types]
         )[0]
-        
+
         minutes_offset = i * 5
-        
+
         event = {
             "event_id": f"EVT_{i+1:08d}",
             "user_id": f"USER_{random.randint(1, 100):06d}",
@@ -149,7 +149,7 @@ def generate_kinesis_events(num_events: int = 100) -> List[Dict[str, Any]]:
             "session_id": f"SESS_{random.randint(1, 50):08d}",
             "metadata": {}
         }
-        
+
         # Event-specific metadata
         if event_type == "page_view":
             event["metadata"] = {
@@ -176,9 +176,9 @@ def generate_kinesis_events(num_events: int = 100) -> List[Dict[str, Any]]:
                 "product_id": f"PROD_{random.randint(1, 1000):06d}",
                 "quantity": random.randint(1, 5)
             }
-        
+
         events.append(event)
-    
+
     return events
 
 
@@ -187,7 +187,7 @@ def generate_kinesis_events(num_events: int = 100) -> List[Dict[str, Any]]:
 def generate_batch_data(num_transactions: int = DEFAULT_TRANSACTIONS) -> pd.DataFrame:
     """Generate sample batch transactions"""
     start_date = datetime(2024, 1, 1)
-    
+
     data = {
         "transaction_id": range(1, num_transactions + 1),
         "user_id": [random.randint(1, 10000) for _ in range(num_transactions)],
@@ -209,7 +209,7 @@ def generate_batch_data(num_transactions: int = DEFAULT_TRANSACTIONS) -> pd.Data
             for _ in range(num_transactions)
         ]
     }
-    
+
     return pd.DataFrame(data)
 
 
@@ -218,7 +218,7 @@ def generate_batch_data(num_transactions: int = DEFAULT_TRANSACTIONS) -> pd.Data
 def generate_product_catalog(num_products: int = DEFAULT_PRODUCTS) -> List[Dict[str, Any]]:
     """Generate product catalog (Product Domain)"""
     categories = ["Electronics", "Clothing", "Home & Garden", "Books", "Sports", "Toys"]
-    
+
     products = []
     for i in range(1, num_products + 1):
         product = {
@@ -232,7 +232,7 @@ def generate_product_catalog(num_products: int = DEFAULT_PRODUCTS) -> List[Dict[
             "reviews_count": random.randint(0, 1000)
         }
         products.append(product)
-    
+
     return products
 
 
@@ -240,7 +240,7 @@ def generate_customer_profiles(num_customers: int = DEFAULT_CUSTOMERS) -> List[D
     """Generate customer profiles (Customer Domain)"""
     segments = ["Premium", "Standard", "New", "Churned"]
     countries = ["US", "GB", "DE", "FR", "ES", "IT", "JP", "AU", "CA", "BR"]
-    
+
     customers = []
     for i in range(1, num_customers + 1):
         customer = {
@@ -257,14 +257,14 @@ def generate_customer_profiles(num_customers: int = DEFAULT_CUSTOMERS) -> List[D
             "orders_count": random.randint(0, 100)
         }
         customers.append(customer)
-    
+
     return customers
 
 
 def generate_sales_orders(num_orders: int = DEFAULT_ORDERS) -> List[Dict[str, Any]]:
     """Generate sales orders (Sales Domain)"""
     start_date = datetime(2024, 1, 1)
-    
+
     orders = []
     for i in range(1, num_orders + 1):
         order = {
@@ -280,7 +280,7 @@ def generate_sales_orders(num_orders: int = DEFAULT_ORDERS) -> List[Dict[str, An
             )[0]
         }
         orders.append(order)
-    
+
     return orders
 
 
@@ -303,49 +303,49 @@ def main():
     parser.add_argument('--orders', type=int, default=DEFAULT_ORDERS, help='Number of sales orders')
     parser.add_argument('--exercise', type=str, choices=['lambda', 'kappa', 'mesh', 'cqrs', 'all'], default='all', help='Generate data for specific exercise')
     parser.add_argument('--output', type=str, default=None, help='Output directory (default: data/sample/)')
-    
+
     args = parser.parse_args()
-    
+
     # Determine output directory
     if args.output:
         output_dir = Path(args.output)
     else:
         output_dir = Path(__file__).parent
-    
+
     output_dir.mkdir(parents=True, exist_ok=True)
-    
-    print(f"📦 Generating sample data for Module 18")
+
+    print("📦 Generating sample data for Module 18")
     print(f"📁 Output directory: {output_dir}")
     print("")
-    
+
     # Generate Event Store data (CQRS)
     if args.exercise in ['cqrs', 'all']:
         events = generate_event_store_data(args.events)
         save_json_lines(events, output_dir / 'event-store-sample.json')
-    
+
     # Generate Kinesis events (Kappa)
     if args.exercise in ['kappa', 'all']:
         kinesis_events = generate_kinesis_events(100)
         save_json_lines(kinesis_events, output_dir / 'kinesis-stream-events.json')
-    
+
     # Generate batch data (Lambda)
     if args.exercise in ['lambda', 'all']:
         batch_df = generate_batch_data(args.transactions)
         batch_file = output_dir / 'batch-data-sample.parquet'
         batch_df.to_parquet(batch_file, index=False)
         print(f"✅ Generated: {batch_file} ({len(batch_df)} records)")
-    
+
     # Generate Data Mesh domains
     if args.exercise in ['mesh', 'all']:
         products = generate_product_catalog(args.products)
         save_json_lines(products, output_dir / 'domain-products-sample.json')
-        
+
         customers = generate_customer_profiles(args.customers)
         save_json_lines(customers, output_dir / 'domain-customer-sample.json')
-        
+
         orders = generate_sales_orders(args.orders)
         save_json_lines(orders, output_dir / 'domain-sales-sample.json')
-    
+
     print("")
     print("✨ Done! All sample data generated successfully.")
 

@@ -235,7 +235,7 @@ Example:
 graph LR
     A[Source]:::source --> B[Process]:::process
     B --> C[Sink]:::sink
-    
+
     classDef source fill:#4A90E2,stroke:#333,stroke-width:2px,color:#fff
     classDef process fill:#7ED321,stroke:#333,stroke-width:2px,color:#fff
     classDef sink fill:#F5A623,stroke:#333,stroke-width:2px,color:#fff

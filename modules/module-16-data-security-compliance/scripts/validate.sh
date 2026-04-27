@@ -19,9 +19,9 @@ FAILED=0
 validate() {
     local test_name=$1
     local command=$2
-    
+
     echo -en "  Testing: $test_name... "
-    
+
     if eval "$command" &> /dev/null; then
         echo -e "${GREEN}✓ PASS${NC}"
         ((PASSED++))
@@ -117,7 +117,7 @@ if [ -f "validation/test_security.py" ]; then
     echo -e "  ${YELLOW}Running tests...${NC}"
     python3 -m pytest validation/test_security.py -v --tb=short
     PYTEST_EXIT=$?
-    
+
     if [ $PYTEST_EXIT -eq 0 ]; then
         echo -e "  ${GREEN}✓ All pytest tests passed${NC}"
         ((PASSED++))
@@ -134,10 +134,10 @@ echo -e "\n${YELLOW}8. IAM Policy Validation${NC}"
 
 if command -v parliament &> /dev/null; then
     echo -e "  ${YELLOW}Checking IAM policies with Parliament...${NC}"
-    
+
     # Find all IAM policy JSON files
     POLICY_FILES=$(find exercises/ -name "*-policy.json" 2>/dev/null)
-    
+
     if [ -n "$POLICY_FILES" ]; then
         for policy in $POLICY_FILES; do
             echo -en "    $(basename $policy)... "

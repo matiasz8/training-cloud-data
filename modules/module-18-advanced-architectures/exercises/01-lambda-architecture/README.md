@@ -1,19 +1,19 @@
 # Exercise 01: Lambda Architecture Implementation
 
-⏱️ **Estimated Time:** 3 hours  
-🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced  
+⏱️ **Estimated Time:** 3 hours
+🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced
 🏗️ **Pattern:** Batch Layer + Speed Layer + Serving Layer
 
 ## Learning Objectives
 
 By completing this exercise, you will:
 
-✅ Implement complete Lambda Architecture with 3 layers  
-✅ Build batch processing with AWS Glue/Spark  
-✅ Build real-time processing with Kinesis + Lambda  
-✅ Merge batch and real-time results at query time  
-✅ Understand trade-offs: complexity vs capabilities  
-✅ Calculate cost-performance characteristics  
+✅ Implement complete Lambda Architecture with 3 layers
+✅ Build batch processing with AWS Glue/Spark
+✅ Build real-time processing with Kinesis + Lambda
+✅ Merge batch and real-time results at query time
+✅ Understand trade-offs: complexity vs capabilities
+✅ Calculate cost-performance characteristics
 
 ## Architecture Overview
 
@@ -57,7 +57,7 @@ By completing this exercise, you will:
 
 **Business Question**: "What is the total revenue and order count per user?"
 
-**Challenge**: 
+**Challenge**:
 - **Historical accuracy**: Need perfect count from all-time data (batch)
 - **Real-time freshness**: Need today's orders immediately (speed)
 
@@ -285,7 +285,7 @@ def lambda_handler(event, context):
         # Decode Kinesis record
         payload = base64.b64decode(record['kinesis']['data'])
         order = json.loads(payload)
-        
+
         # Update real-time metrics in DynamoDB
         update_realtime_metrics(order)
 
@@ -315,7 +315,7 @@ def update_realtime_metrics(order):
 def reset_realtime_metrics():
     # Scan all users
     response = dynamodb.scan(TableName='realtime-user-metrics')
-    
+
     # Archive to S3 (before reset)
     archive_data = [{
         'user_id': item['user_id'],
@@ -323,13 +323,13 @@ def reset_realtime_metrics():
         'revenue_today': float(item['revenue_today']),
         'date': (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     }]
-    
+
     s3.put_object(
         Bucket='lambda-arch-realtime-archive',
         Key=f"year={year}/month={month}/day={day}/metrics.json",
         Body=json.dumps(archive_data)
     )
-    
+
     # Reset counters to 0
     for item in response['Items']:
         dynamodb.update_item(
@@ -409,7 +409,7 @@ def get_today_metrics(user_id):
         TableName='realtime-user-metrics',
         Key={'user_id': user_id}
     )
-    
+
     return {
         'user_id': user_id,
         'orders_today': response['Item'].get('orders_today', 0),
@@ -423,7 +423,7 @@ def get_today_metrics(user_id):
 def get_lifetime_metrics(user_id):
     # Query Athena (batch views)
     query = f"""
-    SELECT 
+    SELECT
         lifetime_orders,
         lifetime_revenue,
         avg_order_value,
@@ -433,7 +433,7 @@ def get_lifetime_metrics(user_id):
     WHERE user_id = '{user_id}'
       AND batch_date = (SELECT MAX(batch_date) FROM user_metrics)
     """
-    
+
     result = athena.execute_query(query)
     return result[0] if result else {}
 ```
@@ -446,27 +446,27 @@ def get_complete_user_metrics(user_id):
     with ThreadPoolExecutor(max_workers=2) as executor:
         batch_future = executor.submit(get_lifetime_metrics, user_id)
         realtime_future = executor.submit(get_today_metrics, user_id)
-        
+
         batch_data = batch_future.result()
         realtime_data = realtime_future.result()
-    
+
     # Merge
     return {
         'user_id': user_id,
-        
+
         # From batch (accurate, up to yesterday)
         'lifetime_orders': batch_data.get('lifetime_orders', 0),
         'lifetime_revenue': batch_data.get('lifetime_revenue', 0),
         'avg_order_value': batch_data.get('avg_order_value', 0),
-        
+
         # From real-time (today only)
         'orders_today': realtime_data.get('orders_today', 0),
         'revenue_today': realtime_data.get('revenue_today', 0),
-        
+
         # Combined (total = lifetime + today)
         'total_orders': batch_data.get('lifetime_orders', 0) + realtime_data.get('orders_today', 0),
         'total_revenue': batch_data.get('lifetime_revenue', 0) + realtime_data.get('revenue_today', 0),
-        
+
         # Metadata
         'batch_cutoff': batch_data.get('last_batch_date', 'Unknown'),
         'realtime_updated_at': realtime_data.get('last_order_time', 'Never')
@@ -485,12 +485,12 @@ def get_top_users_by_revenue(limit=10):
     ORDER BY lifetime_revenue DESC
     LIMIT {limit * 2}  -- Get 2x, then rerank with realtime
     """
-    
+
     batch_top_users = athena.execute_query(athena_query)
-    
+
     # Step 2: Get today's revenue for these users from DynamoDB
     user_ids = [user['user_id'] for user in batch_top_users]
-    
+
     batch_get_response = dynamodb.batch_get_item(
         RequestItems={
             'realtime-user-metrics': {
@@ -498,12 +498,12 @@ def get_top_users_by_revenue(limit=10):
             }
         }
     )
-    
+
     realtime_data = {
         item['user_id']: float(item.get('revenue_today', 0))
         for item in batch_get_response['Responses']['realtime-user-metrics']
     }
-    
+
     # Step 3: Merge and rerank
     combined = []
     for user in batch_top_users:
@@ -514,10 +514,10 @@ def get_top_users_by_revenue(limit=10):
             'lifetime_revenue': user['lifetime_revenue'],
             'revenue_today': realtime_data.get(user['user_id'], 0)
         })
-    
+
     # Sort by total revenue
     combined.sort(key=lambda x: x['total_revenue'], reverse=True)
-    
+
     return combined[:limit]
 ```
 
@@ -675,17 +675,17 @@ else:
 
 ### Advantages of Lambda Architecture
 
-✅ **Best of Both Worlds**: Accuracy (batch) + Speed (real-time)  
-✅ **Fault Tolerance**: Batch reprocessing fixes errors  
-✅ **Proven at Scale**: Netflix, LinkedIn (trillion events/day)  
-✅ **Incremental Migration**: Start with batch, add speed layer later  
+✅ **Best of Both Worlds**: Accuracy (batch) + Speed (real-time)
+✅ **Fault Tolerance**: Batch reprocessing fixes errors
+✅ **Proven at Scale**: Netflix, LinkedIn (trillion events/day)
+✅ **Incremental Migration**: Start with batch, add speed layer later
 
 ### Disadvantages
 
-❌ **Complexity**: Two processing paradigms (Spark + Kinesis/Flink)  
-❌ **Code Duplication**: Similar logic in batch and speed layers  
-❌ **Storage Costs**: Data duplicated in batch views + real-time views  
-❌ **Operational Overhead**: Monitor/maintain 2 systems  
+❌ **Complexity**: Two processing paradigms (Spark + Kinesis/Flink)
+❌ **Code Duplication**: Similar logic in batch and speed layers
+❌ **Storage Costs**: Data duplicated in batch views + real-time views
+❌ **Operational Overhead**: Monitor/maintain 2 systems
 
 ### When to Use Lambda Architecture
 
@@ -831,5 +831,5 @@ After completing Exercise 01:
 
 ---
 
-**Status**: 🚧 Ready to Implement  
+**Status**: 🚧 Ready to Implement
 **Next Exercise**: Exercise 02 - Kappa Architecture (simpler alternative)

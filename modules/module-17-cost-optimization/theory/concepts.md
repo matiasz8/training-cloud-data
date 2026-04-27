@@ -114,7 +114,7 @@ Cloud TCO includes both **direct** and **indirect** costs:
 #### TCO Calculation Framework
 
 ```
-Total Cost of Ownership = 
+Total Cost of Ownership =
     Infrastructure Costs (EC2, S3, RDS) +
     Service Costs (Glue, Athena, Kinesis) +
     Data Transfer Costs +
@@ -167,13 +167,13 @@ ALLOCATION_STRATEGY = {
 def check_tag_compliance(resource_tags):
     """Verify resource has all required cost allocation tags"""
     missing_tags = []
-    
+
     for required_tag in ALLOCATION_STRATEGY['required_tags']:
         if required_tag not in resource_tags:
             missing_tags.append(required_tag)
-    
+
     compliance = len(missing_tags) == 0
-    
+
     return {
         'compliant': compliance,
         'missing_tags': missing_tags,
@@ -298,7 +298,7 @@ print(f"  Cost per API Call: ${unit_costs['cost_per_api_call']:.6f}")
   - Write: $0.00065 per WCU-hour
   - Read: $0.00013 per RCU-hour
   - Storage: $0.25/GB-month
-  
+
 - **On-Demand**:
   - Write: $1.25 per 1M requests
   - Read: $0.25 per 1M requests
@@ -588,16 +588,16 @@ Low usage or spiky → On-Demand + Spot
 def forecast_costs(historical_costs, forecast_months=3, growth_rate=0.05):
     """
     Simple cost forecasting with growth rate
-    
+
     growth_rate: Expected monthly growth (0.05 = 5% MoM)
     """
     current_cost = historical_costs[-1]
     forecast = []
-    
+
     for month in range(1, forecast_months + 1):
         projected_cost = current_cost * ((1 + growth_rate) ** month)
         forecast.append(projected_cost)
-    
+
     return forecast
 
 # Example
@@ -617,7 +617,7 @@ def calculate_forecast_accuracy(actual, forecasted):
     """Calculate forecast accuracy using MAPE"""
     errors = [abs(a - f) / a for a, f in zip(actual, forecasted) if a > 0]
     mape = sum(errors) / len(errors) * 100
-    
+
     accuracy = 100 - mape
     return accuracy
 
@@ -626,12 +626,12 @@ def calculate_forecast_accuracy(actual, forecasted):
 
 ## Key Takeaways
 
-✅ **FinOps is Culture**: Not just tools, requires org-wide collaboration  
-✅ **Visibility First**: Can't optimize what you can't measure  
-✅ **Tagging Foundation**: Cost allocation depends on consistent tagging  
-✅ **Commitment Strategy**: Balance savings (RIs/SPs) with flexibility (On-Demand)  
-✅ **Unit Economics**: Track cost efficiency, not just total spend  
-✅ **Automation**: Scale cost optimization beyond manual reviews  
+✅ **FinOps is Culture**: Not just tools, requires org-wide collaboration
+✅ **Visibility First**: Can't optimize what you can't measure
+✅ **Tagging Foundation**: Cost allocation depends on consistent tagging
+✅ **Commitment Strategy**: Balance savings (RIs/SPs) with flexibility (On-Demand)
+✅ **Unit Economics**: Track cost efficiency, not just total spend
+✅ **Automation**: Scale cost optimization beyond manual reviews
 ✅ **Continuous**: Cost optimization never "done", markets and workloads change
 
 ## FinOps Roles

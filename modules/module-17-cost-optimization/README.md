@@ -1,7 +1,7 @@
 # Module 17: Cloud Cost Optimization for Data Engineering
 
-⏱️ **Estimated Time:** 14-16 hours  
-🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced  
+⏱️ **Estimated Time:** 14-16 hours
+🎯 **Difficulty:** ⭐⭐⭐⭐ Advanced
 💰 **Focus:** AWS cost analysis, optimization strategies, FinOps practices
 
 ## Prerequisites
