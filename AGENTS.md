@@ -30,7 +30,7 @@ This file defines agent behavior for this repository.
 Use project venv explicitly:
 
 ```bash
-PYTHON=/media/nquiroga/SSDedo/Documents/projects/NanLabs/labs/.venv/bin/python
+PYTHON=python
 $PYTHON scripts/validate_learning_labs.py --strict-core --strict-headings
 $PYTHON scripts/validate_english_content.py
 $PYTHON scripts/progress.py

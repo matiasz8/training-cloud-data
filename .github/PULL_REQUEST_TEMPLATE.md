@@ -20,7 +20,7 @@ Describe what changed and why.
 ## Validation Evidence
 
 ```bash
-PYTHON=/media/nquiroga/SSDedo/Documents/projects/NanLabs/labs/.venv/bin/python
+PYTHON=python
 $PYTHON scripts/validate_learning_labs.py --strict-core --strict-headings
 $PYTHON scripts/validate_english_content.py
 $PYTHON scripts/progress.py
