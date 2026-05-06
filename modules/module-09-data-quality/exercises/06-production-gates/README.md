@@ -849,7 +849,7 @@ You have completed the Data Quality module. Now you have:
 - Sistema de monitoreo continuo
 - Robust production pipelines
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - **Data Quality Book**: "Data Quality: The Accuracy Dimension" by Joseph M. Juran
 - **GE in Production**: https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/

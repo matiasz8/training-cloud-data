@@ -416,7 +416,7 @@ You have successfully completed this exercise if:
 - Viewing distributions
 - Correlaciones entre variables
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - **ydata-profiling docs**: https://docs.profiling.ydata.ai/
 - **Pandas profiling**: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html

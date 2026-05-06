@@ -2,17 +2,17 @@
 
 Master Python and its essential libraries to build robust data pipelines, process large volumes of information, and automate data engineering workflows.
 
-## General Description
+## Overview
 
 This module teaches you Python from a data engineering perspective, focusing on the practical skills needed to manipulate data, build ETL pipelines, and work with modern data formats. You will learn from Python fundamentals to advanced techniques with Pandas, working with real data in multiple formats.
 
 **Duration**: 14-16 hours
-**Dificultad**: Principiante a Intermedio  
-**Prerequisitos**: 
+**Dificultad**: Principiante a Intermedio
+**Prerequisites**:
 - Module 03: SQL Foundations (recommended)
 - Basic programming knowledge (any language)
 
-## Objetivos de Aprendizaje
+## Learning Objectives
 
 Upon completion of this module, you will be able to:
 

@@ -360,10 +360,10 @@ def test_calculate_total():
         'price': [10, 20, 30],
         'quantity': [2, 3, 1]
     })
-    
+
     # Act: ejecutar función
     result = calculate_total(df)
-    
+
     # Assert: verificar resultado
     assert result == 110  # (10*2 + 20*3 + 30*1)
 ```
@@ -413,7 +413,7 @@ def test_fetch_data():
             status_code=200,
             json=lambda: {'data': [1, 2, 3]}
         )
-        
+
         result = fetch_data('https://api.example.com')
         assert result == {'data': [1, 2, 3]}
 ```
@@ -428,20 +428,20 @@ def test_fetch_data():
 def calculate_customer_ltv(transactions, discount_rate=0.1):
     """
     Calculate Customer Lifetime Value.
-    
+
     Args:
         transactions (pd.DataFrame): DataFrame with customer transactions.
             Must contain 'customer_id', 'amount', 'date' columns.
         discount_rate (float, optional): Discount rate for future value.
             Defaults to 0.1.
-    
+
     Returns:
         pd.DataFrame: DataFrame with customer_id and ltv columns.
-    
+
     Raises:
         ValueError: If required columns are missing.
         TypeError: If transactions is not a DataFrame.
-    
+
     Examples:
         >>> transactions = pd.DataFrame({
         ...     'customer_id': [1, 1, 2],
@@ -455,11 +455,11 @@ def calculate_customer_ltv(transactions, discount_rate=0.1):
     """
     if not isinstance(transactions, pd.DataFrame):
         raise TypeError("transactions must be a DataFrame")
-    
+
     required_cols = ['customer_id', 'amount', 'date']
     if not all(col in transactions.columns for col in required_cols):
         raise ValueError(f"Missing required columns: {required_cols}")
-    
+
     # Implementation...
     return result
 ```
@@ -588,10 +588,10 @@ DB_PASSWORD = "my_secret_password"  # NUNCA!
 def get_customer_data(customer_id: int) -> dict:
     if not isinstance(customer_id, int):
         raise TypeError("customer_id must be an integer")
-    
+
     if customer_id <= 0:
         raise ValueError("customer_id must be positive")
-    
+
     # Usar parametrized queries
     query = "SELECT * FROM customers WHERE id = %s"
     result = db.execute(query, (customer_id,))
@@ -619,11 +619,11 @@ class DataProcessorFactory:
             'json': JSONProcessor,
             'parquet': ParquetProcessor
         }
-        
+
         processor_class = processors.get(data_type)
         if processor_class is None:
             raise ValueError(f"Unknown data type: {data_type}")
-        
+
         return processor_class()
 
 # Uso
@@ -638,11 +638,11 @@ processor.process(data)
 class DataPipeline:
     def __init__(self):
         self.steps = []
-    
+
     def add_step(self, func):
         self.steps.append(func)
         return self
-    
+
     def execute(self, data):
         for step in self.steps:
             data = step(data)
@@ -664,13 +664,13 @@ clean_data = pipeline.execute(raw_data)
 # ✅ Singleton para configuración
 class Config:
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._load_config()
         return cls._instance
-    
+
     def _load_config(self):
         # Cargar configuración
         pass
@@ -709,7 +709,7 @@ assert config1 is config2  # True
 
 ---
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - **PEP 8**: https://pep8.org/
 - **Python Type Hints**: https://docs.python.org/3/library/typing.html

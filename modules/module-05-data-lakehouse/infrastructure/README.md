@@ -367,7 +367,7 @@ lsof -i :9000
 # Cambiar puerto en docker-compose.yml o .env
 ```
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - [Spark Configuration](https://spark.apache.org/docs/latest/configuration.html)
 - [Delta Lake Quickstart](https://docs.delta.io/latest/quick-start.html)

@@ -257,13 +257,15 @@ Tienes usuarios en América del Norte y Europa. Decides:
 An Availability Zone is one or more discrete data centers with redundant power, networking and connectivity within a region.
 
 **Features clave:**
+
 - Each region has **minimum 3 AZs** (some have 6+)
 - AZs are **physically separated** (different buildings)
 - Connected with **low latency networking** (<2ms between AZs)
 - Nombradas: `us-east-1a`, `us-east-1b`, `us-east-1c`, etc.
 
 **Visualization:**
-```
+
+```text
 Region: us-east-1
 ├── AZ: us-east-1a (Data Center 1, 2)
 ├── AZ: us-east-1b (Data Center 3, 4)
@@ -278,7 +280,8 @@ Region: us-east-1
 **High Availability:** If a data center fails (fire, power outage, natural disaster), your applications continue working in other AZs.
 
 **Multi-AZ architecture example for Data Engineering:**
-```
+
+```text
 Data Pipeline:
 - Kinesis Data Stream: Réplicas en 3 AZs (automático)
 - Lambda processors: Se despliegan en todas las AZs de la región
@@ -296,12 +299,14 @@ Si us-east-1a falla → Kinesis sigue escribiendo en 1b y 1c
 **Edge Locations** are globally distributed points of presence (PoP) to deliver Content with low latency.
 
 **Features:**
+
 - **450+ Edge Locations** in ~90 cities
 - Much more numerous than regions (33) or AZs (~100)
 - Mainly used by **CloudFront** (CDN) and **Route 53** (DNS)
 
 **Usage in Data Engineering:**
-```
+
+```text
 Escenario: Dashboard de BI consumido por 10,000 usuarios globales
 
 Sin Edge Locations:
@@ -367,6 +372,7 @@ IAM is the fundamental security service on AWS. **Everything in AWS requires aut
 An **IAM User** represents a person or application that interacts with AWS.
 
 **Features:**
+
 - Tiene credenciales permanentes (password o access keys)
 - Puede tener permisos asignados directamente (no recomendado)
 - Best Practice: Assign permissions via Groups

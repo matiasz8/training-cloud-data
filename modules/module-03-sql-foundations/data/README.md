@@ -328,7 +328,7 @@ file -i data/seeds/users.csv  # debe ser utf-8
 \COPY users FROM 'data/seeds/users.csv' CSV HEADER DELIMITER ',' NULL 'NULL'
 ```
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - **PostgreSQL COPY**: https://www.postgresql.org/docs/current/sql-copy.html
 - **Data Types**: https://www.postgresql.org/docs/current/datatype.html

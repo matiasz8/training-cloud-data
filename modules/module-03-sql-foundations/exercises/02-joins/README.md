@@ -262,7 +262,7 @@ Do you need help? query`hints.md` para pistas.
 
 The complete solutions are in`solution/`.
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - [PostgreSQL JOIN Documentation](https://www.postgresql.org/docs/current/tutorial-join.html)
 - [Visual JOIN Explanation](https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-joins/)

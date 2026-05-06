@@ -1,29 +1,29 @@
-# Hints Progresivos - Exercise 01
+# Progressive Hints - Exercise 01
 
-**Instrucciones:** Lee solo el nivel de hint que necesites. Intenta resolver con Nivel 1 primero. Si sigues atascado, avanza al siguiente nivel.
+**Instructions:** Only read the hint level you need. Try to solve it with Level 1 first. If you're still stuck, move on to the next level.
 
 ---
 
-## 🟢 NIVEL 1: Hints Conceptuales (Empieza aquí)
+## 🟢 LEVEL 1: Conceptual Hints (Start here)
 
-### Hint 1.1: Configuración Inicial
+### Hint 1.1: Initial Setup
 
-¿No se conecta a LocalStack?
+Can't connect to LocalStack?
 
-**Verifica:**
+**Check:**
 ```bash
-# ¿LocalStack está corriendo?
+# Is LocalStack running?
 docker ps | grep localstack
 
-# ¿Puedes alcanzar el endpoint?
+# Can you reach the endpoint?
 curl http://localhost:4566
 
-# ¿Tienes credenciales configuradas?
+# Do you have credentials configured?
 aws configure list
 ```
 
-**Problema común:**
-Si ves "Unable to locate credentials", configura credentials dummy:
+**Common issue:**
+If you see "Unable to locate credentials", configure dummy credentials:
 ```bash
 aws configure
 # Access Key: test
@@ -31,51 +31,51 @@ aws configure
 # Region: us-east-1
 ```
 
-### Hint 1.2: Crear Bucket
+### Hint 1.2: Create Bucket
 
-Piensa en la estructura del comando:
+Think about the command structure:
 
 ```
-aws s3 mb s3://[NOMBRE_DEL_BUCKET] --endpoint-url=[ENDPOINT]
+aws s3 mb s3://[BUCKET_NAME] --endpoint-url=[ENDPOINT]
 ```
 
 - `mb` = Make Bucket
-- Necesitas pasar el endpoint de LocalStack
-- El bucket name debe coincidir con las variables definidas arriba
+- You need to pass the LocalStack endpoint
+- The bucket name must match the variables defined above
 
-### Hint 1.3: Subir Archivos
+### Hint 1.3: Upload Files
 
-Estructura del comando:
+Command structure:
 
 ```
-aws s3 cp [ARCHIVO_LOCAL] s3://[BUCKET]/[KEY] --endpoint-url=[ENDPOINT]
+aws s3 cp [LOCAL_FILE] s3://[BUCKET]/[KEY] --endpoint-url=[ENDPOINT]
 ```
 
-**Recuerda:** El KEY es el path COMPLETO del objeto en S3, incluyendo "carpetas":
+**Remember:** The KEY is the FULL path of the object in S3, including "folders":
 
 ```
 source=app-logs/year=2024/month=01/day=15/filename.json
 ```
 
-### Hint 1.4: Listar con Prefix
+### Hint 1.4: List with Prefix
 
-Para listar objetos, tienes dos opciones:
+To list objects, you have two options:
 
 ```bash
-# Opción 1: Listar como "carpetas"
+# Option 1: List as "folders"
 aws s3 ls s3://bucket/prefix/
 
-# Opción 2: Listar recursivamente (muestra todos los archivos)
+# Option 2: List recursively (shows all files)
 aws s3 ls s3://bucket/prefix/ --recursive
 ```
 
-Para filtrar solo app-logs, usa el prefix correcto: `source=app-logs`
+To filter only app-logs, use the correct prefix: `source=app-logs`
 
 ---
 
-## 🟡 NIVEL 2: Hints Técnicos (Si Nivel 1 no fue suficiente)
+## 🟡 LEVEL 2: Technical Hints (If Level 1 wasn't enough)
 
-### Hint 2.1: Función create_bucket Completa
+### Hint 2.1: Complete create_bucket Function
 
 ```bash
 create_bucket() {
@@ -87,13 +87,13 @@ create_bucket() {
         --endpoint-url="$ENDPOINT_URL" \
         --region="$REGION"
 
-    # ... resto del código
+    # ... rest of the code
 }
 ```
 
-**Nota:** Las comillas en `"$bucket_name"` son importantes para manejar espacios (aunque no deberían haber espacios en nombres de buckets).
+**Note:** The quotes around `"$bucket_name"` are important to handle spaces (although there shouldn't be spaces in bucket names).
 
-### Hint 2.2: Función upload_file con Metadata
+### Hint 2.2: upload_file Function with Metadata
 
 ```bash
 upload_file() {
@@ -103,16 +103,16 @@ upload_file() {
 
     log_info "Uploading: $local_file → s3://$bucket/$s3_key"
 
-    # Detectar content-type automáticamente
+    # Automatically detect content-type
     aws s3 cp "$local_file" "s3://$bucket/$s3_key" \
         --endpoint-url="$ENDPOINT_URL" \
         --region="$REGION"
 
-    # ... resto del código
+    # ... rest of the code
 }
 ```
 
-### Hint 2.3: Función list_objects
+### Hint 2.3: list_objects Function
 
 ```bash
 list_objects() {
@@ -122,12 +122,12 @@ list_objects() {
     log_info "Listing objects in s3://$bucket/ with prefix: '$prefix'"
 
     if [ -z "$prefix" ]; then
-        # Sin prefix: lista todo
+        # No prefix: list everything
         aws s3 ls "s3://$bucket/" \
             --endpoint-url="$ENDPOINT_URL" \
             --recursive
     else
-        # Con prefix: lista solo ese "directorio"
+        # With prefix: list only that "directory"
         aws s3 ls "s3://$bucket/$prefix" \
             --endpoint-url="$ENDPOINT_URL" \
             --recursive
@@ -135,7 +135,7 @@ list_objects() {
 }
 ```
 
-### Hint 2.4: Función copy_object
+### Hint 2.4: copy_object Function
 
 ```bash
 copy_object() {
@@ -150,15 +150,15 @@ copy_object() {
         --endpoint-url="$ENDPOINT_URL" \
         --region="$REGION"
 
-    # ... resto del código
+    # ... rest of the code
 }
 ```
 
-**Nota:** `aws s3 cp` funciona para local→S3, S3→local, y S3→S3.
+**Note:** `aws s3 cp` works for local→S3, S3→local, and S3→S3.
 
-### Hint 2.5: Función get_object_metadata
+### Hint 2.5: get_object_metadata Function
 
-Para metadata, necesitas usar `s3api` (no `s3`):
+For metadata, you need to use `s3api` (not `s3`):
 
 ```bash
 get_object_metadata() {
@@ -175,29 +175,29 @@ get_object_metadata() {
 }
 ```
 
-**Diferencia importante:**
-- `aws s3`: Comandos de alto nivel (cp, ls, rm, sync)
-- `aws s3api`: API de bajo nivel con más opciones (head-object, put-object, get-bucket-policy, etc.)
+**Important difference:**
+- `aws s3`: High-level commands (cp, ls, rm, sync)
+- `aws s3api`: Low-level API with more options (head-object, put-object, get-bucket-policy, etc.)
 
 ---
 
-## 🔴 NIVEL 3: Solución Parcial (Último recurso)
+## 🔴 LEVEL 3: Partial Solution (Last resort)
 
-### Hint 3.1: Main Function - Step 2 Completo
+### Hint 3.1: Main Function - Complete Step 2
 
 ```bash
 # ========================================
-# STEP 2: Subir Archivos con Particionamiento
+# STEP 2: Upload Files with Partitioning
 # ========================================
 echo "📤 Step 2: Uploading files with partitioning..."
 
-# App logs del día 15
+# App logs for day 15
 upload_file \
     "$TEST_DATA_DIR/app-logs-2024-01-15.json" \
     "$RAW_BUCKET" \
     "source=app-logs/year=2024/month=01/day=15/app-logs-2024-01-15.json"
 
-# App logs del día 16
+# App logs for day 16
 upload_file \
     "$TEST_DATA_DIR/app-logs-2024-01-16.json" \
     "$RAW_BUCKET" \
@@ -212,29 +212,29 @@ upload_file \
 echo ""
 ```
 
-### Hint 3.2: Main Function - Step 3 Completo
+### Hint 3.2: Main Function - Complete Step 3
 
 ```bash
 # ========================================
-# STEP 3: Listar Objetos con Prefix
+# STEP 3: List Objects with Prefix
 # ========================================
 echo "📋 Step 3: Listing objects with specific prefix..."
 
-# Listar solo app-logs
+# List only app-logs
 list_objects "$RAW_BUCKET" "source=app-logs"
 
-# Contar objetos
+# Count objects
 object_count=$(count_objects "$RAW_BUCKET" "source=app-logs")
 log_info "Total objects with prefix 'source=app-logs': $object_count"
 
 echo ""
 ```
 
-### Hint 3.3: Main Function - Step 4 y 5 Completo
+### Hint 3.3: Main Function - Complete Steps 4 and 5
 
 ```bash
 # ========================================
-# STEP 4: Descargar Archivo
+# STEP 4: Download File
 # ========================================
 echo "📥 Step 4: Downloading file for local analysis..."
 
@@ -246,7 +246,7 @@ download_file \
 echo ""
 
 # ========================================
-# STEP 5: Copiar entre Buckets
+# STEP 5: Copy between Buckets
 # ========================================
 echo "🔄 Step 5: Copying file from raw to processed bucket..."
 
@@ -259,7 +259,7 @@ copy_object \
 echo ""
 ```
 
-### Hint 3.4: Función count_objects
+### Hint 3.4: count_objects Function
 
 ```bash
 count_objects() {
@@ -274,12 +274,12 @@ count_objects() {
 }
 ```
 
-**Explicación del pipe:**
-- `aws s3 ls ... --recursive`: Lista todos los archivos
-- `|`: Pasa output al siguiente comando
-- `wc -l`: Cuenta líneas (cada archivo es una línea)
+**Pipe explanation:**
+- `aws s3 ls ... --recursive`: Lists all files
+- `|`: Passes output to the next command
+- `wc -l`: Counts lines (each file is one line)
 
-### Hint 3.5: Función delete_all_objects y delete_bucket
+### Hint 3.5: delete_all_objects and delete_bucket Functions
 
 ```bash
 delete_all_objects() {
@@ -291,7 +291,7 @@ delete_all_objects() {
         --endpoint-url="$ENDPOINT_URL" \
         --recursive
 
-    # ... resto del código
+    # ... rest of the code
 }
 
 delete_bucket() {
@@ -299,104 +299,104 @@ delete_bucket() {
 
     log_warning "Deleting bucket: $bucket"
 
-    # Opción 1: Bucket ya vacío
+    # Option 1: Bucket already empty
     aws s3 rb "s3://$bucket/" \
         --endpoint-url="$ENDPOINT_URL"
 
-    # Opción 2: Forzar eliminación con objetos
+    # Option 2: Force deletion with objects
     # aws s3 rb "s3://$bucket/" \
     #     --endpoint-url="$ENDPOINT_URL" \
     #     --force
 
-    # ... resto del código
+    # ... rest of the code
 }
 ```
 
 ---
 
-## 💡 Tips Adicionales
+## 💡 Additional Tips
 
 ### Debug Mode
 
-Si algo no funciona, activa debug:
+If something isn't working, enable debug:
 
 ```bash
-# En tu script, al inicio
-set -x  # Muestra cada comando antes de ejecutarlo
+# At the beginning of your script
+set -x  # Shows each command before executing it
 
-# O ejecuta así
+# Or run like this
 bash -x s3_operations.sh
 ```
 
-### Verificar Qué Existe en LocalStack
+### Check What Exists in LocalStack
 
 ```bash
-# Listar todos los buckets
+# List all buckets
 aws --endpoint-url=http://localhost:4566 s3 ls
 
-# Ver contenido completo de un bucket
+# View full contents of a bucket
 aws --endpoint-url=http://localhost:4566 s3 ls s3://my-data-lake-raw --recursive
 
-# Ver metadata
+# View metadata
 aws --endpoint-url=http://localhost:4566 s3api head-object \
     --bucket my-data-lake-raw \
     --key "source=app-logs/year=2024/month=01/day=15/app-logs-2024-01-15.json"
 ```
 
-### Limpiar Todo y Empezar de Cero
+### Reset Everything and Start Fresh
 
 ```bash
-# Eliminar todos los buckets y sus contenidos
+# Delete all buckets and their contents
 aws --endpoint-url=http://localhost:4566 s3 rb s3://my-data-lake-raw --force
 aws --endpoint-url=http://localhost:4566 s3 rb s3://my-data-lake-processed --force
 
-# O reinicia LocalStack
+# Or restart LocalStack
 docker restart localstack_main
 ```
 
 ---
 
-## 🎯 Checklist de Troubleshooting
+## 🎯 Troubleshooting Checklist
 
-Si tu script no funciona, verifica:
+If your script doesn't work, check:
 
-- [ ] LocalStack está corriendo: `docker ps`
-- [ ] Endpoint correcto en script: `http://localhost:4566`
-- [ ] AWS CLI configurado: `aws configure list`
-- [ ] Variables de entorno cargadas: `echo $AWS_ENDPOINT_URL`
-- [ ] Script tiene permisos de ejecución: `chmod +x s3_operations.sh`
-- [ ] Paths a test_data correctos: `ls -la test_data/`
-- [ ] No hay typos en nombres de buckets
-- [ ] Comillas correctamente cerradas en comandos
-
----
-
-## 🤔 Preguntas de Reflexión
-
-Después de completar el ejercicio, responde:
-
-1. **¿Qué pasa si ejecutas el script dos veces?**
-   - ¿Falla al crear buckets que ya existen?
-   - ¿Sobrescribe archivos en S3?
-   - ¿Cómo lo harías idempotente?
-
-2. **¿Cómo optimizarías para subir 1000 archivos?**
-   - `aws s3 cp` en loop es lento
-   - Investiga: `aws s3 sync`
-   - O: Usa `--include` y `--exclude` patterns
-
-3. **¿Por qué usamos particionamiento con year/month/day?**
-   - Piensa en queries: "Dame datos de enero 2024"
-   - Sin particiones: Escanea TODO
-   - Con particiones: Solo lee carpeta `year=2024/month=01/`
-
-4. **¿Cuándo usarías `s3api` en lugar de `s3`?**
-   - `s3`: Operaciones simples (copy, move, delete)
-   - `s3api`: Configuración avanzada (policies, lifecycle, versioning, metadata)
+- [ ] LocalStack is running: `docker ps`
+- [ ] Correct endpoint in script: `http://localhost:4566`
+- [ ] AWS CLI configured: `aws configure list`
+- [ ] Environment variables loaded: `echo $AWS_ENDPOINT_URL`
+- [ ] Script has execution permissions: `chmod +x s3_operations.sh`
+- [ ] Correct paths to test_data: `ls -la test_data/`
+- [ ] No typos in bucket names
+- [ ] Quotes properly closed in commands
 
 ---
 
-## 📚 Recursos Útiles Durante el Ejercicio
+## 🤔 Reflection Questions
+
+After completing the exercise, answer:
+
+1. **What happens if you run the script twice?**
+   - Does it fail when creating buckets that already exist?
+   - Does it overwrite files in S3?
+   - How would you make it idempotent?
+
+2. **How would you optimize uploading 1000 files?**
+   - `aws s3 cp` in a loop is slow
+   - Investigate: `aws s3 sync`
+   - Or: Use `--include` and `--exclude` patterns
+
+3. **Why do we use partitioning with year/month/day?**
+   - Think about queries: "Give me data from January 2024"
+   - Without partitions: Scans EVERYTHING
+   - With partitions: Only reads folder `year=2024/month=01/`
+
+4. **When would you use `s3api` instead of `s3`?**
+   - `s3`: Simple operations (copy, move, delete)
+   - `s3api`: Advanced configuration (policies, lifecycle, versioning, metadata)
+
+---
+
+## 📚 Useful Resources During the Exercise
 
 - **AWS CLI S3 Reference**: `aws s3 help`
 - **AWS CLI S3API Reference**: `aws s3api help`
@@ -405,6 +405,6 @@ Después de completar el ejercicio, responde:
 
 ---
 
-**Recuerda:** El objetivo es **aprender**, no solo completar el ejercicio. Si necesitas mirar la solución completa, hazlo, pero asegúrate de entender cada línea.
+**Remember:** The goal is to **learn**, not just complete the exercise. If you need to look at the full solution, do it, but make sure you understand every line.
 
-¡Tú puedes! 💪
+You've got this! 💪

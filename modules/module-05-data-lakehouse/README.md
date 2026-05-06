@@ -1,12 +1,12 @@
 # Module 05: Data Lakehouse Architecture ✅ 100% COMPLETE
 
-## 📋 Description
+## 📋 Overview
 
 Welcome to Module 05 of the Data Engineering bootcamp. In this module we will delve into **Data Lakehouse architecture**, the most recent evolution in large-scale data storage and processing that combines the best of Data Lakes and Data Warehouses.
 
 **🎉 Status: COMPLETED - 68 files, 6 exercises, 26 tests, 614,500 synthetic records**
 
-### 🎯 Objetivos de Aprendizaje
+### 🎯 Learning Objectives
 
 By completing this module, you will be able to:
 
@@ -115,7 +115,7 @@ Sources → [Bronze] → [Silver] → [Gold] → Analytics/ML
 | **Governance** | ⚠️ Complejo | ✅ Robusto | ✅ Robusto |
 | **Time Travel** | ❌ No | ⚠️ Limitado | ✅ Yes |
 
-### 📦 Prerequisitos
+### 📦 Prerequisites
 
 Before beginning this module, you must have completed:
 
@@ -277,7 +277,7 @@ pytest test_solution.py -v
    └─ End-to-End Lakehouse Pipeline
 ```
 
-### 📚 resources Adicionales
+### 📚 Additional Resources
 
 - 📖 [Delta Lake Documentation](https://docs.delta.io/)
 - 📖 [Apache Iceberg Documentation](https://iceberg.apache.org/)

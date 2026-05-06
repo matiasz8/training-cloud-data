@@ -197,7 +197,7 @@ Do you need help? query`hints.md`for clues without revealing the full solution.
 
 The complete solutions are in`solution/`. Intenta resolver los ejercicios por tu cuenta primero.
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 - [PostgreSQL SELECT Documentation](https://www.postgresql.org/docs/current/sql-select.html)
 - [PostgreSQL Pattern Matching](https://www.postgresql.org/docs/current/functions-matching.html)

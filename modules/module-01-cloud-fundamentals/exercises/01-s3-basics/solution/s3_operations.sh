@@ -3,33 +3,33 @@
 ################################################################################
 # S3 Operations Script - SOLUTION
 #
-# Propósito: Automatizar operaciones básicas de S3 para data lake
-# Autor: Training Cloud Data
-# Fecha: 2024
+# Purpose: Automate basic S3 operations for data lake
+# Author: Training Cloud Data
+# Date: 2024
 #
-# Uso: ./s3_operations.sh
+# Usage: ./s3_operations.sh
 ################################################################################
 
 set -e  # Exit on error
 
-# Colores para output
+# Output colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuración
+# Configuration
 ENDPOINT_URL="http://localhost:4566"
 REGION="us-east-1"
 RAW_BUCKET="my-data-lake-raw"
 PROCESSED_BUCKET="my-data-lake-processed"
 
-# Directorio de datos de prueba
+# Test data directory
 TEST_DATA_DIR="./test_data"
 DOWNLOAD_DIR="./downloads"
 
-# Helper functions para imprimir mensajes
+# Helper functions for printing messages
 log_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
@@ -47,7 +47,7 @@ log_warning() {
 }
 
 ################################################################################
-# FUNCIÓN 1: Crear Bucket
+# FUNCTION 1: Create Bucket
 ################################################################################
 create_bucket() {
     local bucket_name=$1
@@ -74,7 +74,7 @@ create_bucket() {
 }
 
 ################################################################################
-# FUNCIÓN 2: Verificar si Bucket Existe
+# FUNCTION 2: Check if Bucket Exists
 ################################################################################
 bucket_exists() {
     local bucket_name=$1
@@ -87,7 +87,7 @@ bucket_exists() {
 }
 
 ################################################################################
-# FUNCIÓN 3: Subir Archivo a S3
+# FUNCTION 3: Upload File to S3
 ################################################################################
 upload_file() {
     local local_file=$1
@@ -116,7 +116,7 @@ upload_file() {
 }
 
 ################################################################################
-# FUNCIÓN 4: Listar Objetos en Bucket
+# FUNCTION 4: List Objects in Bucket
 ################################################################################
 list_objects() {
     local bucket=$1
@@ -136,14 +136,14 @@ list_objects() {
 }
 
 ################################################################################
-# FUNCIÓN 5: Descargar Archivo de S3
+# FUNCTION 5: Download File from S3
 ################################################################################
 download_file() {
     local bucket=$1
     local s3_key=$2
     local local_dest=$3
 
-    # Crear directorio si no existe
+    # Create directory if it doesn't exist
     mkdir -p "$(dirname "$local_dest")"
 
     log_info "Downloading: s3://$bucket/$s3_key → $local_dest"
@@ -163,7 +163,7 @@ download_file() {
 }
 
 ################################################################################
-# FUNCIÓN 6: Copiar Objeto entre Buckets
+# FUNCTION 6: Copy Object between Buckets
 ################################################################################
 copy_object() {
     local source_bucket=$1
@@ -188,7 +188,7 @@ copy_object() {
 }
 
 ################################################################################
-# FUNCIÓN 7: Obtener Metadata de Objeto
+# FUNCTION 7: Get Object Metadata
 ################################################################################
 get_object_metadata() {
     local bucket=$1
@@ -205,7 +205,7 @@ get_object_metadata() {
 
     if [ $? -ne 0 ]; then
         log_warning "Failed to get metadata (object might not exist or jq not installed)"
-        # Fallback sin jq
+        # Fallback without jq
         aws s3api head-object \
             --bucket "$bucket" \
             --key "$key" \
@@ -215,7 +215,7 @@ get_object_metadata() {
 }
 
 ################################################################################
-# FUNCIÓN 8: Eliminar Todos los Objetos de un Bucket
+# FUNCTION 8: Delete All Objects from a Bucket
 ################################################################################
 delete_all_objects() {
     local bucket=$1
@@ -237,14 +237,14 @@ delete_all_objects() {
 }
 
 ################################################################################
-# FUNCIÓN 9: Eliminar Bucket
+# FUNCTION 9: Delete Bucket
 ################################################################################
 delete_bucket() {
     local bucket=$1
 
     log_warning "Deleting bucket: $bucket"
 
-    # Primero intenta eliminar (debe estar vacío)
+    # First try to delete (must be empty)
     aws s3 rb "s3://$bucket/" \
         --endpoint-url="$ENDPOINT_URL" \
         2>/dev/null
@@ -259,7 +259,7 @@ delete_bucket() {
 }
 
 ################################################################################
-# FUNCIÓN 10: Contar Objetos en Bucket
+# FUNCTION 10: Count Objects in Bucket
 ################################################################################
 count_objects() {
     local bucket=$1
@@ -289,7 +289,7 @@ main() {
     echo "🚀 =========================================="
     echo ""
 
-    # Verificar que LocalStack esté corriendo
+    # Check that LocalStack is running
     log_info "Checking LocalStack connection..."
     if ! curl -s "$ENDPOINT_URL" > /dev/null 2>&1; then
         log_error "Cannot connect to LocalStack at $ENDPOINT_URL"
@@ -300,11 +300,11 @@ main() {
     log_success "LocalStack is running"
     echo ""
 
-    # Crear directorio de descargas si no existe
+    # Create downloads directory if it doesn't exist
     mkdir -p "$DOWNLOAD_DIR"
 
     # ========================================
-    # STEP 1: Crear Buckets
+    # STEP 1: Create Buckets
     # ========================================
     echo "📦 Step 1: Creating buckets..."
     create_bucket "$RAW_BUCKET"
@@ -312,17 +312,17 @@ main() {
     echo ""
 
     # ========================================
-    # STEP 2: Subir Archivos con Particionamiento
+    # STEP 2: Upload Files with Partitioning
     # ========================================
     echo "📤 Step 2: Uploading files with partitioning..."
 
-    # App logs del día 15
+    # App logs for day 15
     upload_file \
         "$TEST_DATA_DIR/app-logs-2024-01-15.json" \
         "$RAW_BUCKET" \
         "source=app-logs/year=2024/month=01/day=15/app-logs-2024-01-15.json"
 
-    # App logs del día 16
+    # App logs for day 16
     upload_file \
         "$TEST_DATA_DIR/app-logs-2024-01-16.json" \
         "$RAW_BUCKET" \
@@ -337,14 +337,14 @@ main() {
     echo ""
 
     # ========================================
-    # STEP 3: Listar Objetos con Prefix
+    # STEP 3: List Objects with Prefix
     # ========================================
     echo "📋 Step 3: Listing objects with specific prefix..."
 
-    # Listar solo app-logs
+    # List only app-logs
     list_objects "$RAW_BUCKET" "source=app-logs"
 
-    # Contar objetos
+    # Count objects
     object_count=$(count_objects "$RAW_BUCKET" "source=app-logs")
     echo ""
     log_info "Total objects with prefix 'source=app-logs': $object_count"
@@ -364,7 +364,7 @@ main() {
     echo ""
 
     # ========================================
-    # STEP 5: Copiar entre Buckets (Raw → Processed)
+    # STEP 5: Copy between Buckets (Raw → Processed)
     # ========================================
     echo "🔄 Step 5: Copying file from raw to processed bucket..."
 
@@ -377,7 +377,7 @@ main() {
     echo ""
 
     # ========================================
-    # STEP 6: Obtener Metadata
+    # STEP 6: Get Metadata
     # ========================================
     echo "🔍 Step 6: Getting object metadata..."
 
@@ -400,7 +400,7 @@ main() {
     echo ""
 
     # ========================================
-    # STEP 8: Cleanup (Opcional)
+    # STEP 8: Cleanup (Optional)
     # ========================================
     echo "🗑️  Step 8: Cleanup..."
     read -p "Do you want to delete all buckets and data? (y/N) " -n 1 -r
@@ -439,7 +439,7 @@ main() {
     echo ""
 }
 
-# Ejecutar main
+# Run main
 main
 
 exit 0

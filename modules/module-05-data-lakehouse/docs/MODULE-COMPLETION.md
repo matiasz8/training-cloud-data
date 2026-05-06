@@ -148,7 +148,7 @@ pytest validation/test_01_delta_basics.py -v
 pytest --cov=exercises --cov-report=html
 ```
 
-## 📚 resources Adicionales
+## 📚 Additional Resources
 
 ### Documentation
 - [Delta Lake Official Docs](https://docs.delta.io/)
@@ -247,6 +247,6 @@ You have completed one of the most important modules of the training:
 
 ---
 
-*Generated on: 2024-01-15*  
-*Module version: 1.0*  
+*Generated on: 2024-01-15*
+*Module version: 1.0*
 *Last updated: Module completion*
