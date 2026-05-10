@@ -6,8 +6,8 @@ This guide documents the migration pattern used in the AI labs repository and ad
 
 ## Sources
 
-- `nan-ai-engineering-labs/ENGLISH_CONVERSION_REPORT.md`
-- `nan-ai-engineering-labs/ENGLISH_CONVERSION_AUDIT.md`
+- `ENGLISH_CONVERSION_REPORT.md`
+- `ENGLISH_CONVERSION_AUDIT.md`
 - `training-cloud-data/scripts/validate_english_content.py`
 - `training-cloud-data/scripts/validate_learning_labs.py`
 
@@ -19,7 +19,7 @@ This guide documents the migration pattern used in the AI labs repository and ad
 4. Standardize terminology across all modules.
 5. Validate after each module batch, not only at the end.
 
-## Proven Pattern from nan-ai-engineering-labs
+## Proven Pattern
 
 The successful conversion pattern had four repeatable stages:
 
